@@ -325,7 +325,7 @@ NEGOTIATE = (
     "   - Date allowed for that product in the CALENDAR -> accept it exactly as named.\n"
     "   - Weekend or closure day not after the latest date -> say the bank is closed that day and offer the business day BEFORE it shown in the CALENDAR.\n"
     "   - After the product's latest date -> say the latest date is the last day that can be recorded and offer it. If they refuse it, that is a flat refusal.\n"
-    "   - A day before today -> it cannot be recorded; ask for a day from today onwards.\n"
+    "   - A day before today (also 'I could have paid on ...') -> NOT a refusal, no attempt used, and do NOT propose a date yourself: say that day has passed and cannot be recorded, and ask which day from today onwards they can pay.\n"
     "   - Vague period ('next week', 'the week after next', 'end of the month', 'when I get paid') -> ask ONCE for the exact day. If none is given, propose the date in DATES.\n"
     "   - Weekday words: use WEEKDAY WORDS.\n"
     "   - Amount from the floor up to the full amount, both included -> accept as proposed. More than the full amount -> record the full amount. "
