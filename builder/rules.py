@@ -219,6 +219,12 @@ async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max
     log = log or (lambda s: print(s, file=sys.stderr, flush=True))
     info = {"model": model, "cost_usd": 0.0, "seconds": 0.0, "turns": 0, "attempts": 0, "usage": {}}
     last_err = None
+    # the SDK passes the system prompt on the CLI command line: a big one (the audit's generator + digest, ~90 KB)
+    # fails with "[Errno 7] Argument list too long" (seen in the cloud rehearsal). The user message goes through stdin,
+    # so a large context moves there under a <context> tag and the system prompt stays one line.
+    if system_prompt and len(system_prompt) > 12000:
+        prompt = "<context>\n" + system_prompt + "\n</context>\n\n" + prompt
+        system_prompt = "Follow the instructions and context given in the <context> block of the user message exactly."
     for attempt in range(2):
         info["attempts"] = attempt + 1
         t0 = time.time()

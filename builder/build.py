@@ -246,6 +246,14 @@ async def main(argv):
     if wf_path.exists():
         rules_file = ROOT / "out" / ("%s.rules.json" % slot)
         lint_cmd = [PY, "builder/lint.py", str(wf_path), "--api", tool_api] + (["--rules", str(rules_file), "--budget"] if rules_file.exists() else [])
+        try:   # the call variables every call carries: the practice cases name them (no test_variables are shipped)
+            cs = json.load(open(cases)) if cases else []
+            cs = cs.get("cases", cs) if isinstance(cs, dict) else cs
+            names = sorted({"customer_id"} | set((cs[0].get("variables") or {}).keys())) if cs else []
+            if names:
+                lint_cmd += ["--call-vars", ",".join(names)]
+        except Exception:
+            pass
         run_step(trace, "lint", lint_cmd, timeout=max(30, min(120, int((budget - trace.elapsed_min() - 1) * 60))))
         # the audit only when it cannot push the trace's end past the budget (worst case was 34 min before this guard)
         left_min = budget - trace.elapsed_min()
