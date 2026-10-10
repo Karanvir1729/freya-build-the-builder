@@ -602,6 +602,22 @@ def wait_for_close(cid, ledger, seconds=30):
     return ledger
 
 
+def close_from_args(ledger, row):
+    """--close-from-args: the organisers' mock checks close_call reasons against the KIT briefs' table, so a synthetic
+    brief with its own reason names gets ok:false and an empty ledger outcome. Score the outcome/reason the agent
+    SENT in its last close_call instead, and say so in the row. Only used when the ledger outcome is empty."""
+    if ledger.get("outcome"):
+        return ledger
+    closes = [c for c in ledger.get("calls") or [] if c.get("tool") == "close_call"]
+    if not closes:
+        return ledger
+    args = closes[-1].get("args") or {}
+    led = dict(ledger)
+    led["outcome"], led["reason"] = args.get("outcome"), args.get("reason")
+    row["close_from_args"] = {"args": args, "mock_result": closes[-1].get("result")}
+    return led
+
+
 def finish(ctx, case, rep, row, chat, ledger):
     """Score the ledger, judge the transcript, write the transcript file, print the run_cases-style line."""
     lines, tools, var_table, slowest = [], [], None, 0.0
@@ -618,6 +634,8 @@ def finish(ctx, case, rep, row, chat, ledger):
         row["ended_how"] = chat.ended_how
     if ledger is not None and "calls" in ledger:
         try:
+            if getattr(ctx, "close_from_args", False):
+                ledger = close_from_args(ledger, row)
             row["failed"] += score_ledger(case, ledger)["failed"]
         except Exception as e:
             row["failed"].append("mock bank: the ledger could not be scored: %s: %s" % (type(e).__name__, compact(str(e), 160)))
@@ -693,6 +711,8 @@ def main():
     ap.add_argument("--provider", choices=["openai", "claude"], help="force a model provider (default: openai when OPENAI_API_KEY is set, else the Claude CLI)")
     ap.add_argument("--opening", default="Hello?", help="the customer's first line, which makes the agent produce its opening (default 'Hello?')")
     ap.add_argument("--verbose", action="store_true", help="print every turn as it happens")
+    ap.add_argument("--close-from-args", action="store_true",
+                    help="score the outcome/reason sent in close_call when the mock rejected it (synthetic briefs whose reason names the kit's mock does not know)")
     a = ap.parse_args()
     if not os.environ.get("FREYA_API_KEY") or not os.environ.get("FREYA_BANK_TEAM_KEY"):
         sys.exit("FREYA_API_KEY and FREYA_BANK_TEAM_KEY must be set: source env.sh first.")
@@ -702,6 +722,7 @@ def main():
     ctx.customer_model = a.customer_model or DEFAULTS[ctx.provider.kind]["customer"]
     ctx.judge_model = a.judge_model or DEFAULTS[ctx.provider.kind]["judge"]
     ctx.style, ctx.max_turns, ctx.opening, ctx.verbose, ctx.reps = a.style, a.max_turns, a.opening, a.verbose, a.reps
+    ctx.close_from_args = a.close_from_args
     ctx.transcripts = pathlib.Path(a.transcripts) if a.transcripts else None
     cases = [c for c in json.load(open(a.cases)) if (not a.brief or c["brief"] == a.brief) and (not a.only or c["id"] in a.only.split(","))]
     if not cases:

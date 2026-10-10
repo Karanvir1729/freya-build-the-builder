@@ -447,6 +447,106 @@ def verify_post(question, hints, max_wrong_text,
     return what_next_post(branches, q(wrong_text), prelude=["left = d.get(%r)" % f["left"]])
 
 
+def verify_count_post(question, limit, hints, limit_text, route_var="id_route", counter="id_wrong",
+                      free_hints=None, all_verified_text="All security questions passed. Identity is verified.",
+                      verified_text="Correct. Ask the next security question.",
+                      unreadable_text="The answer could not be read. It does not count as wrong. Ask again: {question}",
+                      wrong_text="Wrong answer. Tell the customer it does not match our records and ask again: {question}",
+                      service_limit_text=None):
+    """Identity-question post hook that keeps the brief's OWN wrong-answer counter in vars (for a brief whose limit
+    is stricter than the service's, or that counts some hints as wrong). vars[counter] counts wrong answers across
+    every question; when it reaches `limit` (or the service's wrong_answers_left reaches 0) vars[route_var] =
+    'exhausted', else 'open'. Route on eq(route_var, 'exhausted', ...). `hints` {value: text}; `free_hints`
+    {value: n} = the first n such hints per call are not wrong answers, later ones count (vars['hint_<value>']
+    counts them). Needs a hook with `vars` (seen working 10 Oct); the service counter stays as a fallback."""
+    free_hints = dict(free_hints or {})
+    qq = lambda t: t.replace("{question}", question)
+    code = ("try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n"
+            "        try:\n            V = vars\n        except Exception:\n            V = None\n"
+            "        if isinstance(d, dict):\n            nw = int(float((V or {}).get(%r) or 0))\n            wrong = False\n"
+            "            hint = d.get('hint')\n            msg = None\n" % counter)
+    for i, (hv, text) in enumerate((hints or {}).items()):
+        code += "            %s hint == %r:\n" % ("if" if i == 0 else "elif", hv)
+        if hv in free_hints:
+            code += ("                nh = int(float((V or {}).get(%r) or 0)) + 1\n"
+                     "                if V is not None:\n                    V[%r] = str(nh)\n"
+                     "                if nh > %d:\n                    wrong = True\n"
+                     "                else:\n                    msg = %r\n" % ("hint_" + hv, "hint_" + hv, int(free_hints[hv]), text))
+        else:
+            code += "                msg = %r\n" % text
+    code += ("            if msg is None and not wrong:\n"
+             "                if %s:\n                    msg = %r\n"
+             "                elif %s:\n                    msg = %r\n"
+             "                elif %s:\n                    msg = %r\n"
+             "                else:\n                    wrong = True\n"
+             % (truthy("all_verified"), all_verified_text, truthy("verified"), verified_text, falsy("ok"), qq(unreadable_text)))
+    code += ("            if wrong:\n                nw += 1\n"
+             "            left = d.get('wrong_answers_left')\n"
+             "            done = nw >= %d or str(left) == '0'\n"
+             "            if V is not None:\n                V[%r] = str(nw)\n                V[%r] = 'exhausted' if done else 'open'\n"
+             "            if done:\n                msg = %r\n"
+             "            elif wrong:\n                msg = %r\n"
+             "            d['what_to_do_next'] = msg\n"
+             "except Exception:\n    pass\n"
+             % (int(limit), counter, route_var, limit_text, qq(wrong_text)))
+    return code
+
+
+def promise_state_pre(full_var, amount_field="amount", date_field="date", amount_var="promise_amount",
+                      date_var="promise_date"):
+    """Pre hook of a promise tool for briefs whose closing reason depends on the recorded amount: normalises the
+    amount (float) and date ([:10]) like promise_pre, and stores them in vars[amount_var] / vars[date_var];
+    vars['promise_kind'] = 'full' when the amount equals vars[full_var] (the full amount, written by code) else
+    'partial'. A fin node reads promise_kind (see promise_reason_code)."""
+    return ("try:\n    b = config.get('body')\n    if isinstance(b, dict):\n"
+            "        if %r in b:\n            b[%r] = float(str(b[%r]).replace(',', '').strip())\n"
+            "        if %r in b:\n            b[%r] = str(b[%r]).strip()[:10]\n"
+            "        try:\n            V = vars\n        except Exception:\n            V = None\n"
+            "        if V is not None:\n            V[%r] = str(b.get(%r))\n            V[%r] = str(b.get(%r))\n"
+            "            try:\n                full = float(V.get(%r))\n                amt = float(b.get(%r))\n"
+            "                V['promise_kind'] = 'full' if abs(amt - full) < 0.005 else 'partial'\n"
+            "            except Exception:\n                pass\nexcept Exception:\n    pass\n"
+            % (amount_field, amount_field, amount_field, date_field, date_field, date_field,
+               amount_var, amount_field, date_var, date_field, full_var, amount_field))
+
+
+def promise_state_post(max_calls, recorded_text, retry_text, give_up_text, route_var="promise_route",
+                       counter="promise_fails", ok_field="ok"):
+    """Post hook of a promise tool with the brief's retry count: on ok true vars['promise_done'] = 'yes' and
+    vars[route_var] = 'recorded'; otherwise vars[counter] += 1 and vars[route_var] = 'fault' once `max_calls`
+    calls failed (e.g. 3 = 'up to two more times'), else 'retry'. Route on eq(route_var, ...); ok_true and the
+    engine failure counters stay as fallbacks."""
+    return ("try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n"
+            "        try:\n            V = vars\n        except Exception:\n            V = None\n"
+            "        ok = isinstance(d, dict) and %s\n"
+            "        if ok:\n            if V is not None:\n                V['promise_done'] = 'yes'\n                V[%r] = 'recorded'\n"
+            "            d['what_to_do_next'] = %r\n"
+            "        else:\n            n = int(float((V or {}).get(%r) or 0)) + 1\n"
+            "            if V is not None:\n                V[%r] = str(n)\n                V[%r] = 'fault' if n >= %d else 'retry'\n"
+            "            if isinstance(d, dict):\n                d['what_to_do_next'] = %r if n >= %d else %r\n"
+            "except Exception:\n    pass\n"
+            % (truthy(ok_field), route_var, recorded_text, counter, counter, route_var, int(max_calls),
+               give_up_text, int(max_calls), retry_text))
+
+
+def promise_reason_code(outcome="promise", default_kind="full", outcome_var="outcome", reason_var="reason"):
+    """fin node code for a promise ending whose reason is vars['promise_kind'] (promise_state_pre)."""
+    return ("try:\n    vars[%r] = %r\n    k = str(vars.get('promise_kind') or %r)\n"
+            "    vars[%r] = k if k in ('full', 'partial') else %r\nexcept Exception:\n    pass\n"
+            % (outcome_var, outcome, default_kind, reason_var, default_kind))
+
+
+def promise_or_code(outcome, reason, promise_outcome="promise", default_kind="full", outcome_var="outcome",
+                    reason_var="reason"):
+    """fin node code for an ending that a recorded promise overrides ('if a transfer takes place after a promise
+    was recorded, the promise decides'): promise/<promise_kind> when vars['promise_done'] == 'yes', else
+    outcome/reason."""
+    return ("try:\n    if str(vars.get('promise_done') or '') == 'yes':\n        vars[%r] = %r\n"
+            "        k = str(vars.get('promise_kind') or %r)\n        vars[%r] = k if k in ('full', 'partial') else %r\n"
+            "    else:\n        vars[%r] = %r\n        vars[%r] = %r\nexcept Exception:\n    pass\n"
+            % (outcome_var, promise_outcome, default_kind, reason_var, default_kind, outcome_var, outcome, reason_var, reason))
+
+
 def promise_post(tool="create_promise", recorded_text="The promise is recorded.",
                  failed_text="NOT recorded. Do not say it is recorded. Call {tool} once more with exactly the same values."):
     """Post hook of the promise tool: say 'recorded' only on ok true, otherwise retry once with the same values."""
@@ -484,6 +584,7 @@ def guarded(body, state_var, fallbacks=None, fallback_code=""):
 _CAL_HELPERS = r'''import datetime, json, re
 HOL = set(__HOLIDAYS__)
 BWD = set(__BWD__)
+WDRULE = __WDRULE__
 WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 def isbd(d):
@@ -528,6 +629,14 @@ def weekday_table(today):
         t1 = '"this ' + WD[i] + '" = ' + txt(a) + (' (already past)' if a < today else '')
         tab.append(t1 + '; "next ' + WD[i] + '" = ' + txt(b))
     return '\n'.join(tab)
+def weekday_table_first_after(today):
+    tab = []
+    for k in range(1, 8):
+        a = today + datetime.timedelta(days=k)
+        tab.append('"this ' + WD[a.weekday()] + '" = "next ' + WD[a.weekday()] + '" = ' + txt(a))
+    return '\n'.join(tab)
+if WDRULE == 'first_after':
+    weekday_table = weekday_table_first_after
 def calendar_text(today, deadline, extra_days=10):
     cal = []
     d = today
@@ -537,12 +646,12 @@ def calendar_text(today, deadline, extra_days=10):
         elif isbd(d):
             tag = 'allowed'
         elif d.weekday() not in BWD:
-            tag = 'weekend, not allowed'
+            tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'
         else:
             tag = 'bank holiday, not allowed'
         nb = next_bd(d)
         extra = ''
-        if tag.startswith('weekend') or tag.startswith('bank'):
+        if tag.startswith('not a business day') or tag.startswith('bank'):
             extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')
         cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)
         d = d + datetime.timedelta(days=1)
@@ -557,15 +666,20 @@ def fmt(x):
 '''
 
 
-def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS):
+def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS, weekday_rule="this_week"):
     """Python source (for the top of a code node) defining, on datetime.date values:
     isbd(d) business day?; next_bd(d) / prev_bd(d) d itself or the first business day after / before it; txt(d) 'Friday 16 October 2026'; txt_short(d) without the year; addbd(d, n) n business
     days later; next_bd(d) d or the first business day after it; lastbd_of_week(monday) last business day of that
     week or None; weekday_table(today) the '"this Monday" = ...; "next Monday" = ...' table; calendar_text(today,
     deadline, extra_days=10) one tagged line per day (allowed / weekend / bank holiday / after the deadline, with the
-    next business day); fmt(x) '420.5' / '420' / '420.25'. Also imports datetime, json, re. No '{{' or '}}'."""
+    next business day); fmt(x) '420.5' / '420' / '420.25'. Also imports datetime, json, re. No '{{' or '}}'.
+    `weekday_rule`: "this_week" ("this X" = X of the current week, "next X" = a week later) or "first_after"
+    (both "this X" and "next X" = the first X after today), as the brief defines the words."""
+    if weekday_rule not in ("this_week", "first_after"):
+        raise ValueError("weekday_rule must be 'this_week' or 'first_after', got %r" % weekday_rule)
     hol = sorted(set(str(h)[:10] for h in holidays or []))
-    return _CAL_HELPERS.replace("__HOLIDAYS__", repr(hol)).replace("__BWD__", repr(sorted(set(int(x) for x in business_weekdays))))
+    return _CAL_HELPERS.replace("__HOLIDAYS__", repr(hol)).replace("__BWD__", repr(sorted(set(int(x) for x in business_weekdays)))) \
+                       .replace("__WDRULE__", repr(weekday_rule))
 
 
 _SETUP_CORE = r'''raw = str(vars.get(__NOW__) or '').strip()
@@ -608,7 +722,7 @@ def _callback_code(rule):
 
 
 def SETUP_CODE(holidays, business_weekdays=BUSINESS_WEEKDAYS, callback_rule=None, extra="", fallbacks=None,
-               now_var="now", state_var="setup_state"):
+               now_var="now", state_var="setup_state", weekday_rule="this_week"):
     """The first code node's source. It parses the call variable `now` (never the real clock) and always sets
     today_iso, today_text, now_time, weekday_table and <state_var> ('ok' or 'error ...').
     `callback_rule` = {"open": "10:00", "close": "19:00", "same_day": True, "days_ahead": 1} also sets
@@ -636,7 +750,7 @@ def SETUP_CODE(holidays, business_weekdays=BUSINESS_WEEKDAYS, callback_rule=None
     fb.update(fallbacks or {})
     fb_code = ("vars.setdefault('today_text', str(vars.get(%r)))\nvars.setdefault('today_iso', str(vars.get(%r))[:10])\n"
                "vars.setdefault('now_time', '')\nvars.setdefault('weekday_table', '')" % (now_var, now_var))
-    return CAL_HELPERS(holidays, business_weekdays) + guarded(body, state_var, fb, fb_code)
+    return CAL_HELPERS(holidays, business_weekdays, weekday_rule) + guarded(body, state_var, fb, fb_code)
 
 
 _PRODUCTS_READER = r'''import json, re
