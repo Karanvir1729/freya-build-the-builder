@@ -32,3 +32,11 @@ FAIL EXT-D-26 hard   Calendar       | verify > verify > get_account > promise > 
        - conversation: create_promise was required exactly once, but it was called four times (one success, then three more after the customer's reply). The agent also never sent close_call with code PRM; the call ended with a technical-problem message and no close_cal
 PASS EXT-D-25 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
 PASS EXT-D-28 hard   Third party    | schedule_callback > close_call
+PASS EXT-D-27 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-D-29 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-D-30 hard   Calendar       | verify > verify > get_account > promise > close_call
+
+slowest agent turn per call: median 3 s, worst 12 s (chat-route timing, not a simulation's).
+
+26 / 30 passed (bank records and conversation checks). Local chat-route simulation, 1685 s.
+cost: 202 chat turns, 202 model calls (172 customer on claude-sonnet-5-5, 30 judge on claude-sonnet-5-5), 226 ledger polls, 66 call fetches.
