@@ -520,15 +520,17 @@ def run_case(ctx, case, rep):
            "transcript": None, "turns": 0, "stop": None, "judge": None}
 
     def new_session():
-        s = http("/v1/practice/sessions", {"case": case["id"]})
+        # an extended case reuses a mock customer (fixed identity, products, faults) under its own id and script
+        s = http("/v1/practice/sessions", {"case": case.get("mock_case", case["id"])})
         return s.get("variables") if isinstance(s, dict) else None
 
     try:
         variables = new_session()
         if not variables:
-            row["failed"].append("mock bank: could not open a practice session for " + case["id"]); row["stop"] = "no practice session"
+            row["failed"].append("mock bank: could not open a practice session for " + case.get("mock_case", case["id"])); row["stop"] = "no practice session"
             return finish(ctx, case, rep, row, None, None)
-        cid = row["customer_id"] = variables["customer_id"]
+        variables = dict(variables); cid = row["customer_id"] = variables["customer_id"]
+        if (case.get("variables") or {}).get("now"): variables["now"] = case["variables"]["now"]   # another call date: the mock enforces no date rule
         persona = persona_for(case, {"identity": case["identity"]}, ctx.style)
         customer = Customer(ctx.provider, ctx.customer_model, persona["prompt"])
         chat = Chat(ctx.workflow_id, variables, new_session=new_session)
