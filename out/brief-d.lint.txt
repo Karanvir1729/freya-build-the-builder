@@ -1,0 +1,2 @@
+WARN nodes.setup.pre_actions[code_exec].code: code has statements outside try/except (Assign); wrap the whole body
+-- 0 error(s), 1 warning(s), 27 info

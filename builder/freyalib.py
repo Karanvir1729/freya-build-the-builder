@@ -439,9 +439,11 @@ def verify_post(question, hints, max_wrong_text,
     f = {"hint": "hint", "all_verified": "all_verified", "verified": "verified", "ok": "ok", "left": "wrong_answers_left"}
     f.update(fields or {})
     q = lambda s: s.replace("{question}", question)
+    stops = tuple(str(x) for x in stop_left)
+    stop = "str(left) == %r" % stops[0] if len(stops) == 1 else "str(left) in %r" % (stops,)
     branches = [("d.get(%r) == %r" % (f["hint"], v), t) for v, t in (hints or {}).items()]
     branches += [(truthy(f["all_verified"]), all_verified_text), (truthy(f["verified"]), verified_text),
-                 (falsy(f["ok"]), q(unreadable_text)), ("str(left) in %r" % (tuple(str(x) for x in stop_left),), max_wrong_text)]
+                 (falsy(f["ok"]), q(unreadable_text)), (stop, max_wrong_text)]
     return what_next_post(branches, q(wrong_text), prelude=["left = d.get(%r)" % f["left"]])
 
 

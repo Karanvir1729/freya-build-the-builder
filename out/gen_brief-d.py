@@ -38,9 +38,9 @@ FINS = {
     "declined": ("not_verified", "IDD", "I understand. Without the security questions I cannot discuss anything. Thank you, goodbye."),  # 12
     "callback": ("not_reached", "CBK", "Thank you, we will call back then. Goodbye."),                       # 13
     "no_callback": ("not_reached", "NCB", "Thank you for your help. Goodbye."),                              # 14
-    "wrong_number": ("not_reached", "WN", "I apologise for the inconvenience. Goodbye."),                     # 15
-    "deceased": ("not_reached", "DEC", "Please accept my condolences. Goodbye."),                            # 16 + verbatim
-    "unclear": ("not_reached", "UNC", "I am sorry, I could not confirm who I am speaking with. Goodbye."),   # 17
+    "wrong_number": ("not_reached", "WN", "I apologise for the inconvenience. Thank you, goodbye."),                     # 15
+    "deceased": ("not_reached", "DEC", "Please accept my condolences. Thank you, goodbye."),                            # 16 + verbatim
+    "unclear": ("not_reached", "UNC", "I am sorry, I could not confirm who I am speaking with. Thank you, goodbye."),   # 17
 }
 for key, (outcome, reason, farewell) in FINS.items():
     fl.end_pair(key, outcome, reason, farewell, nodes, outcome_var="close_outcome", reason_var="close_code")  # not `reason`: add_note has a model-filled `reason`
@@ -53,6 +53,8 @@ for key, (outcome, reason, farewell) in FINS.items():
 # R 4.7 weekday words: "next X" = first X after the call date (same week allowed; on X itself, 7 days later);
 #   "this X" and a bare "X" = the same day = the first X from today on (today when the call is on X).
 SETUP_EXTRA = r'''
+vars['close_outcome'] = 'not_reached'
+vars['close_code'] = 'UNC'
 vars['attempt1_date'] = addbd(today, 1).isoformat()
 vars['f_deadline'] = prev_bd(today + datetime.timedelta(days=21)).isoformat()
 vars['s_deadline'] = addbd(today, 5).isoformat()
@@ -70,10 +72,12 @@ for i in range(7):
     tab.append('"' + WD[i] + '" or "this ' + WD[i] + '" = ' + txt(this_d) + ' (' + this_d.isoformat() + '); "next ' + WD[i] + '" = ' + txt(next_d) + ' (' + next_d.isoformat() + ')')
 vars['weekday_table'] = '\n'.join(tab)
 '''
+# R79 (memo effective date): the memo applies "from the first call on Wednesday 14 October", the campaign's go-live;
+# no campaign call happens before it, so its values are applied unconditionally (not gated on `now`).
 # R 4.4 + memo 6: today later than now, or the next two business days, 09:00 to 18:00 both included.
 SETUP = fl.SETUP_CODE(HOLIDAYS, callback_rule={"open": "09:00", "close": "18:00", "same_day": True, "days_ahead": 2},
                       extra=SETUP_EXTRA,
-                      fallbacks={"attempt1_date": "", "f_deadline": "", "s_deadline": "", "vague_iso": "", "vague_text": ""})
+                      fallbacks={"close_outcome": "not_reached", "close_code": "UNC", "attempt1_date": "", "f_deadline": "", "s_deadline": "", "vague_iso": "", "vague_text": ""})
 
 # ---------------------------------------------------------------- prepare: per-product facts
 # R 4.1 bands per product (F 1-10: 1 attempt; S 11+: 2 attempts per memo 2; over 45 -> S).
@@ -83,7 +87,7 @@ SETUP = fl.SETUP_CODE(HOLIDAYS, callback_rule={"open": "09:00", "close": "18:00"
 PREPARE = mp.prepare_code(
     HOLIDAYS,
     api=API, pid_field="product_id", amount_field="past_due", days_late_field="days_late", type_field="type",
-    extra_code="vars['acct_route'] = 'ok' if prods else 'fail'\n",
+    extra_code="vars['acct_route'] = 'ok' if prods else 'fail'\nvars['close_outcome'] = 'no_promise'\nvars['close_code'] = 'RF'\n",
     statement_fallback="Thank you. I am calling from the arrears team about an overdue payment. Are you able to clear the overdue amount today?",
     bands=[{"name": "F", "max_days_late": 10, "attempts": 1, "deadline_var": "f_deadline"},
            {"name": "S", "max_days_late": None, "attempts": 2, "deadline_var": "s_deadline"}],
@@ -199,6 +203,7 @@ transfer_general = fl.api_tool(API, "transfer_to_agent", baked={"queue": "genera
 
 ID_COMMON = ("Rules for this step:\n"
              "- " + NEVER_SAY + " If asked what the call is about or how much they owe, say you can explain once the security questions are done.\n"
+             "- If they say they do not want to talk: say once that this will only take a moment, and ask the question again.\n"
              "- If the customer does not want to answer, or asks what the call is about instead of answering: explain that the questions are there to protect their account and that nothing can be discussed without them, and ask the question again.\n"
              "- If the customer asks for a person: call transfer_to_agent straight away, no 'can I help you first'.\n"
              "- Robot or AI -> \"I am Kestrel Bank's digital assistant.\" Scam -> they are welcome to hang up and call the number on the back of their card or on their statement. Then ask the question again.\n"
@@ -348,7 +353,7 @@ NEGOTIATE = (
 
 TOPIC_DESC = ("What the customer's LATEST message says, if it is one of these. "
               "hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). "
-              "new_plan = asks for a payment plan, lower or smaller instalments, or more time in general (just saying the amount is too much, or naming a date, is NOT new_plan). "
+              "new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). "
               "none = anything else.")
 
 nodes["negotiate"] = fl.conv(
@@ -372,23 +377,28 @@ nodes["hardship"] = fl.conv(
     "The customer disclosed a hardship (illness, bereavement, job loss or similar). Make NO persuasion attempt and propose no payment.\n"
     "On your first turn here say exactly \"I am sorry to hear that.\" and then offer, once, to put them through to our customer care team.\n"
     "Never offer a discount, waiver, payment holiday, plan or any other term; if they ask for one, say you cannot offer that.\n"
-    "Only if the customer themselves names a date or an amount for a product: check it against PRODUCTS and the CALENDAR, read it back ending with \"Shall I record that?\", and after a clear yes record it with create_promise.\n"
+    "If they ask for a person: call transfer_to_agent straight away.\n"
+    "Only if the customer themselves names a date or an amount for a product: check it against PRODUCTS and the CALENDAR, read it back ending with \"Shall I record that?\", and after a clear yes record it with create_promise. "
+    "If create_promise fails, call it again with the same values (up to three tries in total); if the third try fails, tell the customer you could not record it and call add_note with reason service_error for that product.\n"
     "Follow what_to_do_next in every tool result. After every tool result, speak to the customer or call the next tool.\n\n" + FACTS,
-    tools=[promise_tool()],
+    tools=[promise_tool(), note_tool(), transfer_general],
     extraction=[fl.ext("support_choice", ["none", "accept", "decline"],
                        "Answer to the offer to put them through to the customer care team, from the customer's LATEST message: accept if they want it, decline if they do not want it or say no, none otherwise or if the offer has not been made yet.")],
     transitions=[
         ALL_DONE,
+        TRANSFERRED,
         fl.eq("support_choice", "accept", "xfer_support", "accepts customer care"),
         fl.eq("support_choice", "decline", "hardship_notes", "declines customer care"),
+        mp.done_intent_tr("finalize", "Every product now has a recorded promise or a note, and nothing is left to record.",
+                          "Every product has a recorded promise or a note"),
     ])
 
 nodes["hardship_notes"] = fl.conv(
     "hardship_notes",
     "The customer declined the customer care team. Do not persuade. Say you understand. Then call add_note with reason hardship for each product still open: {{open_pids}} (ids from PRODUCTS), one per message, "
-    "with the circumstance in the customer's own words as the text (for example 'lost my job last month'). Follow what_to_do_next in every tool result.\n\n" + FACTS,
-    tools=[note_tool()],
-    transitions=[ALL_DONE, mp.done_intent_tr("finalize", "Every product has a note or a promise.", "Every product has a note or a promise")])
+    "with the circumstance in the customer's own words as the text (for example 'lost my job last month'). If they ask for a person, call transfer_to_agent straight away instead (no notes after a transfer). Follow what_to_do_next in every tool result.\n\n" + FACTS,
+    tools=[note_tool(), transfer_general],
+    transitions=[ALL_DONE, TRANSFERRED, mp.done_intent_tr("finalize", "Every product has a note or a promise.", "Every product has a note or a promise")])
 
 # R code list "Closing with several products and no promise": promise wins; all paid -> AP; else the most serious
 # note: service_error (SVC) > hardship (HSHP, memo 5) > dispute (DSP) > refused (RF).

@@ -29,9 +29,9 @@ generator ported onto the library; `out/compare_brief-a_lib.py` proves the two o
 | Hooks | `STRIP_HEADER` | drop the response headers |
 | | `what_next_post(branches, else_text, prelude=None)` | strips headers and sets `result['data']['what_to_do_next']` from ordered `(python_condition_on_d, text)` pairs; with no branches, no else and no prelude it is `STRIP_HEADER` |
 | | `ok_post(ok_text, fail_text)`, `promise_post()`, `promise_pre()` | write-tool hooks: say "recorded" only on `ok` true, retry once; amount→float, date→`[:10]` |
-| | `verify_post(question, hints, max_wrong_text, ...)` | identity-question hook: hint (not a wrong answer) → all verified → verified → unreadable → counter at 0 → wrong. The default texts are generic: pass the brief's own wording (`all_verified_text=...` etc.) |
+| | `verify_post(question, hints, max_wrong_text, ...)` | identity-question hook: hint (not a wrong answer) → all verified → verified → unreadable → counter at 0 → wrong. The default texts are generic: pass the brief's own wording (`all_verified_text=...` etc.). `stop_left=("1", "0")` when the brief's wrong-answer limit is stricter than the service's (route the node on the same values) |
 | | `truthy(field)`, `falsy(field)` | condition expressions on `d` that accept booleans and strings |
-| Code | `CAL_HELPERS(holidays, business_weekdays)` | source defining `isbd, txt, txt_short, addbd, next_bd, lastbd_of_week, weekday_table, calendar_text, fmt` |
+| Code | `CAL_HELPERS(holidays, business_weekdays)` | source defining `isbd, txt, txt_short, addbd, next_bd, prev_bd, lastbd_of_week, weekday_table, calendar_text, fmt` (`prev_bd` for "the last business day before" rules) |
 | | `SETUP_CODE(holidays, business_weekdays, callback_rule, extra="", fallbacks=None)` | first code node: parses `now`, always sets `today_iso, today_text, now_time, weekday_table, setup_state` (+ `callback_text` from `{"open","close","same_day","days_ahead"}`); `extra` is brief-specific source run inside the try |
 | | `products_from_vars()` | reads the mapped product list (list / JSON string / flattened keys) |
 | | `guarded(body, state_var, fallbacks)` | try/except wrapper with `vars.setdefault` fallbacks |
