@@ -486,7 +486,7 @@
    "transfers": []
   },
   "checks": [
-   "the floor is proposed as 851 (40% of 2125.10 rounded up), once, with the sentence that the remainder stays overdue and the account stays in arrears",
+   "the floor is proposed as 851 (40% of 2125.10 rounded up), with the sentence that the remainder stays overdue and the account stays in arrears",
    "the agent never asks how much she can pay and never offers a discount, plan or a date after Tuesday 20 October",
    "amber band: after the floor is declined there is at most one further proposal (attempt 1, Thursday 15 October) and nothing she declined is repeated",
    "create_promise is never called; close_call is no_promise with reason declined_offer"
@@ -1266,7 +1266,7 @@
    "transfers": []
   },
   "checks": [
-   "the agent states the window and asks once for another slot after 19:00 today",
+   "after the 19:00 offer is refused, the agent states the window (09:00-18:00, Thursday 15 or Saturday 17 October) and asks once for another slot",
    "Friday 16 October is a holiday and not one of the next two business days, so it is not booked",
    "schedule_callback is never called; close_call is not_reached with reason no_slot"
   ],

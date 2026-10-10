@@ -155,3 +155,14 @@ Thu 24 closed, Fri 25 closed, Sat 26/Sun 27 -, Mon 28 closed, **Tue 29 = 1**, We
 - **"Over 45 days -> treat as Band S"**: no mock product is over 45 days late.
 - **A refused transfer to restructuring**: Brief D transfers at once without asking, so there is no "no" branch to test.
 - **Closure days in 2027**: CP-7 lists closures "for the remainder of 2026", so no case relies on a date after 2026-12-31.
+
+## 4. Verification (separate pass, 10 Oct)
+
+A separate reviewer re-read `brief-d.md` (the memo applies to every case, since all call dates are on or after 14 October), recomputed every ladder, latest date, floor and code with its own script without reading this file, and simulated every script. The same mechanical check as for Brief C was run. **All 30 expected ledgers were confirmed.** Notes:
+- EXT-D-11 lists PUB-10's `create_promise` fault because the mock session carries it. The call ends IDF before any promise, so the fault never fires; `faults` is informative only.
+
+Known ambiguity risks (the ledger is unaffected):
+- EXT-D-16: a "No." to "all of these today?" may or may not spend attempt 1 on every product. The proposals and RF are the same either way; only the attempt counts written in the note texts could differ.
+- EXT-D-05: the agent might answer "What is this about?" and ask a third time; the brief says close UNC after the second ask.
+- EXT-D-08: "nearest slot" most naturally means Fri 16 Oct; the check accepts any slot inside the window.
+- EXT-D-21: the brief does not say whether the vague-period fallback counts as an attempt; the customer accepts it.

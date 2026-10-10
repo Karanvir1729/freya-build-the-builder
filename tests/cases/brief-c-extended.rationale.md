@@ -180,3 +180,14 @@ Tue 8 (holiday) -, Wed 9 = 1, Thu 10 = 2, Fri 11 = 3, **Sat 12 = 4 (amber deadli
 - **Rule 45, unanswerable question**: conversation-only, no ledger effect.
 - **Amber band customers aged >45 days, more than one product**: no such mock customer.
 - **A day_month_swapped answer given twice** (the second one counts as wrong): possible with PUB-02/07/09 but omitted to keep the count; easy to add.
+
+## 5. Verification (separate pass, 10 Oct)
+
+A separate reviewer re-read `brief-c.md`, recomputed every ladder, deadline, floor and weekday with its own script without reading this file, and simulated every script. A mechanical check also asserted that the mock data was copied exactly, that every promise date is a business day between today and its deadline, that every amount lies between the floor and past_due, that full/partial matches, and that every callback falls inside the window. **All 30 expected ledgers were confirmed.** Fixes made after the pass:
+- EXT-C-28: check 1 reworded ("after the 19:00 offer is refused, the agent states the window and asks once"). The old wording could be read as "a slot later than 19:00".
+- EXT-C-11: "once" dropped from the floor check. Rules 27 and 31 conflict for an amber customer who has said "too much": rule 31 makes attempt 1 the floor on Thu 15, while rule 27 allows the floor to be named again only as attempt 2. A correct agent may therefore name 851 twice, propose the full amount on the 15th, or stop after the declined floor. The ledger (`declined_offer`) is the same on every reading.
+
+Known ambiguity risks (the ledger is unaffected):
+- EXT-C-10: attempt 1 may be 72 or 180 on Thu 15, for the same rule 27/31 reason.
+- EXT-C-01: the agent might answer "Go ahead" with a third ask; the brief says close after the second ask.
+- EXT-C-05 depends on the mock returning `day_month_swapped` for 1975-05-12 against 1975-12-05. If it does not, the run ends `exhausted`; check the tool result in the transcript before blaming the agent.
