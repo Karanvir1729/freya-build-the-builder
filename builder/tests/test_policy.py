@@ -500,6 +500,11 @@ def test_too_much_with_a_date_offers_the_floor():
     ev(P, V, "offer", stance="too_much", offer_kind="exact", offer_when="saturday", offer_amount="", offer_ref="floor")
     assert V["offer_verdict"] == "weekend_or_holiday" and V["prop_amount"] == "126.0" and V["prop_date"] == "2026-10-19", (V["offer_verdict"], V["prop_amount"], V["prop_date"])
     assert V["say_next"].startswith("I understand. The lowest amount I can accept is 126"), V["say_next"]
+    # as measured on Freya: stance 'offer' (not too_much), the floor by reference, today
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="offer", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="floor")
+    assert V["route"] == "confirm" and V["ok_amount"] == "126.0" and "rest stays overdue" in V["readback_line"], (V["route"], V.get("ok_amount"), V["readback_line"])
+    assert V["too_much_p1"] == "no"
 
 
 @test

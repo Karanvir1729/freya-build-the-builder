@@ -712,8 +712,12 @@ def ev_offer(V):
         # 'the full amount is too much, but I can pay <date>': the too-much rule applies to the amount (the floor,
         # offered once, with the brief's sentence) and the named date still goes through the guard
         fl_ = floor_of(V, pid)
-        if g(V, 'stance') == 'too_much' and (a is None or abs(a - fl_) < 0.005):
-            pset(V, pid, 'too_much', 'yes')
+        # the floor asked for by name ('I can pay the minimum today'; on Freya the stance came out 'offer') gets the
+        # same sentence: the brief's floor line says what happens to the rest
+        tm = g(V, 'stance') == 'too_much'
+        if (tm and (a is None or abs(a - fl_) < 0.005)) or (g(V, 'offer_ref') == 'floor' and a is not None and abs(a - fl_) < 0.005):
+            if tm:
+                pset(V, pid, 'too_much', 'yes')
             if g(V, 'mode') != 'hardship' and pg(V, pid, 'offered_floor') != 'yes' and fl_ < full_of(V, pid) - 0.005:
                 pset(V, pid, 'offered_floor', 'yes')
                 set_prop(V, pid, fl_, prop_of(V, pid)[1])   # a vague day keeps the floor as the amount
