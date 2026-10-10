@@ -13,7 +13,8 @@ hidden briefs), --runner sim|freya (local simulator or the organisers' simulatio
 default 29), --no-rules / --no-audit to skip those steps.
 
 One run, with no manual step:
-  1. rules:    builder/rules.py extracts the rule inventory of the brief(s) -> out/<slot>.rules.json (one model call)
+  1. rules:    builder/rules.py extracts the rule inventory of the brief(s) -> out/<slot>.rules.json, .spec.json, .rules.conflicts.md
+              (3 samples x 2 parallel calls, a merge, dated decisions and verification: about 1.5-3 minutes)
   2. build:    Claude (Claude Agent SDK) with the `build-phone-agent` skill writes out/gen_<slot>.py on builder/freyalib,
                generates out/<slot>.workflow.json, lints, dry-runs, saves it on Freya (freya.save_workflow), smoke-tests it
                over the chat route, audits rule coverage, runs the practice cases when there are any, and fixes what fails
@@ -109,8 +110,9 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
                  "python3 builder/sim.py <slot> --cases <file>%s --concurrency 5" % ((" --brief " + brief_filter) if brief_filter else "")
                  if runner == "sim" else "python3 tools/run_cases.py <agent_id> --cases <file>%s" % ((" --brief " + brief_filter) if brief_filter else "")))
     prompt = ("Use the %s skill to build a phone agent. Brief file(s): %s. Tool API file: %s. Slot name: %s. "
-              "The rule inventory is at out/%s.rules.json (and .md). %s Time budget: %d minutes from now for everything, "
-              "including your own tests; save a working agent early and improve it." % (SKILL, " ".join(briefs), tool_api, slot, slot, test_line, int(minutes_left)))
+              "The rule inventory is at out/%s.rules.json (and .md); resolve out/%s.rules.conflicts.md first; the structured values "
+              "are in out/%s.spec.json. %s Time budget: %d minutes from now for everything, "
+              "including your own tests; save a working agent early and improve it." % (SKILL, " ".join(briefs), tool_api, slot, slot, slot, slot, test_line, int(minutes_left)))
     trace.line("model call: %s | purpose: build, test and fix the phone agent from the brief | prompt: %s" % (model, prompt))
     async for message in query(prompt=prompt, options=options):
         trace.raw({"type": type(message).__name__, **dataclasses.asdict(message)})

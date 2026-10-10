@@ -49,6 +49,14 @@ import spec_check  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "claude-opus-5-5"
+# extraction, merge and verification write long structured answers: output tokens dominate the wall time, and low effort
+# halves the thinking without losing rules (measured on Brief D: 91-105 rules either way). The dated-decision call keeps
+# the model's default effort. RULES_EFFORT overrides (low | medium | high | "" for the default).
+FAST_EFFORT = os.environ.get("RULES_EFFORT", "low") or None
+# Models of the extraction samples A, B, C (comma-separated; "" = the main model). Sample A sets the order of the merged
+# inventory. Measured on Brief D: Sonnet for B and C was not cheaper (longer answers) and doubled the low-confidence
+# rules (the samples agree less), so all three use the main model by default.
+SAMPLE_MODELS = os.environ.get("RULES_SAMPLE_MODELS", "")
 MAX_BUDGET_USD_PER_CALL = 6.0
 
 CATEGORIES = ["opening", "third_party", "identity", "disclosure", "dates", "amounts", "persuasion", "hardship",
@@ -147,8 +155,8 @@ FIELDS:
     "the n-th business day after the call date" -> {type: business_days_after, n, adjust: none};
     "n calendar days after the call date, if that is not a business day the last business day before it" ->
     {type: calendar_days_after, n, adjust: previous_business_day}; a fixed date -> {type: fixed, date}; anything else ->
-    {type: other, text}; attempts = persuasion attempts in that band. A band that is "treated as" another band: say so
-    in that band's text.
+    {type: other, text}; attempts = persuasion attempts in that band. A band that is "treated as" another band:
+    same_as = that band's name (no deadline_rule needed).
   * floors: [{product_types: [API product types], rule: {type: field, field: <API product field>}}] or
     {type: multiple, factor, field, cap_to_full} or {type: percent, percent, field, round} or {type: other, text}.
   * attempt_ladder: one entry per persuasion attempt: attempt number, bands it applies to ([] = all), amount (full = the
@@ -168,6 +176,11 @@ FIELDS:
   band, every holiday including the new one, the whole outcome table as it now reads).
 - "verbatim": [] when nothing must be said word for word.
 - "overrides": "" unless this rule replaces an earlier listed rule.
+
+KEEP IT COMPACT (the inventory is long and is written three times): "text" at most about 35 words; "values" hold only the
+structured fields -- add a "text" inside values only for what the fields cannot hold, never a copy of the rule text;
+"doc" at most 6 words; "author_role" and "status_words" only for statements that are not plain decided policy or that come
+from a dated change document (a memo, a newer version), else "".
 
 Be exhaustive: a brief of 47 numbered rules with three tables and a few definitions yields 50 to 65 inventory rules; a
 raw-material pack (mail + policy + memo + code list) yields 60 to 80. Do not summarise several numbered rules into one.
@@ -342,6 +355,25 @@ def render_parts(order, order_name):
             + "\n" + p["text"])
     return "\n\n".join(out)
 
+def split_groups(parts, k):
+    """k contiguous groups of parts with about the same amount of text (fewer when there are fewer parts)."""
+    k = max(1, min(k, len(parts)))
+    if k == 1:
+        return [list(parts)]
+    total = sum(len(p["text"]) for p in parts)
+    groups, cur, acc = [], [], 0
+    for i, p in enumerate(parts):
+        cur.append(p)
+        acc += len(p["text"])
+        left_parts, left_groups = len(parts) - i - 1, k - len(groups) - 1
+        if left_groups > 0 and (acc >= total * (len(groups) + 1) / k or left_parts == left_groups):
+            groups.append(cur)
+            cur = []
+    if cur:
+        groups.append(cur)
+    return groups
+
+
 # ----------------------------------------------------------------------------------------------- self-check
 def numbered_rules(text):
     """Numbers of the numbered rules in a Markdown document (lines like '12. ...', not table rows)."""
@@ -380,6 +412,29 @@ def cited_numbers(rule, fname):
     return nums
 
 
+def example_tokens(text):
+    """`backticked` tokens that occur ONLY in an 'Example' column of a Markdown table (sample values, not rules)."""
+    ex, other = set(), set()
+    header = None
+    for line in text.splitlines():
+        st = line.strip()
+        if not st.startswith("|"):
+            header = None
+            other |= set(re.findall(r"`([^`\n]{2,40})`", line))
+            continue
+        cells = [c.strip() for c in st.strip("|").split("|")]
+        if header is None:
+            header = [c.lower() for c in cells]
+            other |= set(re.findall(r"`([^`\n]{2,40})`", line))
+            continue
+        if all(re.fullmatch(r":?-{2,}:?", c) for c in cells if c):
+            continue
+        for i, c in enumerate(cells):
+            toks = set(re.findall(r"`([^`\n]{2,40})`", c))
+            (ex if i < len(header) and "example" in header[i] else other).update(toks)
+    return ex - other
+
+
 def self_check(rules, briefs):
     """Deterministic completeness check. Returns {"missing_numbers": {file: [n,...]}, "missing_tokens": [...]}"""
     dump = "\n".join(_flatten_text(rules)).lower()
@@ -400,7 +455,8 @@ def self_check(rules, briefs):
         for tok in sorted(set(re.findall(r"\d{4}-\d{2}-\d{2}", text))):
             if tok not in dump:
                 missing_tokens.append(tok)
-        for tok in sorted(set(re.findall(r"`([^`\n]{2,40})`", text))):
+        examples = example_tokens(text)
+        for tok in sorted(set(re.findall(r"`([^`\n]{2,40})`", text)) - examples):
             t = tok.lower()
             if t not in dump and t.replace("`", "") not in dump:
                 missing_tokens.append(tok)
@@ -469,7 +525,7 @@ def normalise(rules, keep_flags=False):
 
 
 # ----------------------------------------------------------------------------------------------- atoms (values to compare)
-_SKIP_NUM_KEYS = {"order", "attempt"}
+_SKIP_NUM_KEYS = {"order", "attempt", "min_days"}   # min_days is often derived (previous max + 1); spec_check checks contiguity
 _STR_ATOM_KEYS = {"date", "open", "close", "reason", "outcome", "field"}
 
 
@@ -480,6 +536,8 @@ def value_atoms(values):
     def walk(o, key=""):
         if isinstance(o, dict):
             for k, v in o.items():
+                if k == "identity":          # field names are checked against the API by spec_check; the order is a number
+                    v = [{kk: vv for kk, vv in (q or {}).items() if kk != "field"} for q in v] if isinstance(v, list) else v
                 walk(v, k)
         elif isinstance(o, list):
             for v in o:
@@ -509,9 +567,17 @@ def _num(x):
     return str(int(f)) if f == int(f) else ("%.4f" % f).rstrip("0").rstrip(".")
 
 
+_NUM_WORDS = {w: str(i) for i, ws in enumerate([[], ["one", "first", "once"], ["two", "second", "twice", "both"],
+               ["three", "third", "thrice"], ["four", "fourth"], ["five", "fifth"], ["six", "sixth"], ["seven", "seventh"],
+               ["eight", "eighth"], ["nine", "ninth"], ["ten", "tenth"], ["eleven", "eleventh"], ["twelve", "twelfth"]]) for w in ws}
+
+
 def text_atoms(text):
-    """Numbers, ISO dates and HH:MM times in a free text (dates and times removed before numbers are read)."""
+    """Numbers, ISO dates and HH:MM times in a free text (dates and times removed before numbers are read). Number words
+    and ordinals count as numbers, and 'the next <unit>' counts as 1."""
     t = text or ""
+    t = re.sub(r"\b(%s)\b" % "|".join(_NUM_WORDS), lambda m: " %s " % _NUM_WORDS[m.group(1).lower()], t, flags=re.I)
+    t = re.sub(r"\bnext (business |calendar |working )?(day|week)", lambda m: " 1 " + m.group(0), t, flags=re.I)
     dates = set(re.findall(r"\b\d{4}-\d{2}-\d{2}\b", t))
     t2 = re.sub(r"\b\d{4}-\d{2}-\d{2}\b", " ", t)
     times = {s.zfill(5) for s in re.findall(r"\b\d{1,2}:\d{2}\b", t2)}
@@ -589,6 +655,55 @@ def relabel(rules, label):
         out.append(r)
     for r in out:
         r["overrides"] = m.get(str(r.get("overrides") or ""), "")
+    return out
+
+
+def resolve_ref(ref, rules, before=None):
+    """An 'overrides' written as a source ('brief-a.md rule 28') -> the id of the rule with that source. Exact source match
+    first, then the same file and an overlapping rule number. Only rules listed before `before` (an index) qualify."""
+    ref_l = (ref or "").strip().lower()
+    if not ref_l:
+        return ""
+    pool = rules[:before] if before is not None else rules
+    for r in pool:
+        if r.get("source", "").strip().lower() == ref_l:
+            return r["id"]
+    nums = cited_numbers({"source": ref}, "")
+    files = [w for w in re.findall(r"[\w.-]+\.md", ref_l)]
+    if nums:
+        for r in pool:
+            src = r.get("source", "").lower()
+            if (not files or any(f in src for f in files)) and nums & cited_numbers(r, ""):
+                return r["id"]
+    for r in pool:                                       # 'memo item 3' style: the longest source contained in the ref
+        src = r.get("source", "").strip().lower()
+        if len(src) >= 12 and (src in ref_l or ref_l in src):
+            return r["id"]
+    return ""
+
+
+def relabel_groups(lists, label):
+    """Join the rule lists of one sample's calls (one per group of parts, in order) and relabel (R07 -> B07).
+    'overrides' is an id of the same call, or a source reference resolved against the whole sample."""
+    out, ref = [], []
+    for li, rules in enumerate(lists):
+        m = {}
+        start = len(out)
+        for r in rules or []:
+            if not isinstance(r, dict) or not r.get("text"):
+                continue
+            nid = "%s%02d" % (label, len(out) + 1)
+            m[str(r.get("id", ""))] = nid
+            r = dict(r); r["id"] = nid
+            out.append(r)
+        for r in out[start:]:
+            o = str(r.get("overrides") or "")
+            r["overrides"] = m.get(o, "")
+            if o and not r["overrides"]:
+                ref.append((r, o))
+    for i, (r, o) in enumerate(ref):
+        rid = resolve_ref(o, out)
+        r["overrides"] = rid if rid != r["id"] else ""
     return out
 
 
@@ -676,7 +791,7 @@ async def merge_call(samples, model, log):
     prompt = ("Merge these %d inventories of the same brief into groups of entries that state the same rule.\n\n%s\n\n"
               "Answer with the JSON only." % (len(samples), "\n\n".join(blocks)))
     return await ask_json_async(prompt, MERGE_SYSTEM, MERGE_SCHEMA, "merge %d sampled inventories (self-consistency union, flag "
-                                "minority rules and differing values)" % len(samples), model=model, log=log)
+                                "minority rules and differing values)" % len(samples), model=model, log=log, effort=FAST_EFFORT)
 
 # ----------------------------------------------------------------------------------------------- T14 dated decisions
 DECIDE_SCHEMA = {
@@ -859,11 +974,12 @@ def apply_decisions(rules, blocks, ans, brief_norm):
             if r["in_force"] or not sb:
                 continue
             ef = by_id[sb].get("effective_from", "")
-            if ef and rng["earliest"] and rng["latest"] and rng["earliest"] < ef <= rng["latest"]:
+            if ef and rng["earliest"] and rng["earliest"] < ef and (not rng["latest"] or ef <= rng["latest"]):
                 r["in_force"] = True
                 r["effective_until"] = ef
                 d["kept_until"] = ef
-        if members and not any(by_id[m]["in_force"] for m in members) and not all(by_id[m].get("not_policy") for m in members):
+        if members and not any(by_id[m]["in_force"] or by_id.get(by_id[m].get("superseded_by"), {}).get("in_force")
+                               for m in members) and not all(by_id[m].get("not_policy") for m in members):
             entry["warning"] = "no candidate of this block is in force"
         notes.append(entry)
     return rng, notes
@@ -909,6 +1025,9 @@ def verification_questions(rules):
         names = [b.get("name") for b in v.get("bands") or [] if b.get("name")]
         pts = sorted({pt for f in v.get("floors") or [] for pt in f.get("product_types") or []})
         extra = (" (bands: %s)" % ", ".join(names) if names else "") + (" (product types: %s)" % ", ".join(pts) if pts else "")
+        sizes = ["%d %s" % (len(v[k]), k) for k in keys if isinstance(v[k], list) and len(v[k]) > 2]
+        if sizes:
+            extra += " -- give ALL of them (%s)" % ", ".join(sizes)
         when = " -- the version that applies before %s" % r["effective_until"] if r.get("effective_until") else ""
         qs.append({"q": "V%02d" % (len(qs) + 1), "rule": r["id"],
                    "text": "V%02d [%s | topic %s]: %s%s%s" % (len(qs) + 1, r.get("source", ""), r.get("topic", ""), what, extra, when)})
@@ -924,7 +1043,7 @@ async def verify_calls(qs, docs, api, model, log, per_call=30):
             docs, api, "\n".join(q["text"] for q in ch)))
         jobs.append(ask_json_async(prompt, VERIFY_SYSTEM, VERIFY_SCHEMA, "chain-of-verification: quote the sentences that set "
                                    "%d value(s) (fresh context, brief only)%s" % (len(ch), " [%d/%d]" % (ci + 1, len(chunks)) if len(chunks) > 1 else ""),
-                                   model=model, log=log))
+                                   model=model, log=log, effort=FAST_EFFORT))
     res = await asyncio.gather(*jobs, return_exceptions=True)
     answers, infos = [], []
     for x in res:
@@ -1036,7 +1155,7 @@ def compile_spec(rules, api_name, at=None):
             if tgt is None:
                 tgt = {}
                 bands.append(tgt)
-            for f in ("name", "min_days", "max_days", "deadline_rule", "attempts", "text"):
+            for f in ("name", "min_days", "max_days", "deadline_rule", "attempts", "same_as", "text"):
                 if f in b and not (f == "name" and tgt.get("name")):
                     if f == "max_days" and b[f] is None:
                         tgt.setdefault("max_days", None)
@@ -1244,7 +1363,7 @@ def render_conflicts(rules, briefs, merge_info, decisions, verifs, verbatim_miss
 
 
 # ----------------------------------------------------------------------------------------------- main
-async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, samples=3, verify=True):
+async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, samples=3, verify=True, split=2):
     log = log or (lambda s: print(s, file=sys.stderr, flush=True))
     t0 = time.time()
     model = model or os.environ.get("RULES_MODEL") or DEFAULT_MODEL
@@ -1266,27 +1385,50 @@ async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, 
         ", ".join("%s part %d %s" % (p["file"], p["k"], p["date"]) for p in parts if p["date"]) or "none"))
     t1 = time.time()
 
-    async def one(label, oname, order):
-        prompt = ("Write the complete rule inventory for the brief below.\n\nBRIEF DOCUMENT(S):\n\n%s\n\n%s\n\n"
+    groups = split_groups(parts, split)
+    if len(groups) > 1:
+        log("each sample is written by %d parallel calls, one per group of parts: %s" % (len(groups), " | ".join(
+            ",".join(str(p["pos"] + 1) for p in g) for g in groups)))
+
+    async def one(label, oname, order, group, gi):
+        only = ""
+        if len(groups) > 1:
+            only = ("\n\nLIST RULES ONLY FROM THE PARTS AT POSITION(S) %s. The other parts are shown for context: use them to "
+                    "understand definitions and dates, and to name in \"overrides\" an earlier rule that one of your rules "
+                    "replaces -- when that earlier rule is in a part you do not list, write its source as the other analyst "
+                    "would (e.g. \"brief-a.md rule 28\", \"<file> <document> section 4.1 table\") instead of an id. Do not list "
+                    "rules of the other parts; another analyst lists them." % ", ".join(str(p["pos"] + 1) for p in group))
+        prompt = ("Write the complete rule inventory for the brief below.\n\nBRIEF DOCUMENT(S):\n\n%s\n\n%s%s\n\n"
                   "Reminder: every numbered rule, every table row, every definition and every mandatory sentence, in the "
                   "documents' ORIGINAL order (by position). Use the file names above in \"source\" (e.g. \"%s rule 12\"). "
-                  "Answer with the JSON only." % (render_parts(order, oname), api, pathlib.Path(briefs[-1]).name))
+                  "Answer with the JSON only." % (render_parts(order, oname), api, only, pathlib.Path(briefs[-1]).name))
         obj, info = await ask_json_async(prompt, SYSTEM_PROMPT, RULE_SCHEMA, "extract the rule inventory from %s, sample %s "
-                                         "(documents in %s order)" % (", ".join(pathlib.Path(b).name for b in briefs), label, oname),
-                                         model=model, log=log)
-        return label, obj, info
-    res = await asyncio.gather(*[one(SAMPLE_LABELS[i], on, o) for i, (on, o) in enumerate(orders)], return_exceptions=True)
-    samp = {}
+                                         "(documents in %s order)%s" % (", ".join(pathlib.Path(b).name for b in briefs), label, oname,
+                                         (", parts %s" % ",".join(str(p["pos"] + 1) for p in group)) if len(groups) > 1 else ""),
+                                         model=sample_model.get(label) or model, log=log, effort=FAST_EFFORT)
+        return label, gi, obj, info
+    sm = [x.strip() for x in SAMPLE_MODELS.split(",")]
+    sample_model = {SAMPLE_LABELS[i]: (sm[i] if i < len(sm) else "") for i in range(3)}
+    jobs = [one(SAMPLE_LABELS[i], on, o, g, gi) for i, (on, o) in enumerate(orders) for gi, g in enumerate(groups)]
+    res = await asyncio.gather(*jobs, return_exceptions=True)
+    got = {}
     for x in res:
         if isinstance(x, Exception):
-            log("extraction sample failed: %s: %s" % (type(x).__name__, x))
+            log("extraction call failed: %s: %s" % (type(x).__name__, x))
             continue
-        label, obj, info = x
+        label, gi, obj, info = x
         account(info, "extract")
-        rs = relabel(obj.get("rules", []) if isinstance(obj, dict) else obj, label)
+        got.setdefault(label, {})[gi] = (obj.get("rules", []) if isinstance(obj, dict) else obj, info)
+    samp = {}
+    for label in sorted(got):
+        if len(got[label]) < len(groups):
+            log("sample %s incomplete (%d of %d calls); dropped" % (label, len(got[label]), len(groups)))
+            continue
+        rs = relabel_groups([got[label][gi][0] for gi in range(len(groups))], label)
         if rs:
             samp[label] = rs
-            log("sample %s: %d rules (%.0f s, $%.2f)" % (label, len(rs), info["seconds"], info["cost_usd"]))
+            log("sample %s: %d rules (%s)" % (label, len(rs), ", ".join("%.0f s $%.2f" % (got[label][gi][1]["seconds"], got[label][gi][1]["cost_usd"])
+                                                                    for gi in range(len(groups)))))
     stages.setdefault("extract", {})["seconds"] = time.time() - t1
     if not samp:
         raise RuntimeError("every extraction sample failed")
@@ -1393,7 +1535,7 @@ async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, 
     spec_path.write_text(json.dumps(spec_doc, indent=1, ensure_ascii=False) + "\n")
     conf_md, n_conf = render_conflicts(rules, briefs, merge_note, decisions, verifs, verbatim_missing, spec_doc, spec_problems)
     conf_path.write_text(conf_md + "\n")
-    meta = {"model": model, "seconds": time.time() - t0, "cost_usd": cost, "calls": calls, "self_check": chk,
+    meta = {"model": model, "sample_models": {k: v or model for k, v in sample_model.items() if k in got}, "seconds": time.time() - t0, "cost_usd": cost, "calls": calls, "self_check": chk,
             "samples": merge_note["samples"], "stages": stages, "briefs": [str(b) for b in briefs], "api": str(api_path),
             "spec": spec_path.name, "conflicts": conf_path.name, "n_conflicts": n_conf, "call_date_range": call_range,
             "n_rules": len(rules), "n_in_force": sum(r["in_force"] for r in rules),
@@ -1419,8 +1561,8 @@ async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, 
     return rules
 
 
-def extract_rules(briefs, api_path, out_path, model=None, log=None, samples=3, verify=True):
-    return asyncio.run(extract_rules_async(briefs, api_path, out_path, model=model, log=log, samples=samples, verify=verify))
+def extract_rules(briefs, api_path, out_path, model=None, log=None, samples=3, verify=True, split=2):
+    return asyncio.run(extract_rules_async(briefs, api_path, out_path, model=model, log=log, samples=samples, verify=verify, split=split))
 
 
 def main(argv=None):
@@ -1430,12 +1572,14 @@ def main(argv=None):
     ap.add_argument("--out", required=True, help="output JSON path, e.g. out/<slot>.rules.json")
     ap.add_argument("--model", default=None, help="builder model (default $RULES_MODEL or %s)" % DEFAULT_MODEL)
     ap.add_argument("--samples", type=int, default=3, help="extraction samples in parallel (1-3, default 3)")
+    ap.add_argument("--split", type=int, default=2, help="parallel calls per sample, each listing the rules of one group of "
+                    "parts (default 2; 1 = one call per sample)")
     ap.add_argument("--no-verify", action="store_true", help="skip the dated-decision and verification calls")
     a = ap.parse_args(argv)
     for p in a.briefs + [a.api]:
         if not pathlib.Path(p).exists():
             sys.exit("not found: " + p)
-    extract_rules(a.briefs, a.api, a.out, model=a.model, samples=a.samples, verify=not a.no_verify)
+    extract_rules(a.briefs, a.api, a.out, model=a.model, samples=a.samples, verify=not a.no_verify, split=a.split)
 
 
 if __name__ == "__main__":

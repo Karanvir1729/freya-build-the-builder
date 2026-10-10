@@ -13,7 +13,8 @@ Spec keys (all optional; a brief that does not mention a topic leaves the key ou
 
   calendar          {business_weekdays: ["Mon".."Sun"], holidays: [{date: YYYY-MM-DD, name}], text}
                     holidays = every closure/holiday date in force (non-business days that are weekdays).
-  bands             [{name, min_days, max_days (int, or null when open-ended), deadline_rule, attempts, text}]
+  bands             [{name, min_days, max_days (int, or null when open-ended), deadline_rule, attempts, same_as, text}]
+                    same_as = name of another band whose deadline and attempts apply ("treat it as band X")
                     by the product's lateness (days_late); deadline_rule = {type, n, adjust, date, text}
                     type:   business_days_after (the n-th business day after the call date)
                             calendar_days_after (n calendar days after the call date)
@@ -68,7 +69,7 @@ VALUES_SCHEMA = {
             "deadline_rule": {"type": "object", "properties": {
                 "type": {"type": "string", "enum": DEADLINE_TYPES}, "n": _I,
                 "adjust": {"type": "string", "enum": ADJUST}, "date": _S, "text": _S}},
-            "attempts": _I, "text": _S}}},
+            "attempts": _I, "same_as": _S, "text": _S}}},
         "floors": {"type": "array", "items": {"type": "object", "properties": {
             "product_types": _SL,
             "rule": {"type": "object", "properties": {
@@ -213,7 +214,10 @@ def validate_spec(spec, en, where="spec"):
             if _is_int(lo):
                 rows.append((lo, hi, w))
             dr = b.get("deadline_rule")
-            if not isinstance(dr, dict):
+            if b.get("same_as"):
+                if str(b["same_as"]).strip().lower() not in {str(x.get("name", "")).strip().lower() for x in bands if x is not b}:
+                    err("%s: same_as %r is not another band's name" % (w, b["same_as"]))
+            elif not isinstance(dr, dict):
                 err("%s: no deadline_rule" % w)
             else:
                 t = dr.get("type")
@@ -346,8 +350,9 @@ def validate_spec(spec, en, where="spec"):
             if key in seen:
                 warn("%s: outcome/reason %s/%s listed twice" % (w, key[0], key[1] or "-"))
             seen.add(key)
-            if not o.get("when"):
-                warn("%s: no 'when'" % w)
+        nowhen = [i for i, o in enumerate(outs or []) if not o.get("when")]
+        if nowhen:
+            warn("outcomes%s: no 'when'" % nowhen)
         used = {o.get("outcome") for o in outs or []}
         for oc in en.get("outcome") or []:
             if outs and oc not in used:
