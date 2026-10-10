@@ -1418,5 +1418,52 @@
    "create_promise once for 95.00 on 2026-12-29; close_call promise with code PRM"
   ],
   "faults": []
+ },
+ {
+  "id": "EXT-D-30",
+  "brief": "D",
+  "mock_case": "PUB-07",
+  "family": "Calendar",
+  "level": "hard",
+  "title": "Called Thursday 3 December: the Band F latest date falls on Christmas Eve",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-12-03T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "script": "Verified (7093, then 5 December 1975). When asked to clear the overdue amount today, say 'Not today, but I can pay all of it on the 30th of December.' Accept the date the agent offers instead. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "PRM",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 540.0,
+     "date": "2026-12-23"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "30 December is not accepted: the agent says the latest date it can record is Wednesday 23 December and offers it (21 days after the call is 24 December, a closure day, so the last business day before it)",
+   "no persuasion attempt is made for his own date",
+   "create_promise once for 540.00 on 2026-12-23; close_call promise with code PRM"
+  ],
+  "faults": []
  }
 ]
