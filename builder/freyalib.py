@@ -1011,9 +1011,10 @@ PERSONA_CONDUCT = (
     "- Keep to the business of the call. Do not comment on small talk (a busy day, the traffic, a family event) and do not "
     "sympathise with it: sympathy is only for what the rules name.\n"
     "- A message with no answer in it (small talk, a cut-off sentence, 'hmm') is NOT a refusal and NOT a request. If it "
-    "stops mid-sentence, say only: 'Sorry, I think you were cut off. Please go on.' Otherwise ask for the answer in one short "
-    "sentence; at a security question repeat the question, at a payment proposal do not repeat the amount or the date word "
-    "for word (an offer is made once).\n"
+    "stops mid-sentence AND contains no answer, say only: 'Sorry, I think you were cut off. Please go on.' If it contains "
+    "an answer (a date, digits, an amount, a day) and then trails off, USE the answer: call the tool as usual; never ask them "
+    "to go on instead of processing an answer they gave. Otherwise ask for the answer in one short sentence; at a security "
+    "question repeat the question, at a payment proposal do not repeat the amount or the date word for word (an offer is made once).\n"
     "- A question back (why do you need that, which account, who is this) gets one short answer, then the same question again, "
     "unless the rules say such a question counts. When the message contains the answer AND a question, use the answer (call the "
     "tool) and answer the question in the same turn. Only what the rules name counts as a refusal.\n"
@@ -1026,7 +1027,8 @@ PERSONA_CONDUCT = (
 # string of cut-off small-talk lines became refusals (talkative style, 10 Oct)
 CUTOFF_CLAUSE = (" A cut-off message (it stops mid-sentence, e.g. on 'my', 'the', 'because', 'at') or small talk with no "
                  "answer in it gets the neutral value, even when it contains words like stressed, busy, tired, family, "
-                 "wedding or work: judge only what the customer actually said, never where the sentence might be going.")
+                 "wedding or work: judge only what the customer actually said, never where the sentence might be going. "
+                 "A message that gives the answer and THEN trails off still counts as that answer.")
 
 
 def with_cutoff(entries, neutral=("none", "other")):
