@@ -1,0 +1,39 @@
+# EXT-A-05 Only times outside the callback window
+# workflow f278ab9e-e94b-41c3-8b91-07bf2cca2e83 | call bbb97467-1572-4da4-b8a8-e8be7094a40f | customer c_b59e158c-12e | 2026-10-10 20:49:33
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/bbb97467-1572-4da4-b8a8-e8be7094a40f
+# RESULT: PASS
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Ms Costa?
+customer: No, this is her husband.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> third_party: someone else answered who1 == 'someone_else'
+   [node] setup -> third_party
+agent: When can Ms Costa be reached?
+customer: Tonight at nine.
+agent: I can only call back today or on the next business day between 10:00 and 19:00. Could you provide another time?
+customer: Saturday morning, nothing else.
+   [node] third_party -> fin_no_callback
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_reached'\n vars['reason'] = 'no_callback'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_no_callback -> end_no_callback: always always
+   [node] fin_no_callback -> end_no_callback
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you for your help. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: Thank you for your help. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "no_callback", "outcome": "not_reached", "customer_id": "c_b59e158c-12e"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_reached'\n vars['reason'] = 'no_callback'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+3. end_call args={"message_mode": "custom", "spoken_message": "Thank you for your help. Goodbye."} -> success Call ended
+4. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "no_callback", "outcome": "not_reached", "customer_id": "c_b59e158c-12e"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=not_reached reason=no_callback promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): pass - All criteria hold: the agent asked once for another time after 'tonight at nine', no callback was scheduled, verify_identity and get_account were never called, and the agent never stated a reason for the call.
