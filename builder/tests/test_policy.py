@@ -485,7 +485,7 @@ def test_offer_when_resolved_in_code():
     assert out["end of the month"] == (None, "vague"), out
     assert out[""] == (None, "none"), out
     assert out["monday the 26th"] == ("2026-10-26", "exact"), out      # the number wins over the weekday (PUB-07)
-    assert out["Monday the twenty-sixth"] == ("2026-10-26", "exact"), out
+    assert out["monday the twenty-sixth"] == ("2026-10-26", "exact"), out
     assert out["friday the 16th"] == ("2026-10-16", "exact"), out
     # the offer event: the extraction said 2026-10-11 (real clock) but the words say tomorrow -> 15 Oct is checked
     ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-11", offer_when="tomorrow", offer_amount="420")
