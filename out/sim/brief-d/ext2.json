@@ -1,0 +1,551 @@
+{
+ "runner": "sim",
+ "workflow_id": "de5f944a-d43d-4a7e-80fc-405ee4c53649",
+ "agent_id": "49ba465f-6ca5-4240-b4a7-c81502d3a8d8",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 475,
+ "passed": 5,
+ "total": 6,
+ "runs": 1,
+ "final": [
+  {
+   "id": "EXT-D-16",
+   "family": "Multi-product",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-D-17",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-D-18",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-D-23",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-D-25",
+   "family": "Tool failure",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-D-26",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-D-16",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "notes [('p1', 'refused'), ('p1', 'refused'), ('p2', 'refused'), ('p2', 'refused'), ('p3', 'refused'), ('p3', 'refused')], expected [('p1', 'refused'), ('p2', 'refused'), ('p3', 'refused')]"
+   ],
+   "call_id": "e3430fce-46ad-40f0-a914-b9591db088dc",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_d35b177e-f0e",
+   "transcript": "out/sim/brief-d/ext2/EXT-D-16.txt",
+   "turns": 11,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent stated all three products, one sentence each, before asking 'Are you able to clear all of these today?'. It offered the correct amounts and dates for each product (card 510 then 306, loan 1320 then 440, car loan 140 on 15 October only). It added a refused note for p1, p2 and p3 with attempt counts and last offers, and sent close_call with no_promise and RF. The notes were duplicated, but each one is correct.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/e3430fce-46ad-40f0-a914-b9591db088dc",
+   "slowest_turn_s": 6.7,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "RF",
+     "outcome": "no_promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  },
+  {
+   "id": "EXT-D-17",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "e3f4f293-fa89-4a6f-ac64-1355e7819539",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_2d26d1f8-ef4",
+   "transcript": "out/sim/brief-d/ext2/EXT-D-17.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent said the required sentence about the card and asked for no promise on it. It added a 'paid' note on p1 (app, yesterday), created a single promise for p2 of 900.00 on 2026-10-15, and sent close_call with outcome promise and code PRM. The close_call ok:false reply is a test bank limit and is not held against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/e3f4f293-fa89-4a6f-ac64-1355e7819539",
+   "slowest_turn_s": 8.4,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "EXT-D-18",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "d38ed1cd-4849-4273-9b49-5cffc9eb56ae",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_b62ba314-ac7",
+   "transcript": "out/sim/brief-d/ext2/EXT-D-18.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent noted the car loan dispute and continued with the other products. It read back 220 for the card and 640 for the personal loan for Friday 16 October once, and the customer confirmed. It then made two create_promise calls (p1 and p2), added a dispute note on p3 with no promise, and sent close_call with outcome promise and code PRM. The close_call ok:false reply is a test-bank limitation.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/d38ed1cd-4849-4273-9b49-5cffc9eb56ae",
+   "slowest_turn_s": 4.1,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "EXT-D-23",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "8b60f024-e644-4383-a731-553ee77cbd2d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a0f42497-d89",
+   "transcript": "out/sim/brief-d/ext2/EXT-D-23.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent said 12 October cannot be recorded and asked for a day from today onwards, with no persuasion. It accepted Tuesday 20 October for the full 540, called create_promise once with 540.0 on 2026-10-20, and sent close_call with outcome promise and code PRM. The close_call ok:false reply is a test-bank limit and does not count against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8b60f024-e644-4383-a731-553ee77cbd2d",
+   "slowest_turn_s": 1.7,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "EXT-D-25",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "c6847439-bb0d-40ae-8fcd-b688b6d28191",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_f2d1b303-5e6",
+   "transcript": "out/sim/brief-d/ext2/EXT-D-25.txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The floor was offered as 219 with the remainder-stays-overdue sentence. The first create_promise failed and was retried with no mention of recording in between, ending in exactly one promise of 219.00 on 2026-10-15. There was no service_error note, the email-confirmation sentence came after the successful call, and close_call was sent with promise/PRM.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c6847439-bb0d-40ae-8fcd-b688b6d28191",
+   "slowest_turn_s": 7.2,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "EXT-D-26",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "ccee0ad3-4df6-4767-a3d2-08729811113d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_8ba9ef31-8bf",
+   "transcript": "out/sim/brief-d/ext2/EXT-D-26.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "After the customer declined to pay today, the agent's first proposal was the full 420 on Monday 2 November. It called create_promise once with amount 420.0 and date 2026-11-02, then sent close_call with outcome promise and reason PRM. The close_call ok:false reply is the test bank's limit and is not held against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/ccee0ad3-4df6-4767-a3d2-08729811113d",
+   "slowest_turn_s": 1.6,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-D-16",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "notes [('p1', 'refused'), ('p1', 'refused'), ('p2', 'refused'), ('p2', 'refused'), ('p3', 'refused'), ('p3', 'refused')], expected [('p1', 'refused'), ('p2', 'refused'), ('p3', 'refused')]"
+    ],
+    "call_id": "e3430fce-46ad-40f0-a914-b9591db088dc",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_d35b177e-f0e",
+    "transcript": "out/sim/brief-d/ext2/EXT-D-16.txt",
+    "turns": 11,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent stated all three products, one sentence each, before asking 'Are you able to clear all of these today?'. It offered the correct amounts and dates for each product (card 510 then 306, loan 1320 then 440, car loan 140 on 15 October only). It added a refused note for p1, p2 and p3 with attempt counts and last offers, and sent close_call with no_promise and RF. The notes were duplicated, but each one is correct.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/e3430fce-46ad-40f0-a914-b9591db088dc",
+    "slowest_turn_s": 6.7,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "RF",
+      "outcome": "no_promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+     }
+    }
+   },
+   {
+    "id": "EXT-D-17",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "e3f4f293-fa89-4a6f-ac64-1355e7819539",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_2d26d1f8-ef4",
+    "transcript": "out/sim/brief-d/ext2/EXT-D-17.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent said the required sentence about the card and asked for no promise on it. It added a 'paid' note on p1 (app, yesterday), created a single promise for p2 of 900.00 on 2026-10-15, and sent close_call with outcome promise and code PRM. The close_call ok:false reply is a test bank limit and is not held against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/e3f4f293-fa89-4a6f-ac64-1355e7819539",
+    "slowest_turn_s": 8.4,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "EXT-D-18",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "d38ed1cd-4849-4273-9b49-5cffc9eb56ae",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_b62ba314-ac7",
+    "transcript": "out/sim/brief-d/ext2/EXT-D-18.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent noted the car loan dispute and continued with the other products. It read back 220 for the card and 640 for the personal loan for Friday 16 October once, and the customer confirmed. It then made two create_promise calls (p1 and p2), added a dispute note on p3 with no promise, and sent close_call with outcome promise and code PRM. The close_call ok:false reply is a test-bank limitation.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/d38ed1cd-4849-4273-9b49-5cffc9eb56ae",
+    "slowest_turn_s": 4.1,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "EXT-D-23",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "8b60f024-e644-4383-a731-553ee77cbd2d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a0f42497-d89",
+    "transcript": "out/sim/brief-d/ext2/EXT-D-23.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent said 12 October cannot be recorded and asked for a day from today onwards, with no persuasion. It accepted Tuesday 20 October for the full 540, called create_promise once with 540.0 on 2026-10-20, and sent close_call with outcome promise and code PRM. The close_call ok:false reply is a test-bank limit and does not count against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8b60f024-e644-4383-a731-553ee77cbd2d",
+    "slowest_turn_s": 1.7,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "EXT-D-25",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "c6847439-bb0d-40ae-8fcd-b688b6d28191",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_f2d1b303-5e6",
+    "transcript": "out/sim/brief-d/ext2/EXT-D-25.txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The floor was offered as 219 with the remainder-stays-overdue sentence. The first create_promise failed and was retried with no mention of recording in between, ending in exactly one promise of 219.00 on 2026-10-15. There was no service_error note, the email-confirmation sentence came after the successful call, and close_call was sent with promise/PRM.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c6847439-bb0d-40ae-8fcd-b688b6d28191",
+    "slowest_turn_s": 7.2,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "EXT-D-26",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "ccee0ad3-4df6-4767-a3d2-08729811113d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_8ba9ef31-8bf",
+    "transcript": "out/sim/brief-d/ext2/EXT-D-26.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "After the customer declined to pay today, the agent's first proposal was the full 420 on Monday 2 November. It called create_promise once with amount 420.0 and date 2026-11-02, then sent close_call with outcome promise and reason PRM. The close_call ok:false reply is the test bank's limit and is not held against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/ccee0ad3-4df6-4767-a3d2-08729811113d",
+    "slowest_turn_s": 1.6,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   }
+  ]
+ ],
+ "customer_model": "claude-sonnet-5-5",
+ "judge_model": "claude-sonnet-5-5",
+ "provider": "claude",
+ "counts": {
+  "chat_turns": 52,
+  "customer_calls": 46,
+  "judge_calls": 6,
+  "judge_retries": 0,
+  "ledger_polls": 54,
+  "ledger_errors": 0,
+  "call_fetches": 22
+ }
+}

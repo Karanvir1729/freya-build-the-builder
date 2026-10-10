@@ -1,0 +1,19 @@
+sim | workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 (slot brief-d) | 13 case(s) x 1 rep(s) | concurrency 2 | customer claude-sonnet-5-5, judge claude-sonnet-5-5 (claude)
+PASS PUB-02 medium Third party    | schedule_callback > close_call
+PASS PUB-01 easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-03 medium Identity       | verify > verify > verify > close_call
+PASS PUB-04 medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-05 medium Hardship       | verify > verify > get_account > add_note > close_call > close_call
+PASS PUB-07 hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-06 hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-08 medium Already paid   | verify > verify > get_account > add_note > close_call
+PASS PUB-09 medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-10 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-11 medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-13 hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+PASS PUB-12 hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+
+slowest agent turn per call: median 5 s, worst 12 s (chat-route timing, not a simulation's).
+
+13 / 13 passed (bank records and conversation checks). Local chat-route simulation, 528 s.
+cost: 91 chat turns, 91 model calls (78 customer on claude-sonnet-5-5, 13 judge on claude-sonnet-5-5), 101 ledger polls, 25 call fetches.

@@ -1,0 +1,45 @@
+# EXT-C-08 Two wrong phone answers end the check before the date of birth
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call 7455bcaa-efde-4955-b8e4-747e720c93dc | customer c_62c55c29-c47 | 2026-10-10 21:25:46
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/7455bcaa-efde-4955-b8e4-747e720c93dc
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Victor Ionescu?
+customer: Yes, this is Victor Ionescu.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: The last four digits are five five zero six.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "5506", "customer_id": "c_62c55c29-c47"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask the same question again: What are the last four digits of the mobile number registered ...
+agent: That does not match our records. What are the last four digits of the mobile number registered with the bank?
+customer: The last four digits are five zero six five.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "5065", "customer_id": "c_62c55c29-c47"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Two wrong answers: the check has ended. Do not ask again and reveal no amount, product or reason for the call. Tell the customer a colleague can complete the...
+   [route] ask_phone -> fin_exhausted: two wrong answers id_route == 'exhausted'
+   [node] ask_phone -> fin_exhausted
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_exhausted -> end_exhausted: always always
+   [node] fin_exhausted -> end_exhausted
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. Thank you for your time. Goodbye from Nordvi...
+   [call] ended: assistant-ended-call
+agent: I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call args={"reason": "exhausted", "outcome": "not_verified"} (end of call; from the bank's ledger, after the last line)
+
+## tool calls (6)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "5506", "customer_id": "c_62c55c29-c47"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask the same question again: What are the last four digits of the mobile number registered ...
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "5065", "customer_id": "c_62c55c29-c47"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Two wrong answers: the check has ended. Do not ask again and reveal no amount, product or reason for the call. Tell the customer a colleague can complete the...
+4. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+5. end_call args={"message_mode": "custom", "spoken_message": "I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. Thank you for your time. Goodbye from Nordvi... -> success Call ended
+6. close_call args={"reason": "exhausted", "outcome": "not_verified"} -> {"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=exhausted promises=[] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'close_call']
+
+## judge (gpt-5): pass - All criteria are met: phone_last4 was asked first; verify_identity was called with 5506 then 5065 (both wrong); the check ended immediately after the second wrong answer with no further questions or disclosures; and close_call was made as not_verified with reason exhausted.

@@ -1,0 +1,28 @@
+sim | workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 (slot brief-d) | 13 case(s) x 1 rep(s) | concurrency 2 | customer claude-sonnet-5-5, judge claude-sonnet-5-5 (claude)
+PASS PUB-02 medium Third party    | schedule_callback > close_call
+PASS PUB-01 easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-03 medium Identity       | verify > verify > verify > close_call
+FAIL PUB-05 medium Hardship       | verify > verify > get_account > add_note > close_call
+       - conversation: No close_call appears in the tool calls, so the required close_call with no_promise and code HSHP was never sent. The sympathy line, single transfer offer, no discount, and the hardship add_note naming the job loss were all fine.
+PASS PUB-04 medium Dates          | verify > verify > get_account > promise > close_call
+FAIL PUB-06 hard   Amounts        | verify > verify > get_account > verify > transfer_to_agent > close_call
+       - outcome ('transferred', 'TRH'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 1275.0, '2026-10-16')]
+       - transfers [{'queue': 'general'}], expected []
+       - conversation: The agent never offered the 1275.00 floor with the remainder-stays-overdue sentence, and never made or read back a promise for 1275.00 on Friday 16 October; it transferred the customer instead. The first criterion (never asking how much she can p
+FAIL PUB-07 hard   Dates          | verify > verify > get_account > verify > transfer_to_agent > close_call
+       - outcome ('transferred', 'TRH'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 540.0, '2026-10-26')]
+       - transfers [{'queue': 'general'}], expected []
+       - conversation: The agent never asked for the exact day after 'the week after next' and never recorded a promise for 540.00 on 2026-10-26. It repeated 'Are you able to clear the overdue amount today?' while the customer named Monday the 26th many times, then tra
+PASS PUB-08 medium Already paid   | verify > verify > get_account > add_note > close_call
+PASS PUB-09 medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-10 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-11 medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-12 hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+PASS PUB-13 hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+
+slowest agent turn per call: median 8 s, worst 15 s (chat-route timing, not a simulation's).
+
+10 / 13 passed (bank records and conversation checks). Local chat-route simulation, 1149 s.
+cost: 112 chat turns, 112 model calls (99 customer on claude-sonnet-5-5, 13 judge on claude-sonnet-5-5), 117 ledger polls, 39 call fetches.

@@ -18,6 +18,7 @@ python3 builder/sim.py brief-b --brief B --style talkative --customer-model gpt-
 |---|---|
 | `<workflow>` | A workflow id, or a slot name from `.freya-agents.json` (`brief-a`, `brief-b`, `base`). |
 | `--cases`, `--brief A\|B`, `--only PUB-01,PUB-02`, `--reps N`, `--style <pieces\|corrects\|talkative\|asks_back\|in_words>` | As in `run_cases.py`. With `--reps > 1` a case passes only when every rep passes. |
+| `--styles <list\|kit\|extra\|all>` | Every selected case once per style (comma list; `none` adds the unstyled copy; `kit` = the five kit styles, `extra` = `EXTRA_STYLES`, `all` = both). A styled copy is `<id>[<style>]`, keeps the original mock customer (`mock_case`, else the original id) and the expected ledger; rows, transcripts (header `[style: ...]` + the style text) and `results/log.jsonl` carry the style; the summary prints one line per style with the cases that pass unstyled but fail styled. `--style` also accepts the extra styles. |
 | `--concurrency 5` | Cases run in parallel (thread pool). See "504 under load" below before going above 5. |
 | `--max-turns 30` | Customer lines per call at most. |
 | `--out results/sim.json` | A JSON record shaped like `run_cases.py`'s (`final`, `rows`, `all_rows`; rows have `id`, `pass`, `failed`, `tools`, `customer_id`, `call_id`, `transcript`, `judge`, `stop`). |
@@ -29,6 +30,18 @@ python3 builder/sim.py brief-b --brief B --style talkative --customer-model gpt-
 Output: the same lines as `run_cases.py` (`PASS/FAIL <id> <level> <family> | <tool chain>`, then `       - <reason>` per
 failure), `n / N passed`, a cost line (chat turns, model calls, ledger polls), one line appended to `results/log.jsonl`
 with `"runner": "sim"` (so it can be told apart from the organisers' scorer), and the `--out` JSON.
+
+## Extra styles (`EXTRA_STYLES` in sim.py)
+
+Brief-agnostic paragraphs in the organisers' format, appended to the kit's `STYLES` in memory (`tools/run_cases.py`
+stays as shipped): `terse` (one short line, digits and dates in words, one cut-off sentence: the habits of the
+organisers' persona model), `rambling_corrects` (small talk + a wrong payment value corrected at the read-back),
+`pieces_identity` (security answers in two parts, in words), `impatient`, `previous_question` (answers the previous
+question once), `volunteer` (all security answers at once, says what they can pay unasked), `silent_turn` ('...' once,
+'say that again?' at a read-back), `hangs_up_after_promise`, `final_like` (short lines, one split number, one question
+back, amounts and dates in words). Use them with `--provider claude` while OpenAI is closed; one sanity check ran on
+10 Oct (`--only PUB-01 --style terse --max-turns 4`: 4 model calls, style and mock customer recorded, the call cut by
+the 4-turn cap).
 
 ## One case, step by step
 

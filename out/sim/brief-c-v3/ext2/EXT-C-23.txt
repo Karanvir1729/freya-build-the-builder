@@ -1,0 +1,38 @@
+# EXT-C-23 Does not want to talk before the security check
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call 1f38df77-9322-4d58-9b73-fb7efdeaa090 | customer c_cf4ab63b-2cd | 2026-10-10 22:27:26
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/1f38df77-9322-4d58-9b73-fb7efdeaa090
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Hannah Schmidt?
+customer: Yes, this is Hannah Schmidt.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: I don't want to talk to you. Goodbye.
+   [route] ask_phone -> fin_withheld: wants to end the call (R46) refusal_phone == 'end_call'
+   [node] ask_phone -> fin_withheld
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_withheld -> end_withheld: always always
+   [node] fin_withheld -> end_withheld
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. The bank cannot discuss anything until the security check is complete. Thank you for your time. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: I understand. The bank cannot discuss anything until the security check is complete. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "withheld", "outcome": "not_verified", "customer_id": "c_cf4ab63b-2cd"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+3. end_call args={"message_mode": "custom", "spoken_message": "I understand. The bank cannot discuss anything until the security check is complete. Thank you for your time. Goodbye from Nordvik Savings Bank."} -> success Call ended
+4. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "withheld", "outcome": "not_verified", "customer_id": "c_cf4ab63b-2cd"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=withheld promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): pass - The agent did not insist or repeat the security question, no account/product/amount info was discussed and get_account was never called, and close_call was made with outcome not_verified and reason withheld.

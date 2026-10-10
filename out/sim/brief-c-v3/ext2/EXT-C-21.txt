@@ -1,0 +1,54 @@
+# EXT-C-21 Asks for a person before the security check
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call 4d6ba628-e63e-43e4-aa69-42f6d3652689 | customer c_7c3fa76c-2c3 | 2026-10-10 22:26:34
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/4d6ba628-e63e-43e4-aa69-42f6d3652689
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Lena Hoffmann?
+customer: Yes, this is Lena Hoffmann.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: I want to speak to a real person, now.
+   [route] ask_phone -> xfer_general: asks for a person (R43) refusal_phone == 'human'
+   [node] ask_phone -> xfer_general
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "general", "customer_id": "c_7c3fa76c-2c3"}
+agent: I will connect you with a colleague now.
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] xfer_general -> fin_agent_request: always always
+   [node] xfer_general -> fin_agent_request
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_agent_request -> end_agent_request: always always
+   [node] fin_agent_request -> end_agent_request
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank."}
+customer: Okay, thank you.
+   [route] xfer_general -> fin_agent_request: always always
+   [node] xfer_general -> fin_agent_request
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_agent_request -> end_agent_request: always always
+   [node] fin_agent_request -> end_agent_request
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "agent_request", "outcome": "transferred", "customer_id": "c_7c3fa76c-2c3"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## tool calls (7)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "general", "customer_id": "c_7c3fa76c-2c3"} -> HTTP 200 data={"ok": true}
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+4. end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank."} -> (no result event)
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+6. end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank."} -> success Call ended
+7. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "agent_request", "outcome": "transferred", "customer_id": "c_7c3fa76c-2c3"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## ledger: outcome=transferred reason=agent_request promises=[] notes=[] callbacks=[] transfers=[{"queue": "general"}] calls=['transfer_to_agent', 'close_call']
+
+## judge (gpt-5): pass - All criteria hold: no help-first or repeated security questions; no verify_identity/get_account or account details; transfer_to_agent used queue general and close_call had outcome transferred with reason agent_request.

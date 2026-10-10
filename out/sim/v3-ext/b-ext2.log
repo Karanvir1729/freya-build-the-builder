@@ -1,0 +1,13 @@
+sim | workflow b030ebb0-ab59-49d7-9352-2414bd10662b (slot brief-b-v3) | 6 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS EXT-B-02 hard   Multi-product  | verify > verify > get_account > promise > add_note > add_note > close_call
+PASS EXT-B-06 hard   Multi-product  | verify > verify > get_account > promise > transfer_to_agent > close_call
+PASS EXT-B-09 hard   Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+FAIL EXT-B-10 medium Notes          | verify > verify > get_account > add_note > close_call
+       - conversation: There were two persuasion attempts: first asking to pay today, then asking to pay on Friday 16 October. The 'refused' note was added and no promise was recorded.
+PASS EXT-B-12 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+PASS EXT-B-14 hard   Calendar       | verify > verify > get_account > promise > promise > close_call
+
+slowest agent turn per call: median 8 s, worst 9 s (chat-route timing, not a simulation's).
+
+5 / 6 passed (bank records and conversation checks). Local chat-route simulation, 288 s.
+cost: 44 chat turns, 44 model calls (38 customer on gpt-5-mini, 6 judge on gpt-5), 44 ledger polls, 12 call fetches.

@@ -208,6 +208,24 @@ def _parse_json_text(text):
     return obj
 
 
+# Linux caps ONE command-line argument at 128 KiB (MAX_ARG_STRLEN) and the SDK passes a string system prompt as
+# --system-prompt <text>: the audit of a policy-as-code workflow (digest + generator, ~200 KB) failed with
+# "Argument list too long". A long system prompt goes through --system-prompt-file instead.
+SYSTEM_PROMPT_ARG_MAX = 100_000
+
+
+def _system_prompt_arg(system_prompt):
+    if not isinstance(system_prompt, str) or len(system_prompt.encode("utf-8")) <= SYSTEM_PROMPT_ARG_MAX:
+        return system_prompt
+    import hashlib, tempfile
+    d = pathlib.Path(tempfile.gettempdir()) / "builder-prompts"
+    d.mkdir(parents=True, exist_ok=True)
+    f = d / ("sp-%s.txt" % hashlib.sha256(system_prompt.encode("utf-8")).hexdigest()[:16])
+    if not f.exists():
+        f.write_text(system_prompt, encoding="utf-8")
+    return {"type": "file", "path": str(f)}
+
+
 async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max_budget_usd=MAX_BUDGET_USD_PER_CALL,
                          log=None, effort=None):
     """One Claude call, no tools, structured JSON out. Returns (obj, info). Retries once on invalid JSON.
@@ -219,13 +237,19 @@ async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max
     log = log or (lambda s: print(s, file=sys.stderr, flush=True))
     info = {"model": model, "cost_usd": 0.0, "seconds": 0.0, "turns": 0, "attempts": 0, "usage": {}}
     last_err = None
+    # the SDK passes the system prompt on the CLI command line: a big one (the audit's generator + digest, ~90 KB)
+    # fails with "[Errno 7] Argument list too long" (seen in the cloud rehearsal). The user message goes through stdin,
+    # so a large context moves there under a <context> tag and the system prompt stays one line.
+    if system_prompt and len(system_prompt) > 12000:
+        prompt = "<context>\n" + system_prompt + "\n</context>\n\n" + prompt
+        system_prompt = "Follow the instructions and context given in the <context> block of the user message exactly."
     for attempt in range(2):
         info["attempts"] = attempt + 1
         t0 = time.time()
         log("model call: %s | purpose: %s%s" % (model, purpose, " (retry after invalid JSON)" if attempt else ""))
         options = ClaudeAgentOptions(
             cwd=str(ROOT), model=model, tools=[], allowed_tools=[], permission_mode="dontAsk", max_turns=4,
-            setting_sources=[], system_prompt=system_prompt, max_budget_usd=max_budget_usd,
+            setting_sources=[], system_prompt=_system_prompt_arg(system_prompt), max_budget_usd=max_budget_usd,
             output_format={"type": "json_schema", "schema": schema}, effort=effort)
         p = prompt if not attempt else (prompt + "\n\nYour previous answer was not valid JSON for the schema (%s). "
                                                  "Answer again with valid JSON only." % last_err)

@@ -1,0 +1,41 @@
+# EXT-C-28 Evening call: tonight, then the Friday holiday -> no_slot
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call c65e88f4-2a4f-454c-8b87-b3559b56cda7 | customer c_a902524f-e13 | 2026-10-10 21:50:46
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/c65e88f4-2a4f-454c-8b87-b3559b56cda7
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Maria Costa?
+customer: No, this is her husband.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> third_party: someone else answered who1 == 'someone_else'
+   [node] setup -> third_party
+agent: I am calling from Nordvik Savings Bank on a private matter that I can discuss with the customer personally. When can Maria Costa be reached?
+customer: She can be reached tonight at seven.
+agent: I can only book callbacks between 09:00 and 18:00. Would tomorrow, Thursday 15 October, or Saturday 17 October work instead?
+customer: Friday morning at ten, then.
+agent: I'm sorry, I can only schedule callbacks for tomorrow, Thursday 15 October, or Saturday 17 October, from 09:00 to 18:00. Would either of those days work?
+customer: That is the only time she has.
+   [node] third_party -> fin_no_slot
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_no_slot -> end_no_slot: always always
+   [node] fin_no_slot -> end_no_slot
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand, I will not book a callback. Thank you for your time. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: I understand, I will not book a callback. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "no_slot", "outcome": "not_reached", "customer_id": "c_a902524f-e13"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+3. end_call args={"message_mode": "custom", "spoken_message": "I understand, I will not book a callback. Thank you for your time. Goodbye from Nordvik Savings Bank."} -> success Call ended
+4. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "no_slot", "outcome": "not_reached", "customer_id": "c_a902524f-e13"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## ledger: outcome=not_reached reason=no_slot promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): pass - After the 19:00 offer, the agent stated 09:00–18:00 and Thursday 15/Saturday 17 and asked for another slot; Friday 16 (a holiday) was not booked; schedule_callback was not called and close_call was sent as not_reached with reason no_slot.

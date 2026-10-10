@@ -1,0 +1,77 @@
+# EXT-C-05 One wrong phone answer, a swapped date (free retry), then verified; already paid
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call 67bb4db1-0e67-4f54-94dc-9f8ab8b4b510 | customer c_8edfab36-0e2 | 2026-10-10 21:23:50
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/67bb4db1-0e67-4f54-94dc-9f8ab8b4b510
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Samuel Ortiz?
+customer: Yes, this is Samuel Ortiz.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: Seven zero three nine.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "7039", "customer_id": "c_8edfab36-0e2"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask the same question again: What are the last four digits of the mobile number registered ...
+agent: That does not match our records. What are the last four digits of the mobile number registered with the bank?
+customer: Seven zero nine three.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "7093", "customer_id": "c_8edfab36-0e2"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Correct. Now ask the second security question: What is your date of birth?"}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: What is your date of birth?
+customer: 12 May 1975.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1975-05-12", "customer_id": "c_8edfab36-0e2"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "hint": "day_month_swapped", "what_to_do_next": "Day and month look swapped. This is NOT a wrong answer. Ask the customer to repeat the date of birth with the month said as a word, for example 14 Marc...
+agent: Day and month look swapped. Could you please repeat your date of birth with the month said as a word, for example 14 March 1988?
+customer: Five December 1975.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1975-12-05", "customer_id": "c_8edfab36-0e2"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 2, "all_verified": true, "what_to_do_next": "Both security questions passed. Identity is verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_8edfab36-0e2"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 540, "days_late": 5, "instalment_amount": 180}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Ortiz. I am calling from the payments team of Nordvik Savings Bank about an overdue amount on your personal loan. The overdue amount is 540, and it is 5 days overdue. Are you able to settle the full overdue amount today?
+customer: I already paid it in the banking app this morning.
+   [route] negotiate -> pol_paid: topic already_paid topic == 'already_paid'
+   [node] negotiate -> pol_paid
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] pol_paid -> fin_paid: the call ends with paid (route == 'fin' AND final_route == 'paid')
+   [node] pol_paid -> fin_paid
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_paid -> end_paid: always always
+   [node] fin_paid -> end_paid
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you for letting me know. The bank will check for the payment within two business days and will not call you again before then. Thank you for your time, Mr Ortiz. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: Thank you for letting me know. The bank will check for the payment within two business days and will not call you again before then. Thank you for your time, Mr Ortiz. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "self_reported", "outcome": "paid", "customer_id": "c_8edfab36-0e2"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: "}
+
+## tool calls (11)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "7039", "customer_id": "c_8edfab36-0e2"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask the same question again: What are the last four digits of the mobile number registered ...
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "7093", "customer_id": "c_8edfab36-0e2"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Correct. Now ask the second security question: What is your date of birth?"}
+4. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1975-05-12", "customer_id": "c_8edfab36-0e2"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "hint": "day_month_swapped", "what_to_do_next": "Day and month look swapped. This is NOT a wrong answer. Ask the customer to repeat the date of birth with the month said as a word, for example 14 Marc...
+5. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1975-12-05", "customer_id": "c_8edfab36-0e2"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 2, "all_verified": true, "what_to_do_next": "Both security questions passed. Identity is verified."}
+6. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_8edfab36-0e2"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 540, "days_late": 5, "instalment_amount": 180}]}
+7. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M... -> HTTP 200 data=null
+8. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M... -> HTTP 200 data=null
+9. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+10. end_call args={"message_mode": "custom", "spoken_message": "Thank you for letting me know. The bank will check for the payment within two business days and will not call you again before then. Thank you for your time, Mr Ortiz. Goodbye from Nordvik Savings Bank."} -> success Call ended
+11. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "self_reported", "outcome": "paid", "customer_id": "c_8edfab36-0e2"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: "}
+
+## ledger: outcome=paid reason=self_reported promises=[] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'verify_identity', 'verify_identity', 'get_account', 'close_call']
+
+## judge (gpt-5): pass - All criteria are satisfied: phone_last4 was asked first with one retry (7039 wrong, 7093 correct), the day_month_swapped hint led to a re-ask with month as a word, get_account was called only after verification, the agent stated personal loan with 540 and 5 days overdue, gave the two-business-days/no further calls message without asking for a promise, and close_call was made with outcome paid and reason self_reported.

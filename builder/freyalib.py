@@ -1010,20 +1010,47 @@ PERSONA_CONDUCT = (
     "or say amounts and dates in words. The facts stay the same.\n"
     "- Keep to the business of the call. Do not comment on small talk (a busy day, the traffic, a family event) and do not "
     "sympathise with it: sympathy is only for what the rules name.\n"
-    "- A message with no answer in it (small talk, a cut-off sentence, 'hmm') is NOT a refusal and NOT a request: repeat the "
-    "same question in one short sentence.\n"
+    "- A message with no answer in it (small talk, a cut-off sentence, 'hmm') is NOT a refusal and NOT a request. If it "
+    "stops mid-sentence AND contains no answer, say only: 'Sorry, I think you were cut off. Please go on.' If it contains "
+    "an answer (a date, digits, an amount, a day) and then trails off, USE the answer: call the tool as usual; never ask them "
+    "to go on instead of processing an answer they gave. Otherwise ask for the answer in one short sentence; at a security "
+    "question repeat the question, at a payment proposal do not repeat the amount or the date word for word (an offer is made once).\n"
     "- A question back (why do you need that, which account, who is this) gets one short answer, then the same question again, "
-    "unless the rules say such a question counts. Only what the rules name counts as a refusal.\n"
+    "unless the rules say such a question counts. When the message contains the answer AND a question, use the answer (call the "
+    "tool) and answer the question in the same turn. Only what the rules name counts as a refusal.\n"
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
     "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
     "the rules give you.")
+# appended by builder/policy.py to every enum on the payment nodes (topic, stance, offer_kind, confirm, hs_answer, wrap,
+# aside): a persona's cut-off line ("I've been so stressed because my cousin's") was labelled hardship on Freya, and a
+# string of cut-off small-talk lines became refusals (talkative style, 10 Oct)
+CUTOFF_CLAUSE = (" A cut-off message (it stops mid-sentence, e.g. on 'my', 'the', 'because', 'at') or small talk with no "
+                 "answer in it gets the neutral value, even when it contains words like stressed, busy, tired, family, "
+                 "wedding or work: judge only what the customer actually said, never where the sentence might be going. "
+                 "A message that gives the answer and THEN trails off still counts as that answer.")
+
+
+def with_cutoff(entries, neutral=("none", "other")):
+    """Copies of extraction entries with CUTOFF_CLAUSE appended to every enum entry that has a neutral value
+    (none/other) and does not carry the clause yet. Non-enum entries are returned unchanged."""
+    out = []
+    for e in entries or []:
+        e = dict(e)
+        vals = e.get("enum_values") or []
+        if vals and any(v in neutral for v in vals) and CUTOFF_CLAUSE not in str(e.get("description") or ""):
+            e["description"] = str(e.get("description") or "") + CUTOFF_CLAUSE
+        out.append(e)
+    return out
+
+
 # append to every refusal / decline enum description (the brief's own list of what counts goes first)
 REFUSAL_NONE_CLAUSE = (" Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back "
                        "that the rules do not count is none, never refused: only what the rules name counts.")
 # the `question` value of a refusal/decline enum (a question back is not a refusal until it replaces the answer twice)
-QUESTION_ENUM_CLAUSE = (" question = asks something back instead of answering (why do you need that, which account or what this is "
-                        "about, who is calling) without refusing; refused is only an explicit refusal or not wanting to talk.")
+QUESTION_ENUM_CLAUSE = (" question = asks something back INSTEAD of answering (why do you need that, which account or what this is "
+                        "about, who is calling) with NO answer in the message; a message that contains the answer and also a question is none "
+                        "(the answer is processed and the question answered in the same turn); refused is only an explicit refusal or not wanting to talk.")
 
 
 def reset_pre(names):
@@ -1036,7 +1063,9 @@ def question_back_node(stage, ask_node, close_node, limit=2, flag=None):
     question is asked again (always -> ask_node); the `limit`-th question in a row with no answer in between is a
     deflection and routes to close_node (the brief's "asked instead of answering" close). Measured on the organisers'
     simulator: counting every question back as a refusal closed 4 of 10 calls as declined under the kit's asks_back
-    style, whose customer asks twice and then answers. Reset the counter with reset_pre on the identity tool."""
+    style, whose customer asks twice and then answers. Reset the counter with reset_pre on the identity tool.
+    The ask node's model answers the question; when the brief counts a question back as declining, its prompt must also
+    give the brief's decline explanation for a question back (this path never reaches the refusal path's explanation)."""
     flag = flag or "refusal_%s" % stage
     code = counter_code("question_count_%s" % stage, limit, "qb_route", reset={flag: "none"})
     return code_node("qb_%s" % stage, code, [eq("qb_route", "close", close_node, "a second question back instead of an answer"),
@@ -1365,7 +1394,9 @@ _NORM_SRC = r'''def _nz_main(config, vars):
         y = year_of(ys, past)
         if y is None:
             return None
-        day, month = (a, b) if ORDER == 'dmy' else (b, a)
+        if ORDER == 'none' and a != b and mkdate(y, b, a) and mkdate(y, a, b):
+            return None   # the brief asks for the month as a word: an ambiguous numbers-only date is left as said
+        day, month = (a, b) if ORDER != 'mdy' else (b, a)
         d = mkdate(y, month, day)
         if d is None:
             d = mkdate(y, day, month)
@@ -1582,7 +1613,9 @@ def normalise_pre(fields, date_order="dmy", now_var="now", relative_var=None, pm
       answer  identity answer: dob when the body's `field` names a date/birth, digits when it names anything
               else, otherwise a date if it reads as one, else digits.
     `date_order` ('dmy' or 'mdy') reads numbers-only dates ("14/03/1988"); it must come from the brief. A reading
-    that is impossible in that order but valid swapped (month > 12) is swapped.
+    that is impossible in that order but valid swapped (month > 12) is swapped. 'none' = the brief fixes no order
+    (e.g. it says to ask for the month as a word): a numbers-only date valid in both orders is left as said (the
+    service rejects it unread, which does not count as a wrong answer); an unambiguous one is still converted.
     `now_var`: the call variable holding today's date (ISO), for two-digit years and year-less dates.
     `relative_var`: name of a variable holding a {phrase: 'YYYY-MM-DD'} table (dict or JSON string) the
     generator computed in code (see relative_days_code); "tomorrow", "next friday" are resolved ONLY through it.
@@ -1595,8 +1628,8 @@ def normalise_pre(fields, date_order="dmy", now_var="now", relative_var=None, pm
     for f, k in fm.items():
         if k not in NORMALISE_KINDS:
             raise ValueError("normalise_pre: field %r has unknown kind %r (use one of %s)" % (f, k, ", ".join(NORMALISE_KINDS)))
-    if date_order not in ("dmy", "mdy"):
-        raise ValueError("normalise_pre: date_order must be 'dmy' or 'mdy'")
+    if date_order not in ("dmy", "mdy", "none"):
+        raise ValueError("normalise_pre: date_order must be 'dmy', 'mdy' or 'none'")
     code = (_NORM_SRC.replace("__FIELDS__", repr(fm)).replace("__ORDER__", repr(date_order))
             .replace("__NOW_VAR__", repr(now_var)).replace("__REL_VAR__", repr(relative_var or ""))
             .replace("__PM_HOURS__", repr(tuple(int(h) for h in pm_hours))))
@@ -1648,3 +1681,86 @@ def digit_extraction(name, n_digits, description, conf=0.5, max_retries=2):
     return {"name": name, "type": "string", "description": description,
             "validation_pattern": "^[0-9]{%d}$" % int(n_digits), "max_retries": int(max_retries),
             "min_confidence": conf}
+
+
+# ----------------------------------------------------------------------------------------------- gated identity (opt-in)
+_NUM_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9,
+              "ten": 10, "eleven": 11, "twelve": 12}
+
+
+def digits_from_spec(api, field_value, tool="verify_identity", answer_field="answer"):
+    """N for a digits security question, read from the API file: the identity tool's answer description, e.g.
+    "For phone_last4: four digits." -> 4 (the sentence that names `field_value` first, then the field name itself,
+    e.g. 'last4'). None when the file gives no count (the generator then passes n_digits from the brief)."""
+    fs = tool_spec(api, tool)["fields"].get(answer_field) or {}
+    desc = str(fs.get("description") or "")
+    num = r"(\d+|%s)[\s-]+digits?" % "|".join(_NUM_WORDS)
+    sentences = re.split(r"(?<=[.;])\s+", desc)
+    for s in [x for x in sentences if field_value in x] + [field_value]:
+        m = re.search(num, s, re.I)
+        if m:
+            w = m.group(1).lower()
+            return int(w) if w.isdigit() else _NUM_WORDS[w]
+    return None
+
+
+def gated_digits_identity(api, stage, field_value, n_digits, ask_task, answer_desc, on_verified, on_all_verified,
+                          on_exhausted, wrong_line, unreadable_line, extraction=None, transitions=None,
+                          tool_post="", extra_routes=None, stop_left=("0",), tool="verify_identity",
+                          field_name="field", answer_field="answer", on_enter=None):
+    """OPT-IN identity question whose answer reaches the identity tool only when all N digits are in (the default
+    form is a conversation node that holds verify_identity as a model-called tool, prompt-driven). Returns a dict of
+    nodes to merge into the workflow:
+
+      ask_<stage>        conversation, extraction `<stage>_digits` (validation_pattern ^[0-9]{N}$), NO tools.
+                         Route: <stage>_digits is set and is not the sentinel -> check_<stage>. Half a number
+                         ('44'), words the extractor cannot turn into N digits, or a cut-off line never validate,
+                         so nothing is sent and the model asks for the rest (say so in `ask_task`).
+      ask_<stage>_wrong  the same node, entered after a wrong answer: on_enter tts `wrong_line` (fixed text).
+      ask_<stage>_unread the same node, entered after an answer the service could not read: tts `unreadable_line`.
+      check_<stage>      api_request: verify_identity with field baked = field_value and answer baked =
+                         {{<stage>_digits}}; node-level mapping of ok / verified / all_verified /
+                         wrong_answers_left to <stage>_ok, <stage>_verified, <stage>_all, <stage>_left.
+      route_<stage>      code: writes the sentinel ('0' * N, schema-valid for the pattern: a cleared value must be
+                         valid or the code node fails) so the same answer is not sent twice, then routes in order:
+                         `extra_routes` (e.g. the brief's own counter written by `tool_post`), all_verified ->
+                         on_all_verified, verified -> on_verified, wrong_answers_left in `stop_left` -> on_exhausted,
+                         ok false -> ask_<stage>_unread, else -> ask_<stage>_wrong.
+
+    `extraction` / `transitions`: the brief's other extraction entries and routes (refusal, question back, transfer)
+    added to all three ask nodes AFTER the gate route. Every text (ask_task, answer_desc, wrong_line,
+    unreadable_line) comes from the brief. Known corner: a customer whose real answer is the sentinel ('0000') is
+    never sent; use the default form for such a brief.
+    """
+    n = int(n_digits)
+    var, sentinel = "%s_digits" % stage, "0" * n
+    ask, check, route = "ask_%s" % stage, "check_%s" % stage, "route_%s" % stage
+    ext_entry = digit_extraction(var, n, answer_desc + " Only when ALL %d digits are in the customer's messages "
+                                 "(join parts given in two turns, write digits said in words as digits; if they "
+                                 "correct themselves, the LAST value). Leave it empty for fewer digits." % n)
+    gate = tr(check, "all %d digits given" % n, and_group(cond(var, "is_set"), cond(var, "not_equals", sentinel)))
+    extraction = [ext_entry] + list(extraction or [])
+    routes = [gate] + list(transitions or [])
+    task = ask_task + ("\nYou do not call a tool for this answer: it is checked automatically once all %d digits are "
+                       "given. If the customer gives only part, or the line is cut off, ask for the rest and wait." % n)
+    nodes = {}
+    for name, enter in ((ask, on_enter), ("%s_wrong" % ask, {"type": "tts", "text": wrong_line}),
+                        ("%s_unread" % ask, {"type": "tts", "text": unreadable_line})):
+        nodes[name] = conv(name, task, on_enter=enter, extraction=json.loads(json.dumps(extraction)),
+                           transitions=json.loads(json.dumps(routes)))
+    t = api_tool(api, tool, baked={field_name: field_value, answer_field: "{{%s}}" % var},
+                 description="Check the %s answer." % stage, post=tool_post)
+    mapping = [{"path": "data.ok", "variable": "%s_ok" % stage}, {"path": "data.verified", "variable": "%s_verified" % stage},
+               {"path": "data.all_verified", "variable": "%s_all" % stage},
+               {"path": "data.wrong_answers_left", "variable": "%s_left" % stage}]
+    nodes[check] = api_node(check, t, [always(route)], mapping=mapping)
+    stop = [cond("%s_left" % stage, "equals", str(v)) for v in stop_left]
+    code = "try:\n    vars[%r] = %r\nexcept Exception:\n    pass\n" % (var, sentinel)
+    nodes[route] = code_node(route, code, list(extra_routes or []) + [
+        is_true("%s_all" % stage, on_all_verified, "identity verified"),
+        is_true("%s_verified" % stage, on_verified, "answer correct"),
+        tr(on_exhausted, "no wrong answers left", *stop),
+        tr("%s_unread" % ask, "the service could not read the answer",
+           cond("%s_ok" % stage, "equals", "false"), cond("%s_ok" % stage, "equals", "False")),
+        always("%s_wrong" % ask)])
+    return nodes

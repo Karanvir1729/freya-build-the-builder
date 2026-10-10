@@ -1,0 +1,106 @@
+# EXT-B-05 Lost his job, declines support
+# workflow b030ebb0-ab59-49d7-9352-2414bd10662b | call 5b8bfa68-7bd1-4272-a449-5d5e4eb7dcdd | customer c_863ed80b-0d1 | 2026-10-10 21:47:48
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/5b8bfa68-7bd1-4272-a449-5d5e4eb7dcdd
+# RESULT: PASS
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Mr Bell?
+customer: Yes, this is Marcus Bell.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_dob: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_dob
+agent: Thank you, Mr Bell. For security, could you please tell me your date of birth?
+customer: My date of birth is 19 October 1983.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1983-10-19", "customer_id": "c_863ed80b-0d1"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Ask the next security question."}
+   [route] ask_dob -> ask_phone: date of birth correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_dob -> ask_phone
+agent: That is correct. What are the last four digits of the phone number we have on file for you, Mr Bell?
+customer: The last four digits are 4410.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "4410", "customer_id": "c_863ed80b-0d1"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_phone -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_phone -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_863ed80b-0d1"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "9015", "past_due": 510, "days_late": 16, "minimum_payment": 153}, {"product_id": "p2", "type": "personal_loan", "past_due": 1320, "days_late": 16, "instalment_amount": 440}...
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Bell. I am calling from the collections team about late payments on 3 of your products. Your credit card ending 9015 has 510 past due, 16 days late. Your personal loan has 1320 past due, 16 days late. Your car loan has 140 past due, 7 days late. Can you pay all of them today?
+customer: I lost my job last month and I can't pay anything on any of them. Please do not transfer me.
+   [route] negotiate -> pol_hardship: topic hardship topic == 'hardship'
+   [node] negotiate -> pol_hardship
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] pol_hardship -> hardship: policy route hardship route == 'hardship'
+   [node] pol_hardship -> hardship
+agent: I am sorry to hear that. Would you like me to connect you with our customer support team?
+customer: No, thank you. I do not want to be transferred.
+   [route] hardship -> hs_decline: the customer declines the support team hs_answer == 'support_no'
+   [node] hardship -> hs_decline
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] hs_decline -> record_note: policy route note route == 'note'
+   [node] hs_decline -> record_note
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"reason": "hardship", "product_id": "p1", "customer_id": "c_863ed80b-0d1"}
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] record_note -> note_after: always always
+   [node] record_note -> note_after
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] note_after -> record_note: policy route note route == 'note'
+   [node] note_after -> record_note
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"reason": "hardship", "product_id": "p2", "customer_id": "c_863ed80b-0d1"}
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] record_note -> note_after: always always
+   [node] record_note -> note_after
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] note_after -> record_note: policy route note route == 'note'
+   [node] note_after -> record_note
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"reason": "hardship", "product_id": "p3", "customer_id": "c_863ed80b-0d1"}
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] record_note -> note_after: always always
+   [node] record_note -> note_after
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] note_after -> fin_hardship: the call ends with hardship (route == 'fin' AND final_route == 'hardship')
+   [node] note_after -> fin_hardship
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'no_promise'\n vars['reason'] = 'hardship'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_hardship -> end_hardship: always always
+   [node] fin_hardship -> end_hardship
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. I have not recorded a promise today. Thank you for your time, Mr Bell, and take care. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: I understand. I have not recorded a promise today. Thank you for your time, Mr Bell, and take care. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "hardship", "outcome": "no_promise", "customer_id": "c_863ed80b-0d1"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (16)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1983-10-19", "customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Ask the next security question."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "4410", "customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "9015", "past_due": 510, "days_late": 16, "minimum_payment": 153}, {"product_id": "p2", "type": "personal_loan", "past_due": 1320, "days_late": 16, "instalment_amount": 440}...
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+6. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+7. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+8. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"reason": "hardship", "product_id": "p1", "customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true}
+9. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+10. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"reason": "hardship", "product_id": "p2", "customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true}
+11. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+12. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"reason": "hardship", "product_id": "p3", "customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true}
+13. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+14. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'no_promise'\n vars['reason'] = 'hardship'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+15. end_call args={"message_mode": "custom", "spoken_message": "I understand. I have not recorded a promise today. Thank you for your time, Mr Bell, and take care. Goodbye."} -> success Call ended
+16. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "hardship", "outcome": "no_promise", "customer_id": "c_863ed80b-0d1"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=no_promise reason=hardship promises=[] notes=[{"product_id": "p1", "reason": "hardship", "text": ""}, {"product_id": "p2", "reason": "hardship", "text": ""}, {"product_id": "p3", "reason": "hardship", "text": ""}] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'get_account', 'add_note', 'add_note', 'add_note', 'close_call']
+
+## judge (gpt-5): pass - Agent gave one brief sympathy sentence, made no product persuasion, offered support once, and recorded one hardship add_note for each product (p1, p2, p3).

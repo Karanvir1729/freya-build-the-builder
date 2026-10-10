@@ -1,0 +1,754 @@
+{
+ "case": "EXT-D-16",
+ "rep": 1,
+ "workflow_id": "de5f944a-d43d-4a7e-80fc-405ee4c53649",
+ "call_id": "e3430fce-46ad-40f0-a914-b9591db088dc",
+ "customer_id": "c_d35b177e-f0e",
+ "variables": {
+  "customer_id": "c_d35b177e-f0e",
+  "first_name": "Marcus",
+  "last_name": "Bell",
+  "title": "Mr",
+  "now": "2026-10-14T11:00"
+ },
+ "turns": [
+  {
+   "n": 1,
+   "customer": "Hello?",
+   "agent": "This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Marcus Bell?",
+   "status": 200,
+   "seconds": 17.5,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_4_1791667615366"
+  },
+  {
+   "n": 2,
+   "customer": "Yes, this is Marcus Bell.",
+   "agent": "Thank you, Mr Bell. For security, could you please tell me the last four digits of your phone number?",
+   "status": 200,
+   "seconds": 7.0,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_10_1791667631520"
+  },
+  {
+   "n": 3,
+   "customer": "4410.",
+   "agent": "Thank you. Could you please tell me your date of birth?",
+   "status": 200,
+   "seconds": 16.1,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_9_1791667644096"
+  },
+  {
+   "n": 4,
+   "customer": "19 October 1983.",
+   "agent": "Thank you, Mr Bell. I am calling from the arrears team about overdue payments on 3 of your products. Your credit card ending 9015 has an overdue amount of 510, 16 days overdue. Your personal loan has an overdue amount of 1320, 16 days overdue. Your car loan has an overdue amount of 140, 7 days overdue. Are you able to clear all of these today?",
+   "status": 200,
+   "seconds": 12.8,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_17_1791667666816"
+  },
+  {
+   "n": 5,
+   "customer": "No.",
+   "agent": "I understand. For your credit card ending 9015, can you pay 510 on Thursday 15 October?",
+   "status": 200,
+   "seconds": 18.5,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_5_1791667685023"
+  },
+  {
+   "n": 6,
+   "customer": "No.",
+   "agent": "For your credit card ending 9015, can you pay 306 on Wednesday 21 October?",
+   "status": 200,
+   "seconds": 5.7,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_5_1791667699411"
+  },
+  {
+   "n": 7,
+   "customer": "No.",
+   "agent": "I understand. For your personal loan, can you pay 1320 on Thursday 15 October?",
+   "status": 200,
+   "seconds": 19.9,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_5_1791667717508"
+  },
+  {
+   "n": 8,
+   "customer": "No.",
+   "agent": "For your personal loan, can you pay 440 on Wednesday 21 October?",
+   "status": 200,
+   "seconds": 2.5,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_5_1791667729394"
+  },
+  {
+   "n": 9,
+   "customer": "No.",
+   "agent": "For your car loan, can you pay 140 on Thursday 15 October?",
+   "status": 200,
+   "seconds": 10.9,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_5_1791667738112"
+  },
+  {
+   "n": 10,
+   "customer": "No.",
+   "agent": "",
+   "status": 504,
+   "seconds": 126.9,
+   "error": "HTTP 504: error code: 504 | reply NOT found in the call log after 67 s",
+   "ended_by_agent": false
+  },
+  {
+   "n": 11,
+   "customer": "No.",
+   "agent": "I understand. Thank you for your time, Mr Bell. Goodbye.",
+   "status": 502,
+   "seconds": 11.6,
+   "error": "HTTP 502: error code: 502 | reply recovered from the call log after 7 s; the agent ended the call",
+   "ended_by_agent": true
+  }
+ ],
+ "end": {
+  "callId": "e3430fce-46ad-40f0-a914-b9591db088dc",
+  "ended": true,
+  "endedReason": "assistant-ended-call",
+  "alreadyEnded": true
+ },
+ "transcript": [
+  "customer: Hello?",
+  "agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Marcus Bell?",
+  "customer: Yes, this is Marcus Bell.",
+  "   [route] opening -> setup: always always",
+  "   [node] opening -> setup",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"import datetime, json, re\\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\\nBWD = set([0, 1, 2, 3, 4])\\nWDRULE = 'this_week'\\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'",
+  "   [node] setup -> ask_phone",
+  "agent: Thank you, Mr Bell. For security, could you please tell me the last four digits of your phone number?",
+  "customer: 4410.",
+  "   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={\"field\": \"phone_last4\", \"answer\": \"4410\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] verify_identity -> HTTP 200 data={\"ok\": true, \"verified\": true, \"wrong_answers_left\": 3, \"all_verified\": false, \"what_to_do_next\": \"Correct. Now ask for the date of birth.\"}",
+  "   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')",
+  "   [node] ask_phone -> ask_dob",
+  "agent: Thank you. Could you please tell me your date of birth?",
+  "customer: 19 October 1983.",
+  "   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={\"field\": \"date_of_birth\", \"answer\": \"1983-10-19\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] verify_identity -> HTTP 200 data={\"ok\": true, \"verified\": true, \"wrong_answers_left\": 3, \"all_verified\": true, \"what_to_do_next\": \"Both answers are correct. Identity verified.\"}",
+  "   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')",
+  "   [node] ask_dob -> load_account",
+  "   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={\"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] api_call -> HTTP 200 data={\"ok\": true, \"products\": [{\"product_id\": \"p1\", \"type\": \"credit_card\", \"card_last4\": \"9015\", \"past_due\": 510, \"days_late\": 16, \"minimum_payment\": 153}, {\"product_id\": \"p2\", \"type\": \"personal_loan\", \"past_due\": 1320, \"days_late\": 16, \"instalment_amount\": 440}...",
+  "   [route] load_account -> prepare: always always",
+  "   [node] load_account -> prepare",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"try:\\n import datetime, json, re\\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\\n BWD = set([0, 1, 2, 3, 4])\\n WDRULE = 'this_week'\\n WD = ['Monday', 'Tuesday', 'Wednesday', '...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] prepare -> negotiate: always always",
+  "   [node] prepare -> negotiate",
+  "agent: Thank you, Mr Bell. I am calling from the arrears team about overdue payments on 3 of your products. Your credit card ending 9015 has an overdue amount of 510, 16 days overdue. Your personal loan has an overdue amount of 1320, 16 days overdue. Your car loan has an overdue amount of 140, 7 days overdue. Are you able to clear all of these today?",
+  "customer: No.",
+  "agent: I understand. For your credit card ending 9015, can you pay 510 on Thursday 15 October?",
+  "customer: No.",
+  "agent: For your credit card ending 9015, can you pay 306 on Wednesday 21 October?",
+  "customer: No.",
+  "agent: I understand. For your personal loan, can you pay 1320 on Thursday 15 October?",
+  "customer: No.",
+  "agent: For your personal loan, can you pay 440 on Wednesday 21 October?",
+  "customer: No.",
+  "agent: For your car loan, can you pay 140 on Thursday 15 October?",
+  "customer: No.",
+  "   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={\"text\": \"1 attempts; last offer 140 on 2026-10-15\", \"reason\": \"refused\", \"product_id\": \"p3\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={\"text\": \"2 attempts; last offer 440 on 2026-10-21\", \"reason\": \"refused\", \"product_id\": \"p2\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={\"text\": \"2 attempts; last offer 306 on 2026-10-21\", \"reason\": \"refused\", \"product_id\": \"p1\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] add_note -> HTTP 200 data={\"ok\": true, \"what_to_do_next\": \"Note saved. Recorded promises: none. Notes: p2:refused. Still open: p1, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right rea...",
+  "   [tool] add_note -> HTTP 200 data={\"ok\": true, \"what_to_do_next\": \"Note saved. Recorded promises: none. Notes: p2:refused. Still open: p1, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right rea...",
+  "   [tool] add_note -> HTTP 200 data={\"ok\": true, \"what_to_do_next\": \"Note saved. Recorded promises: none. Notes: p1:refused. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right rea...",
+  "   [error] The model returned no speakable content {\"source\": \"llm\", \"response_id\": \"chatcmpl-b3147d52ff433ffd\", \"model\": \"experimental-5\", \"finish_reason\": \"stop\", \"reasoning_chars\": 0, \"truncated_by\": null,...",
+  "   [error] The model returned no speakable content {\"source\": \"llm\", \"response_id\": \"chatcmpl-95631c25f571d538\", \"model\": \"experimental-5\", \"finish_reason\": \"stop\", \"reasoning_chars\": 0, \"truncated_by\": null,...",
+  "customer: No.",
+  "   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={\"text\": \"2 attempts; last offer 440 on 2026-10-21\", \"reason\": \"refused\", \"product_id\": \"p2\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={\"text\": \"2 attempts; last offer 306 on 2026-10-21\", \"reason\": \"refused\", \"product_id\": \"p1\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={\"text\": \"1 attempt; last offer 140 on 2026-10-15\", \"reason\": \"refused\", \"product_id\": \"p3\", \"customer_id\": \"c_d35b177e-f0e\"}",
+  "   [tool] add_note -> HTTP 200 data={\"ok\": true, \"what_to_do_next\": \"Note saved. Recorded promises: none. Notes: p1:refused. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right rea...",
+  "   [tool] add_note -> HTTP 200 data={\"ok\": true, \"what_to_do_next\": \"Note saved. Recorded promises: none. Notes: p1:refused. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right rea...",
+  "   [tool] add_note -> HTTP 200 data={\"ok\": true, \"what_to_do_next\": \"Note saved. Recorded promises: none. Notes: p3:refused. Still open: p1, p2. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right rea...",
+  "   [node] negotiate -> finalize",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"\\ntry:\\n rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\\n notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\\n pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\\n nd = di...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] finalize -> fin_refused: always always",
+  "   [node] finalize -> fin_refused",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"try:\\n vars['close_outcome'] = 'no_promise'\\n vars['close_code'] = 'RF'\\nexcept Exception:\\n pass\\n\"}",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] fin_refused -> end_refused: always always",
+  "   [node] fin_refused -> end_refused",
+  "   [tool] end_call args={\"message_mode\": \"custom\", \"spoken_message\": \"I understand. Thank you for your time, Mr Bell. Goodbye.\"}",
+  "   [call] ended: assistant-ended-call",
+  "agent: I understand. Thank you for your time, Mr Bell. Goodbye.",
+  "   [tool] end_call -> success Call ended",
+  "   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={\"reason\": \"RF\", \"outcome\": \"no_promise\", \"customer_id\": \"c_d35b177e-f0e\"}"
+ ],
+ "tool_calls": [
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']\nMO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']\ndef isbd(d):\n    return d.weekday() in BWD and d.isoformat() not in HOL\ndef txt(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)\ndef txt_short(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1]\ndef addbd(d, n):\n    c = 0\n    guard = 0\n    while c < n and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n        if isbd(d):\n            c += 1\n    return d\ndef next_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef prev_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d - datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef lastbd_of_week(monday):\n    for k in range(6, -1, -1):\n        d = monday + datetime.timedelta(days=k)\n        if isbd(d):\n            return d\n    return None\ndef weekday_table(today):\n    monday = today - datetime.timedelta(days=today.weekday())\n    tab = []\n    for i in range(7):\n        a = monday + datetime.timedelta(days=i)\n        b = a + datetime.timedelta(days=7)\n        t1 = '\"this ' + WD[i] + '\" = ' + txt(a) + (' (already past)' if a < today else '')\n        tab.append(t1 + '; \"next ' + WD[i] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\ndef weekday_table_first_after(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"this ' + WD[a.weekday()] + '\" = \"next ' + WD[a.weekday()] + '\" = ' + txt(a))\n    return '\\n'.join(tab)\nif WDRULE == 'first_after':\n    weekday_table = weekday_table_first_after\ndef calendar_text(today, deadline, extra_days=10):\n    cal = []\n    d = today\n    while d <= deadline + datetime.timedelta(days=extra_days):\n        if d > deadline:\n            tag = 'AFTER THE DEADLINE, not allowed'\n        elif isbd(d):\n            tag = 'allowed'\n        elif d.weekday() not in BWD:\n            tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'\n        else:\n            tag = 'bank holiday, not allowed'\n        nb = next_bd(d)\n        extra = ''\n        if tag.startswith('not a business day') or tag.startswith('bank'):\n            extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')\n        cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)\n        d = d + datetime.timedelta(days=1)\n    return '\\n'.join(cal)\ndef fmt(x):\n    try:\n        x = float(x)\n    except Exception:\n        return str(x)\n    s = '%.2f' % x\n    return s[:-3] if s.endswith('.00') else s\ntry:\n    raw = str(vars.get('now') or '').strip()\n    try:\n        nowdt = datetime.datetime.fromisoformat(raw[:16])\n    except Exception:\n        nowdt = datetime.datetime.fromisoformat(raw[:10] + 'T09:00')\n    today = nowdt.date()\n    vars['today_iso'] = today.isoformat()\n    vars['today_text'] = txt(today)\n    vars['now_time'] = nowdt.strftime('%H:%M')\n    vars['weekday_table'] = weekday_table(today)\n    lines = []\n    cur = nowdt.strftime('%H:%M')\n    if cur < '18:00':\n        start = '09:00' if cur < '09:00' else 'after ' + cur\n        lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to 18:00.')\n    nbd = today\n    for _i in range(2):\n        nbd = addbd(nbd, 1)\n        lines.append(txt(nbd) + ' (' + nbd.isoformat() + '), from 09:00 up to 18:00 included.')\n    tom = today + datetime.timedelta(days=1)\n    extra = 'Tomorrow is ' + txt(tom) + '.'\n    if not isbd(tom):\n        extra += ' Tomorrow is NOT allowed, it is not a business day.'\n    vars['callback_text'] = 'The ONLY allowed callback times are:\\n- ' + '\\n- '.join(lines) + '\\n' + extra + ' Any other day or time is outside the window.'\n    vars['close_outcome'] = 'not_reached'\n    vars['close_code'] = 'UNC'\n    vars['attempt1_date'] = addbd(today, 1).isoformat()\n    vars['f_deadline'] = prev_bd(today + datetime.timedelta(days=21)).isoformat()\n    vars['s_deadline'] = addbd(today, 5).isoformat()\n    monday = today - datetime.timedelta(days=today.weekday())\n    vg = lastbd_of_week(monday)\n    if vg is None or vg <= today:\n        vg = addbd(today, 1)\n    vars['vague_iso'] = vg.isoformat()\n    vars['vague_text'] = txt_short(vg)\n    tab = []\n    for i in range(7):\n        k = (i - today.weekday()) % 7\n        this_d = today + datetime.timedelta(days=k)\n        next_d = today + datetime.timedelta(days=(k if k > 0 else 7))\n        tab.append('\"' + WD[i] + '\" or \"this ' + WD[i] + '\" = ' + txt(this_d) + ' (' + this_d.isoformat() + '); \"next ' + WD[i] + '\" = ' + txt(next_d) + ' (' + next_d.isoformat() + ')')\n    vars['weekday_table'] = '\\n'.join(tab)\n    vars['setup_state'] = 'ok'\nexcept Exception as e:\n    vars['setup_state'] = 'error ' + str(e)\n    vars.setdefault('callback_text', 'Callbacks: today later than now up to 18:00, or the next business day from 09:00 to 18:00.')\n    vars.setdefault('close_outcome', 'not_reached')\n    vars.setdefault('close_code', 'UNC')\n    vars.setdefault('attempt1_date', '')\n    vars.setdefault('f_deadline', '')\n    vars.setdefault('s_deadline', '')\n    vars.setdefault('vague_iso', '')\n    vars.setdefault('vague_text', '')\n    vars.setdefault('today_text', str(vars.get('now')))\n    vars.setdefault('today_iso', str(vars.get('now'))[:10])\n    vars.setdefault('now_time', '')\n    vars.setdefault('weekday_table', '')\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "verify_identity",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "field": "phone_last4",
+     "answer": "4410",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "verified": true,
+     "wrong_answers_left": 3,
+     "all_verified": false,
+     "what_to_do_next": "Correct. Now ask for the date of birth."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "verify_identity",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "field": "date_of_birth",
+     "answer": "1983-10-19",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "verified": true,
+     "wrong_answers_left": 3,
+     "all_verified": true,
+     "what_to_do_next": "Both answers are correct. Identity verified."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "api_call",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "products": [
+      {
+       "product_id": "p1",
+       "type": "credit_card",
+       "card_last4": "9015",
+       "past_due": 510,
+       "days_late": 16,
+       "minimum_payment": 153
+      },
+      {
+       "product_id": "p2",
+       "type": "personal_loan",
+       "past_due": 1320,
+       "days_late": 16,
+       "instalment_amount": 440
+      },
+      {
+       "product_id": "p3",
+       "type": "car_loan",
+       "past_due": 140,
+       "days_late": 7,
+       "instalment_amount": 46
+      }
+     ]
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "try:\n    import datetime, json, re\n    HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n    BWD = set([0, 1, 2, 3, 4])\n    WDRULE = 'this_week'\n    WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']\n    MO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']\n    def isbd(d):\n        return d.weekday() in BWD and d.isoformat() not in HOL\n    def txt(d):\n        return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)\n    def txt_short(d):\n        return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1]\n    def addbd(d, n):\n        c = 0\n        guard = 0\n        while c < n and guard < 4000:\n            d = d + datetime.timedelta(days=1)\n            guard += 1\n            if isbd(d):\n                c += 1\n        return d\n    def next_bd(d):\n        guard = 0\n        while not isbd(d) and guard < 4000:\n            d = d + datetime.timedelta(days=1)\n            guard += 1\n        return d\n    def prev_bd(d):\n        guard = 0\n        while not isbd(d) and guard < 4000:\n            d = d - datetime.timedelta(days=1)\n            guard += 1\n        return d\n    def lastbd_of_week(monday):\n        for k in range(6, -1, -1):\n            d = monday + datetime.timedelta(days=k)\n            if isbd(d):\n                return d\n        return None\n    def weekday_table(today):\n        monday = today - datetime.timedelta(days=today.weekday())\n        tab = []\n        for i in range(7):\n            a = monday + datetime.timedelta(days=i)\n            b = a + datetime.timedelta(days=7)\n            t1 = '\"this ' + WD[i] + '\" = ' + txt(a) + (' (already past)' if a < today else '')\n            tab.append(t1 + '; \"next ' + WD[i] + '\" = ' + txt(b))\n        return '\\n'.join(tab)\n    def weekday_table_first_after(today):\n        tab = []\n        for k in range(1, 8):\n            a = today + datetime.timedelta(days=k)\n            tab.append('\"this ' + WD[a.weekday()] + '\" = \"next ' + WD[a.weekday()] + '\" = ' + txt(a))\n        return '\\n'.join(tab)\n    if WDRULE == 'first_after':\n        weekday_table = weekday_table_first_after\n    def calendar_text(today, deadline, extra_days=10):\n        cal = []\n        d = today\n        while d <= deadline + datetime.timedelta(days=extra_days):\n            if d > deadline:\n                tag = 'AFTER THE DEADLINE, not allowed'\n            elif isbd(d):\n                tag = 'allowed'\n            elif d.weekday() not in BWD:\n                tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'\n            else:\n                tag = 'bank holiday, not allowed'\n            nb = next_bd(d)\n            extra = ''\n            if tag.startswith('not a business day') or tag.startswith('bank'):\n                extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')\n            cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)\n            d = d + datetime.timedelta(days=1)\n        return '\\n'.join(cal)\n    def fmt(x):\n        try:\n            x = float(x)\n        except Exception:\n            return str(x)\n        s = '%.2f' % x\n        return s[:-3] if s.endswith('.00') else s\n    import json, re\n    prods = vars.get('products')\n    if isinstance(prods, str):\n        try:\n            prods = json.loads(prods)\n        except Exception:\n            prods = None\n    if not isinstance(prods, list) or not prods:\n        found = {}\n        for k, v in list(vars.items()):\n            m = re.search(r'products\\.(\\d+)\\.(\\w+)$', str(k))\n            if m:\n                found.setdefault(int(m.group(1)), {})[m.group(2)] = v\n        prods = [found[i] for i in sorted(found)]\n    vars['acct_route'] = 'ok' if prods else 'fail'\n    vars['close_outcome'] = 'no_promise'\n    vars['close_code'] = 'RF'\n\n    prods = [p for p in prods if isinstance(p, dict)]\n    today = datetime.date.fromisoformat(str(vars.get('today_iso')))\n    a1base = datetime.date.fromisoformat(str(vars.get('attempt1_date')))\n    BANDS = [('F', 10, 1, 'f_deadline', None), ('S', None, 2, 's_deadline', None)]\n    WORDS = [(['credit_card'], 'credit card ending {card_last4}'), (None, '{type_words}')]\n    bdl = dict()\n    for _b in BANDS:\n        if _b[3]:\n            bdl[_b[0]] = datetime.date.fromisoformat(str(vars.get(_b[3])))\n        else:\n            bdl[_b[0]] = addbd(today, int(_b[4] or 0))\n    def _fill(t, d):\n        return re.sub(r'\\{(\\w+)\\}', lambda m: '' if d.get(m.group(1)) is None else str(d.get(m.group(1))), t)\n    infos = []\n    for i, p in enumerate(prods):\n        ptype = str(p.get('type') or '')\n        pid = str(p.get('product_id') or ('p' + str(i + 1)))\n        f = dict(p)\n        f['type_words'] = ptype.replace('_', ' ') if ptype else 'account'\n        words = ''\n        for _w in WORDS:\n            if _w[0] is None or ptype in _w[0]:\n                words = _fill(_w[1], f)\n                break\n        past_due = float(p.get('past_due') or 0)\n        amount = past_due\n        days_late = int(float(p.get('days_late') or 0))\n        dl = days_late\n        floor = None\n        floor_name = ''\n        try:\n            if ptype in ('credit_card',):\n                floor_name = 'twice the minimum payment'\n                floor = (min(2 * float(p.get('minimum_payment') or 0), amount))\n            elif True:\n                floor_name = 'instalment'\n                floor = p.get('instalment_amount')\n        except Exception:\n            floor = None\n        try:\n            floor = float(floor)\n        except Exception:\n            floor = past_due\n        band = BANDS[-1]\n        for _b in BANDS:\n            if _b[1] is None or dl <= int(_b[1]):\n                band = _b\n                break\n        deadline = bdl[band[0]]\n        att = int(band[2])\n        a1 = a1base if a1base is not None and a1base <= deadline else deadline\n        infos.append(dict(pid=pid, words=words, past_due=past_due, floor=floor, floor_name=floor_name, dl=dl, band=band[0], att=att, deadline=deadline, a1=a1))\n        vars['dl_' + pid] = deadline.isoformat()\n        vars['pd_' + pid] = str(past_due)\n    n = len(infos)\n    vars['n_products'] = str(n)\n    vars['pids_csv'] = ','.join(x['pid'] for x in infos)\n    vars['open_pids'] = vars['pids_csv']\n    vars['rec_pids'] = ''\n    vars['note_log'] = ''\n    vars['all_done'] = 'no'\n    base = dict(title=str(vars.get('title') or ''), last_name=str(vars.get('last_name') or ''), first_name=str(vars.get('first_name') or ''), n=str(n))\n    def _facts(x):\n        f = dict(base)\n        f.update(x)\n        f['past_due'] = fmt(x['past_due'])\n        f['floor'] = fmt(x['floor'])\n        f['days_late'] = str(x['dl'])\n        f['deadline_text'] = txt_short(x['deadline'])\n        f['deadline_iso'] = x['deadline'].isoformat()\n        f['a1_text'] = txt_short(x['a1'])\n        f['a1_iso'] = x['a1'].isoformat()\n        f['attempts'] = str(x['att'])\n        return f\n    lines = []\n    for x in infos:\n        f = _facts(x)\n        lines.append('- ' + _fill('{pid} = your {words}: full overdue amount {past_due}, {days_late} days overdue (band {band}). Floor (smallest amount that can be recorded) {floor} ({floor_name}). Latest date {deadline_text} ({deadline_iso}). Attempt 1: propose the amount in play ({past_due}, or the floor {floor} once the customer said the full amount is too much) on {a1_text} ({a1_iso}). ', f) + _fill('Attempt 2: propose the floor {floor} on the latest date {deadline_text} ({deadline_iso}). Persuasion attempts for this product: {attempts}. After attempt 2 is refused, stop: this product is refused (2 attempts).' if x['att'] >= 2 else 'NO attempt 2. Persuasion attempts for this product: 1. After attempt 1 is refused, stop: this product is refused (1 attempt).', f))\n    vars['products_text'] = '\\n'.join(lines)\n    if n == 1:\n        st = _fill('Thank you, {title} {last_name}. I am calling from the arrears team about an overdue payment. Your {words} has an overdue amount of {past_due}, and it is {days_late} days overdue. Are you able to clear the overdue amount today?', _facts(infos[0]))\n    else:\n        st = _fill('Thank you, {title} {last_name}. I am calling from the arrears team about overdue payments on {n} of your products. ', base)\n        for x in infos:\n            st += _fill('Your {words} has an overdue amount of {past_due}, {days_late} days overdue. ', _facts(x))\n        st += _fill('Are you able to clear all of these today?', base)\n    vars['statement_text'] = st\n    maxdl = max([x['deadline'] for x in infos] or [today])\n    cal = []\n    d = today\n    while d <= maxdl + datetime.timedelta(days=10):\n        nb = next_bd(d)\n        if isbd(d):\n            ok = [x['pid'] for x in infos if d <= x['deadline']]\n            bad = [x['pid'] for x in infos if d > x['deadline']]\n            tag = 'business day.'\n            if ok:\n                tag += ' Allowed for ' + ', '.join(ok) + '.'\n            if bad:\n                tag += ' AFTER THE DEADLINE of ' + ', '.join(bad) + ' (use that product\\'s deadline instead).'\n        elif 'before' == 'before':\n            pb = prev_bd(d)\n            tag = ('weekend' if d.weekday() not in BWD else 'closure day') + ', NOT allowed.'\n            ok = [x['pid'] for x in infos if d <= x['deadline']]\n            bad = [x['pid'] for x in infos if d > x['deadline']]\n            if ok and pb >= today:\n                tag += ' For ' + ', '.join(ok) + ': offer the business day BEFORE it, ' + txt_short(pb) + ' (' + pb.isoformat() + ').'\n            elif ok:\n                tag += ' For ' + ', '.join(ok) + ': no business day before it from today, ask for another day.'\n            if bad:\n                tag += ' AFTER THE DEADLINE of ' + ', '.join(bad) + ' (offer that product\\'s deadline instead).'\n        else:\n            tag = ('weekend' if d.weekday() not in BWD else 'bank holiday') + ', NOT allowed -> offer the next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ') where it is not after the deadline.'\n        cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag)\n        d = d + datetime.timedelta(days=1)\n    vars['calendar_text'] = '\\n'.join(cal)\n    vars['prepare_state'] = 'ok'\nexcept Exception as e:\n    vars['prepare_state'] = 'error ' + str(e)\n    vars.setdefault('products_text', 'Product data could not be prepared.')\n    vars.setdefault('statement_text', 'Thank you. I am calling from the arrears team about an overdue payment. Are you able to clear the overdue amount today?')\n    vars.setdefault('calendar_text', '')\n    vars.setdefault('pids_csv', 'p1')\n    vars.setdefault('open_pids', 'p1')\n    vars.setdefault('all_done', 'no')\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "add_note",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "text": "1 attempts; last offer 140 on 2026-10-15",
+     "reason": "refused",
+     "product_id": "p3",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:refused. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right reason. One tool call per message."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "add_note",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "text": "2 attempts; last offer 440 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p2",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "what_to_do_next": "Note saved. Recorded promises: none. Notes: p2:refused. Still open: p1, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right reason. One tool call per message."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "add_note",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "text": "2 attempts; last offer 306 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p1",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "what_to_do_next": "Note saved. Recorded promises: none. Notes: p2:refused. Still open: p1, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right reason. One tool call per message."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "add_note",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "text": "2 attempts; last offer 440 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p2",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "what_to_do_next": "Note saved. Recorded promises: none. Notes: p3:refused. Still open: p1, p2. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right reason. One tool call per message."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "add_note",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "text": "2 attempts; last offer 306 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p1",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:refused. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right reason. One tool call per message."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "add_note",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "text": "1 attempt; last offer 140 on 2026-10-15",
+     "reason": "refused",
+     "product_id": "p3",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:refused. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right reason. One tool call per message."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "\ntry:\n    rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\n    notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\n    pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\n    nd = dict()\n    for x in notes:\n        if ':' in x:\n            nd[x.split(':')[0]] = x.split(':', 1)[1]\n    keys = dict([('service_error', 'service_error'), ('hardship', 'hardship'), ('dispute', 'dispute'), ('refused', 'refused')])\n    if rec:\n        r = 'promise'\n    elif nd and all(nd.get(p) == 'paid' for p in pids if p in nd) and len(nd) >= len(pids):\n        r = 'paid'\n    else:\n        r = 'refused'\n        for reason, key in [('service_error', 'service_error'), ('hardship', 'hardship'), ('dispute', 'dispute'), ('refused', 'refused')]:\n            if any(nd.get(p) == reason for p in pids):\n                r = key\n                break\n        if not rec and not nd:\n            try:\n                if int(float(vars.get('create_promise_success_count') or 0)) > 0 and str(vars.get('create_promise_response.data.ok')).lower() == 'true':\n                    r = 'promise'\n            except Exception:\n                pass\n    vars['final_route'] = r\nexcept Exception:\n    vars['final_route'] = 'refused'\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "try:\n    vars['close_outcome'] = 'no_promise'\n    vars['close_code'] = 'RF'\nexcept Exception:\n    pass\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "end_call",
+   "args": {
+    "message_mode": "custom",
+    "spoken_message": "I understand. Thank you for your time, Mr Bell. Goodbye."
+   },
+   "result": {
+    "status": "success",
+    "message": "Call ended"
+   }
+  },
+  {
+   "tool": "close_call",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "reason": "RF",
+     "outcome": "no_promise",
+     "customer_id": "c_d35b177e-f0e"
+    }
+   },
+   "result": null
+  }
+ ],
+ "ledger": {
+  "ok": true,
+  "case": "PUB-12",
+  "team": "4d03f63f4e0d8cc0ec31bb9b",
+  "now": "2026-10-14T11:00",
+  "verified": {
+   "phone_last4": true,
+   "date_of_birth": true
+  },
+  "wrong": 0,
+  "hinted": false,
+  "promises": [],
+  "notes": [
+   {
+    "product_id": "p3",
+    "reason": "refused",
+    "text": "1 attempts; last offer 140 on 2026-10-15"
+   },
+   {
+    "product_id": "p2",
+    "reason": "refused",
+    "text": "2 attempts; last offer 440 on 2026-10-21"
+   },
+   {
+    "product_id": "p1",
+    "reason": "refused",
+    "text": "2 attempts; last offer 306 on 2026-10-21"
+   },
+   {
+    "product_id": "p2",
+    "reason": "refused",
+    "text": "2 attempts; last offer 440 on 2026-10-21"
+   },
+   {
+    "product_id": "p1",
+    "reason": "refused",
+    "text": "2 attempts; last offer 306 on 2026-10-21"
+   },
+   {
+    "product_id": "p3",
+    "reason": "refused",
+    "text": "1 attempt; last offer 140 on 2026-10-15"
+   }
+  ],
+  "callbacks": [],
+  "transfers": [],
+  "outcome": "no_promise",
+  "reason": "RF",
+  "failures": {
+   "verify_identity": 0,
+   "get_account": 0,
+   "add_note": 0,
+   "close_call": 0
+  },
+  "calls": [
+   {
+    "n": 1,
+    "tool": "verify_identity",
+    "args": {
+     "field": "phone_last4",
+     "answer": "4410"
+    },
+    "status": 200,
+    "result": {
+     "ok": true,
+     "verified": true,
+     "wrong_answers_left": 3,
+     "all_verified": false
+    }
+   },
+   {
+    "n": 2,
+    "tool": "verify_identity",
+    "args": {
+     "field": "date_of_birth",
+     "answer": "1983-10-19"
+    },
+    "status": 200,
+    "result": {
+     "ok": true,
+     "verified": true,
+     "wrong_answers_left": 3,
+     "all_verified": true
+    }
+   },
+   {
+    "n": 3,
+    "tool": "get_account",
+    "args": {},
+    "status": 200,
+    "result": {
+     "ok": true,
+     "products": [
+      {
+       "product_id": "p1",
+       "type": "credit_card",
+       "card_last4": "9015",
+       "past_due": 510,
+       "days_late": 16,
+       "minimum_payment": 153
+      },
+      {
+       "product_id": "p2",
+       "type": "personal_loan",
+       "past_due": 1320,
+       "days_late": 16,
+       "instalment_amount": 440
+      },
+      {
+       "product_id": "p3",
+       "type": "car_loan",
+       "past_due": 140,
+       "days_late": 7,
+       "instalment_amount": 46
+      }
+     ]
+    }
+   },
+   {
+    "n": 4,
+    "tool": "add_note",
+    "args": {
+     "text": "1 attempts; last offer 140 on 2026-10-15",
+     "reason": "refused",
+     "product_id": "p3"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 5,
+    "tool": "add_note",
+    "args": {
+     "text": "2 attempts; last offer 440 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p2"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 6,
+    "tool": "add_note",
+    "args": {
+     "text": "2 attempts; last offer 306 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p1"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 7,
+    "tool": "add_note",
+    "args": {
+     "text": "2 attempts; last offer 440 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p2"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 8,
+    "tool": "add_note",
+    "args": {
+     "text": "2 attempts; last offer 306 on 2026-10-21",
+     "reason": "refused",
+     "product_id": "p1"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 9,
+    "tool": "add_note",
+    "args": {
+     "text": "1 attempt; last offer 140 on 2026-10-15",
+     "reason": "refused",
+     "product_id": "p3"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 10,
+    "tool": "close_call",
+    "args": {
+     "reason": "RF",
+     "outcome": "no_promise"
+    },
+    "status": 200,
+    "result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  ],
+  "last_at": 1791667893456
+ },
+ "judge": {
+  "outcome": "pass",
+  "reason": "The agent stated all three products, one sentence each, before asking 'Are you able to clear all of these today?'. It offered the correct amounts and dates for each product (card 510 then 306, loan 1320 then 440, car loan 140 on 15 October only). It added a refused note for p1, p2 and p3 with attempt counts and last offers, and sent close_call with no_promise and RF. The notes were duplicated, but each one is correct.",
+  "model": "claude-sonnet-5-5"
+ },
+ "failed": [
+  "notes [('p1', 'refused'), ('p1', 'refused'), ('p2', 'refused'), ('p2', 'refused'), ('p3', 'refused'), ('p3', 'refused')], expected [('p1', 'refused'), ('p2', 'refused'), ('p3', 'refused')]"
+ ],
+ "pass": false,
+ "stop": "ended by the agent (end_call in the call log after HTTP 502)"
+}

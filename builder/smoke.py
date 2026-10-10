@@ -224,6 +224,9 @@ class Chat:
             lines.append("[extract] %s = %r" % (ev.get("name"), ev.get("value")))
         elif e == "function_call_start":
             name, args = fn_name(ev), ev.get("args")
+            if name == "api_call" and isinstance(args, dict) and args.get("url"):   # a pre_action api_request: name it by its endpoint
+                name = args["url"].rstrip("/").rsplit("/", 1)[-1].split("?")[0] or name
+                self.api_alias = name
             rec = {"turn": turn["n"], "tool": name, "args": args, "result": None, "after_end": self.in_tail}
             self.tool_calls.append(rec)
             if isinstance(args, dict) and "url" in args:
@@ -232,6 +235,8 @@ class Chat:
                 lines.append("[tool] %s args=%s" % (name, compact(args, 240)))
         elif e in ("function_call_complete", "function_call_error"):
             name = fn_name(ev)
+            if name == "api_call" and getattr(self, "api_alias", None):
+                name = self.api_alias
             result = ev.get("result")
             if e == "function_call_error":       # {"event", "function", "error": "API request failed: {...}"}
                 result = {"error": ev.get("error") or ev.get("message") or "error"}
@@ -372,7 +377,7 @@ def validate_script(script):
     if not isinstance(expect, list):
         problems.append("expect must be a list")
         expect = []
-    known = {"after_turn", "cumulative", "contains_any", "contains_all", "not_contains", "no_tool_calls", "tools_called_any", "tools_not_called", "note"}
+    known = {"after_turn", "cumulative", "contains_any", "contains_all", "not_contains", "no_tool_calls", "tools_called_any", "tools_not_called", "tool", "note"}
     for i, ex in enumerate(expect, 1):
         if not isinstance(ex, dict):
             problems.append("expect[%d] is not an object" % i)
@@ -380,6 +385,13 @@ def validate_script(script):
         for k in ex:
             if k not in known:
                 problems.append("expect[%d]: unknown key %r (known: %s)" % (i, k, ", ".join(sorted(known))))
+        tl = ex.get("tool")
+        if tl is not None:
+            if not isinstance(tl, dict) or not isinstance(tl.get("name"), str) or not set(tl) <= {"name", "count", "values_in_order", "results_true"}:
+                problems.append("expect[%d]: tool must be an object {name, count?, values_in_order?, results_true?}" % i)
+            elif ("count" in tl and (not isinstance(tl["count"], int) or isinstance(tl["count"], bool))) or \
+                    not all(isinstance(x, str) for x in (tl.get("values_in_order") or []) + (tl.get("results_true") or [])):
+                problems.append("expect[%d]: tool.count must be an integer, values_in_order and results_true lists of strings" % i)
         n = ex.get("after_turn")
         if n is not None and (not isinstance(n, int) or isinstance(n, bool) or n < 1 or (isinstance(turns, list) and n > len(turns))):
             problems.append("expect[%d]: after_turn %r is not a turn number between 1 and %d" % (i, n, len(turns) if isinstance(turns, list) else 0))
@@ -451,6 +463,61 @@ def evaluate(expect, chat):
         for name in ex.get("tools_not_called") or []:
             ok = name not in tools
             out.append((ok, "%s %s tool %s not called%s" % ("PASS" if ok else "FAIL", label, name, "" if ok else " -> it was")))
+        if ex.get("tool"):
+            out.extend(check_tool(ex["tool"], [t for t in chat.tool_calls if n is None or (t["turn"] <= n and not t.get("after_end"))], label))
+    return out
+
+
+def _digits(v):
+    return re.sub(r"\D", "", str(v))
+
+
+def body_of(rec):
+    a = rec.get("args") if isinstance(rec.get("args"), dict) else {}
+    b = a.get("body", a)
+    if isinstance(b, str):
+        try:
+            b = json.loads(b)
+        except ValueError:
+            b = {"_": b}
+    return b if isinstance(b, dict) else {}
+
+
+def result_of(rec):
+    r = rec.get("result")
+    if isinstance(r, dict) and isinstance(r.get("data"), dict):
+        r = r["data"]
+    if isinstance(r, str):
+        try:
+            r = json.loads(r)
+        except ValueError:
+            pass
+    return r if isinstance(r, dict) else {}
+
+
+def check_tool(spec, recs, label):
+    """`tool` expectation: the calls of one tool. `count` exact number of calls; `values_in_order`: the k-th call's body
+    holds a value equal to the k-th expected value (compared on its digits when the expected value has digits, so
+    '1988-03-14' matches an ISO answer and '4471' a four-digit one; never a value in words); `results_true`: every
+    call's result has these keys and they are true (e.g. ok, verified)."""
+    out, name = [], spec["name"]
+    calls = [r for r in recs if r["tool"] == name]
+    if "count" in spec:
+        ok = len(calls) == spec["count"]
+        out.append((ok, "%s %s tool %s called %d time(s), expected %d" % ("PASS" if ok else "FAIL", label, name, len(calls), spec["count"])))
+    for k, want in enumerate(spec.get("values_in_order") or []):
+        if k >= len(calls):
+            out.append((False, "FAIL %s tool %s call %d with %r -> no such call (%d made)" % (label, name, k + 1, want, len(calls))))
+            continue
+        vals = [v for v in body_of(calls[k]).values() if isinstance(v, (str, int, float)) and not isinstance(v, bool)]
+        wd = _digits(want)
+        ok = any((_digits(v) == wd and re.fullmatch(r"[\d\s\-/.]+", str(v).strip() or "x")) if wd else str(v).strip().lower() == want.strip().lower() for v in vals)
+        out.append((ok, "%s %s tool %s call %d carries %r%s" % ("PASS" if ok else "FAIL", label, name, k + 1, want, "" if ok else " -> body " + compact(body_of(calls[k]), 200))))
+    for key in spec.get("results_true") or []:
+        bad = [i + 1 for i, r in enumerate(calls) if result_of(r).get(key) is not True]
+        ok = bool(calls) and not bad
+        out.append((ok, "%s %s tool %s result %s true on every call%s" % ("PASS" if ok else "FAIL", label, name, key,
+                                                                         "" if ok else " -> not on call(s) %s" % (bad or "none made"))))
     return out
 
 
@@ -507,11 +574,58 @@ def resolve_workflow(arg):
     return arg
 
 
-def case_by_id(case_id):
-    for c in json.load(open(ROOT / "public-test-set.json")):
+def case_by_id(case_id, path=None):
+    path = path or ROOT / "public-test-set.json"
+    data = json.load(open(path))
+    for c in (data.get("cases") if isinstance(data, dict) else data) or []:
         if c["id"] == case_id:
             return c
-    die("no case %s in public-test-set.json" % case_id)
+    die("no case %s in %s" % (case_id, path))
+
+
+MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
+def spoken(v):
+    """How a customer says a case value: an ISO date as '14 March 1988', anything else as it is."""
+    m = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})", str(v))
+    return "%d %s %s" % (int(m.group(3)), MONTHS[int(m.group(2)) - 1], m.group(1)) if m else str(v)
+
+
+def answer_values(case, answers=None):
+    """Placeholders for scripts: {{answerN}} (spoken) and {{answerN_raw}} (as the case stores it), N = 1.. in the order
+    of the case's `identity` (the order a brief asks its security questions in the practice set); --answers overrides."""
+    raw = [str(x) for x in (answers if answers is not None else list((case or {}).get("identity", {}).values()))]
+    out = {}
+    for i, v in enumerate(raw, 1):
+        out["answer%d" % i], out["answer%d_raw" % i] = spoken(v), v
+    return out
+
+
+def fill(obj, values):
+    """Replace {{name}} in every string of obj; an unknown name is left as it is (validate_placeholders reports it)."""
+    if isinstance(obj, str):
+        return re.sub(r"\{\{(\w+)\}\}", lambda m: values.get(m.group(1), m.group(0)), obj)
+    if isinstance(obj, list):
+        return [fill(x, values) for x in obj]
+    if isinstance(obj, dict):
+        return {k: fill(v, values) for k, v in obj.items()}
+    return obj
+
+
+def practice_variables(case):
+    """Open a practice customer on the mock bank for this case (its `mock_case`, else its id): real customer_id, so
+    the bank tools answer for real over the chat route. Needs FREYA_BANK_TEAM_KEY."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    from score import http      # noqa: E402  the kit's mock-bank client
+    s = http("/v1/practice/sessions", {"case": case.get("mock_case", case["id"])})
+    v = s.get("variables") if isinstance(s, dict) else None
+    if not v or not v.get("customer_id"):
+        die("the mock bank opened no practice session for %s: %s" % (case["id"], compact(s, 200)))
+    v = dict(v)
+    if (case.get("variables") or {}).get("now"):
+        v["now"] = case["variables"]["now"]
+    return v
 
 
 def persona_from_case(case):
@@ -533,6 +647,9 @@ def main(argv=None):
     ap.add_argument("--model", default=DEFAULT_CUSTOMER_MODEL, help="driven mode: the customer's model (default %s)" % DEFAULT_CUSTOMER_MODEL)
     ap.add_argument("--opening", default="Hello?", help="driven mode: the customer's first line (default 'Hello?')")
     ap.add_argument("--case", help="take the call variables (and, in driven mode without --customer, the persona) from this practice case id")
+    ap.add_argument("--cases", help="the case file --case is looked up in (default public-test-set.json; a generated cases file works, its mock_case opens the practice customer)")
+    ap.add_argument("--practice", action="store_true", help="with --case: open a practice customer on the mock bank (real customer_id), so bank tools answer for real")
+    ap.add_argument("--answers", help="JSON list of the security answers for {{answer1}}, {{answer2}}, ... (default: the case's identity values in order)")
     ap.add_argument("--vars", help="JSON object merged over the call variables, e.g. '{\"customer_id\": \"c_123\"}'")
     ap.add_argument("--out", help="write a JSON record of the run here")
     a = ap.parse_args(argv)
@@ -548,9 +665,22 @@ def main(argv=None):
         if problems:
             die("the script %s cannot be run:\n  - %s" % (a.script, "\n  - ".join(problems)))
     variables = dict(DEFAULT_VARIABLES)
-    case = case_by_id(a.case) if a.case else None
+    case = case_by_id(a.case, a.cases) if a.case else None
+    if a.practice and not case:
+        die("--practice needs --case <id>")
     if case:
         variables.update(case["variables"])
+    if a.script:
+        try:
+            answers = json.loads(a.answers) if a.answers else None
+        except ValueError as e:
+            die("--answers is not valid JSON: %s" % e)
+        values = {k: str(v) for k, v in ((case or {}).get("variables") or {}).items()}   # {{first_name}}, {{last_name}}, ...
+        values.update(answer_values(case, answers))
+        script = fill(script, values)
+        left = sorted(set(re.findall(r"\{\{(\w+)\}\}", json.dumps({"t": script.get("turns"), "e": script.get("expect")}))))
+        if left:
+            die("the script %s uses %s: give --case <id> (its identity values) or --answers '[...]'" % (a.script, ", ".join("{{%s}}" % x for x in left)))
     variables.update(script.get("variables") or {})
     if a.vars:
         try:
@@ -560,6 +690,8 @@ def main(argv=None):
         if not isinstance(extra, dict):
             die("--vars must be a JSON object")
         variables.update(extra)
+    if a.practice:
+        variables.update(practice_variables(case))
     variables.setdefault("customer_id", "c_smoke")
 
     mode = "scripted" if a.script else "driven"

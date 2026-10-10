@@ -1,0 +1,79 @@
+# PUB-10 The promise service fails on the first try
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call a8a65c85-06a7-47be-b1fe-c9fcda50eab7 | customer c_795a25c4-c70 | 2026-10-10 21:44:03
+# customer model claude-sonnet-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/a8a65c85-06a7-47be-b1fe-c9fcda50eab7
+# RESULT: PASS
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Grace Lin?
+customer: Yes, this is Grace Lin.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Ms Lin. For security, could you please tell me the last four digits of your phone number?
+customer: Nine, nine, zero, four.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "9904", "customer_id": "c_795a25c4-c70"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: Thank you. Could you also please tell me your date of birth?
+customer: My date of birth is 23 February 1989.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1989-02-23", "customer_id": "c_795a25c4-c70"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_795a25c4-c70"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "7740", "past_due": 365, "days_late": 8, "minimum_payment": 109.5}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Ms Lin. I am calling from the arrears team about an overdue payment. Your credit card ending 7740 has an overdue amount of 365, and it is 8 days overdue. Are you able to clear the overdue amount today?
+customer: I can't pay today, but I can pay the full amount this Friday.
+agent: That is fine. I can record a payment of 365 for your credit card ending 7740 on Friday 16 October. Shall I record that?
+customer: Yes, please record that.
+   [tool] create_promise POST https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise body={"date": "2026-10-16", "amount": 365.0, "product_id": "p1", "customer_id": "c_795a25c4-c70"}
+   [tool] create_promise -> ERROR API request failed: {'ok': False, 'error': 'service unavailable, nothing was recorded'}
+   [tool] create_promise POST https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise body={"date": "2026-10-16", "amount": 365.0, "product_id": "p1", "customer_id": "c_795a25c4-c70"}
+   [tool] create_promise -> HTTP 200 data={"ok": true, "promise_id": "pr1", "what_to_do_next": "The promise for p1 is recorded. Recorded promises: p1. Notes: none. "}
+   [route] negotiate -> finalize: every product has a recorded promise or a note all_done == 'yes'
+   [node] negotiate -> finalize
+   [tool] code_exec args={"timeout_ms": 10000, "code": "\ntry:\n rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\n notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\n pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\n nd = di...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] finalize -> wrapup: promise final_route == 'promise'
+   [node] finalize -> wrapup
+agent: We will email you a confirmation of this arrangement. Is there anything else I can help you with?
+customer: No, that's everything. Thank you.
+   [route] wrapup -> fin_promise: nothing else wrap == 'done'
+   [node] wrapup -> fin_promise
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'promise'\n vars['close_code'] = 'PRM'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_promise -> end_promise: always always
+   [node] fin_promise -> end_promise
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you for your time, Ms Lin. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: Thank you for your time, Ms Lin. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "PRM", "outcome": "promise", "customer_id": "c_795a25c4-c70"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: "}
+
+## tool calls (11)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "9904", "customer_id": "c_795a25c4-c70"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1989-02-23", "customer_id": "c_795a25c4-c70"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_795a25c4-c70"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "7740", "past_due": 365, "days_late": 8, "minimum_payment": 109.5}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '... -> HTTP 200 data=null
+6. create_promise POST https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise body={"date": "2026-10-16", "amount": 365.0, "product_id": "p1", "customer_id": "c_795a25c4-c70"} -> ERROR API request failed: {'ok': False, 'error': 'service unavailable, nothing was recorded'}
+7. create_promise POST https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise body={"date": "2026-10-16", "amount": 365.0, "product_id": "p1", "customer_id": "c_795a25c4-c70"} -> HTTP 200 data={"ok": true, "promise_id": "pr1", "what_to_do_next": "The promise for p1 is recorded. Recorded promises: p1. Notes: none. "}
+8. code_exec args={"timeout_ms": 10000, "code": "\ntry:\n rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\n notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\n pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\n nd = di... -> HTTP 200 data=null
+9. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'promise'\n vars['close_code'] = 'PRM'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+10. end_call args={"message_mode": "custom", "spoken_message": "Thank you for your time, Ms Lin. Goodbye."} -> success Call ended
+11. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "PRM", "outcome": "promise", "customer_id": "c_795a25c4-c70"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: "}
+
+## ledger: outcome=promise reason=PRM promises=[{"promise_id": "pr1", "product_id": "p1", "type": "credit_card", "amount": 365, "date": "2026-10-16"}] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'get_account', 'create_promise', 'create_promise', 'close_call']
+
+## judge (claude-sonnet-5-5): pass - The first create_promise failed with 'nothing was recorded' and the retry succeeded, so the ledger holds exactly one promise (365.00 on 2026-10-16). The agent only offered to record it and did not claim it was recorded before the successful return. The email-confirmation sentence came after the success, and no service_error note was added. The close_call ok:false is a test-bank limitation, not an agent fault.

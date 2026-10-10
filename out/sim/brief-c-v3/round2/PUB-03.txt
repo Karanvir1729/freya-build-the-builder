@@ -1,0 +1,53 @@
+# PUB-03 Two wrong dates of birth end the check
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call 4d08f31a-0657-4d75-938b-17f9cf3fe888 | customer c_1fc92400-fcb | 2026-10-10 21:56:55
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/4d08f31a-0657-4d75-938b-17f9cf3fe888
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Owen Park?
+customer: Yes, this is Owen Park.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: The last four digits are six six three zero.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "6630", "customer_id": "c_1fc92400-fcb"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask the second security question: What is your date of birth?"}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: What is your date of birth?
+customer: My date of birth is 12 July 1991.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1991-07-12", "customer_id": "c_1fc92400-fcb"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask the same question again: What is your date of birth?"}
+agent: That does not match our records. What is your date of birth?
+customer: My date of birth is 21 August 1992.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1992-08-21", "customer_id": "c_1fc92400-fcb"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Two wrong answers: the check has ended. Do not ask again and reveal no amount, product or reason for the call. Tell the customer a colleague can complete the...
+   [route] ask_dob -> fin_exhausted: two wrong answers id_route == 'exhausted'
+   [node] ask_dob -> fin_exhausted
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_exhausted -> end_exhausted: always always
+   [node] fin_exhausted -> end_exhausted
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. Thank you for your time. Goodbye from Nordvi...
+   [call] ended: assistant-ended-call
+agent: I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "exhausted", "outcome": "not_verified", "customer_id": "c_1fc92400-fcb"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## tool calls (7)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "6630", "customer_id": "c_1fc92400-fcb"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask the second security question: What is your date of birth?"}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1991-07-12", "customer_id": "c_1fc92400-fcb"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask the same question again: What is your date of birth?"}
+4. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1992-08-21", "customer_id": "c_1fc92400-fcb"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Two wrong answers: the check has ended. Do not ask again and reveal no amount, product or reason for the call. Tell the customer a colleague can complete the...
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+6. end_call args={"message_mode": "custom", "spoken_message": "I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. Thank you for your time. Goodbye from Nordvi... -> success Call ended
+7. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "exhausted", "outcome": "not_verified", "customer_id": "c_1fc92400-fcb"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=exhausted promises=[] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'verify_identity', 'close_call']
+
+## judge (gpt-5): pass - phone_last4 was asked first and passed with 6630; date_of_birth was asked only afterwards and the check ended after the second wrong DOB without a third ask; no details were disclosed and the agent instructed to call the number on the back of the card/statement; close_call used outcome not_verified with reason exhausted.

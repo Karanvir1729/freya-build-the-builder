@@ -1,0 +1,42 @@
+sim | workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 (slot brief-d) | 30 case(s) x 1 rep(s) | concurrency 2 | customer claude-sonnet-5-5, judge claude-sonnet-5-5 (claude)
+PASS EXT-D-01 hard   Memo           | verify > verify > get_account > promise > close_call
+PASS EXT-D-02 medium Memo           | verify > verify > get_account > promise > close_call
+PASS EXT-D-03 medium Third party    | schedule_callback > close_call
+PASS EXT-D-05 medium Opening        | close_call
+PASS EXT-D-04 medium Memo           | verify > verify > get_account > promise > close_call
+PASS EXT-D-06 easy   Third party    | close_call
+PASS EXT-D-07 medium Third party    | close_call
+PASS EXT-D-08 hard   Third party    | close_call
+PASS EXT-D-10 medium Identity       | close_call
+PASS EXT-D-09 medium Identity       | verify > verify > close_call
+PASS EXT-D-11 hard   Identity       | verify > verify > verify > close_call
+PASS EXT-D-12 medium Persuasion     | verify > verify > get_account > add_note > close_call
+PASS EXT-D-14 medium Dispute        | verify > verify > get_account > add_note > close_call
+PASS EXT-D-13 hard   Persuasion     | verify > verify > get_account > add_note > close_call
+PASS EXT-D-15 easy   Already paid   | verify > verify > get_account > add_note > close_call
+FAIL EXT-D-16 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+       - conversation: The first criterion fails: the agent stated all three products in a single combined sentence ('I am calling... Your credit card... Your personal loan... Your car loan...') rather than one sentence each before asking 'Are you able to clear all of 
+PASS EXT-D-17 hard   Multi-product  | verify > verify > get_account > promise > add_note > close_call
+FAIL EXT-D-18 hard   Multi-product  | verify > verify > get_account > promise > promise > add_note > close_call
+       - conversation: The read-back before the two create_promise calls said only "the full amounts on Friday 16 October". It never stated 220.00 for the card or 640.00 for the personal loan, so the customer did not confirm the specific amounts. The other criteria hol
+PASS EXT-D-19 hard   Hardship       | verify > verify > get_account > add_note > add_note > add_note > close_call
+PASS EXT-D-20 hard   Restructuring  | verify > verify > get_account > promise > transfer_to_agent > close_call
+PASS EXT-D-21 medium Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-D-22 hard   Dates          | verify > verify > get_account > promise > close_call
+FAIL EXT-D-23 medium Dates          | verify > verify > get_account > promise > close_call
+       - conversation: The first criterion failed. When the customer offered Monday 12th, the agent never said that 12 October cannot be recorded or asked for a day from today onwards. It replied "I understand" and proposed Thursday 15 October itself. The 20 October pr
+PASS EXT-D-24 hard   Dates          | verify > verify > get_account > promise > close_call
+FAIL EXT-D-26 hard   Calendar       | verify > verify > get_account > promise > promise > promise > promise > add_note > close_call > close_call
+       - outcome ('no_promise', 'SVC'), expected ('promise', 'PRM')
+       - notes [('p1', 'service_error')], expected []
+       - conversation: create_promise was required exactly once, but it was called four times (one success, then three more after the customer's reply). The agent also never sent close_call with code PRM; the call ended with a technical-problem message and no close_cal
+PASS EXT-D-25 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS EXT-D-28 hard   Third party    | schedule_callback > close_call
+PASS EXT-D-27 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-D-29 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-D-30 hard   Calendar       | verify > verify > get_account > promise > close_call
+
+slowest agent turn per call: median 3 s, worst 12 s (chat-route timing, not a simulation's).
+
+26 / 30 passed (bank records and conversation checks). Local chat-route simulation, 1685 s.
+cost: 202 chat turns, 202 model calls (172 customer on claude-sonnet-5-5, 30 judge on claude-sonnet-5-5), 226 ledger polls, 66 call fetches.

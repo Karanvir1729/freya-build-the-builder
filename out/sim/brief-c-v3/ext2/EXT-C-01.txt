@@ -1,0 +1,38 @@
+# EXT-C-01 Asks whether it is a scam, then never confirms
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call 7442c5ed-9cf3-4599-892a-d114d232ca28 | customer c_c8055fd1-4d5 | 2026-10-10 22:11:52
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/7442c5ed-9cf3-4599-892a-d114d232ca28
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Daniel Reyes?
+customer: Is this a scam?
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> opening_retry: always always
+   [node] setup -> opening_retry
+agent: You may hang up and call the number on the back of your card or on your latest statement to confirm this call. Am I speaking with Daniel Reyes?
+customer: Go ahead, I'm listening.
+   [route] opening_retry -> fin_unconfirmed: always always
+   [node] opening_retry -> fin_unconfirmed
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_unconfirmed -> end_unconfirmed: always always
+   [node] fin_unconfirmed -> end_unconfirmed
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am sorry, I could not confirm who I am speaking with. Thank you for your time. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: I am sorry, I could not confirm who I am speaking with. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "unconfirmed", "outcome": "not_reached", "customer_id": "c_c8055fd1-4d5"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+3. end_call args={"message_mode": "custom", "spoken_message": "I am sorry, I could not confirm who I am speaking with. Thank you for your time. Goodbye from Nordvik Savings Bank."} -> success Call ended
+4. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "unconfirmed", "outcome": "not_reached", "customer_id": "c_c8055fd1-4d5"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## ledger: outcome=not_reached reason=unconfirmed promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): pass - All criteria are met: the agent advises calling the card/statement number, asks the name exactly twice, does not ask security questions or call verify_identity/get_account or mention restricted terms, and close_call is made with outcome not_reached and reason unconfirmed.

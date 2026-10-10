@@ -151,7 +151,7 @@ prepare (POLICY.prepare_code: register_product per product + init_negotiation(st
 
 | Piece | What it gives |
 |---|---|
-| `Policy(holidays, texts, multi, notes, note_reasons, fin_keys, fail_max, max_checks, human_limit, notalk_limit, wrap_turns, closed_day_move, business_weekdays, ordinals, targets)` | one instance per generator; every value from the brief (texts = finished-sentence templates with `[amount] [when] [date] [deadline] [floor] [floor_name] [full] [words] [named] [past_due] [list]`; `DEFAULT_TEXTS` are generic and MUST be replaced by the brief's own sentences, verbatim ones above all) |
+| `Policy(holidays, texts, multi, notes, note_reasons, fin_keys, fail_max, max_checks, human_limit, notalk_limit, wrap_turns, closed_day_move, business_weekdays, ordinals, targets, asides, weekday_rule, vague_again, above_full, promise_reasons)` | one instance per generator; every value from the brief (texts = finished-sentence templates with `[amount] [when] [date] [deadline] [floor] [floor_name] [full] [words] [named] [past_due] [list]`; `DEFAULT_TEXTS` are generic and MUST be replaced by the brief's own sentences, verbatim ones above all) |
 | `prepare_code(body, statement_expr, fallbacks)` | the prepare node: the guarded `body` reads the products and calls `register_product(vars, pid, words, full, floor, floor_name, deadline, rungs)` per product in `get_account` order, `rungs = [(amount_rule, date), ...]` the brief's persuasion ladder (`full`, `floor`, `full_or_floor` = the floor once the customer said the full amount is too much); then `init_negotiation(vars, statement)` |
 | `offer_extraction(...)`, `offer_guard_transitions()` | (a) `offer_date` (date), `offer_amount` (float), `offer_kind` (exact\|vague\|none, min_confidence 0.6) and the routes to `check_offer` / `accept_offer`. The guard writes `offer_verdict` ∈ {ok, weekend_or_holiday, after_deadline, below_floor, above_full, vague, before_today}, `offer_text` (the finished sentence), the approved `ok_pid/ok_amount/ok_date`, clears the extraction, and routes ok → confirm (one product) or the next product (several), anything else back with the corrected offer; `max_checks` is the loop exit |
 | `confirm_node(task, confirm_desc, date_desc, amount_desc, topic_entry, topic_trs)` | (b) the read-back: tts `{{readback_line}}` built in code from the agreed values; `confirm` ∈ {yes, no, change, other}; change → the guard → read back again (never a transfer); no → a flat refusal of that offer |
@@ -161,6 +161,12 @@ prepare (POLICY.prepare_code: register_product per product + init_negotiation(st
 | `hardship_node(...)` | no persuasion by routing: a refusal there settles the product as hardship; a named date or amount still goes through the guard and the read-back; support_no without a named offer closes as hardship |
 | `wrapup_node(task, wrap_desc)` | after a recorded promise: the recorded sentence + the brief's after-promise sentence + "anything else?"; done → the promise ending; human → ask once, then transfer (the promise stays, the transfer's close code); new_plan → restructuring transfer; change → the brief's change sentence, promise unchanged; question → the model answers; `max_turns` then finalize. `outcome`/`reason` are set to the promise ending before it, so a hang-up closes correctly |
 | `state_first(task)` / `{{state_line}}` | (d) one variable rewritten by every policy node: per product what is settled, the offers already refused, attempts used, whether the floor was offered, the current offer word for word, what is recorded. It is FIRST in the negotiate, confirm, hardship and wrap-up prompts |
+| `offer_ref` (in `offer_extraction(..., ref_desc=)`, `confirm_node(..., ref_desc=)`, `hardship_node(..., ref_desc=)`) | an amount named by reference (`floor` = 'the minimum' / the brief's name for its floor, `full` = 'all of it'), resolved in code against the product; routes to `check_offer` like a named amount. 'Too much, but I can pay <day>' (stance `too_much` + an offer with no number) offers the floor once with the brief's too-much sentence on that day (extended Brief A EXT-A-36: the guard had read back the full amount) |
+| `per_product` (multi only, added by `negotiate_node` and `confirm_node`: `claims_extraction()`) | one string `first=dispute;second=paid;third=pay@<the customer's words for that product's day>` for a turn that says different things about different products; parsed in code: paid/dispute products are settled one by one (a single `topic` had settled every product, EXT-B-02/12), `pay` products get their own day (EXT-B-09), also at the read-back (EXT-B-14) |
+| read-back loop guards | a `change` that names nothing new is read back once more, the second in a row is a no to the read-back (`same_change`); a moved weekend/holiday is explained with the brief's `weekend_or_holiday` sentence before the read-back; a recorded product is never reopened or recorded again (`recorded_guard`: the brief's change sentence, wrap-up) |
+| `Policy(notes_on_transfer=False)` | notes are written only once the wrap-up after a recorded promise has ended without a transfer (a brief that adds no notes on a transferred call; EXT-B-06). Default True: notes right after the promises |
+| `vague_again`, `above_full`, `promise_reasons`, `end_pair()` / `ending_code()` | the brief's choices (optional text `above_full_again`: a second, plainer sentence when the customer repeats the same higher amount at the read-back): a second vague answer is a non-answer (`'refuse'`, one attempt) or gets the deadline (`'deadline'`); an amount above the full amount is read back as the full amount with the brief's sentence (`'agree'`) or proposed again (`'ask'`); `{'full': r1, 'partial': r2}` writes the promise ending's reason when the promise is recorded; `POLICY.end_pair(key, outcome, reason, farewell, nodes)` = `freyalib.end_pair` whose fin node lets a promise recorded earlier decide the ending (a transfer after a promise closes as the promise) |
+
 | `add_event_nodes(nodes)`, `route_transitions()` | the policy code nodes (`EVENT_NODES`), each = CAL_HELPERS + core + `main(vars, event)` in one try, sharing one transition list (endings first, the default ending once and last: the engine merges transitions with the same target) |
 
 Rules the module keeps: every per-product variable is a string written only by code (`state_<pid>`, `attempts_used_<pid>`,
@@ -179,3 +185,32 @@ opening prompt should quote the opening line too.
 `Policy(asides={value: {'when': ..., 'say': ...}})`: side questions (robot? scam?) extracted as `aside` on the negotiate, confirm, hardship and wrap-up nodes; the core prefixes the brief's answer to the line the route speaks, so a turn that goes through code into a tts line still answers the question (measured: v3 ignored 'Am I talking to a robot?' on an accepted offer).
 
 **Dates named by the customer are resolved in code against the call's `now`.** The platform's `date`-type extraction resolves relative words with the REAL clock (Brief B PUB-12: 'tomorrow' arrived as a date before the call's today, and the agent repeated 'has already passed' eight times). The policy nodes therefore also extract `offer_when` (the customer's own words) and `resolve_when()` in the core turns today/tomorrow/this or next <weekday>/the 23rd/the sixth of November/in two weeks into a date from `today_iso`; vague periods become 'vague'; an extracted date before today with no words is treated as vague (ask once for the exact day). `Policy(weekday_rule='this_week'|'first_after')` is the brief's rule for 'next <weekday>'.
+
+## Identity questions: two forms
+
+**Default (prompt-driven), what every generator and both v3 agents use.** The identity question is one
+conversation node holding `verify_identity` as a model-called tool (`api_tool(api, "verify_identity",
+baked={"field": <field>}, post=verify_post(...))`); the node prompt says "when they give all N digits, call
+verify_identity with the digits only; if they give part, ask for the rest", `PERSONA_CONDUCT` says "wait for a
+complete number", and routes read `verify_identity_response.data.*`. Measured over the chat route with
+`builder/smoke_scripts/talkative.json` (a cut-off line with no answer at the second question, then the answer) and
+`asks_back.json` on brief-a-v3 and brief-b-v3 (10 Oct): the tool was called exactly once per question with the right
+value, never on the cut-off line; on the organisers' simulator `pieces` scored 9/10 on the v2 reference, its miss not
+identity. So the default stays.
+
+**Opt-in gate (`gated_digits_identity`), for a brief or a run where half numbers reach the service.**
+
+| Function | What it gives |
+|---|---|
+| `digits_from_spec(api, field_value)` | N read from the identity tool's `answer` description in the API file ("For phone_last4: four digits." → 4; "exactly eight digits" → 8); `None` when the file gives no count (pass the brief's N) |
+| `gated_digits_identity(api, stage, field_value, n_digits, ask_task, answer_desc, on_verified, on_all_verified, on_exhausted, wrong_line, unreadable_line, extraction=None, transitions=None, tool_post="", extra_routes=None, stop_left=("0",))` | dict of nodes: `ask_<stage>` (conversation, NO tool, extraction `<stage>_digits` with `validation_pattern ^[0-9]{N}$`, first route `is_set(<stage>_digits) AND != sentinel` → `check_<stage>`), `ask_<stage>_wrong` / `ask_<stage>_unread` (the same node entered with the brief's fixed wrong / unreadable line as tts), `check_<stage>` (api_request: `verify_identity` with field and answer BAKED, `{{<stage>_digits}}`; node mapping to `<stage>_ok/_verified/_all/_left`), `route_<stage>` (code: writes the sentinel `'0'*N`, schema-valid for the pattern, so the same answer is not sent twice; routes `extra_routes` → all verified → verified → `stop_left` → ok false → wrong) |
+
+What it buys: the model never fills `answer`, so '44', words the extractor cannot turn into N digits, an 11-digit
+whole phone number or a cut-off line never reach the service as a counted wrong answer; a wrong answer re-enters the
+question with the brief's fixed wording. What it costs: three conversation nodes per question instead of one, the
+brief's other identity routes (refusal, question back, transfer) must be passed in `extraction`/`transitions` (they
+are copied onto all three ask nodes after the gate), and a real answer equal to the sentinel ('0000') is never sent
+(use the default form for such a brief). Dates keep the default form (the service answers an unreadable date with
+`ok: false`, not counted). Tests: `python3 builder/tests/test_gated_identity.py` (route code exec'd as a code node,
+transitions walked for verified / all verified / wrong / exhausted / unreadable / stricter-brief paths, an 8-digit
+field from the transfer-test API, `check()` on an assembled workflow).

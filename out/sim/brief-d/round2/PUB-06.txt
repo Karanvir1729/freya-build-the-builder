@@ -1,0 +1,93 @@
+# PUB-06 Full amount is too much, accepts the card floor
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call 6c7068a3-57cc-4e7a-90b4-04ca22614331 | customer c_5e74f37c-ce6 | 2026-10-10 21:19:51
+# customer model claude-sonnet-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/6c7068a3-57cc-4e7a-90b4-04ca22614331
+# RESULT: FAIL | outcome ('transferred', 'TRH'), expected ('promise', 'PRM') | promises [], expected [('p1', 1275.0, '2026-10-16')] | transfers [{'queue': 'general'}], expected [] | conversation: The agent never offered the 1275.00 floor with the remainder-stays-overdue sentence, and never made or read back a promise for 1275.00 on Friday 16 October; it transferred the customer instead. The first criterion (never asking how much she can pay) held, but the second and third did not.
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Priya Nair?
+customer: Yes, this is Priya Nair.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Ms Nair. For security, could you please tell me the last four digits of your phone number?
+customer: One five zero two.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "1502", "customer_id": "c_5e74f37c-ce6"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: Thank you. Could you please tell me your date of birth?
+customer: 17 May 1986.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1986-05-17", "customer_id": "c_5e74f37c-ce6"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_5e74f37c-ce6"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "1903", "past_due": 2125.1, "days_late": 12, "minimum_payment": 637.5}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Ms Nair. I am calling from the arrears team about an overdue payment. Your credit card ending 1903 has an overdue amount of 2125.10, and it is 12 days overdue. Are you able to clear the overdue amount today?
+customer: No, the full amount is too much for me right now.
+   [route] ask_dob -> count_decline_dob: customer declined refusal_dob == 'refused'
+   [node] ask_dob -> count_decline_dob
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_dob -> ask_dob: always always
+   [node] count_decline_dob -> ask_dob
+agent: These questions are there to protect your account, and nothing can be discussed without them. Could you please tell me your date of birth?
+customer: 17 May 1986.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1986-05-17", "customer_id": "c_5e74f37c-ce6"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "what_to_do_next": "Correct. Ask the next security question."}
+agent: Thank you, Ms Nair. Your identity has been confirmed.
+customer: Are you still there? I can't pay the full amount right now, so what can you offer me?
+agent: I don't have that information. I can transfer you to an agent who can help you with this. Would you like me to do that?
+customer: No, I'd rather sort this out with you. How much can I pay to clear this, can you tell me what you can offer?
+agent: I don't have that information. I can transfer you to an agent who can assist you further. Would you like to speak with one?
+customer: You tell me, what amount can I pay to clear this? I'd rather not be transferred.
+agent: I don't have that information. I can transfer you to an agent who can help you with this. Would you like me to do that?
+customer: I understand, but I can't pay the full amount right now. Could you please check whether there's a reduced amount I could pay?
+agent: I don't have that information. I can transfer you to an agent who can help you with this. Would you like me to do that?
+customer: I'd still rather not be transferred. Can you tell me what reduced amount I could pay instead of the full 2125.10?
+agent: I don't have that information. I can transfer you to an agent who can help you with this. Would you like me to do that?
+customer: No, please don't transfer me. Could you check what reduced amount you can offer me for this overdue payment?
+agent: I don't have that information. I can transfer you to an agent who can help you with this. Would you like me to do that?
+customer: Okay, I understand you can't give me an amount. Is there any option you can offer me to pay less than the full amount right now?
+agent: I don't have that information. I can transfer you to an agent who can help you with this. Would you like me to do that?
+customer: Alright, since you can't help with that, please transfer me to an agent who can.
+   [tool] transfer_to_agent POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "general", "customer_id": "c_5e74f37c-ce6"}
+   [tool] transfer_to_agent -> HTTP 200 data={"ok": true}
+   [route] ask_dob -> fin_transferred_human: transferred transfer_to_agent_success_count > 0
+   [node] ask_dob -> fin_transferred_human
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TRH'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_human -> end_transferred_human: always always
+   [node] fin_transferred_human -> end_transferred_human
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to a colleague now. Thank you, Ms Nair. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: I am transferring you to a colleague now. Thank you, Ms Nair. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "TRH", "outcome": "transferred", "customer_id": "c_5e74f37c-ce6"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## tool calls (11)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "1502", "customer_id": "c_5e74f37c-ce6"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1986-05-17", "customer_id": "c_5e74f37c-ce6"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_5e74f37c-ce6"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "1903", "past_due": 2125.1, "days_late": 12, "minimum_payment": 637.5}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '... -> HTTP 200 data=null
+6. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+7. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1986-05-17", "customer_id": "c_5e74f37c-ce6"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "what_to_do_next": "Correct. Ask the next security question."}
+8. transfer_to_agent POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "general", "customer_id": "c_5e74f37c-ce6"} -> HTTP 200 data={"ok": true}
+9. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TRH'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+10. end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to a colleague now. Thank you, Ms Nair. Goodbye."} -> success Call ended
+11. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "TRH", "outcome": "transferred", "customer_id": "c_5e74f37c-ce6"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## ledger: outcome=transferred reason=TRH promises=[] notes=[] callbacks=[] transfers=[{"queue": "general"}] calls=['verify_identity', 'verify_identity', 'get_account', 'verify_identity', 'transfer_to_agent', 'close_call']
+
+## judge (claude-sonnet-5-5): fail - The agent never offered the 1275.00 floor with the remainder-stays-overdue sentence, and never made or read back a promise for 1275.00 on Friday 16 October; it transferred the customer instead. The first criterion (never asking how much she can pay) held, but the second and third did not.

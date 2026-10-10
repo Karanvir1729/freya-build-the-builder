@@ -1,0 +1,114 @@
+{
+ "runner": "sim",
+ "workflow_id": "239c5d00-d0cc-4202-83a2-71794aff95c6",
+ "agent_id": "e5343a6b-e5c3-4097-b0e5-2a9534def898",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 175,
+ "passed": 1,
+ "total": 1,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-07",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-07",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "b6f3dafc-b450-4f15-8fed-84695973ce85",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_1f793b04-a93",
+   "transcript": "out/sim/brief-c-v3/round3/PUB-07.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent asked once for the exact day after \u201cthe week after next,\u201d accepted Monday 26 October without suggesting alternatives, recorded a promise for 540.00 on 2026-10-26 (the 9th business day after today), and closed the call with outcome promise and reason full.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b6f3dafc-b450-4f15-8fed-84695973ce85",
+   "slowest_turn_s": 8.7,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "full",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-07",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "b6f3dafc-b450-4f15-8fed-84695973ce85",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_1f793b04-a93",
+    "transcript": "out/sim/brief-c-v3/round3/PUB-07.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent asked once for the exact day after \u201cthe week after next,\u201d accepted Monday 26 October without suggesting alternatives, recorded a promise for 540.00 on 2026-10-26 (the 9th business day after today), and closed the call with outcome promise and reason full.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b6f3dafc-b450-4f15-8fed-84695973ce85",
+    "slowest_turn_s": 8.7,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "full",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 8,
+  "customer_calls": 7,
+  "judge_calls": 1,
+  "judge_retries": 0,
+  "ledger_polls": 8,
+  "ledger_errors": 0,
+  "call_fetches": 2
+ }
+}
