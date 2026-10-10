@@ -481,5 +481,61 @@ def test_offer_when_resolved_in_code():
     assert V.get("offer_verdict") == "vague", (V.get("offer_verdict"), V.get("say_next"))
 
 
+@test
+def test_too_much_with_a_date_offers_the_floor():
+    """EXT-A-36: 'the full amount is too much, but I can pay the minimum today' arrives as an exact offer with no number
+    (the extractor does not know the floor): the floor is offered once with the brief's too-much sentence, on the
+    named day, never the full amount."""
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="too_much", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_amount"] == "126.0" and V["ok_date"] == TODAY, (V["route"], V.get("ok_amount"), V.get("ok_date"))
+    assert V["readback_line"].startswith("I understand. The lowest amount I can accept is 126") and "rest stays overdue" in V["readback_line"], V["readback_line"]
+    assert V["readback_line"].endswith("credit card ending 4821, 126, today. Do you confirm?"), V["readback_line"]
+    assert V["too_much_p1"] == "yes" and V["offered_floor_p1"] == "yes"
+    # with a weekend day the guard still moves it, and the amount stays the floor
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="too_much", offer_kind="exact", offer_when="saturday", offer_amount="", offer_ref="floor")
+    assert V["offer_verdict"] == "weekend_or_holiday" and V["prop_amount"] == "126.0" and V["prop_date"] == "2026-10-19", (V["offer_verdict"], V["prop_amount"], V["prop_date"])
+    assert V["say_next"].startswith("I understand. The lowest amount I can accept is 126"), V["say_next"]
+
+
+@test
+def test_amount_by_reference():
+    """'I can pay the minimum' / 'all of it': the reference is resolved in code against the product (offer_ref)."""
+    P, V = start([LOAN])
+    ev(P, V, "offer", stance="offer", offer_kind="none", offer_when="", offer_amount="", offer_ref="floor")
+    assert V["route"] == "confirm" and V["ok_amount"] == "700.0" and V["ok_date"] == TODAY, (V["route"], V.get("ok_amount"))
+    # at the read-back: 'make it the minimum instead' is a change to the floor, read back again
+    P, V = start([LOAN])
+    ev(P, V, "offer", offer_kind="exact", offer_when="friday", offer_amount="2100", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_amount"] == "2100.0"
+    ev(P, V, "change", confirm="change", offer_when="", offer_amount="", offer_ref="floor")
+    assert V["route"] == "confirm" and V["ok_amount"] == "700.0" and V["ok_date"] == "2026-10-16", (V["route"], V.get("ok_amount"), V.get("ok_date"))
+    n = P.confirm_node("t", "c", "d", "a")
+    assert any(e["name"] == "offer_ref" for e in n["extraction_schema"])
+    assert "offer_ref" in str(P.offer_guard_transitions()[0]), P.offer_guard_transitions()[0]
+
+
+@test
+def test_unchanged_change_is_not_a_loop():
+    """EXT-A-36: a 'change' at the read-back that names nothing new re-read the same line 28 times. Once it is read
+    back again; the second such answer in a row is a no to the read-back offer (the ladder's next rung)."""
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_amount"] == "420.0"
+    first = V["readback_line"]
+    ev(P, V, "change", confirm="change", offer_when="", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["readback_line"] == first, (V["route"], V["readback_line"])
+    ev(P, V, "change", confirm="change", offer_when="today", offer_amount="420", offer_ref="none")
+    assert V["route"] == "negotiate" and V["say_next"] == "Can you pay 420 on Friday 16 October?", (V["route"], V["say_next"])
+    assert V["same_change"] == "0"
+    # a real change resets the count
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="none")
+    ev(P, V, "change", confirm="change", offer_when="", offer_amount="", offer_ref="none")
+    ev(P, V, "change", confirm="change", offer_when="tomorrow", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_date"] == "2026-10-15" and V["same_change"] == "0", (V["route"], V.get("ok_date"))
+
+
 if __name__ == "__main__":
     sys.exit(main())

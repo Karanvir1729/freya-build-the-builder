@@ -1036,7 +1036,9 @@ def question_back_node(stage, ask_node, close_node, limit=2, flag=None):
     question is asked again (always -> ask_node); the `limit`-th question in a row with no answer in between is a
     deflection and routes to close_node (the brief's "asked instead of answering" close). Measured on the organisers'
     simulator: counting every question back as a refusal closed 4 of 10 calls as declined under the kit's asks_back
-    style, whose customer asks twice and then answers. Reset the counter with reset_pre on the identity tool."""
+    style, whose customer asks twice and then answers. Reset the counter with reset_pre on the identity tool.
+    The ask node's model answers the question; when the brief counts a question back as declining, its prompt must also
+    give the brief's decline explanation for a question back (this path never reaches the refusal path's explanation)."""
     flag = flag or "refusal_%s" % stage
     code = counter_code("question_count_%s" % stage, limit, "qb_route", reset={flag: "none"})
     return code_node("qb_%s" % stage, code, [eq("qb_route", "close", close_node, "a second question back instead of an answer"),
