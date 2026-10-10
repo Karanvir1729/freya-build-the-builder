@@ -5,13 +5,13 @@ Encodes the rules of docs/workflow-format.md, docs/tools-and-code.md and the
 pitfalls of the kit README. Standard library only.
 
 CLI:
-    python3 builder/lint.py <workflow.json> [--api tools/openapi.json]
+    python3 builder/lint.py <workflow.json> [--api tools/openapi.json] [--call-vars a,b] [--rules <rules.json>] [--budget]
 prints one line per finding  'ERROR|WARN|INFO <node or path>: message'
 and exits 1 when any ERROR was found.
 
 Importable:
     from lint import lint
-    findings = lint(workflow_dict, api=openapi_dict_or_None)
+    findings = lint(workflow_dict, api=openapi_dict_or_None, call_vars=None, rules=inventory_list_or_None, budget=False)
     -> list of {"level": "ERROR"|"WARN"|"INFO", "where": str, "message": str}
 """
 import ast
@@ -59,8 +59,10 @@ DATE_NAME_RE = re.compile(r"(^|_)(date|dob|birthday|birth_date|day|deadline)(_\w
 
 
 class _Linter:
-    def __init__(self, wf, api=None, call_vars=None):
+    def __init__(self, wf, api=None, call_vars=None, rules=None, budget=False):
         self.wf = wf if isinstance(wf, dict) else {}
+        self.rules = rules if isinstance(rules, list) else None
+        self.budget = budget
         self.api = api
         self.call_vars = list(call_vars or [])
         self.findings = []
@@ -1271,6 +1273,441 @@ class _Linter:
             if targets and not (targets & can_end):
                 self.err(f"global_nodes.{k}", "global node has no path back (__previous__) and none to an end_call node")
 
+    # ------------------------------------------------------------ rules inventory checks (--rules, --budget)
+    # T24 verbatim coverage, T25 forbidden words before verification, T6 write tools before verification,
+    # T26 success claims before the write succeeded, T29 prompt size, T30 extraction / routing size.
+    # See builder/LINT.md.
+
+    @staticmethod
+    def _norm(text):
+        text = (text or "").replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+        return re.sub(r"\s+", " ", text).strip()
+
+    @staticmethod
+    def _cond_leaves(c, out=None):
+        out = [] if out is None else out
+        if isinstance(c, dict):
+            if isinstance(c.get("conditions"), list):
+                for x in c["conditions"]:
+                    _Linter._cond_leaves(x, out)
+            else:
+                out.append(c)
+        return out
+
+    def _transitions_of(self, n):
+        """(target, condition) for every out-edge of a node, the passthrough/max-turn fields with no condition."""
+        out = []
+        for t in n.get("transitions") or []:
+            if isinstance(t, dict) and isinstance(t.get("target_node"), str):
+                out.append((t["target_node"], t.get("condition")))
+        for fld in ("passthrough_default_transition", "max_turn_transition"):
+            v = n.get(fld)
+            if isinstance(v, str) and v:
+                out.append((v, None))
+        return out
+
+    def _region(self, blocked):
+        """Nodes reachable from initial_node without taking a transition whose condition satisfies blocked(cond).
+        Global nodes count as reachable from anywhere (their targets too)."""
+        init = self.wf.get("initial_node")
+        if not isinstance(init, str) or init not in self.nodes:
+            return set()
+        start = [init] + list(self.globals)
+        seen, stack = set(), start
+        while stack:
+            k = stack.pop()
+            if k in seen or k not in self.all_nodes:
+                continue
+            seen.add(k)
+            n = self.all_nodes[k]
+            if not isinstance(n, dict):
+                continue
+            for target, cond in self._transitions_of(n):
+                if target in self.all_nodes and not (cond is not None and blocked(cond)):
+                    stack.append(target)
+        return seen
+
+    @staticmethod
+    def _truthy_leaf(leaf):
+        op = leaf.get("operator")
+        if op == "is_set":
+            return True
+        return op == "equals" and str(leaf.get("operand", "")).strip().lower() in ("true", "yes", "1")
+
+    def _verified_test(self):
+        """A predicate on conditions that marks the identity-verified route. A variable ending in all_verified wins
+        (verify_identity's per-answer `verified` is not the gate when all_verified exists); else a variable ending in
+        verified / identity_verified / is_verified. None when no route tests one."""
+        leaves = []
+        for n in self.all_nodes.values():
+            if isinstance(n, dict):
+                for _, cond in self._transitions_of(n):
+                    leaves += [l for l in self._cond_leaves(cond) if isinstance(l.get("variable"), str)]
+        for pat in (r"(^|[._])all_verified$", r"(^|[._])(verified|identity_verified|is_verified|id_verified)$"):
+            rx = re.compile(pat, re.I)
+            if any(rx.search(l["variable"]) and self._truthy_leaf(l) for l in leaves):
+                return lambda cond, rx=rx: any(isinstance(l.get("variable"), str) and rx.search(l["variable"])
+                                               and self._truthy_leaf(l) for l in self._cond_leaves(cond))
+        return None
+
+    # --- text sources
+    def _code_snippets(self, n):
+        """Python snippets of a node: code_exec pre_actions and the hooks of its tools / pre_actions."""
+        out = []
+        for lst in (n.get("pre_actions") or [], n.get("tools") or []):
+            for a in lst:
+                if not isinstance(a, dict):
+                    continue
+                fn = a.get("function") if isinstance(a.get("function"), dict) else {}
+                if fn.get("handler") == HANDLER_CODE:
+                    code = (((fn.get("parameters") or {}).get("properties") or {}).get("code") or {}).get("default")
+                    if isinstance(code, str):
+                        out.append(code)
+                for hook in ("pre_process_code", "post_process_code"):
+                    if isinstance(a.get(hook), str):
+                        out.append(a[hook])
+        return out
+
+    @staticmethod
+    def _expr_strings(expr, local_strings):
+        """String constants inside an expression in source order; a local name pulls in the strings assigned to it."""
+        out = []
+        keys = set()     # vars['x'], d.get('x'): names, not text
+        for sub in ast.walk(expr):
+            if isinstance(sub, ast.Subscript):
+                keys.add(id(sub.slice))
+            elif isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute) and sub.args \
+                    and sub.func.attr in ("get", "pop", "setdefault"):
+                keys.add(id(sub.args[0]))
+        for sub in ast.walk(expr):
+            if id(sub) in keys:
+                continue
+            pos = (getattr(sub, "lineno", 0), getattr(sub, "col_offset", 0))
+            if isinstance(sub, ast.Constant) and isinstance(sub.value, str):
+                out.append((pos, [sub.value]))
+            elif isinstance(sub, ast.Name) and sub.id in local_strings:
+                out.append((pos, local_strings[sub.id]))
+        return [s for _, lst in sorted(out, key=lambda x: x[0]) for s in lst]
+
+    def _code_texts(self, code):
+        """(all strings joined per expression, {vars key: [texts]}) for one snippet."""
+        try:
+            tree = ast.parse(code)
+        except Exception:
+            return [], {}
+        local_strings = {}
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Assign, ast.AugAssign)):
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                for t in targets:
+                    if isinstance(t, ast.Name):
+                        local_strings.setdefault(t.id, []).extend(self._expr_strings(node.value, {}))
+        texts, by_var = [], {}
+        for node in ast.walk(tree):
+            exprs = []
+            if isinstance(node, (ast.Assign, ast.AugAssign)):
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                parts = self._expr_strings(node.value, local_strings)
+                for t in targets:
+                    if isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and isinstance(t.slice, ast.Constant) \
+                            and isinstance(t.slice.value, str):
+                        by_var.setdefault(t.slice.value, []).append(" ".join(parts))
+                        by_var[t.slice.value].extend(parts)
+                exprs.append(node.value)
+            elif isinstance(node, (ast.JoinedStr, ast.BinOp)):
+                exprs.append(node)
+            elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+                texts.append(node.value)
+            for e in exprs:
+                texts.append(" ".join(self._expr_strings(e, local_strings)))
+        return texts, by_var
+
+    def _collect_texts(self):
+        """Per node: spoken texts, prompt texts, code-built texts; plus the vars written by code across the workflow."""
+        self._var_texts = {}
+        self._node_code_texts = {}
+        for key, n in self.all_nodes.items():
+            if not isinstance(n, dict):
+                continue
+            texts = []
+            for code in self._code_snippets(n):
+                t, by_var = self._code_texts(code)
+                texts += t
+                for v, lst in by_var.items():
+                    self._var_texts.setdefault(v, []).extend(lst)
+            self._node_code_texts[key] = texts
+        self._spoken, self._prompts = {}, {}
+        for key, n in self.all_nodes.items():
+            if not isinstance(n, dict):
+                continue
+            spoken, prompts = [], []
+            oe = n.get("on_enter") if isinstance(n.get("on_enter"), dict) else {}
+            if oe.get("type") == "tts" and isinstance(oe.get("text"), str):
+                spoken.append(("on_enter", oe["text"]))
+            elif oe.get("type") == "llm":
+                for f in ("text", "prompt", "message"):
+                    if isinstance(oe.get(f), str):
+                        prompts.append(("on_enter", oe[f]))
+            if isinstance(n.get("task_message"), str):
+                prompts.append(("task_message", n["task_message"]))
+            term = n.get("terminal") if isinstance(n.get("terminal"), dict) else {}
+            props = ((term.get("function") or {}).get("parameters") or {}).get("properties") or {}
+            sm = (props.get("spoken_message") or {}).get("default")
+            mode = (props.get("message_mode") or {}).get("default", "custom")
+            if isinstance(sm, str):
+                (spoken if mode != "llm" else prompts).append(("terminal.spoken_message", sm))
+            self._spoken[key], self._prompts[key] = spoken, prompts
+
+    def _expand(self, text):
+        """The text plus the code-built strings of every {{var}} it references (one level)."""
+        out = [text]
+        for v in self.placeholders(text):
+            out += self._var_texts.get(v, [])
+        return out
+
+    # --- inventory helpers
+    def _in_force(self):
+        return [r for r in self.rules if isinstance(r, dict) and r.get("in_force", True) is not False]
+
+    @staticmethod
+    def _rule_blob(r):
+        return (str(r.get("text", "")) + " " + json.dumps(r.get("values") or {})).lower()
+
+    @staticmethod
+    def _phrase_rx(phrase):
+        """Regex for a verbatim phrase: whitespace-normalised, case-insensitive, {field} / {{field}} / [field] / <field>
+        stand for any short text (a {{var}} placeholder in the workflow or a value built by code)."""
+        phrase = _Linter._norm(phrase)
+        parts = re.split(r"\{\{[^{}]*\}\}|\{[^{}]*\}|\[[^\[\]]*\]|<[^<>]*>", phrase)
+        rx = r".{0,80}?".join(r"\s*".join(re.escape(w) for w in p.split(" ")) if p.strip() else r"\s*" for p in parts)
+        return re.compile(rx, re.I | re.S)
+
+    @staticmethod
+    def _word_rx(word):
+        w = word.strip().lower()
+        if not w:
+            return None
+        if re.search(r"[{\[<]", w):
+            return _Linter._phrase_rx(w)
+        body = r"\s+".join(re.escape(x) for x in w.split())
+        return re.compile(r"(?<![\w-])" + body + r"(?:s|es)?(?![\w-])", re.I)
+
+    def _forbidden_words(self):
+        words = []
+        product_names = []
+        for r in self._in_force():
+            vals = r.get("values") if isinstance(r.get("values"), dict) else {}
+            for k, v in vals.items():
+                if k.startswith("product_name"):
+                    product_names += list(v.values()) if isinstance(v, dict) else (v if isinstance(v, list) else [v])
+                if re.match(r"forbidden(_words)?(_before)?_verif", k) or k == "forbidden_words":
+                    words += v if isinstance(v, list) else [v]
+        if not words:      # fallback: quoted words of opening/disclosure rules that say "do not say"
+            for r in self._in_force():
+                text = str(r.get("text", ""))
+                if r.get("category") in ("opening", "disclosure") and re.search(r"\b(do not|don't|never)\s+(say|mention|use)\b", text, re.I):
+                    words += re.findall(r"\"([^\"]{2,40})\"", text)
+        out = []
+        for w in words:
+            if not isinstance(w, str) or not w.strip():
+                continue
+            if re.match(r"(the|a|any|their|its)\s+product", w.strip(), re.I) and product_names:
+                out += [p for p in product_names if isinstance(p, str)]
+            elif re.match(r"(the|any|a)\s", w.strip(), re.I):
+                self.info("rules", f"forbidden word {w!r} is a description, not a word; not checked")
+            else:
+                out.append(w)
+        return list(dict.fromkeys(out))
+
+    # --- T24
+    def check_verbatim(self):
+        spoken, codebuilt, prompts = [], [], []
+        for key in self.all_nodes:
+            spoken += [t for _, t in self._spoken.get(key, [])]
+            codebuilt += self._node_code_texts.get(key, [])
+            prompts += [t for _, t in self._prompts.get(key, [])]
+        for tool in self.wf.get("tools") or []:
+            if isinstance(tool, dict):
+                for hook in ("pre_process_code", "post_process_code"):
+                    if isinstance(tool.get(hook), str):
+                        codebuilt += self._code_texts(tool[hook])[0]
+        if isinstance(self.wf.get("system_prompt"), str):
+            prompts.append(self.wf["system_prompt"])
+        fixed = [self._norm(t) for t in spoken + codebuilt]
+        prompts = [self._norm(t) for t in prompts]
+        for r in self._in_force():
+            for phrase in r.get("verbatim") or []:
+                if not isinstance(phrase, str) or not phrase.strip():
+                    continue
+                rx = self._phrase_rx(phrase)
+                if any(rx.search(t) for t in fixed):
+                    continue
+                if any(rx.search(t) for t in prompts):
+                    self.warn(f"rules.{r.get('id')}", f"verbatim line {phrase!r} is only in a prompt; make it fixed text (tts on_enter, farewell or code-built text) so the model cannot paraphrase it")
+                else:
+                    self.err(f"rules.{r.get('id')}", f"verbatim line {phrase!r} appears in no tts on_enter, farewell or code-built text")
+
+    # --- T25
+    NEG_CLAUSE_RE = re.compile(r"\b(never|do not|don't|dont|must not|mustn't|should not|shouldn't|cannot|can't|avoid|not)\b"
+                               r"[^.!?\n]*\b(say|said|mention|use|tell|reveal|disclose|state|name|discuss|talk|bring up|refer|ask|offer|describe|propose|quote|promise|invent)", re.I)
+
+    def _negated_mention(self, text, start):
+        sent_start = max(text.rfind(c, 0, start) for c in ".!?\n") + 1
+        return bool(self.NEG_CLAUSE_RE.search(text[sent_start:start]))
+
+    def check_forbidden_words(self, pre):
+        words = self._forbidden_words()
+        if not words:
+            self.info("rules", "no forbidden-before-verification words in the inventory; T25 not checked")
+            return
+        rxs = [(w, self._word_rx(w)) for w in words]
+        sysp = self.wf.get("system_prompt") if isinstance(self.wf.get("system_prompt"), str) else ""
+        for key in sorted(pre):
+            base = f"{'global_nodes' if key in self.globals else 'nodes'}.{key}"
+            # code strings count only once a spoken text or prompt references them ({{var}}, see _expand)
+            for fld, text in self._spoken.get(key, []):
+                for piece in self._expand(text):
+                    for w, rx in rxs:
+                        m = rx.search(self._norm(piece))
+                        if m:
+                            self.err(f"{base}.{fld}", f"spoken before identity is verified and contains forbidden word {w!r}: {self._norm(piece)[max(0, m.start() - 40):m.end() + 40]!r}")
+                            break
+            for fld, text in self._prompts.get(key, []):
+                for piece in self._expand(text):
+                    np = self._norm(piece) if piece is not text else piece
+                    for w, rx in rxs:
+                        for m in rx.finditer(np):
+                            if not self._negated_mention(np, m.start()):
+                                self.warn(f"{base}.{fld}", f"prompt of a node before identity is verified mentions forbidden word {w!r} outside a 'never say' clause: {self._norm(np[max(0, m.start() - 50):m.end() + 30])!r}")
+                                break
+                        else:
+                            continue
+                        break
+        for w, rx in rxs:
+            for m in rx.finditer(sysp):
+                if not self._negated_mention(sysp, m.start()):
+                    self.warn("$.system_prompt", f"system prompt (in force before verification) mentions forbidden word {w!r} outside a 'never say' clause: {self._norm(sysp[max(0, m.start() - 50):m.end() + 30])!r}")
+                    break
+
+    # --- T6
+    def _write_tool_names(self):
+        spec_names = set()
+        if isinstance(self.api, dict):
+            for p in (self.api.get("paths") or {}):
+                spec_names.add(p.rstrip("/").rsplit("/", 1)[-1])
+        return spec_names - {"get_account", "verify_identity"}
+
+    @staticmethod
+    def _node_api_tools(n):
+        for lst, kind in ((n.get("tools") or [], "tools"), (n.get("pre_actions") or [], "pre_actions")):
+            for a in lst:
+                fn = a.get("function") if isinstance(a, dict) and isinstance(a.get("function"), dict) else {}
+                if fn.get("handler") == HANDLER_API and isinstance(fn.get("name"), str):
+                    yield kind, fn["name"]
+
+    PRE_VERIFICATION_RE = re.compile(r"before (identity|verification|the security|verif)|before and after verif|"
+                                     r"during (identity|verification|the security)|at any (time|point)|any point in the call|"
+                                     r"whenever|even before", re.I)
+
+    def check_pre_verification_tools(self, pre):
+        writes = self._write_tool_names()
+        if not writes:
+            self.info("rules", "no --api given: T6 write-tool check needs the tool names from the API file")
+            return
+        rules = self._in_force()
+        for key in sorted(pre):
+            n = self.all_nodes.get(key)
+            if not isinstance(n, dict):
+                continue
+            base = f"{'global_nodes' if key in self.globals else 'nodes'}.{key}"
+            for kind, name in self._node_api_tools(n):
+                if name not in writes or name == "close_call":
+                    continue   # close_call closes every call, the not-reached ones included
+                naming = [r for r in rules if re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", self._rule_blob(r))]
+                if any(r.get("category") in ("third_party", "identity") or self.PRE_VERIFICATION_RE.search(self._rule_blob(r))
+                       for r in naming):
+                    continue
+                if naming:
+                    self.err(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified, and no third_party/identity rule of the inventory allows it there ({', '.join(str(r.get('id')) for r in naming)} name it)")
+                else:
+                    self.warn(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified; the inventory says nothing about it")
+
+    # --- T26
+    CLAIM_RE = re.compile(r"(?<![\w-])(recorded|booked|confirmed|noted)(?![\w-])", re.I)
+    CLAIM_EXEMPT_RE = re.compile(r"\bcalls?\b[^.!?]{0,30}\b(is|are|will be|being|may be)\s+(being\s+)?recorded|recorded line", re.I)
+    CLAIM_NEG_RE = re.compile(r"\b(not|never|no|cannot|can't|couldn't|could not|unable|wasn't|isn't|haven't|hasn't|failed)\b|n't\b", re.I)
+
+    def check_success_claims(self):
+        writes = self._write_tool_names() or {"create_promise", "schedule_callback", "add_note", "transfer_to_agent"}
+
+        def ok_true(cond):
+            for l in self._cond_leaves(cond):
+                v = l.get("variable")
+                if isinstance(v, str) and l.get("operator") == "equals" and \
+                        str(l.get("operand", "")).strip().lower() in ("true", "yes", "1"):
+                    m = re.match(r"(\w+)_response\.data\.(ok|success)$", v)
+                    if m and m.group(1) in writes:
+                        return True
+            return False
+        before = self._region(ok_true)
+        for key in sorted(before):
+            base = f"{'global_nodes' if key in self.globals else 'nodes'}.{key}"
+            for fld, text in self._spoken.get(key, []):
+                for piece in self._expand(text):
+                    piece = self._norm(piece)
+                    for m in self.CLAIM_RE.finditer(piece):
+                        s0 = max(piece.rfind(c, 0, m.start()) for c in ".!?") + 1
+                        e = [i for i in (piece.find(c, m.end()) for c in ".!?") if i >= 0]
+                        sent = piece[s0:min(e) + 1 if e else len(piece)]
+                        if self.CLAIM_EXEMPT_RE.search(sent) or self.CLAIM_NEG_RE.search(piece[s0:m.start()]):
+                            continue
+                        self.warn(f"{base}.{fld}", f"says {m.group(1)!r} in a node reachable before any write tool returned ok: true: {sent.strip()!r}")
+                        break
+
+    # --- T29 / T30
+    IMPERATIVE_RE = re.compile(r"^(?:[-*•]\s*|\d+[.)]\s*)?(say|ask|call|never|do|don't|always|use|tell|read|offer|propose|"
+                               r"confirm|check|keep|follow|speak|answer|explain|give|state|mention|repeat|wait|end|close|if|when|"
+                               r"after|before|only|must|make|name|transfer|book|record|avoid|stop|then|now|greet|address|"
+                               r"remember|treat|accept|reject|decline|move|go|note|first|next|finally)\b", re.I)
+
+    def check_budget(self):
+        for key, n in self.all_nodes.items():
+            if not isinstance(n, dict):
+                continue
+            base = f"{'global_nodes' if key in self.globals else 'nodes'}.{key}"
+            tm = n.get("task_message") if isinstance(n.get("task_message"), str) else ""
+            if n.get("node_type") == "conversation" and tm:
+                if len(tm) > 2500:
+                    self.warn(f"{base}.task_message", f"task_message is {len(tm)} characters (> 2500, before placeholders are filled): move facts into code-built text, drop rules a route or code already enforces, put the deciding rules first")
+                imp = sum(1 for line in tm.splitlines() if self.IMPERATIVE_RE.match(line.strip()))
+                if imp > 15:
+                    self.warn(f"{base}.task_message", f"task_message has {imp} imperative lines (> 15): the model omits rules in long lists; keep the 3-5 that decide this node")
+            es = n.get("extraction_schema") if isinstance(n.get("extraction_schema"), list) else []
+            if len(es) > 4:
+                self.warn(f"{base}.extraction_schema", f"{len(es)} extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate")
+            for e in es:
+                if isinstance(e, dict) and isinstance(e.get("enum_values"), list) and len(e["enum_values"]) > 7:
+                    self.warn(f"{base}.extraction_schema.{e.get('name')}", f"enum has {len(e['enum_values'])} values (> 7): split it or route the rare values elsewhere")
+            intents = sum(1 for t in n.get("transitions") or [] if isinstance(t, dict)
+                          and any(l.get("operator") == "matches_intent" for l in self._cond_leaves(t.get("condition"))))
+            if intents > 8:
+                self.warn(f"{base}.transitions", f"{intents} model-judged (matches_intent) transitions (> 8): route on extracted enums or tool results instead")
+
+    def check_rules(self):
+        self._collect_texts()
+        if self.rules is not None:
+            self.check_verbatim()
+            vt = self._verified_test()
+            if vt is None:
+                self.warn("$.nodes", "no route tests an all_verified / verified variable: forbidden-word (T25) and write-tool (T6) checks before verification skipped")
+            else:
+                pre = self._region(vt)
+                self.check_forbidden_words(pre)
+                self.check_pre_verification_tools(pre)
+            self.check_success_claims()
+        if self.rules is not None or self.budget:
+            self.check_budget()
+
     # ------------------------------------------------------------ run
     def run(self):
         self.check_nulls(self.wf)
@@ -1281,47 +1718,62 @@ class _Linter:
         self.check_nodes()
         self.check_workflow_tools()
         self.check_graph()
+        if self.rules is not None or self.budget:
+            self.check_rules()
         self.findings.sort(key=lambda f: LEVEL_ORDER.get(f["level"], 9))
         return self.findings
 
 
-def lint(wf, api=None, call_vars=None):
+def lint(wf, api=None, call_vars=None, rules=None, budget=False):
     """Lint a workflow dict. Returns a list of {level, where, message} sorted ERROR, WARN, INFO.
     `call_vars`: the call variables the brief lists (customer_id, names, now, ...). They are set on every call, so
-    a workflow shipped without test_variables (as it must be) does not report them as never set."""
-    return _Linter(wf, api, call_vars).run()
+    a workflow shipped without test_variables (as it must be) does not report them as never set.
+    `rules`: the rule inventory (out/<slot>.rules.json, a list) for the verbatim, forbidden-word, pre-verification
+    write-tool and success-claim checks; it also turns on the prompt/latency budget checks (`budget=True` alone does
+    that without an inventory). See builder/LINT.md."""
+    return _Linter(wf, api, call_vars, rules, budget).run()
 
 
 def format_findings(findings):
     return "\n".join(f"{f['level']} {f['where']}: {f['message']}" for f in findings)
 
 
+USAGE = ("usage: lint.py <workflow.json> [--api openapi.json] [--call-vars customer_id,first_name,...] "
+         "[--rules out/<slot>.rules.json] [--budget]")
+
+
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
-    api = None
-    call_vars = None
-    if "--call-vars" in argv:
-        i = argv.index("--call-vars")
-        if i + 1 < len(argv):
-            call_vars = [v.strip() for v in argv[i + 1].split(",") if v.strip()]
-            args = [a for a in args if a != argv[i + 1]]
-    if "--api" in argv:
-        i = argv.index("--api")
-        if i + 1 >= len(argv):
-            print("usage: lint.py <workflow.json> [--api openapi.json] [--call-vars customer_id,first_name,...]", file=sys.stderr)
-            return 2
-        api_path = argv[i + 1]
-        args = [a for a in args if a != api_path]
-        with open(api_path) as fh:
+    values = {}
+    for flag in ("--call-vars", "--api", "--rules"):
+        if flag in argv:
+            i = argv.index(flag)
+            if i + 1 >= len(argv) or argv[i + 1].startswith("--"):
+                print(USAGE, file=sys.stderr)
+                return 2
+            values[flag] = argv[i + 1]
+            args.remove(argv[i + 1])
+    call_vars = [v.strip() for v in values["--call-vars"].split(",") if v.strip()] if "--call-vars" in values else None
+    api = rules = None
+    if "--api" in values:
+        with open(values["--api"]) as fh:
             api = json.load(fh)
+    if "--rules" in values:
+        with open(values["--rules"]) as fh:
+            rules = json.load(fh)
+        if isinstance(rules, dict) and isinstance(rules.get("rules"), list):
+            rules = rules["rules"]
+        if not isinstance(rules, list):
+            print("--rules: expected a JSON list of rules", file=sys.stderr)
+            return 2
     if len(args) != 1:
-        print("usage: lint.py <workflow.json> [--api openapi.json] [--call-vars customer_id,first_name,...]", file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     with open(args[0]) as fh:
         wf = json.load(fh)
     if isinstance(wf, dict) and "workflow" in wf and isinstance(wf["workflow"], dict) and "nodes" not in wf:
         wf = wf["workflow"]
-    findings = lint(wf, api, call_vars)
+    findings = lint(wf, api, call_vars, rules, budget="--budget" in argv)
     out = format_findings(findings)
     if out:
         print(out)
