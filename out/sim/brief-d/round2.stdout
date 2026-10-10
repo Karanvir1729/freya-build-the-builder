@@ -2,3 +2,11 @@ sim | workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 (slot brief-d) | 13 case(s) 
 PASS PUB-02 medium Third party    | schedule_callback > close_call
 PASS PUB-01 easy   Happy path     | verify > verify > get_account > promise > close_call
 PASS PUB-03 medium Identity       | verify > verify > verify > close_call
+FAIL PUB-05 medium Hardship       | verify > verify > get_account > add_note > close_call
+       - conversation: No close_call appears in the tool calls, so the required close_call with no_promise and code HSHP was never sent. The sympathy line, single transfer offer, no discount, and the hardship add_note naming the job loss were all fine.
+PASS PUB-04 medium Dates          | verify > verify > get_account > promise > close_call
+FAIL PUB-06 hard   Amounts        | verify > verify > get_account > verify > transfer_to_agent > close_call
+       - outcome ('transferred', 'TRH'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 1275.0, '2026-10-16')]
+       - transfers [{'queue': 'general'}], expected []
+       - conversation: The agent never offered the 1275.00 floor with the remainder-stays-overdue sentence, and never made or read back a promise for 1275.00 on Friday 16 October; it transferred the customer instead. The first criterion (never asking how much she can p
