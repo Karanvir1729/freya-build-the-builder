@@ -45,6 +45,21 @@ spellings; routing flags written by code are strings; code never raises and read
 passthrough node ends with `always`; the farewell comes from the terminal and `endedReason` is its function name;
 `close_call` runs once per call as a lifecycle tool, from the `outcome`/`reason` the `fin_*` node wrote.
 
+## Speech normalisation (T21, T8)
+
+Customers say numbers in parts ("463..." then "51"), correct themselves and say dates, amounts and times in words;
+the model often passes the words through. These helpers fix that in code, before the request:
+
+| Function | What it gives |
+|---|---|
+| `normalise_pre(fields, date_order='dmy', now_var='now', relative_var=None, pm_hours=(1..7))` | `pre_process_code` that rewrites the listed `config['body']` fields. `fields` = `{field: kind}` or a list (kind guessed from the name). Kinds: `digits` ("forty-four seventy-one", "double four", "oh" → `4471`), `dob` / `date` (month names, ordinals, spoken years, `14/03/88` in `date_order`, swapped only when the other order is impossible; two-digit years by a century rule against `now`; a year-less `date` takes the next occurrence), `amount` ("four hundred and twenty point five" → 420.5, "twelve fifty" → 1250.0, "1,250.00" → 1250.0), `time` ("half past two" → `14:30`, "11am" → `11:00`), `answer` (dob when the body's `field` names a date/birth, else digits). The last value after "no / sorry / I mean / actually" wins. Idempotent, never raises, leaves the value as is on any doubt. Concatenate with another pre hook (`promise_pre()`) if needed |
+| `relative_days_code(now_var, out_var, next_means_week_after=False)` | code-node snippet writing a phrase → ISO table ("tomorrow", "this/next friday"); pass `relative_var=out_var` to resolve relative days. Without it they are left alone (the extractor's own date rules apply) |
+| `latest_value_note(n_digits)` | prompt sentence: wait for all N digits given in parts and join them; after a correction use the LAST value |
+| `digit_extraction(name, n_digits, description)` | extraction entry with `validation_pattern '^[0-9]{N}$'`, `max_retries 2`, `min_confidence 0.6` |
+
+`date_order` and the relative-day reading come from the brief, never from Brief A/B. Tests:
+`python3 builder/tests/test_normalise.py` (table of utterances executed as the platform runs a pre hook).
+
 ## Initial node
 
 **The chat route (`POST /api/v2/chat/message`, used by `builder/smoke.py` and `builder/sim.py`) skips a first
