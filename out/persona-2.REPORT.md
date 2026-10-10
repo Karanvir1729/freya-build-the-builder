@@ -59,7 +59,7 @@ v3 agents at the same time and a republish would have changed the agent under it
 | 5 | brief-b-v3-p2 v2 | talkative | B ×3 | **3/3** | – | `b-v3p2-talkative.json` |
 | 6 | brief-a-v3-p2 v2 | talkative | A ×10 | **9/10** | PUB-05 | `a-v3p2-talkative-r2.json` |
 | 7 | brief-a-v3-p2 v3 (+ fixes 5-6) | talkative | A ×10 | **8/10** | PUB-04 (platform stall), PUB-06 (judge) | `a-v3p2-talkative-r3.json` |
-| 8 | brief-a-v3-p2 v3 | none | A ×10 | RUN8 | RUN8F | `a-v3p2-x1.json` |
+| 8 | brief-a-v3-p2 v3 | none | A ×10 | **10/10** | – (median slowest turn 11 s: busy platform, the run queued 40 min behind other simulations) | `a-v3p2-x1.json` |
 
 Talkative on A over the three runs of the fixed agent: 9, 9, 8 of 10; no failure repeated across runs, and none of
 the three agent mechanisms of run 1 came back. The "before" 9/10 was measured on an earlier v3 by the main session;
@@ -82,7 +82,11 @@ unit-tested and confirmed on the chat route before run 7.
 
 ## Credits
 
-RUNS_USED
+8 organisers' simulator runs started, 7 completed (one attempt of run 8 timed out in the queue before a simulation
+was created, so it cost nothing): six ten-case Brief A runs and two three-case Brief B runs, about **6.6 ten-case
+runs** of the 8 budgeted. Local simulator: one Claude-provider sanity check, 4 model calls (3 customer, 1 judge); no
+OpenAI call. Chat-route smoke calls: 6 script runs + 4 scratch checks (no credits beyond the platform's chat turns).
+Log: `results/credits.log` (gitignored).
 
 ## Not done / open
 
