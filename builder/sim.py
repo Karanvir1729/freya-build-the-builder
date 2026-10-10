@@ -720,6 +720,10 @@ class Ctx:
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(line_buffering=True)   # a run killed mid-way (timeout) still shows every finished case
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("workflow", help="workflow id, or a slot name from .freya-agents.json (brief-a, brief-b, ...)")
     ap.add_argument("--cases", default=str(ROOT / "public-test-set.json")); ap.add_argument("--brief"); ap.add_argument("--only")
@@ -756,8 +760,18 @@ def main():
     reps, total_s = [], 0.0
     for rep in range(a.reps):
         t0 = time.time()
+        rows = []
         with ThreadPoolExecutor(max_workers=max(1, a.concurrency)) as pool:
-            rows = list(pool.map(lambda c: run_case(ctx, c, rep), cases))
+            for row in pool.map(lambda c: run_case(ctx, c, rep), cases):
+                rows.append(row)
+                if a.out:   # incremental: a killed run still leaves every finished case on disk
+                    try:
+                        pathlib.Path(a.out).parent.mkdir(parents=True, exist_ok=True)
+                        json.dump({"runner": "sim", "partial": True, "workflow_id": ctx.workflow_id, "agent_id": agent_id, "rep": rep + 1,
+                                   "passed": sum(1 for r in rows if r.get("pass")), "done": len(rows), "total": len(cases), "rows": rows,
+                                   "all_rows": reps + [rows]}, open(a.out, "w"), indent=1)
+                    except Exception:
+                        pass
         took = time.time() - t0; total_s += took
         waits = sorted(r.get("slowest_turn_s") or 0 for r in rows if r.get("call_id"))
         if waits:

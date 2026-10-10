@@ -198,6 +198,7 @@ def workflow_digest(wf):
         wf = wf["workflow"]
     nodes = wf.get("nodes") or {}
     tools, labels, counts = {}, {}, {}
+    code_seen, code_seen_src = {}, {}
 
     def register(t):
         key = json.dumps(t, sort_keys=True)
@@ -231,7 +232,14 @@ def workflow_digest(wf):
             f = pa.get("function") or {}
             if f.get("name") == "code_exec":
                 code = (((f.get("parameters") or {}).get("properties") or {}).get("code") or {}).get("default", "")
-                body.append("  code:\n" + _indent(code, 4))
+                # the policy-as-code nodes share one 40 KB core: print it once (the digest was 872 KB and E2BIG otherwise)
+                ck = hash(code)
+                if ck in code_seen:
+                    body.append("  code: same code as node %s" % code_seen[ck] +
+                                ("" if code == code_seen_src[ck] else " (identical core)"))
+                else:
+                    code_seen[ck] = key; code_seen_src[ck] = code
+                    body.append("  code:\n" + _indent(code, 4))
             else:
                 body.append("  pre_action tool: " + register(pa))
         if n.get("response_mapping"):
