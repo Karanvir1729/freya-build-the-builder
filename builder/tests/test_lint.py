@@ -343,6 +343,239 @@ def test_cli_exit_codes():
     assert r.stdout.startswith("ERROR "), r.stdout
 
 
+# ------------------------------------------------------------ rules inventory checks (--rules / --budget)
+def end_node(name, spoken):
+    return {"name": name, "node_type": "end_call", "on_enter": {"type": "silent"}, "disable_inactivity_monitor": True,
+            "transitions": [], "terminal": {"type": "function", "function": {
+                "name": name, "handler": "__function__:end_call", "parameters": {"type": "object", "properties": {
+                    "message_mode": {"type": "string", "default": "custom"},
+                    "spoken_message": {"type": "string", "default": spoken}}}}}}
+
+
+def eq_true(var):
+    return {"logic": "or", "conditions": [{"variable": var, "operator": "equals", "operand": "true"},
+                                          {"variable": var, "operator": "equals", "operand": "True"}]}
+
+
+def gated():
+    """opening (tts) -> ask_id (verify_identity) -[all_verified]-> talk (create_promise) -[ok true]-> end_promise;
+    ask_id -> end_failed; talk -> end_refused. 'pre-verification' = opening, ask_id, end_failed."""
+    def cid():
+        return {"customer_id": {"type": "string", "default": "{{customer_id}}"}}
+    wf = minimal()
+    wf["initial_node"] = "opening"
+    wf["nodes"] = {
+        "opening": {"name": "opening", "node_type": "conversation", "task_message": "Wait for the answer. Do not call any tool in this turn.",
+                    "on_enter": {"type": "tts", "text": "Hello, this is the bank. Am I speaking with {{title}} {{last_name}}?"},
+                    "transitions": [always("ask_id")]},
+        "ask_id": {"name": "ask_id", "node_type": "conversation",
+                   "task_message": "Ask the date of birth. CALL verify_identity with it. Never say debt or payment.",
+                   "tools": [api_tool("verify_identity", dict(cid(), field={"type": "string", "default": "date_of_birth"},
+                                      answer={"type": "string", "description": "The answer.", "default": "{{answer}}"}))],
+                   "transitions": [
+                       {"target_node": "talk", "description": "verified",
+                        "condition": eq_true("verify_identity_response.data.all_verified")},
+                       {"target_node": "end_failed", "description": "failed", "condition": {"logic": "or", "conditions": [
+                           {"variable": "verify_identity_response.data.wrong_answers_left", "operator": "equals", "operand": "0"}]}}]},
+        "talk": {"name": "talk", "node_type": "conversation",
+                 "task_message": "Ask for the payment. Read the amount back and ask \"Do you confirm?\". CALL create_promise after yes.",
+                 "on_enter": {"type": "tts", "text": "I am calling about your late payment. Can you pay today?"},
+                 "tools": [api_tool("create_promise", dict(cid(), product_id={"type": "string", "default": "p1"},
+                                    amount={"type": "number", "description": "Amount.", "default": "{{amount}}"},
+                                    date={"type": "string", "description": "Date.", "default": "{{date}}"}))],
+                 "transitions": [
+                     {"target_node": "end_promise", "description": "recorded", "condition": eq_true("create_promise_response.data.ok")},
+                     {"target_node": "end_refused", "description": "the customer refuses", "condition": {
+                         "operator": "matches_intent", "description": "the customer refuses"}}]},
+        "end_promise": end_node("end_promise", "Your promise is recorded. Goodbye."),
+        "end_refused": end_node("end_refused", "I have not recorded a promise today. Goodbye."),
+        "end_failed": end_node("end_failed", "I am sorry, I could not verify you. Goodbye."),
+    }
+    wf["test_variables"] = {"customer_id": "c_test", "title": "Ms", "last_name": "Lee"}
+    return wf
+
+
+RULES = [
+    {"id": "R01", "category": "opening", "text": "Ask \"Am I speaking with {title} {last_name}?\".",
+     "verbatim": ["Am I speaking with {title} {last_name}?"], "values": {}},
+    {"id": "R02", "category": "disclosure", "text": "Do not say \"debt\" or \"payment\" before identity is verified.",
+     "verbatim": [], "values": {"forbidden_words_before_verification": ["debt", "payment"]}},
+    {"id": "R03", "category": "confirmation", "text": "Ask \"Do you confirm?\"; call `create_promise` after a yes.",
+     "verbatim": ["Do you confirm?"], "values": {}},
+]
+
+
+def rl(wf, rules=None, api=API):
+    return lint(wf, api, rules=RULES if rules is None else rules)
+
+
+def new_findings(f):
+    return [x for x in f if x["level"] in (ERROR, WARN) and ("rules." in x["where"] or "verif" in x["message"]
+            or "forbidden" in x["message"] or "write tool" in x["message"] or "ok: true" in x["message"])]
+
+
+def test_rules_gated_fixture_is_clean():
+    f = rl(gated())
+    assert errors(gated(), API) == [], errors(gated(), API)
+    # only the T24 prompt-only WARN for "Do you confirm?" (the fixture keeps it in the prompt on purpose)
+    assert [x for x in new_findings(f) if "Do you confirm" not in x["message"]] == [], new_findings(f)
+    assert has(f, WARN, "rules.R03", "only in a prompt"), f
+    # without --rules none of the new checks run
+    assert not any("rules." in x["where"] for x in lint(gated(), API))
+
+
+def test_rules_verbatim():
+    wf = gated()
+    wf["nodes"]["opening"]["on_enter"]["text"] = "Hello, is this {{title}} {{last_name}}?"
+    assert has(rl(wf), ERROR, "rules.R01", "appears in no tts"), rl(wf)
+    # whitespace, a placeholder for the braced field, and code-built text all count
+    wf["nodes"]["opening"]["on_enter"]["text"] = "Hello.  Am I   speaking with {{greeting_name}}?"
+    assert not has(rl(wf), ERROR, "rules.R01"), rl(wf)
+    wf["nodes"]["opening"]["on_enter"]["text"] = "{{opening_line}}"
+    wf["nodes"]["talk"]["on_enter"]["text"] = "I am calling about your late payment. Do you confirm?"
+    assert not has(rl(wf), WARN, "rules.R03"), rl(wf)
+    assert has(rl(wf), ERROR, "rules.R01"), rl(wf)
+    wf["nodes"]["end_failed"]["terminal"]["function"]["parameters"]["properties"]["spoken_message"]["default"] = \
+        "Am I speaking with " + "{{title}} {{last_name}}?"
+    assert not has(rl(wf), ERROR, "rules.R01"), rl(wf)
+
+
+def test_rules_verbatim_code_built():
+    wf = gated()
+    wf["nodes"]["opening"]["on_enter"]["text"] = "{{opening_line}}"
+    wf["nodes"]["talk"]["tools"][0]["post_process_code"] = (
+        "try:\n    t = 'Am I speaking with '\n    vars['opening_line'] = t + vars.get('title', '') + ' ' + "
+        "vars.get('last_name', '') + '?'\nexcept Exception:\n    pass\n")
+    assert not has(rl(wf), ERROR, "rules.R01"), rl(wf)
+
+
+def test_rules_forbidden_words():
+    wf = gated()
+    wf["nodes"]["opening"]["on_enter"]["text"] += " It is about your debt."
+    assert has(rl(wf), ERROR, "nodes.opening.on_enter", "forbidden word 'debt'"), rl(wf)
+    # after the verified route the same word is fine
+    wf = gated()
+    assert not has(rl(wf), ERROR, "nodes.talk", "forbidden"), rl(wf)
+    # a farewell reachable before verification (code-built via a placeholder) is spoken text too
+    wf["nodes"]["end_failed"]["terminal"]["function"]["parameters"]["properties"]["spoken_message"]["default"] = "{{bye_text}}"
+    wf["nodes"]["ask_id"]["tools"][0]["post_process_code"] = (
+        "try:\n    vars['bye_text'] = 'Please settle the payments soon.'\nexcept Exception:\n    pass\n")
+    assert has(rl(wf), ERROR, "nodes.end_failed.terminal.spoken_message", "'payment'"), rl(wf)
+    # prompts: a 'never say' clause is fine, any other mention is a WARN
+    wf = gated()
+    assert not has(rl(wf), WARN, "nodes.ask_id.task_message"), rl(wf)
+    wf["nodes"]["ask_id"]["task_message"] += " If they ask about the payment, say you will explain later."
+    assert has(rl(wf), WARN, "nodes.ask_id.task_message", "forbidden word 'payment'"), rl(wf)
+
+
+def test_rules_forbidden_words_fallback_and_product():
+    rules = [{"id": "R01", "category": "disclosure", "text": "Do not say \"collections\" or the product before verification.",
+              "verbatim": [], "values": {}}]
+    wf = gated()
+    wf["nodes"]["opening"]["on_enter"]["text"] += " This is the collections team."
+    assert has(rl(wf, rules), ERROR, "nodes.opening", "'collections'"), rl(wf, rules)
+    rules = [{"id": "R01", "category": "disclosure", "text": "Do not name the product before verification.", "verbatim": [],
+              "values": {"forbidden_before_verification": ["the product"]}},
+             {"id": "R02", "category": "disclosure", "text": "Name the product in words.", "verbatim": [],
+              "values": {"product_names": {"credit_card": "credit card ending {card_last4}", "car_loan": "car loan"}}}]
+    wf = gated()
+    wf["nodes"]["opening"]["on_enter"]["text"] += " It is about your car loan."
+    assert has(rl(wf, rules), ERROR, "nodes.opening", "'car loan'"), rl(wf, rules)
+
+
+def test_rules_no_verified_route():
+    wf = gated()
+    wf["nodes"]["ask_id"]["transitions"][0]["condition"] = {"logic": "or", "conditions": [
+        {"variable": "id_state", "operator": "equals", "operand": "passed"}]}
+    assert has(rl(wf), WARN, "$.nodes", "no route tests an all_verified"), rl(wf)
+
+
+def test_rules_write_tools_before_verification():
+    wf = gated()
+    wf["nodes"]["ask_id"]["tools"].append(api_tool("create_promise", {"customer_id": {"type": "string", "default": "{{customer_id}}"}}))
+    assert has(rl(wf), ERROR, "nodes.ask_id.tools[create_promise]", "no third_party/identity rule"), rl(wf)
+    # the inventory is silent about the tool: WARN
+    wf = gated()
+    wf["nodes"]["ask_id"]["tools"].append(api_tool("add_note", {"customer_id": {"type": "string", "default": "{{customer_id}}"}}))
+    assert has(rl(wf), WARN, "nodes.ask_id.tools[add_note]", "says nothing"), rl(wf)
+    # allowed by a third_party rule, or by a rule that says it applies before verification
+    wf = gated()
+    wf["nodes"]["ask_id"]["tools"].append(api_tool("schedule_callback", {
+        "customer_id": {"type": "string", "default": "{{customer_id}}"},
+        "date": {"type": "string", "description": "Date.", "default": "{{date}}"},
+        "time": {"type": "string", "description": "Time HH:MM.", "default": "{{time}}"}}))
+    allow = RULES + [{"id": "R09", "category": "third_party", "text": "Call `schedule_callback` with the date and time.",
+                      "verbatim": [], "values": {}}]
+    assert not any("schedule_callback" in x["where"] and x["level"] in (ERROR, WARN) for x in rl(wf, allow)), rl(wf, allow)
+    wf = gated()
+    wf["nodes"]["ask_id"]["tools"].append(api_tool("transfer_to_agent", {"customer_id": {"type": "string", "default": "{{customer_id}}"},
+                                                                    "queue": {"type": "string", "default": "general"}}))
+    special = RULES + [{"id": "R09", "category": "special", "text": "A request for a human: call `transfer_to_agent`.",
+                        "verbatim": [], "values": {}}]
+    assert has(rl(wf, special), ERROR, "tools[transfer_to_agent]", "write tool"), rl(wf, special)
+    special[-1]["text"] += " Applies before and after verification."
+    assert not has(rl(wf, special), ERROR, "tools[transfer_to_agent]"), rl(wf, special)
+    # write tools after the verified route are not reported
+    assert not any("nodes.talk.tools" in x["where"] and "write tool" in x["message"] for x in rl(gated()))
+
+
+def test_rules_success_claims():
+    wf = gated()
+    sm = wf["nodes"]["end_failed"]["terminal"]["function"]["parameters"]["properties"]["spoken_message"]
+    sm["default"] = "Your details are noted. Goodbye."
+    assert has(rl(wf), WARN, "nodes.end_failed.terminal.spoken_message", "'noted'"), rl(wf)
+    # a negated claim and 'this call is recorded' are fine; after the ok_true route is fine
+    sm["default"] = "I could not record anything and nothing was booked. Goodbye."
+    wf["nodes"]["opening"]["on_enter"]["text"] = "Hello, this call is recorded. Am I speaking with {{title}} {{last_name}}?"
+    assert not any("ok: true" in x["message"] for x in rl(wf)), rl(wf)
+    wf["nodes"]["end_refused"]["terminal"]["function"]["parameters"]["properties"]["spoken_message"]["default"] = \
+        "Your promise is confirmed. Goodbye."
+    assert has(rl(wf), WARN, "nodes.end_refused", "'confirmed'"), rl(wf)
+
+
+def test_budget_checks():
+    wf = gated()
+    assert not any(x["level"] == WARN for x in lint(wf, API, budget=True) if "budget" in x["message"])
+    n = wf["nodes"]["talk"]
+    n["task_message"] = "x" * 2600
+    assert has(lint(wf, API, budget=True), WARN, "nodes.talk.task_message", "2600 characters"), lint(wf, API, budget=True)
+    n["task_message"] = "\n".join(f"- Never say thing {i}." for i in range(16))
+    assert has(lint(wf, API, budget=True), WARN, "nodes.talk.task_message", "16 imperative lines")
+    n["task_message"] = "\n".join(f"- Never say thing {i}." for i in range(15))
+    assert not has(lint(wf, API, budget=True), WARN, "nodes.talk.task_message")
+    n["extraction_schema"] = [{"name": f"v{i}", "type": "string", "description": "d"} for i in range(5)]
+    assert has(lint(wf, API, budget=True), WARN, "nodes.talk.extraction_schema", "5 extraction variables")
+    n["extraction_schema"] = [{"name": "topic", "type": "string", "description": "d", "enum_values": [str(i) for i in range(8)]}]
+    assert has(lint(wf, API, budget=True), WARN, "extraction_schema.topic", "8 values")
+    n["transitions"] += [{"target_node": "end_refused", "description": f"intent {i}", "condition": {
+        "operator": "matches_intent", "description": f"intent {i}"}} for i in range(8)]
+    assert has(lint(wf, API, budget=True), WARN, "nodes.talk.transitions", "9 model-judged")
+    assert not has(lint(wf, API), WARN, "nodes.talk.transitions", "model-judged")        # off by default
+
+
+def test_rules_reference_workflows():
+    """The two real workflows with their inventories: no new ERROR on the cloud build (its inventory allows a human
+    transfer before verification); brief-a_v2 with the older inventory gets the two transfer_to_agent ERRORs."""
+    for wf_path, rules_path, n_err in (("brief-a-cloud.workflow.json", "brief-a-cloud.rules.json", 0),
+                                       ("brief-a_v2.workflow.json", "brief-a.rules.json", 2)):
+        wf = json.load(open(ROOT / "out" / wf_path))
+        f = lint(wf, API, rules=json.load(open(ROOT / "out" / rules_path)))
+        errs = [x for x in f if x["level"] == ERROR]
+        assert len(errs) == n_err and all("transfer_to_agent" in x["where"] for x in errs), errs
+        assert not any("forbidden" in x["message"] for x in f), f
+
+
+def test_cli_rules_flag():
+    r = subprocess.run([sys.executable, str(ROOT / "builder" / "lint.py"), str(ROOT / "out" / "brief-a-cloud.workflow.json"),
+                        "--api", str(ROOT / "tools" / "openapi.json"), "--rules", str(ROOT / "out" / "brief-a-cloud.rules.json")],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "only in a prompt" in r.stdout and "3445 characters" in r.stdout, r.stdout
+    r = subprocess.run([sys.executable, str(ROOT / "builder" / "lint.py"), str(ROOT / "out" / "brief-a-cloud.workflow.json"),
+                        "--rules"], capture_output=True, text=True)
+    assert r.returncode == 2, r.stdout + r.stderr
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
