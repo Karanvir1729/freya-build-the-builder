@@ -3622,7 +3622,7 @@
      }
     }
    },
-   "pre_process_code": "try:\n    b = config.get('body')\n    if isinstance(b, dict):\n        if not b.get('reason'):\n            b.pop('reason', None)\nexcept Exception:\n    pass\n"
+   "pre_process_code": "try:\n    b = config.get('body')\n    if isinstance(b, dict):\n        r = str(b.get('reason') or '').strip()\n        if not r or r.startswith('{'):\n            b['reason'] = 'UNC'\n            b['outcome'] = 'not_reached'\nexcept Exception:\n    pass\n"
   }
  ],
  "test_variables": {}

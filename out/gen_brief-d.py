@@ -461,6 +461,18 @@ close_call = fl.close_call_tool(
     outcome_desc="promise | paid | transferred | no_promise | not_verified | not_reached, from the dialler code list.",
     reason_desc="The dialler code: PRM, AP, TRS, TRH, TSP, RF, HSHP, DSP, SVC, IDF, IDD, CBK, NCB, WN, DEC, UNC. Never empty.",
     no_reason_outcomes=(), outcome_var="close_outcome", reason_var="close_code")
+# R code list intro (audit R68): every close carries a code. A hang-up before `setup` ran leaves close_code unset, so
+# the close would go out without one (or with model-filled values): that is row 17, not_reached / UNC.
+close_call["pre_process_code"] = """try:
+    b = config.get('body')
+    if isinstance(b, dict):
+        r = str(b.get('reason') or '').strip()
+        if not r or r.startswith('{'):
+            b['reason'] = 'UNC'
+            b['outcome'] = 'not_reached'
+except Exception:
+    pass
+"""
 
 SYSTEM = ("You are the digital assistant of Kestrel Bank on an outbound phone call to {{first_name}} {{last_name}}. Speak English. Keep every turn to one or two short sentences. "
           "Once identity is confirmed, address the customer as {{title}} {{last_name}}.\n"

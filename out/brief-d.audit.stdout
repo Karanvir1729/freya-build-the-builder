@@ -1,1 +1,1 @@
-audit: implemented 99, partial 2, missing 0, contradicted 0, superseded 16, total 117 -> out/brief-d.audit.json + brief-d.audit.md | 10 model call(s), 76 s, $1.82 | evidence not found verbatim: 1 | top fixes: R75, R53
+audit: implemented 99, partial 2, missing 0, contradicted 0, superseded 16, total 117 -> out/brief-d.audit.json + brief-d.audit.md | 10 model call(s), 75 s, $1.78 | evidence not found verbatim: 1 | top fixes: R53, R68
