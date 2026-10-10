@@ -169,3 +169,7 @@ Rules the module keeps: every per-product variable is a string written only by c
 value never routes twice; no '{{' in code (the parameters travel as a JSON literal with escaped braces); a failing core
 still leaves `route` and `state_line`. On the chat route an initial node's tts is replaced by a model turn, so the
 opening prompt should quote the opening line too.
+
+## How customers talk (persona conduct)
+
+`assemble(..., conduct=True)` appends `PERSONA_CONDUCT` to the system prompt: keep to the business of the call, no sympathy for small talk, a message without an answer is neither a refusal nor a request, one short answer to a question back then the same question again, wait for a complete number, the last corrected value counts, 'how much can I pay' is not a plan request. `REFUSAL_NONE_CLAUSE` and `PLAN_REQUEST_CLAUSE` are appended to the matching enum descriptions by the generator. Brief-agnostic; the brief's own definitions of a refusal or a deflection come first in the description and win.

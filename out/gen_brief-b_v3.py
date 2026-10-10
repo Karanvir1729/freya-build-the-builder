@@ -153,7 +153,7 @@ ID_COMMON = ("Rules for this step:\n"
              "- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.")
 
 REFUSAL_DESC = ("From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, "
-                "or ask what the call is about instead of answering it. none if they give an answer or say anything else.")
+                "or ask what the call is about instead of answering it. none if they give an answer or say anything else." + fl.REFUSAL_NONE_CLAUSE)
 
 nodes["ask_dob"] = fl.conv(
     "ask_dob",
@@ -301,7 +301,7 @@ TOPIC_DESC = ("What the customer's LATEST message says, if it is one of these. "
               "hardship = mentions illness, a death in the family, or losing their job (this wins over every other value, even when they also name a date or an amount). "
               "already_paid = says they have ALREADY paid a past-due amount (not 'I will pay'). "
               "dispute = says a debt or a product is not theirs, they never had it, or it was closed or paid off in the past. "
-              "new_plan = explicitly asks for a new payment plan, lower or smaller instalments, or restructuring. Saying an amount is too much is NOT new_plan; a different amount or date for a payment is NOT new_plan. "
+              "new_plan = explicitly asks for a new payment plan, lower or smaller instalments, or restructuring. Saying an amount is too much is NOT new_plan; a different amount or date for a payment is NOT new_plan." + fl.PLAN_REQUEST_CLAUSE + " "
               "human = asks to speak to a person, a human, an agent or a colleague. "
               "no_talk = says they do not want to talk or do not want this call (not a refusal to pay). "
               "none = anything else: offers, yes or no answers, refusals to pay, questions.")
@@ -398,7 +398,7 @@ SYSTEM = ("You are Freya Bank's digital assistant on an outbound phone call to {
           "- After every tool result, speak to the customer or call the next tool. Never end a turn with nothing. Follow what_to_do_next in a tool result.\n"
           "- Say amounts as plain numbers, for example 420.50, and dates as weekday, day and month, for example Friday 16 October.")
 
-wf = fl.assemble(INITIAL, nodes, SYSTEM, [close_call])   # no test_variables (CLAUDE.md)
+wf = fl.assemble(INITIAL, nodes, SYSTEM, [close_call], conduct=True)   # no test_variables (CLAUDE.md); conduct = how customers talk
 
 if __name__ == "__main__":
     out = sys.argv[2] if len(sys.argv) > 2 else ROOT / "out/brief-b_v3.workflow.json"
