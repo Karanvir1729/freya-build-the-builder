@@ -32,8 +32,8 @@ with `"runner": "sim"` (so it can be told apart from the organisers' scorer), an
 
 ## One case, step by step
 
-1. `POST /v1/practice/sessions {"case": id}` on the mock bank opens a fresh practice customer; its `variables`
-   (`customer_id`, `first_name`, `last_name`, `title`, `now`) are the call's `customerVariables`.
+1. `POST /v1/practice/sessions {"case": mock_case or id}` on the mock bank opens a fresh practice customer; its `variables`
+   (`customer_id`, `first_name`, `last_name`, `title`, `now`) are the call's `customerVariables` (a case's own `variables.now` replaces `now`).
 2. The customer's persona is `run_cases.persona_for(case)['prompt']` (the organisers' `PERSONA` template, `STYLES`,
    third-party handling) plus one line: `You are on a phone call. Reply with ONLY your next spoken line.` The
    conversation is kept as alternating messages (customer = `assistant`, agent = `user`); for the CLI it is
@@ -50,6 +50,20 @@ with `"runner": "sim"` (so it can be told apart from the organisers' scorer), an
    organisers' `successCriteria` wording), the transcript with tool events in place, and the tool list, and must
    answer `{"outcome": "pass"|"fail", "reason": "..."}` (parsed robustly: JSON anywhere in the text, else the words).
    Judge failures are appended as `conversation: ...`, like `run_cases.py`.
+
+## Extended cases: `mock_case` and a different `now`
+
+The mock bank serves exactly the practice customers `PUB-01`..`PUB-13` (fixed identity answers, products, `days_late`,
+faults: PUB-10's first `create_promise` fails). The customer's script, the expected ledger and the checks are ours, so a
+case file may reuse a mock customer with a new script under its own id. Two optional case fields:
+
+| Field | Effect |
+|---|---|
+| `mock_case: "PUB-03"` | The practice session is opened with `{"case": case["mock_case"]}` instead of the case's `id`, so ids can be unique (`EXT-A-07`). Copy `variables` (names, title), `identity`, `products` and `faults` from that mock case: the mock answers with its own data, whatever the case file says. |
+| `variables.now` | Sent in `customerVariables` instead of the session's `now`. The mock enforces no date rule, so another call date is a valid test as long as every expected date is recomputed for it. |
+
+Case sets: `tests/cases/brief-a-extended.cases.json`, `tests/cases/brief-b-extended.cases.json` (see `tests/cases/README.md`).
+`tools/run_cases.py` (kit file) knows neither field: run extended cases with `sim.py` only.
 
 ## How it differs from the organisers' simulation
 
