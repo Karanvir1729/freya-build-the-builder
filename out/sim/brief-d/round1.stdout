@@ -25,3 +25,9 @@ FAIL PUB-05 medium Hardship       | verify > verify > get_account > transfer_to_
        - notes [], expected [('p1', 'hardship')]
        - transfers [{'queue': 'support'}], expected []
        - conversation: No add_note call was made on p1 with reason hardship naming the job loss. close_call was made with reason TSP and outcome transferred, not no_promise with code HSHP, and it returned an error.
+FAIL PUB-07 hard   Dates          | close_call
+       - outcome ('not_verified', 'IDD'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 540.0, '2026-10-26')]
+       - conversation: The call ended after the customer refused security questions. The agent never asked for the exact day after 'the week after next', never accepted 26 October, and never recorded a promise of 540.00 on 2026-10-26.
+FAIL PUB-08 medium Already paid   | verify > verify > get_account > add_note > close_call
+       - conversation: The close_call with reason AP and outcome paid was sent, but it returned ok: false ("this outcome needs one of these reasons"), so the call was not successfully closed. The other two criteria hold: the agent said payments made today show on the n
