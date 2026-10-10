@@ -180,6 +180,7 @@ nodes["third_party"] = fl.conv(
 # ---------------------------------------------------------------- identity
 HINTS = {"day_month_swapped": "Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988."}
 MAX_WRONG = "Three wrong answers. The check has ended. Say nothing about the account."
+ALL_VERIFIED = "Both answers are correct. Identity verified."  # the brief's two questions (freyalib's default is generic)
 
 transfer_general = fl.api_tool(API, "transfer_to_agent", baked={"queue": "general"},
                                description="Transfer the call to a human colleague. CALL it only when the customer insists on a human after you asked once whether you can help.")
@@ -201,7 +202,7 @@ nodes["ask_dob"] = fl.conv(
     tools=[fl.api_tool(API, "verify_identity", baked={"field": "date_of_birth"},
                        description="Check the date of birth. CALL it every time the customer gives a full date of birth.",
                        field_descriptions={"answer": "The date of birth as YYYY-MM-DD."},
-                       post=fl.verify_post("What is your date of birth?", HINTS, MAX_WRONG)), transfer_general],
+                       post=fl.verify_post("What is your date of birth?", HINTS, MAX_WRONG, all_verified_text=ALL_VERIFIED)), transfer_general],
     extraction=[fl.ext("refusal_dob", ["none", "refused"], REFUSAL_DESC)],
     transitions=[
         fl.eq("verify_identity_response.data.wrong_answers_left", "0", "fin_failed", "three wrong answers"),
@@ -217,7 +218,7 @@ nodes["ask_phone"] = fl.conv(
     tools=[fl.api_tool(API, "verify_identity", baked={"field": "phone_last4"},
                        description="Check the last four digits of the phone number. CALL it every time the customer gives four digits.",
                        field_descriptions={"answer": "Exactly four digits."},
-                       post=fl.verify_post("What are the last four digits of the phone number on file?", HINTS, MAX_WRONG)), transfer_general],
+                       post=fl.verify_post("What are the last four digits of the phone number on file?", HINTS, MAX_WRONG, all_verified_text=ALL_VERIFIED)), transfer_general],
     extraction=[fl.ext("refusal_phone", ["none", "refused"], REFUSAL_DESC)],
     transitions=[
         fl.is_true("verify_identity_response.data.all_verified", "load_account", "identity verified"),

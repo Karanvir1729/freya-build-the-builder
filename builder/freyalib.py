@@ -217,8 +217,14 @@ def conv(name, task, on_enter=None, tools=None, extraction=None, transitions=Non
                      on_enter_first_entry_only=first_only, max_node_turns=max_turns)
 
 
+def _need_transitions(name, transitions, kind):
+    if not transitions:
+        raise ValueError("%s node %r needs at least one transition (end with always(<next>))" % (kind, name))
+
+
 def code_node(name, code, transitions):
-    """A passthrough code node. `transitions` must end with always(<next>)."""
+    """A passthrough code node. `transitions` must end with always(<next>). Raises ValueError when empty."""
+    _need_transitions(name, transitions, "code")
     return base_node(name, "code", passthrough=True, passthrough_default_transition=transitions[-1]["target_node"],
                      on_enter={"type": "silent"}, disable_inactivity_monitor=True, pre_actions=[{
                          "type": "function",
@@ -231,7 +237,9 @@ def code_node(name, code, transitions):
 
 def api_node(name, tool, transitions, mapping=None, on_enter=None):
     """A passthrough api_request node that runs `tool` (an api_tool) on entry. `mapping` is the NODE-level
-    response_mapping ([{"path": "data.x", "variable": "x"}]). on_enter defaults to silent; a tts line covers the wait."""
+    response_mapping ([{"path": "data.x", "variable": "x"}]). on_enter defaults to silent; a tts line covers the wait.
+    `transitions` must end with always(<next>). Raises ValueError when empty."""
+    _need_transitions(name, transitions, "api_request")
     kw = {}
     if mapping:
         kw["response_mapping"] = list(mapping)
@@ -250,6 +258,30 @@ def end_node(name, ended_reason, farewell):
                          "parameters": {"type": "object", "properties": {
                              "message_mode": {"type": "string", "default": "custom"},
                              "spoken_message": {"type": "string", "default": farewell}}}}})
+
+
+def conversation_first(opening_node_name, setup_code, route_var, routes, default_target, nodes, setup_name="setup"):
+    """The 'Initial node' pattern: the call starts in a conversation node and the setup code runs right after the
+    customer's first turn. The chat route (smoke tests, the local simulator) SKIPS a first code node, so a code node
+    must never be the initial node; simulations would run it, the chat route would not, and the two would differ.
+
+    `nodes[opening_node_name]` must already be a conversation node (its on_enter speaks the opening line and its
+    extraction_schema extracts `route_var`). Its transitions are replaced by one always(setup_name). Adds
+    nodes[setup_name]: a passthrough code node that runs `setup_code` (compute facts from call variables there) and
+    then routes on `route_var`: `routes` is a list of (value, target, description) or a dict {value: target};
+    anything else goes to `default_target`. Returns opening_node_name: pass it to assemble() as the initial node.
+    Prompts of the opening node can only use call variables (test_variables); setup's outputs exist from the
+    next node on."""
+    op = nodes.get(opening_node_name)
+    if not isinstance(op, dict) or op.get("node_type") != "conversation":
+        raise ValueError("conversation_first: %r must be a conversation node already in nodes" % opening_node_name)
+    if setup_name in nodes:
+        raise ValueError("conversation_first: node %r already exists" % setup_name)
+    items = [(v, t, "%s is %s" % (route_var, v)) for v, t in routes.items()] if isinstance(routes, dict) else routes
+    trs = [eq(route_var, v, t, d) for v, t, d in items] + [always(default_target)]
+    op["transitions"] = [always(setup_name)]
+    nodes[setup_name] = code_node(setup_name, setup_code, trs)
+    return opening_node_name
 
 
 def outcome_code(outcome, reason, outcome_var="outcome", reason_var="reason"):
@@ -364,9 +396,13 @@ def what_next_post(branches, else_text=None, prelude=None, key="what_to_do_next"
     """A post_process_code string: strips the response headers and sets result['data'][key] from an ordered list
     of (python_condition_on_d, text) pairs, `d` being the API's JSON body; `else_text` is the final else.
     `prelude` is a list of statements run before the branches (e.g. "left = d.get('wrong_answers_left')").
+    With no branches, no else_text and no prelude the hook only strips the response headers.
     The line tells the dialogue model what the result means and what to say or call next; the prompt says to obey it."""
     out = ("try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n"
            "        if isinstance(d, dict):\n")
+    if not branches and else_text is None and not prelude:
+        # nothing to say: only strip the header (an empty if-block would not compile)
+        return STRIP_HEADER
     for line in prelude or []:
         out += "            %s\n" % line
     for i, (c, text) in enumerate(branches):
@@ -386,14 +422,17 @@ def ok_post(ok_text, fail_text, ok_field="ok"):
 
 
 def verify_post(question, hints, max_wrong_text,
-                all_verified_text="Both answers are correct. Identity verified.",
+                all_verified_text="All security questions passed. Identity is verified.",
                 verified_text="Correct. Ask the next security question.",
                 unreadable_text="The answer could not be read. It does not count as wrong. Ask again: {question}",
                 wrong_text="Wrong answer. Tell the customer it does not match our records and ask again: {question}",
                 fields=None):
     """Post hook for one identity question. `hints` maps a response hint value to the text for it (checked first,
     a hint is not a wrong answer). `max_wrong_text` is used when the wrong-answers counter reaches 0.
-    `fields` renames the response fields: {"hint", "all_verified", "verified", "ok", "left"}."""
+    `fields` renames the response fields: {"hint", "all_verified", "verified", "ok", "left"}.
+    The default texts are generic placeholders: a generator should pass the brief's own wording for every text
+    (all_verified_text, verified_text, unreadable_text, wrong_text, max_wrong_text), e.g. what the brief says the
+    agent does once identity is verified, how many questions there are, how a wrong answer is worded."""
     f = {"hint": "hint", "all_verified": "all_verified", "verified": "verified", "ok": "ok", "left": "wrong_answers_left"}
     f.update(fields or {})
     q = lambda s: s.replace("{question}", question)
@@ -670,7 +709,8 @@ def check(wf):
     missing; passthrough node not ending with an always transition; tools on a non-conversation node or pre_actions
     on a conversation node; api_request/code node without pre_actions; code or hook that does not compile or has
     '{{'/'}}'; end_call node without a proper terminal or with transitions; a node from which no end_call is
-    reachable. Warnings: node unreachable from initial_node; a model-filled tool field that shares its name with a
+    reachable; a global node without a condition, with a transition to an unknown node (``__previous__`` is
+    allowed), or passthrough without a final always transition. Warnings: node unreachable from initial_node; a model-filled tool field that shares its name with a
     test variable or an extracted variable; a workflow-level tool without alwaysRunsAt (it would never run)."""
     errors, warnings = [], []
     nodes = wf.get("nodes") or {}
@@ -745,6 +785,50 @@ def check(wf):
                         warnings.append("%s tool %r: model-filled field %r reads {{%s}}, which is a known variable: it "
                                         "would be baked and hidden from the model" % (where, tname, f, var))
         succ[key] = targets
+    # global nodes: interrupt handlers entered on their own condition from any node
+    gnodes = wf.get("global_nodes") or {}
+    if not isinstance(gnodes, dict):
+        errors.append("global_nodes is not an object")
+        gnodes = {}
+    for key, n in gnodes.items():
+        where = "global node %r" % key
+        if not isinstance(n, dict):
+            errors.append("%s: not an object" % where)
+            continue
+        if key in nodes:
+            errors.append("%s: same key used in nodes" % where)
+        if n.get("name") != key:
+            errors.append("%s: name %r differs from its key" % (where, n.get("name")))
+        if not isinstance(n.get("condition"), dict) or not n.get("condition"):
+            errors.append("%s: has no condition (it would never activate)" % where)
+        trs = n.get("transitions") or []
+        for i, t in enumerate(trs):
+            tgt = t.get("target_node") if isinstance(t, dict) else None
+            if tgt != "__previous__" and tgt not in nodes and tgt not in gnodes:
+                errors.append("%s: transition %d targets unknown node %r" % (where, i, tgt))
+            if isinstance(t, dict) and "condition" not in t:
+                errors.append("%s: transition %d has no condition" % (where, i))
+        if n.get("passthrough"):
+            if not trs or (trs[-1].get("condition") or {}).get("operator") != "always":
+                errors.append("%s: passthrough node does not end with an always transition" % where)
+            pdt = n.get("passthrough_default_transition")
+            if pdt != "__previous__" and pdt not in nodes and pdt not in gnodes:
+                errors.append("%s: passthrough_default_transition %r is not a node" % (where, pdt))
+        if n.get("node_type", "conversation") == "conversation" and n.get("pre_actions"):
+            errors.append("%s: pre_actions on a conversation node (the platform strips them)" % where)
+        elif n.get("node_type", "conversation") != "conversation" and n.get("tools"):
+            errors.append("%s: tools on a %s node (the platform strips them)" % (where, n.get("node_type")))
+        for t in (n.get("tools") or []) + (n.get("pre_actions") or []):
+            tname = ((t.get("function") or {}).get("name")) if isinstance(t, dict) else None
+            for hk in ("pre_process_code", "post_process_code"):
+                if isinstance(t, dict) and t.get(hk):
+                    _check_code(t[hk], "%s tool %r %s" % (where, tname, hk), errors)
+        if n.get("node_type") == "code":
+            for pa in n.get("pre_actions") or []:
+                try:
+                    _check_code(pa["function"]["parameters"]["properties"]["code"]["default"], where + " code", errors)
+                except (KeyError, TypeError):
+                    errors.append("%s: code node pre_action has no code default" % where)
     for t in wf.get("tools") or []:
         tname = ((t.get("function") or {}).get("name")) if isinstance(t, dict) else None
         if not (t.get("config") or {}).get("alwaysRunsAt"):
