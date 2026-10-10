@@ -1001,11 +1001,39 @@ def check(wf):
     return warnings
 
 
-def assemble(initial_node, nodes, system_prompt, tools=None, test_variables=None, global_nodes=None, strict=True):
+# --- how customers talk (brief-agnostic). Measured on the organisers' simulator with the kit's styles: small talk at a
+# security question was read as a refusal (3 calls closed as declined), "how much can I pay instead?" became a plan
+# request (a transfer), and sympathy was said for a busy day (the judge counts sympathy sentences).
+PERSONA_CONDUCT = (
+    "How customers talk: they add small talk, give a number or a date in two parts, correct themselves, ask a question back, "
+    "or say amounts and dates in words. The facts stay the same.\n"
+    "- Keep to the business of the call. Do not comment on small talk (a busy day, the traffic, a family event) and do not "
+    "sympathise with it: sympathy is only for what the rules name.\n"
+    "- A message with no answer in it (small talk, a cut-off sentence, 'hmm') is NOT a refusal and NOT a request: repeat the "
+    "same question in one short sentence.\n"
+    "- A question back (why do you need that, which account, who is this) gets one short answer, then the same question again, "
+    "unless the rules say such a question counts. Only what the rules name counts as a refusal.\n"
+    "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
+    "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
+    "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
+    "the rules give you.")
+# append to every refusal / decline enum description (the brief's own list of what counts goes first)
+REFUSAL_NONE_CLAUSE = (" Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back "
+                       "that the rules do not count is none, never refused: only what the rules name counts.")
+# append to every plan-request enum description
+PLAN_REQUEST_CLAUSE = (" Asking how much they can, should or have to pay, or naming an amount or a date, is NOT a plan "
+                       "request: the agent proposes the amount.")
+
+
+def assemble(initial_node, nodes, system_prompt, tools=None, test_variables=None, global_nodes=None, strict=True,
+             conduct=False):
     """The workflow dict (initial_node, system_prompt, nodes, global_nodes, tools, test_variables), checked.
     With strict=True (default) check() errors raise ValueError and warnings are printed to stderr; nothing
-    is added to the dict. Leave agent_config out: the platform fills it in."""
+    is added to the dict. Leave agent_config out: the platform fills it in.
+    conduct=True appends PERSONA_CONDUCT (how customers talk) to the system prompt (the skill's default)."""
     import sys
+    if conduct and PERSONA_CONDUCT.split("\n")[0] not in (system_prompt or ""):
+        system_prompt = (system_prompt or "").rstrip("\n") + "\n" + PERSONA_CONDUCT
     wf = {"initial_node": initial_node, "system_prompt": system_prompt, "nodes": nodes,
           "global_nodes": global_nodes or {}, "tools": list(tools or []), "test_variables": dict(test_variables or {})}
     if strict:
