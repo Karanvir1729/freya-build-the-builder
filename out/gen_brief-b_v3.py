@@ -322,7 +322,9 @@ KIND_DESC = ("From the customer's LATEST message only. exact = they name a speci
              "vague = only a vague period without a day ('next week', 'end of the month', 'when my salary comes'). "
              "none = no date, amount or period in the latest message (also 'yes', 'no', questions).")
 FOR_DESC = ("Which product the customer's LATEST message is about, in the order the agent listed the products: first, second or third "
-            "(match the product they name, e.g. 'the credit card', 'the car loan'). all = all of them, everything, both. none = no product named.")
+            "(match the product they name, e.g. 'the credit card', 'the car loan'); pick that one even when they mention the other products only to "
+            "refuse or exclude them ('the credit card tomorrow, not the loans' = first). all = all of them, everything, both, "
+            "or one date or amount for everything. none = no product named.")
 DATE_DESC = ("The payment date the customer names in their LATEST message. 'this <weekday>' is that weekday in the current Monday-to-Sunday week; "
              "'next <weekday>' is that weekday in the FOLLOWING calendar week. Leave it empty when the latest message names no specific day.")
 AMOUNT_DESC = ("The amount of money the customer offers to pay in their LATEST message, as a number ('six forty' = 640). "

@@ -688,6 +688,15 @@ def ev_confirm_no(V):
     pset(V, pid, 'state', 'open')
     refuse(V, pid)
 def ev_change(V):
+    # a 'change' at the read-back that changes nothing (same agreed products, amounts and dates) is a NO to the
+    # read-back, not a reason to read it back again: Brief B PUB-12 looped 150 turns on "I will pay the credit card
+    # tomorrow, not the others" when the all-products read-back came back unchanged
+    before = [(p, pg(V, p, 'agreed'), state(V, p)) for p in pids(V)]
+    _ev_change_inner(V)
+    after = [(p, pg(V, p, 'agreed'), state(V, p)) for p in pids(V)]
+    if g(V, 'route') == 'confirm' and after == before:
+        ev_confirm_no(V)
+def _ev_change_inner(V):
     agreed = [p for p in pids(V) if state(V, p) == 'agreed']
     a = num(g(V, 'offer_amount'))
     if a is not None and a <= 0:

@@ -497,5 +497,16 @@ def test_offer_when_resolved_in_code():
     assert V.get("offer_verdict") == "vague", (V.get("offer_verdict"), V.get("say_next"))
 
 
+@test
+def test_change_without_change_is_a_no():
+    """PUB-12: an all-products read-back answered with 'change' that resolves to the same date for everyone must not loop."""
+    P, V = start([CARD, LOAN], multi=True)
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_date="2026-10-15")
+    assert V["route"] == "confirm", (V["route"], V.get("say_next"))
+    line1 = V["readback_line"]
+    ev(P, V, "change", offer_kind="exact", offer_when="tomorrow", offer_date="2026-10-15")
+    assert not (V["route"] == "confirm" and V["readback_line"] == line1), (V["route"], V["readback_line"])
+
+
 if __name__ == "__main__":
     sys.exit(main())
