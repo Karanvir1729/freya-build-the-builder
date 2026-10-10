@@ -1,0 +1,87 @@
+# EXT-B-13 Illness, accepts support, no notes
+# workflow b030ebb0-ab59-49d7-9352-2414bd10662b | call 1e41593e-7edc-4a01-9e64-f7bbe995974f | customer c_929abffc-24f | 2026-10-10 21:55:17
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/1e41593e-7edc-4a01-9e64-f7bbe995974f
+# RESULT: PASS
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Ms Rossi?
+customer: Yes, this is Elena Rossi.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_dob: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_dob
+agent: Thank you, Ms Rossi. For security, could you please tell me your date of birth?
+customer: My date of birth is 8 January 1991.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1991-01-08", "customer_id": "c_929abffc-24f"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Ask the next security question."}
+   [route] ask_dob -> ask_phone: date of birth correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_dob -> ask_phone
+agent: Thank you, Ms Rossi. What are the last four digits of the phone number on file?
+customer: The last four digits are six six zero four.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "6604", "customer_id": "c_929abffc-24f"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_phone -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_phone -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_929abffc-24f"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "6604", "past_due": 300, "days_late": 4, "minimum_payment": 90}, {"product_id": "p2", "type": "personal_loan", "past_due": 900, "days_late": 20, "instalment_amount": 300}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Ms Rossi. I am calling from the collections team about late payments on 2 of your products. Your credit card ending 6604 has 300 past due, 4 days late. Your personal loan has 900 past due, 20 days late. Can you pay all of them today?
+customer: I’ve been ill for weeks and can’t deal with this right now. Please connect me with the support team.
+   [route] negotiate -> pol_hardship: topic hardship topic == 'hardship'
+   [node] negotiate -> pol_hardship
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] pol_hardship -> hardship: policy route hardship route == 'hardship'
+   [node] pol_hardship -> hardship
+agent: I am sorry to hear that. Would you like me to connect you with our customer support team?
+customer: Yes, please connect me with the support team.
+   [route] hardship -> xfer_support: the customer accepts the support team hs_answer == 'support_yes'
+   [node] hardship -> xfer_support
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "support", "customer_id": "c_929abffc-24f"}
+agent: I will connect you with our customer support team now.
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] xfer_support -> fin_transferred_support: always always
+   [node] xfer_support -> fin_transferred_support
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'transferred'\n vars['reason'] = 'support'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_support -> end_transferred_support: always always
+   [node] fin_transferred_support -> end_transferred_support
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you, Ms Rossi. A colleague from customer support will take over now. Goodbye."}
+customer: Thank you.
+   [route] xfer_support -> fin_transferred_support: always always
+   [node] xfer_support -> fin_transferred_support
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'transferred'\n vars['reason'] = 'support'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_support -> end_transferred_support: always always
+   [node] fin_transferred_support -> end_transferred_support
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you, Ms Rossi. A colleague from customer support will take over now. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: Thank you, Ms Rossi. A colleague from customer support will take over now. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "support", "outcome": "transferred", "customer_id": "c_929abffc-24f"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (12)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1991-01-08", "customer_id": "c_929abffc-24f"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Ask the next security question."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "6604", "customer_id": "c_929abffc-24f"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_929abffc-24f"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "6604", "past_due": 300, "days_late": 4, "minimum_payment": 90}, {"product_id": "p2", "type": "personal_loan", "past_due": 900, "days_late": 20, "instalment_amount": 300}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+6. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+7. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "support", "customer_id": "c_929abffc-24f"} -> HTTP 200 data={"ok": true}
+8. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'transferred'\n vars['reason'] = 'support'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+9. end_call args={"message_mode": "custom", "spoken_message": "Thank you, Ms Rossi. A colleague from customer support will take over now. Goodbye."} -> (no result event)
+10. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'transferred'\n vars['reason'] = 'support'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+11. end_call args={"message_mode": "custom", "spoken_message": "Thank you, Ms Rossi. A colleague from customer support will take over now. Goodbye."} -> success Call ended
+12. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "support", "outcome": "transferred", "customer_id": "c_929abffc-24f"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=transferred reason=support promises=[] notes=[] callbacks=[] transfers=[{"queue": "support"}] calls=['verify_identity', 'verify_identity', 'get_account', 'transfer_to_agent', 'close_call']
+
+## judge (gpt-5): pass - All criteria hold: the agent gave one short sympathy sentence, made no persuasion attempts, transferred to an agent with queue 'support', and there was no add_note call.

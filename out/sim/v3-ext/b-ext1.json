@@ -1,0 +1,1003 @@
+{
+ "runner": "sim",
+ "workflow_id": "b030ebb0-ab59-49d7-9352-2414bd10662b",
+ "agent_id": "4ff79460-e3e6-483f-abcb-34a8c8a85a9b",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 1508,
+ "passed": 8,
+ "total": 14,
+ "runs": 1,
+ "final": [
+  {
+   "id": "EXT-B-01",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-02",
+   "family": "Multi-product",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-B-03",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-04",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-05",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-06",
+   "family": "Multi-product",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-B-07",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-08",
+   "family": "Tool failure",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-09",
+   "family": "Multi-product",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-B-10",
+   "family": "Notes",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-B-11",
+   "family": "Notes",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-12",
+   "family": "Multi-product",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-B-13",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-B-14",
+   "family": "Calendar",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-B-01",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "6a11df02-5a34-47b6-a2ca-100d788120ea",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_5f7a8b00-395",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-01.txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All late products were listed before any payment ask. Two attempts were made for the credit card and personal loan, one for the car loan; one 'refused' note per product was added, and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/6a11df02-5a34-47b6-a2ca-100d788120ea",
+   "slowest_turn_s": 9.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-02",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'dispute'), expected ('promise', None)",
+    "promises [], expected [('p3', 140.0, '2026-10-14')]",
+    "notes [('p1', 'dispute'), ('p2', 'dispute'), ('p3', 'dispute')], expected [('p1', 'dispute'), ('p2', 'paid')]",
+    "conversation: The agent ended the call immediately after the dispute/payment claim, violating 'the dispute and the payment claim do not end the call'; no promise for the car loan ($140 today) was taken; and notes recorded disputes for all products instead of 'credit card dispute, personal loan paid'."
+   ],
+   "call_id": "dc000dbe-6028-4b60-b1a8-38644f228dfc",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_18a93af2-3e0",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-02.txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent ended the call immediately after the dispute/payment claim, violating 'the dispute and the payment claim do not end the call'; no promise for the car loan ($140 today) was taken; and notes recorded disputes for all products instead of 'credit card dispute, personal loan paid'.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/dc000dbe-6028-4b60-b1a8-38644f228dfc",
+   "slowest_turn_s": 3.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-03",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "b42702d1-2669-4fbe-ba65-f99872f72bda",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_624f602f-a56",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-03.txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: both late products were stated before the payment ask; the agent did not argue; exactly one 'dispute' note was added for each product (p1 and p2); and no payment promise was recorded (outcome marked 'no_promise').",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b42702d1-2669-4fbe-ba65-f99872f72bda",
+   "slowest_turn_s": 3.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-04",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "368e5895-3269-4324-bef2-e306fc8699a5",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_94fd6eaf-da7",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-04.txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said payments can take one business day to appear; there is exactly one add_note with reason 'paid' for each product p1, p2, and p3; and no promise was recorded in the tool calls.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/368e5895-3269-4324-bef2-e306fc8699a5",
+   "slowest_turn_s": 3.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-05",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "5b8bfa68-7bd1-4272-a449-5d5e4eb7dcdd",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_863ed80b-0d1",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-05.txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent gave one brief sympathy sentence, made no product persuasion, offered support once, and recorded one hardship add_note for each product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5b8bfa68-7bd1-4272-a449-5d5e4eb7dcdd",
+   "slowest_turn_s": 3.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-06",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "notes [('p2', 'refused')], expected []",
+    "conversation: The agent made an add_note call (tool call #12), violating the 'no add_note at all' criterion. Other criteria were satisfied, including the 300.00 credit card promise recorded before transfer and transfer_to_agent with queue 'restructuring', and the agent did not describe its own plan."
+   ],
+   "call_id": "3ffeaf6a-c5f8-40b3-a844-0b68d19ce977",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_d81e63f0-2c5",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-06.txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent made an add_note call (tool call #12), violating the 'no add_note at all' criterion. Other criteria were satisfied, including the 300.00 credit card promise recorded before transfer and transfer_to_agent with queue 'restructuring', and the agent did not describe its own plan.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/3ffeaf6a-c5f8-40b3-a844-0b68d19ce977",
+   "slowest_turn_s": 10.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-07",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "968a2225-737f-47a7-bd82-f280ce563ad9",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_c21ee6f0-075",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-07.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All late products were listed before the ask; the read-back named credit card and personal loan on 23 Oct and car loan on 2 Nov; 6 Nov was not recorded; and there was exactly one create_promise per product.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/968a2225-737f-47a7-bd82-f280ce563ad9",
+   "slowest_turn_s": 4.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-08",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "a79b9b4a-3698-4b97-9493-063646213229",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_afd1a870-d0a",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-08.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Exactly one promise was created after the retry; the agent only said 'recorded' after the successful create_promise (opening used 'record'); and there was no add_note call.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/a79b9b4a-3698-4b97-9493-063646213229",
+   "slowest_turn_s": 5.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-09",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 220.0, '2026-10-23'), ('p2', 640.0, '2026-10-23'), ('p3', 75.0, '2026-10-27')], expected [('p1', 220.0, '2026-10-14'), ('p2', 640.0, '2026-10-14'), ('p3', 75.0, '2026-10-27')]"
+   ],
+   "call_id": "31c62740-23e4-4377-9130-4c0d292ac7ea",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_17a0caae-241",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-09.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent declined 26 Oct for the car loan and offered 27 Oct, did one combined read-back with a single confirmation for all three, and made exactly one create_promise per product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/31c62740-23e4-4377-9130-4c0d292ac7ea",
+   "slowest_turn_s": 6.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-10",
+   "level": "medium",
+   "family": "Notes",
+   "pass": false,
+   "failed": [
+    "conversation: There were two persuasion attempts: asking to pay today and proposing payment on Friday 16 October, violating the 'exactly one persuasion attempt' criterion. The 'refused' note was added and no promise was recorded."
+   ],
+   "call_id": "6a3eee08-d6d4-4e4a-9242-8ece05082e8d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_5884451d-dad",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-10.txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "There were two persuasion attempts: asking to pay today and proposing payment on Friday 16 October, violating the 'exactly one persuasion attempt' criterion. The 'refused' note was added and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/6a3eee08-d6d4-4e4a-9242-8ece05082e8d",
+   "slowest_turn_s": 4.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-11",
+   "level": "medium",
+   "family": "Notes",
+   "pass": true,
+   "failed": [],
+   "call_id": "d2520875-0585-4ef9-9903-b79406598e92",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_0f811940-27a",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-11.txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent stated payments can take one business day to appear; a 'paid' note was added for product p1; and no promise was recorded or scheduled.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/d2520875-0585-4ef9-9903-b79406598e92",
+   "slowest_turn_s": 15.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-12",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'dispute'), expected ('no_promise', 'refused')",
+    "notes [('p1', 'dispute'), ('p2', 'dispute'), ('p3', 'dispute')], expected [('p1', 'paid'), ('p2', 'refused'), ('p3', 'dispute')]",
+    "conversation: The agent did not make two attempts on the personal loan\u2014only one general payment ask before ending due to dispute. Notes were incorrect: recorded as dispute for all products instead of 'credit card paid' and 'personal loan refused' (car loan dispute was noted), though all late products were stated before the ask and no promise was recorded."
+   ],
+   "call_id": "74dc866d-8ae0-4749-b49a-2ad0ff5fe119",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_dc59b040-3f3",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-12.txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent did not make two attempts on the personal loan\u2014only one general payment ask before ending due to dispute. Notes were incorrect: recorded as dispute for all products instead of 'credit card paid' and 'personal loan refused' (car loan dispute was noted), though all late products were stated before the ask and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/74dc866d-8ae0-4749-b49a-2ad0ff5fe119",
+   "slowest_turn_s": 14.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-13",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "1e41593e-7edc-4a01-9e64-f7bbe995974f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_929abffc-24f",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-13.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent gave one short sympathy sentence, made no persuasion attempts, transferred to an agent with queue 'support', and there was no add_note call.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/1e41593e-7edc-4a01-9e64-f7bbe995974f",
+   "slowest_turn_s": 13.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-B-14",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'service_error'), expected ('promise', None)",
+    "notes [('p1', 'service_error'), ('p2', 'service_error')], expected []",
+    "conversation: The agent repeated the read-back and confirmation many times, not just once, and made multiple create_promise calls per product (p1 at 26 then again at 34/36; p2 at 28 then again at 38/40). While 26 Oct was not accepted and 27 Oct was offered for the loan, the other two criteria are not met."
+   ],
+   "call_id": "dbad9285-ed5b-4f1f-b25b-9d597620ce65",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_4769e4ff-594",
+   "transcript": "out/sim/v3-ext/b-ext1/EXT-B-14.txt",
+   "turns": 30,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent repeated the read-back and confirmation many times, not just once, and made multiple create_promise calls per product (p1 at 26 then again at 34/36; p2 at 28 then again at 38/40). While 26 Oct was not accepted and 27 Oct was offered for the loan, the other two criteria are not met.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/dbad9285-ed5b-4f1f-b25b-9d597620ce65",
+   "slowest_turn_s": 17.6,
+   "ended_how": null
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-B-01",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "6a11df02-5a34-47b6-a2ca-100d788120ea",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_5f7a8b00-395",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-01.txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All late products were listed before any payment ask. Two attempts were made for the credit card and personal loan, one for the car loan; one 'refused' note per product was added, and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/6a11df02-5a34-47b6-a2ca-100d788120ea",
+    "slowest_turn_s": 9.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-02",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'dispute'), expected ('promise', None)",
+     "promises [], expected [('p3', 140.0, '2026-10-14')]",
+     "notes [('p1', 'dispute'), ('p2', 'dispute'), ('p3', 'dispute')], expected [('p1', 'dispute'), ('p2', 'paid')]",
+     "conversation: The agent ended the call immediately after the dispute/payment claim, violating 'the dispute and the payment claim do not end the call'; no promise for the car loan ($140 today) was taken; and notes recorded disputes for all products instead of 'credit card dispute, personal loan paid'."
+    ],
+    "call_id": "dc000dbe-6028-4b60-b1a8-38644f228dfc",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_18a93af2-3e0",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-02.txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent ended the call immediately after the dispute/payment claim, violating 'the dispute and the payment claim do not end the call'; no promise for the car loan ($140 today) was taken; and notes recorded disputes for all products instead of 'credit card dispute, personal loan paid'.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/dc000dbe-6028-4b60-b1a8-38644f228dfc",
+    "slowest_turn_s": 3.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-03",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "b42702d1-2669-4fbe-ba65-f99872f72bda",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_624f602f-a56",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-03.txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: both late products were stated before the payment ask; the agent did not argue; exactly one 'dispute' note was added for each product (p1 and p2); and no payment promise was recorded (outcome marked 'no_promise').",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b42702d1-2669-4fbe-ba65-f99872f72bda",
+    "slowest_turn_s": 3.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-04",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "368e5895-3269-4324-bef2-e306fc8699a5",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_94fd6eaf-da7",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-04.txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said payments can take one business day to appear; there is exactly one add_note with reason 'paid' for each product p1, p2, and p3; and no promise was recorded in the tool calls.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/368e5895-3269-4324-bef2-e306fc8699a5",
+    "slowest_turn_s": 3.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-05",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "5b8bfa68-7bd1-4272-a449-5d5e4eb7dcdd",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_863ed80b-0d1",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-05.txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent gave one brief sympathy sentence, made no product persuasion, offered support once, and recorded one hardship add_note for each product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5b8bfa68-7bd1-4272-a449-5d5e4eb7dcdd",
+    "slowest_turn_s": 3.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-06",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "notes [('p2', 'refused')], expected []",
+     "conversation: The agent made an add_note call (tool call #12), violating the 'no add_note at all' criterion. Other criteria were satisfied, including the 300.00 credit card promise recorded before transfer and transfer_to_agent with queue 'restructuring', and the agent did not describe its own plan."
+    ],
+    "call_id": "3ffeaf6a-c5f8-40b3-a844-0b68d19ce977",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_d81e63f0-2c5",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-06.txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent made an add_note call (tool call #12), violating the 'no add_note at all' criterion. Other criteria were satisfied, including the 300.00 credit card promise recorded before transfer and transfer_to_agent with queue 'restructuring', and the agent did not describe its own plan.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/3ffeaf6a-c5f8-40b3-a844-0b68d19ce977",
+    "slowest_turn_s": 10.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-07",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "968a2225-737f-47a7-bd82-f280ce563ad9",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_c21ee6f0-075",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-07.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All late products were listed before the ask; the read-back named credit card and personal loan on 23 Oct and car loan on 2 Nov; 6 Nov was not recorded; and there was exactly one create_promise per product.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/968a2225-737f-47a7-bd82-f280ce563ad9",
+    "slowest_turn_s": 4.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-08",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "a79b9b4a-3698-4b97-9493-063646213229",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_afd1a870-d0a",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-08.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Exactly one promise was created after the retry; the agent only said 'recorded' after the successful create_promise (opening used 'record'); and there was no add_note call.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/a79b9b4a-3698-4b97-9493-063646213229",
+    "slowest_turn_s": 5.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-09",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 220.0, '2026-10-23'), ('p2', 640.0, '2026-10-23'), ('p3', 75.0, '2026-10-27')], expected [('p1', 220.0, '2026-10-14'), ('p2', 640.0, '2026-10-14'), ('p3', 75.0, '2026-10-27')]"
+    ],
+    "call_id": "31c62740-23e4-4377-9130-4c0d292ac7ea",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_17a0caae-241",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-09.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent declined 26 Oct for the car loan and offered 27 Oct, did one combined read-back with a single confirmation for all three, and made exactly one create_promise per product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/31c62740-23e4-4377-9130-4c0d292ac7ea",
+    "slowest_turn_s": 6.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-10",
+    "level": "medium",
+    "family": "Notes",
+    "pass": false,
+    "failed": [
+     "conversation: There were two persuasion attempts: asking to pay today and proposing payment on Friday 16 October, violating the 'exactly one persuasion attempt' criterion. The 'refused' note was added and no promise was recorded."
+    ],
+    "call_id": "6a3eee08-d6d4-4e4a-9242-8ece05082e8d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_5884451d-dad",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-10.txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "There were two persuasion attempts: asking to pay today and proposing payment on Friday 16 October, violating the 'exactly one persuasion attempt' criterion. The 'refused' note was added and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/6a3eee08-d6d4-4e4a-9242-8ece05082e8d",
+    "slowest_turn_s": 4.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-11",
+    "level": "medium",
+    "family": "Notes",
+    "pass": true,
+    "failed": [],
+    "call_id": "d2520875-0585-4ef9-9903-b79406598e92",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_0f811940-27a",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-11.txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent stated payments can take one business day to appear; a 'paid' note was added for product p1; and no promise was recorded or scheduled.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/d2520875-0585-4ef9-9903-b79406598e92",
+    "slowest_turn_s": 15.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-12",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'dispute'), expected ('no_promise', 'refused')",
+     "notes [('p1', 'dispute'), ('p2', 'dispute'), ('p3', 'dispute')], expected [('p1', 'paid'), ('p2', 'refused'), ('p3', 'dispute')]",
+     "conversation: The agent did not make two attempts on the personal loan\u2014only one general payment ask before ending due to dispute. Notes were incorrect: recorded as dispute for all products instead of 'credit card paid' and 'personal loan refused' (car loan dispute was noted), though all late products were stated before the ask and no promise was recorded."
+    ],
+    "call_id": "74dc866d-8ae0-4749-b49a-2ad0ff5fe119",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_dc59b040-3f3",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-12.txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent did not make two attempts on the personal loan\u2014only one general payment ask before ending due to dispute. Notes were incorrect: recorded as dispute for all products instead of 'credit card paid' and 'personal loan refused' (car loan dispute was noted), though all late products were stated before the ask and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/74dc866d-8ae0-4749-b49a-2ad0ff5fe119",
+    "slowest_turn_s": 14.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-13",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "1e41593e-7edc-4a01-9e64-f7bbe995974f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_929abffc-24f",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-13.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent gave one short sympathy sentence, made no persuasion attempts, transferred to an agent with queue 'support', and there was no add_note call.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/1e41593e-7edc-4a01-9e64-f7bbe995974f",
+    "slowest_turn_s": 13.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-B-14",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'service_error'), expected ('promise', None)",
+     "notes [('p1', 'service_error'), ('p2', 'service_error')], expected []",
+     "conversation: The agent repeated the read-back and confirmation many times, not just once, and made multiple create_promise calls per product (p1 at 26 then again at 34/36; p2 at 28 then again at 38/40). While 26 Oct was not accepted and 27 Oct was offered for the loan, the other two criteria are not met."
+    ],
+    "call_id": "dbad9285-ed5b-4f1f-b25b-9d597620ce65",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_4769e4ff-594",
+    "transcript": "out/sim/v3-ext/b-ext1/EXT-B-14.txt",
+    "turns": 30,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent repeated the read-back and confirmation many times, not just once, and made multiple create_promise calls per product (p1 at 26 then again at 34/36; p2 at 28 then again at 38/40). While 26 Oct was not accepted and 27 Oct was offered for the loan, the other two criteria are not met.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/dbad9285-ed5b-4f1f-b25b-9d597620ce65",
+    "slowest_turn_s": 17.6,
+    "ended_how": null
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 115,
+  "customer_calls": 101,
+  "judge_calls": 14,
+  "judge_retries": 0,
+  "ledger_polls": 115,
+  "ledger_errors": 0,
+  "call_fetches": 52
+ }
+}
