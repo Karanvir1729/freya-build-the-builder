@@ -274,6 +274,16 @@ PROMISE_PRE = mp.promise_pre_code(cap_to_deadline=True, cap_to_amount=True, api=
                                   snap_closed="before", holidays=HOLIDAYS)
 PROMISE_POST = mp.promise_post_code(max_fails=3, fail_reason="service_error", api=API,
                                     duplicate_is_recorded=True)   # a 504 rollback must not turn a recorded promise into SVC
+# R code list row 1 (audit R75): once a promise is recorded the close is promise/PRM, also when the customer hangs up
+# before finalize; a later transfer or the finalize/fin_* code overwrites it.
+PROMISE_POST += """
+try:
+    if str(vars.get('rec_pids') or '').strip(','):
+        vars['close_outcome'] = 'promise'
+        vars['close_code'] = 'PRM'
+except Exception:
+    pass
+"""
 NOTE_PRE = mp.note_pre_code(api=API)
 NOTE_POST = mp.note_post_code(api=API)
 
