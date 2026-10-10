@@ -71,6 +71,9 @@ DEFAULT_TEXTS = {
     "above_full": "The past-due amount is [full], so I can record at most [full].",
     "above_full_again": "",   # optional: a repeated higher amount at the read-back (above_full='agree')
     "vague": "Which exact day would that be?",
+    # a day or an amount cut off mid-word ('Monday the twenty', 'I accept the twenty'): asked again, never guessed
+    "cutoff_day": "Sorry, I did not catch the day. Which day would that be?",
+    "cutoff_amount": "Sorry, I did not catch that.",
     "vague_deadline": "The latest date I can record is [deadline].",
     "too_much_floor": "The lowest amount I can accept is [floor], the [floor_name].",
     "exhausted": "I understand.",
@@ -513,11 +516,28 @@ def _ordinal_words(t):
     for w in sorted(ORDW, key=len, reverse=True):
         t = t.replace(' %s ' % w, ' %dth ' % ORDW[w])
     return t
+CARDW = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+         'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15, 'sixteen': 16, 'seventeen': 17,
+         'eighteen': 18, 'nineteen': 19, 'twenty': 20, 'thirty': 30}
+CARD_RX = r'((?:twenty|thirty)(?: (?:one|two|three|four|five|six|seven|eight|nine))?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)'
+MON_RX = r'(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)'
+def _card_val(s):
+    return sum([CARDW.get(x, 0) for x in s.split()])
+def _cardinal_days(t):
+    # a day said as a cardinal next to a month ('thirty October', 'October twenty six') -> '30 october'; only beside a
+    # month name, so an amount ('twenty') is never read as a day
+    t = re.sub(r' (?:the )?' + CARD_RX + r' (?:of )?' + MON_RX + r' ', lambda m: ' %d %s ' % (_card_val(m.group(1)), m.group(2)), t)
+    t = re.sub(r' ' + MON_RX + r' (?:the )?' + CARD_RX + r' ', lambda m: ' %s %d ' % (m.group(1), _card_val(m.group(2))), t)
+    return t
+def cut_off(text):
+    # the words stop on a bare tens word ('Monday the twenty', 'thirty...'): a day cut off mid-word
+    t = ' ' + re.sub(r'\s+', ' ', re.sub(r'[^a-z0-9 ]', ' ', str(text or '').lower())).strip() + ' '
+    return bool(re.search(r' (twenty|thirty) $', t))
 def resolve_when(V, text):
     # (date, kind) from the customer's OWN WORDS, relative to the call's today (never the real clock: the platform's
     # date extraction resolved 'tomorrow' with the real clock). kind: 'exact' (with a date), 'vague', or 'none'.
     t = ' ' + re.sub(r'[^a-z0-9 ]', ' ', str(text or '').lower()) + ' '
-    t = _ordinal_words(re.sub(r'\s+', ' ', t))
+    t = _cardinal_days(_ordinal_words(re.sub(r'\s+', ' ', t)))
     if not t.strip():
         return None, 'none'
     today = today_of(V)
@@ -598,7 +618,19 @@ def resolve_when(V, text):
 def offer_date_of(V):
     # the customer's words first (offer_when, resolved in code); the extraction's offer_date only as a fallback and
     # never a date before the call's today
-    d, kind = resolve_when(V, g(V, 'offer_when'))
+    w = g(V, 'offer_when')
+    d, kind = resolve_when(V, w)
+    prev = g(V, 'when_prev')
+    if (kind != 'exact' or cut_off(prev)) and prev and w.strip():
+        # a day said in pieces over two turns ('thirty...' / 'October.'; 'Monday the twenty' / 'sixth'): the last
+        # turn's unresolved words joined with this turn's (Freya pieces PUB-13 lost 'thirty' and offered the deadline)
+        # after a cut-off tens word the join comes first ('twenty' + 'sixth' is the 26th, not the 6th of next month)
+        d2, k2 = resolve_when(V, prev + ' ' + w)
+        if k2 == 'exact' and d2 is not None:
+            d, kind = d2, k2
+    if kind != 'exact' and w.strip():
+        V['pending_when'] = w
+        V['when_cutoff'] = 'yes' if cut_off(w) else ''
     if kind == 'exact' and d is not None:
         return d, 'exact'
     if kind == 'vague':
@@ -713,6 +745,29 @@ def claims_first(V):
         return False
     advance(V, pre)
     return True
+def cutoff_turn(V, a, d):
+    # a cut-off day ('Monday the twenty') or a day-sized amount with no day ('I accept the twenty' -> 20, below the
+    # floor) is asked again, twice at most per call, before any rule uses it (Freya corrects PUB-07 offered the
+    # deadline for a cut-off 26th, PUB-04 recorded the floor after 'the twenty' was taken as an amount)
+    c = int(num(g(V, 'cutoff_count'), 0) or 0)
+    if c >= 2:
+        return False
+    if g(V, 'when_cutoff') == 'yes' and a is None:
+        V['cutoff_count'] = str(c + 1)
+        V['offer_verdict'] = 'cutoff'
+        say(V, T('cutoff_day'))
+        return True
+    if a is not None and d is None and abs(a - round(a)) < 0.005 and 1 <= a <= 31:
+        ps = [p for p in pids(V) if state(V, p) == 'open']
+        cur = g(V, 'cur_pid')
+        fl_ = floor_of(V, cur) if cur in ps and not (multi(V) and g(V, 'stage') == 'all') else min([floor_of(V, p) for p in ps] or [0.0])
+        if a < fl_ - 0.005 and g(V, 'small_amount_asked') != 'yes':
+            V['small_amount_asked'] = 'yes'
+            V['cutoff_count'] = str(c + 1)
+            V['offer_verdict'] = 'cutoff_amount'
+            say(V, join([T('cutoff_amount'), g(V, 'offer_question')]))
+            return True
+    return False
 def ev_offer(V):
     if claims_first(V):
         return
@@ -721,6 +776,8 @@ def ev_offer(V):
     if a is not None and a <= 0:
         a = None
     d, k2 = offer_date_of(V)
+    if cutoff_turn(V, a, d):
+        return
     if k2 in ('exact', 'vague'):
         kind = k2
     if kind == 'vague':
@@ -1167,6 +1224,9 @@ def main(V, ev):
     try:
         V['policy_event'] = ev
         V['offer_verdict'] = ''
+        V['when_prev'] = g(V, 'pending_when')   # unresolved day words of the last policy turn, joined once
+        V['pending_when'] = ''
+        V['when_cutoff'] = ''
         if ev == 'offer':
             ev_offer(V)
         elif ev == 'accept':
@@ -1220,7 +1280,7 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
            "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
-           "promise_reason")
+           "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked")
 
 
 def _declare():

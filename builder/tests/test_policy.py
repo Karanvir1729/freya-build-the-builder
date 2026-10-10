@@ -481,7 +481,8 @@ def test_offer_when_resolved_in_code():
     assert out["the twenty third"] == ("2026-10-23", "exact"), out
     P2, V2 = start([CARD])
     ev(P2, V2, "offer", offer_kind="exact", offer_date="2026-10-20", offer_when="the twenty", offer_amount="")
-    assert V2.get("offer_verdict") == "vague", (V2.get("offer_verdict"), V2.get("say_next"))
+    # a cut-off day is asked again (not the vague question, which a second time offers the deadline: corrects PUB-07)
+    assert V2.get("offer_verdict") == "cutoff", (V2.get("offer_verdict"), V2.get("say_next"))
     G2 = {"vars": V}
     exec(src + "\nr = resolve_when(vars, 'monday the 26th')\nr2 = resolve_when(vars, 'on monday the twenty sixth')\n", G2)
     assert G2["r"][0].isoformat() == "2026-10-26" and G2["r2"][0].isoformat() == "2026-10-26", (G2["r"], G2["r2"])   # EXT-B-14
@@ -782,6 +783,40 @@ def test_above_full_again():
     assert V["readback_line"].startswith("The past-due amount is 420"), V["readback_line"]
     ev(P, V, "change", confirm="change", offer_when="friday", offer_amount="500")
     assert V["route"] == "confirm" and V["readback_line"].startswith("AGAIN 500 420."), V["readback_line"]
+
+
+
+@test
+def test_cutoff_day_and_amount():
+    """Days cut off mid-word or said in pieces (Freya styles-final: pieces PUB-13, corrects PUB-07 and PUB-04)."""
+    # pieces PUB-13: 'thirty...' then 'October.' is 30 October, never the deadline after a second 'vague'
+    P, V = start([CARD, LOAN], multi=True)
+    ev(P, V, "offer", offer_kind="exact", offer_for="all", offer_when="thirty", offer_date="2026-10-30")
+    assert V["offer_verdict"] == "cutoff", (V["offer_verdict"], V["say_next"])
+    ev(P, V, "offer", offer_kind="vague", offer_for="all", offer_when="October", offer_date="2026-10-30")
+    assert V["route"] == "confirm" and "Friday 30 October" in V["readback_line"], V.get("readback_line")
+    # corrects PUB-07: 'Monday the twenty' (cut off) is asked again; the next piece 'sixth' completes it
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="Monday the twenty", offer_date="2026-10-19")
+    assert V["offer_verdict"] == "cutoff" and V["say_next"].startswith("Sorry"), V["say_next"]
+    ev(P, V, "offer", offer_kind="exact", offer_when="sixth", offer_date="2026-10-06")
+    assert "26 October" in V["say_next"] and "Tuesday 27 October" in V["say_next"], V["say_next"]
+    # corrects PUB-04: 'I accept the twenty' extracted as amount 20 (below the floor) is asked again once, the floor
+    # is not spent; a second 20 is a real offer
+    P, V = start([LOAN])
+    q = V["offer_question"]
+    ev(P, V, "offer", offer_kind="exact", offer_amount="20")
+    assert V["offer_verdict"] == "cutoff_amount" and V["say_next"].endswith(q) and V["offered_floor_p1"] == "no", V["say_next"]
+    ev(P, V, "offer", offer_kind="exact", offer_amount="20")
+    assert V["offer_verdict"] == "below_floor" and V["offered_floor_p1"] == "yes", V["offer_verdict"]
+    # an amount that is not day-sized, or one with a day, goes straight through the guard
+    P, V = start([LOAN])
+    ev(P, V, "offer", offer_kind="exact", offer_amount="20", offer_when="friday")
+    assert V["offer_verdict"] == "below_floor", V["offer_verdict"]
+    # 'thirty October' / 'October twenty six' as cardinals beside a month
+    G = {"vars": V}
+    exec(P.core() + "\nr = [resolve_when(vars, w) for w in ['thirty October', 'october twenty six', 'the twenty']]\n", G)
+    assert [(d.isoformat() if d else None, k) for d, k in G["r"]] == [("2026-10-30", "exact"), ("2026-10-26", "exact"), (None, "vague")], G["r"]
 
 
 
