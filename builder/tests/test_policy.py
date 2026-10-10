@@ -154,7 +154,7 @@ def after_deadline_offer():                                # PUB-04
 @test
 def before_today_offer():
     P, V = start([CARD])
-    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-12", offer_amount="420")
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-12", offer_when="12 October", offer_amount="420")
     assert V["offer_verdict"] == "before_today" and V["prop_date"] == TODAY
 
 
@@ -422,15 +422,12 @@ def main():
     return 1 if fails else 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
-
-
+@test
 def test_aside_prefix():
     """A side question in a turn that goes through code is answered first, in the line the route speaks."""
     import json
     P = pol.Policy(HOL, texts=TEXTS, asides={"robot": {"when": "asks whether they talk to a robot", "say": "I am the bank's digital assistant."}})
-    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([{"product_id": "p1", "type": "credit_card", "past_due": 420.0, "days_late": 6, "minimum_payment": 126.0}])}
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
     run(P.prepare_code(BODY, "statement"), V)
     assert V.get("prepare_state") == "ok", V.get("prepare_state")
     V["stance"] = "accept"; V["aside"] = "robot"
@@ -444,3 +441,37 @@ def test_aside_prefix():
     assert not V["say_next"].startswith("I am the bank"), V["say_next"]
     n = P.confirm_node("t", "c", "d", "a")
     assert any(e["name"] == "aside" for e in n["extraction_schema"]), n["extraction_schema"]
+
+
+@test
+def test_offer_when_resolved_in_code():
+    """'tomorrow' and friends resolve against the CALL's today, not the real clock; a past extracted date is vague."""
+    import json, datetime
+    P, V = start([CARD])
+    src = P.core()
+    G = {"vars": V}
+    exec(src + "\nout = {}\nfor w in ['tomorrow', 'next friday', 'this saturday', 'friday', 'the 23rd', 'the sixth of november', 'end of the month', 'day after tomorrow', 'in two weeks', 'November 6th', '']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G)
+    out = G["out"]
+    assert out["tomorrow"] == ("2026-10-15", "exact"), out
+    assert out["day after tomorrow"] == ("2026-10-16", "exact"), out
+    assert out["next friday"] == ("2026-10-23", "exact"), out        # Wed 14 Oct: the Friday of the following week
+    assert out["this saturday"] == ("2026-10-17", "exact"), out
+    assert out["friday"] == ("2026-10-16", "exact"), out
+    assert out["the 23rd"] == ("2026-10-23", "exact"), out
+    assert out["the sixth of november"] == ("2026-11-06", "exact"), out
+    assert out["November 6th"] == ("2026-11-06", "exact"), out
+    assert out["in two weeks"] == ("2026-10-28", "exact"), out
+    assert out["end of the month"] == (None, "vague"), out
+    assert out[""] == (None, "none"), out
+    # the offer event: the extraction said 2026-10-11 (real clock) but the words say tomorrow -> 15 Oct is checked
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-11", offer_when="tomorrow", offer_amount="420")
+    assert V.get("offer_verdict") == "ok", (V.get("offer_verdict"), V.get("say_next"))
+    assert "15 October" in (V.get("readback_line") or V.get("say_next") or ""), (V.get("route"), V.get("readback_line"), V.get("say_next"))
+    # a past date with no words is treated as vague (ask once for the exact day), never 'has already passed'
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-11", offer_when="", offer_amount="420")
+    assert V.get("offer_verdict") == "vague", (V.get("offer_verdict"), V.get("say_next"))
+
+
+if __name__ == "__main__":
+    sys.exit(main())

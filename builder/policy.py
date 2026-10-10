@@ -90,7 +90,12 @@ DEFAULT_TEXTS = {
 
 # Extraction variables every policy node clears at its end (enum ones to 'none', value ones to '').
 CLEAR_ENUMS = ("stance", "offer_kind", "offer_for", "topic", "confirm", "hs_answer", "wrap", "aside")
-CLEAR_VALUES = ("offer_date", "offer_amount")
+CLEAR_VALUES = ("offer_date", "offer_amount", "offer_when")
+# the customer's own words for the day, resolved in code against the call's date (the platform's date extraction uses
+# the real clock: 'tomorrow' arrived as a date before the call's today on Brief B PUB-12)
+WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as said (for example 'tomorrow', 'next Friday', "
+             "'this Saturday', 'the 23rd', 'the sixth of November', 'end of the month', 'when my salary comes'). "
+             "Empty when no day or period is mentioned in the latest message.")
 
 
 def _tpl(s):
@@ -423,10 +428,116 @@ def all_offer(V, d):
         agree(V, p, full_of(V, p), dd, tag, move=False)
     V['offer_verdict'] = 'ok'
     advance(V, '')
+WDN = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+MON = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
+       'september': 9, 'october': 10, 'november': 11, 'december': 12}
+NUMW = {'a': 1, 'an': 1, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8,
+        'nine': 9, 'ten': 10, 'fourteen': 14}
+def _month_of(w):
+    for k, v in MON.items():
+        if w.startswith(k[:3]):
+            return v
+    return None
+ORDW = {'first': 1, 'second': 2, 'third': 3, 'fourth': 4, 'fifth': 5, 'sixth': 6, 'seventh': 7, 'eighth': 8, 'ninth': 9,
+        'tenth': 10, 'eleventh': 11, 'twelfth': 12, 'thirteenth': 13, 'fourteenth': 14, 'fifteenth': 15, 'sixteenth': 16,
+        'seventeenth': 17, 'eighteenth': 18, 'nineteenth': 19, 'twentieth': 20, 'thirtieth': 30}
+def _ordinal_words(t):
+    for tens, base in (('twenty', 20), ('thirty', 30)):
+        for w, n in ORDW.items():
+            if n < 10:
+                t = t.replace(' %s %s ' % (tens, w), ' %dth ' % (base + n))
+    for w in sorted(ORDW, key=len, reverse=True):
+        t = t.replace(' %s ' % w, ' %dth ' % ORDW[w])
+    return t
+def resolve_when(V, text):
+    # (date, kind) from the customer's OWN WORDS, relative to the call's today (never the real clock: the platform's
+    # date extraction resolved 'tomorrow' with the real clock). kind: 'exact' (with a date), 'vague', or 'none'.
+    t = ' ' + re.sub(r'[^a-z0-9 ]', ' ', str(text or '').lower()) + ' '
+    t = _ordinal_words(re.sub(r'\s+', ' ', t))
+    if not t.strip():
+        return None, 'none'
+    today = today_of(V)
+    D = datetime.timedelta
+    if ' day after tomorrow ' in t:
+        return today + D(2), 'exact'
+    if ' tomorrow ' in t:
+        return today + D(1), 'exact'
+    if re.search(r' (today|tonight|right now|now|this morning|this afternoon|this evening) ', t):
+        return today, 'exact'
+    m = re.search(r' in (\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten|fourteen) (day|week|fortnight)s? ', t)
+    if m:
+        n = int(m.group(1)) if m.group(1).isdigit() else NUMW.get(m.group(1), 1)
+        n = n * (7 if m.group(2) == 'week' else 14 if m.group(2) == 'fortnight' else 1)
+        return today + D(n), 'exact'
+    m = re.search(r' (\d{1,2})(?:st|nd|rd|th)? (?:of )?([a-z]{3,9})(?: (\d{4}))? ', t)
+    mo = _month_of(m.group(2)) if m else None
+    if m and mo:
+        y = int(m.group(3)) if m.group(3) else today.year
+        try:
+            d = datetime.date(y, mo, int(m.group(1)))
+            if not m.group(3) and d < today - D(14):
+                d = datetime.date(y + 1, mo, int(m.group(1)))
+            return d, 'exact'
+        except Exception:
+            return None, 'vague'
+    m = re.search(r' ([a-z]{3,9}) (?:the )?(\d{1,2})(?:st|nd|rd|th)? ', t)
+    mo = _month_of(m.group(1)) if m else None
+    if m and mo:
+        try:
+            d = datetime.date(today.year, mo, int(m.group(2)))
+            if d < today - D(14):
+                d = datetime.date(today.year + 1, mo, int(m.group(2)))
+            return d, 'exact'
+        except Exception:
+            return None, 'vague'
+    m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
+    if m:
+        wd = WDN.index(m.group(2))
+        if m.group(1) == 'next':
+            if P.get('weekday_rule') == 'first_after':
+                delta = (wd - today.weekday()) % 7 or 7
+            else:   # that weekday in the following calendar week
+                delta = (7 - today.weekday()) + wd
+        else:
+            delta = (wd - today.weekday()) % 7
+        return today + D(delta), 'exact'
+    m = re.search(r' (?:the )?(\d{1,2})(?:st|nd|rd|th) ', t)
+    if m:
+        n = int(m.group(1))
+        y, mo = today.year, today.month
+        if n < today.day:
+            mo += 1
+            if mo > 12:
+                mo, y = 1, y + 1
+        try:
+            return datetime.date(y, mo, n), 'exact'
+        except Exception:
+            return None, 'vague'
+    if re.search(r'(next week|week after next|end of (the )?month|end of month|this month|next month|when (my |the )?(salary|pay|wages|money)|'
+                 r'after (my |the )?(pay|salary)|a few (days|weeks)|couple of (days|weeks)|soon|later|some ?time|not sure|maybe|'
+                 r'next (few|couple)|beginning of|middle of|start of|mid )', t):
+        return None, 'vague'
+    return None, 'none'
+def offer_date_of(V):
+    # the customer's words first (offer_when, resolved in code); the extraction's offer_date only as a fallback and
+    # never a date before the call's today
+    d, kind = resolve_when(V, g(V, 'offer_when'))
+    if kind == 'exact' and d is not None:
+        return d, 'exact'
+    if kind == 'vague':
+        return None, 'vague'
+    d = pdate(g(V, 'offer_date'))
+    if d is not None and d < today_of(V):
+        return None, 'vague'
+    return d, g(V, 'offer_kind')
 def ev_offer(V):
     kind = g(V, 'offer_kind')
     a = num(g(V, 'offer_amount'))
-    d = pdate(g(V, 'offer_date'))
+    d, k2 = offer_date_of(V)
+    if k2 in ('exact', 'vague'):
+        kind = k2
+    if kind == 'vague':
+        d = None
     if multi(V) and g(V, 'stage') != 'all' and g(V, 'offer_for') == 'all' and d is not None and a is None and kind == 'exact':
         all_offer(V, d)
         return
@@ -523,9 +634,10 @@ def ev_notalk(V):
     say(V, join([T('notalk_first'), g(V, 'offer_question')]))
 def ev_hardship(V):
     V['mode'] = 'hardship'
-    if g(V, 'offer_kind') == 'exact':
+    hd, hk = offer_date_of(V)
+    if g(V, 'offer_kind') == 'exact' or hk == 'exact':
         V['hs_offer'] = 'yes'
-        V['hs_date'] = g(V, 'offer_date')
+        V['hs_date'] = hd.isoformat() if hd is not None else ''
         V['hs_amount'] = g(V, 'offer_amount')
     say(V, T('hardship'), 'hardship')
 def ev_hs_decline(V):
@@ -557,7 +669,7 @@ def ev_confirm_no(V):
 def ev_change(V):
     agreed = [p for p in pids(V) if state(V, p) == 'agreed']
     a = num(g(V, 'offer_amount'))
-    d = pdate(g(V, 'offer_date'))
+    d, k2 = offer_date_of(V)
     tp = offer_target(V)
     if not tp and multi(V) and len(agreed) > 1 and d is not None and a is None:
         for p in agreed:
@@ -830,7 +942,8 @@ class Policy:
     def __init__(self, holidays, texts=None, multi=False, notes=False, note_reasons=None, fin_keys=None,
                  fail_max=2, max_checks=8, human_limit=2, notalk_limit=2, wrap_turns=2, closed_day_move="after",
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
-                 outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None):
+                 outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None,
+                 weekday_rule="this_week"):
         t = dict(DEFAULT_TEXTS)
         for k, v in (texts or {}).items():
             t[k] = v
@@ -858,7 +971,7 @@ class Policy:
         self.targets = dict(DEFAULT_TARGETS)
         self.targets.update(targets or {})
         self.asides = {str(k): {"when": str(v.get("when") or ""), "say": str(v.get("say") or "")} for k, v in (asides or {}).items()}
-        self.P = {"texts": t, "multi": self.multi, "notes": self.notes, "note_reasons": nr, "fin_keys": fk, "asides": self.asides,
+        self.P = {"texts": t, "multi": self.multi, "notes": self.notes, "note_reasons": nr, "fin_keys": fk, "asides": self.asides, "weekday_rule": str(weekday_rule),
                   "fail_max": int(fail_max), "max_checks": int(max_checks), "human_limit": int(human_limit),
                   "notalk_limit": int(notalk_limit), "wrap_turns": int(wrap_turns),
                   "closed_day_move": closed_day_move, "ordinals": list(ordinals),
@@ -869,7 +982,7 @@ class Policy:
     # ------------------------------------------------------------------ sources
     def core(self):
         """CAL_HELPERS + the policy core (functions only, nothing runs)."""
-        src = fl.CAL_HELPERS(self.holidays, self.bwd) + _CORE.replace("__P__", _pylit(self.P))
+        src = fl.CAL_HELPERS(self.holidays, self.bwd, self.P.get("weekday_rule", "this_week")) + _CORE.replace("__P__", _pylit(self.P))
         if "{{" in src or "}}" in src:
             raise ValueError("policy core contains '{{' or '}}'")
         return src
@@ -941,6 +1054,7 @@ class Policy:
         """T1: offer_date (date), offer_amount (float), offer_kind (exact|vague|none)."""
         return [fl.ext("offer_kind", ["none", "exact", "vague"], kind_desc, conf),
                 {"name": "offer_date", "type": "date", "description": date_desc, "min_confidence": conf},
+                {"name": "offer_when", "type": "string", "description": WHEN_DESC, "min_confidence": conf},
                 {"name": "offer_amount", "type": "float", "description": amount_desc, "min_confidence": conf}]
 
     @staticmethod
@@ -992,6 +1106,7 @@ class Policy:
         name = name or self.targets["confirm"]
         ext = [fl.ext("confirm", ["other", "yes", "no", "change"], confirm_desc, conf),
                {"name": "offer_date", "type": "date", "description": date_desc, "min_confidence": conf},
+               {"name": "offer_when", "type": "string", "description": WHEN_DESC, "min_confidence": conf},
                {"name": "offer_amount", "type": "float", "description": amount_desc, "min_confidence": conf}]
         if topic_entry:
             ext.append(topic_entry)
