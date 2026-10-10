@@ -426,10 +426,13 @@ def verify_post(question, hints, max_wrong_text,
                 verified_text="Correct. Ask the next security question.",
                 unreadable_text="The answer could not be read. It does not count as wrong. Ask again: {question}",
                 wrong_text="Wrong answer. Tell the customer it does not match our records and ask again: {question}",
-                fields=None):
+                fields=None, stop_left=("0",)):
     """Post hook for one identity question. `hints` maps a response hint value to the text for it (checked first,
     a hint is not a wrong answer). `max_wrong_text` is used when the wrong-answers counter reaches 0.
     `fields` renames the response fields: {"hint", "all_verified", "verified", "ok", "left"}.
+    `stop_left` = the wrong_answers_left values at which the check is over (default ("0",), the service's own
+    limit). A brief stricter than the service (e.g. "the second wrong answer ends the check" on a service that
+    allows three) passes the values that mean "limit reached", e.g. ("1", "0"); route the node on the same values.
     The default texts are generic placeholders: a generator should pass the brief's own wording for every text
     (all_verified_text, verified_text, unreadable_text, wrong_text, max_wrong_text), e.g. what the brief says the
     agent does once identity is verified, how many questions there are, how a wrong answer is worded."""
@@ -438,7 +441,7 @@ def verify_post(question, hints, max_wrong_text,
     q = lambda s: s.replace("{question}", question)
     branches = [("d.get(%r) == %r" % (f["hint"], v), t) for v, t in (hints or {}).items()]
     branches += [(truthy(f["all_verified"]), all_verified_text), (truthy(f["verified"]), verified_text),
-                 (falsy(f["ok"]), q(unreadable_text)), ("str(left) == '0'", max_wrong_text)]
+                 (falsy(f["ok"]), q(unreadable_text)), ("str(left) in %r" % (tuple(str(x) for x in stop_left),), max_wrong_text)]
     return what_next_post(branches, q(wrong_text), prelude=["left = d.get(%r)" % f["left"]])
 
 
@@ -502,6 +505,12 @@ def next_bd(d):
         d = d + datetime.timedelta(days=1)
         guard += 1
     return d
+def prev_bd(d):
+    guard = 0
+    while not isbd(d) and guard < 4000:
+        d = d - datetime.timedelta(days=1)
+        guard += 1
+    return d
 def lastbd_of_week(monday):
     for k in range(6, -1, -1):
         d = monday + datetime.timedelta(days=k)
@@ -548,7 +557,7 @@ def fmt(x):
 
 def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS):
     """Python source (for the top of a code node) defining, on datetime.date values:
-    isbd(d) business day?; txt(d) 'Friday 16 October 2026'; txt_short(d) without the year; addbd(d, n) n business
+    isbd(d) business day?; next_bd(d) / prev_bd(d) d itself or the first business day after / before it; txt(d) 'Friday 16 October 2026'; txt_short(d) without the year; addbd(d, n) n business
     days later; next_bd(d) d or the first business day after it; lastbd_of_week(monday) last business day of that
     week or None; weekday_table(today) the '"this Monday" = ...; "next Monday" = ...' table; calendar_text(today,
     deadline, extra_days=10) one tagged line per day (allowed / weekend / bank holiday / after the deadline, with the

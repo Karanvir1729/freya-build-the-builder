@@ -59,7 +59,8 @@ DATE_NAME_RE = re.compile(r"(^|_)(date|dob|birthday|birth_date|day|deadline)(_\w
 
 
 class _Linter:
-    def __init__(self, wf, api=None):
+    def __init__(self, wf, api=None, call_vars=None):
+        self.call_vars = [str(v) for v in (call_vars or [])]
         self.wf = wf if isinstance(wf, dict) else {}
         self.api = api
         self.findings = []
@@ -311,6 +312,9 @@ class _Linter:
             for k in tv:
                 if isinstance(k, str):
                     self.note_var(k, "test_variables")
+        # call variables the dialler passes (--call-vars): a workflow shipped without test_variables still has them
+        for k in self.call_vars:
+            self.note_var(k, "test_variables")
         for key, n in self.all_nodes.items():
             if not isinstance(n, dict):
                 continue
@@ -1282,9 +1286,11 @@ class _Linter:
         return self.findings
 
 
-def lint(wf, api=None):
-    """Lint a workflow dict. Returns a list of {level, where, message} sorted ERROR, WARN, INFO."""
-    return _Linter(wf, api).run()
+def lint(wf, api=None, call_vars=None):
+    """Lint a workflow dict. Returns a list of {level, where, message} sorted ERROR, WARN, INFO.
+    `call_vars` = the call variables the brief says every call carries (e.g. customer_id, first_name, now): they
+    count as set even though the shipped workflow has no test_variables."""
+    return _Linter(wf, api, call_vars).run()
 
 
 def format_findings(findings):
@@ -1294,23 +1300,29 @@ def format_findings(findings):
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     api = None
+    call_vars = None
+    if "--call-vars" in argv:
+        i = argv.index("--call-vars")
+        if i + 1 < len(argv):
+            call_vars = [v.strip() for v in argv[i + 1].split(",") if v.strip()]
+            args = [a for a in args if a != argv[i + 1]]
     if "--api" in argv:
         i = argv.index("--api")
         if i + 1 >= len(argv):
-            print("usage: lint.py <workflow.json> [--api openapi.json]", file=sys.stderr)
+            print("usage: lint.py <workflow.json> [--api openapi.json] [--call-vars a,b,c]", file=sys.stderr)
             return 2
         api_path = argv[i + 1]
         args = [a for a in args if a != api_path]
         with open(api_path) as fh:
             api = json.load(fh)
     if len(args) != 1:
-        print("usage: lint.py <workflow.json> [--api openapi.json]", file=sys.stderr)
+        print("usage: lint.py <workflow.json> [--api openapi.json] [--call-vars a,b,c]", file=sys.stderr)
         return 2
     with open(args[0]) as fh:
         wf = json.load(fh)
     if isinstance(wf, dict) and "workflow" in wf and isinstance(wf["workflow"], dict) and "nodes" not in wf:
         wf = wf["workflow"]
-    findings = lint(wf, api)
+    findings = lint(wf, api, call_vars)
     out = format_findings(findings)
     if out:
         print(out)

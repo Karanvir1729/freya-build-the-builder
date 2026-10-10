@@ -201,8 +201,19 @@ __PREFIX_BLOCK__        b[__PID__] = pid
             b[__DATE__] = str(b[__DATE__]).strip()[:10]
         if V is not None:
             V['pending_pid'] = pid
-__CAP_DATE____CAP_AMOUNT__except Exception:
+__CAP_DATE____CAP_AMOUNT____SNAP__except Exception:
     pass
+"""
+_SNAP = """        if b.get(__DATE__):
+            import datetime
+            _hol = set(__HOL__)
+            _bwd = set(__BWD__)
+            _d = datetime.date.fromisoformat(str(b[__DATE__])[:10])
+            _g = 0
+            while (_d.weekday() not in _bwd or _d.isoformat() in _hol) and _g < 30:
+                _d = _d + datetime.timedelta(days=__STEP__)
+                _g += 1
+            b[__DATE__] = _d.isoformat()
 """
 _PREFIX_BLOCK = """        if pid.isdigit():
             pid = __PREFIX__ + pid
@@ -219,13 +230,18 @@ _CAP_AMOUNT = """            pd = V.get('pd_' + pid)
 
 def promise_pre_code(cap_to_deadline=True, cap_to_amount=True, id_prefix="p", pid_field="product_id",
                      amount_field="amount", date_field="date", promise_tool="create_promise", note_tool="add_note",
-                     api=None):
+                     api=None, snap_closed=None, holidays=(), business_weekdays=fl.BUSINESS_WEEKDAYS):
     """Pre hook of the promise tool. Normalises the product id (a bare number gets `id_prefix`, so '1' -> 'p1';
     None skips it), amount -> float (commas stripped), date -> YYYY-MM-DD, remembers vars['pending_pid'], and
     with cap_to_deadline / cap_to_amount clamps the date to vars['dl_<pid>'] and the amount to vars['pd_<pid>']
     (the per-product facts the prepare node wrote), so the model can never record past a product's deadline or
     above its past-due amount. pid_field / amount_field / date_field are the promise tool's request fields; with
-    `api` they are checked against the API file."""
+    `api` they are checked against the API file.
+    snap_closed: None, or "before" / "after" = a date that is not a business day (a weekday outside
+    `business_weekdays` or one of `holidays`) is moved to the business day before / after it, after the deadline
+    cap (a safety net for the brief's closed-day rule; the read-back should already carry the moved date)."""
+    if snap_closed not in (None, "before", "after"):
+        raise ValueError("snap_closed must be None, 'before' or 'after'")
     _ident(promise_tool, "promise_tool")
     if api is not None:
         _check_request_fields(api, promise_tool, [("pid_field", pid_field), ("amount_field", amount_field), ("date_field", date_field)],
@@ -234,6 +250,12 @@ def promise_pre_code(cap_to_deadline=True, cap_to_amount=True, id_prefix="p", pi
     code = code.replace("__PREFIX_BLOCK__", _PREFIX_BLOCK.replace("__PREFIX__", repr(str(id_prefix))) if id_prefix else "")
     code = code.replace("__CAP_DATE__", _CAP_DATE if cap_to_deadline else "")
     code = code.replace("__CAP_AMOUNT__", _CAP_AMOUNT if cap_to_amount else "")
+    snap = ""
+    if snap_closed:
+        hol = sorted(set(str(h)[:10] for h in holidays or []))
+        snap = (_SNAP.replace("__HOL__", repr(hol)).replace("__BWD__", repr(sorted(set(int(x) for x in business_weekdays))))
+                .replace("__STEP__", "-1" if snap_closed == "before" else "1"))
+    code = code.replace("__SNAP__", snap)
     code = code.replace("__PID__", repr(pid_field)).replace("__AMOUNT__", repr(amount_field)).replace("__DATE__", repr(date_field))
     return _no_braces(state_fn_code(promise_tool, note_tool) + code, "promise_pre_code")
 
@@ -578,6 +600,17 @@ while d <= maxdl + datetime.timedelta(days=__EXTRA__):
             tag += ' Allowed for ' + ', '.join(ok) + '.'
         if bad:
             tag += ' AFTER THE DEADLINE of ' + ', '.join(bad) + ' (use that product\'s deadline instead).'
+    elif __MOVE__ == 'before':
+        pb = prev_bd(d)
+        tag = ('weekend' if d.weekday() not in BWD else 'closure day') + ', NOT allowed.'
+        ok = [x['pid'] for x in infos if d <= x['deadline']]
+        bad = [x['pid'] for x in infos if d > x['deadline']]
+        if ok and pb >= today:
+            tag += ' For ' + ', '.join(ok) + ': offer the business day BEFORE it, ' + txt_short(pb) + ' (' + pb.isoformat() + ').'
+        elif ok:
+            tag += ' For ' + ', '.join(ok) + ': no business day before it from today, ask for another day.'
+        if bad:
+            tag += ' AFTER THE DEADLINE of ' + ', '.join(bad) + ' (offer that product\'s deadline instead).'
     else:
         tag = ('weekend' if d.weekday() not in BWD else 'bank holiday') + ', NOT allowed -> offer the next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ') where it is not after the deadline.'
     cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag)
@@ -645,7 +678,7 @@ def products_facts_code(bands, floor_rules, wording, statement, attempt1_var="at
                         unknown_type_words="account", line_template=LINE_TEMPLATE, attempt2_template=ATTEMPT2_TEMPLATE,
                         one_attempt_template=ONE_ATTEMPT_TEMPLATE, calendar_extra_days=10, pid_field="product_id",
                         amount_field="past_due", days_late_field="days_late", type_field="type", api=None,
-                        account_tool="get_account", products_field=None):
+                        account_tool="get_account", products_field=None, closed_day_move="after"):
     """The body of the prepare code node (put it after freyalib.products_from_vars() inside guarded(), with
     CAL_HELPERS on top; prepare_code() does that). From the product list `prods` it writes, per product,
     dl_<pid> and pd_<pid>, then n_products, pids_csv, open_pids (= pids_csv), rec_pids '', note_log '',
@@ -675,7 +708,12 @@ def products_facts_code(bands, floor_rules, wording, statement, attempt1_var="at
            as 0, so pass `api` (the loaded API file): then these names, every floor rule's field (and the
            p.get('..') / p['..'] fields of an expr), the `types` lists (against the type field's enum) and the
            wording placeholders are checked against the product schema of `account_tool`'s response
-           (`products_field` None = its first array property) and a wrong name fails here, not on the call."""
+           (`products_field` None = its first array property) and a wrong name fails here, not on the call.
+    closed_day_move: what the calendar offers for a weekend or closure day the customer names: "after" = the next
+           business day (Brief A/B), "before" = the business day before it (a brief whose payments on a closed
+           day would be late, so the promise moves back); needs prev_bd from CAL_HELPERS."""
+    if closed_day_move not in ("after", "before"):
+        raise ValueError("closed_day_move must be 'after' or 'before'")
     if not bands:
         raise ValueError("bands must list at least one band")
     band_rows = []
@@ -740,7 +778,8 @@ def products_facts_code(bands, floor_rules, wording, statement, attempt1_var="at
             .replace("__ATT1__", repr(att1)).replace("__ST_ONE__", repr(st["one"])).replace("__ST_HEAD__", repr(st["many_head"]))
             .replace("__ST_ITEM__", repr(st["many_item"])).replace("__ST_TAIL__", repr(st["many_tail"]))
             .replace("__EXTRA__", str(int(calendar_extra_days))).replace("__PIDF__", repr(pid_field)).replace("__AMTF__", repr(amount_field))
-            .replace("__DAYSF__", repr(days_late_field)).replace("__TYPEF__", repr(type_field)))
+            .replace("__DAYSF__", repr(days_late_field)).replace("__TYPEF__", repr(type_field))
+            .replace("__MOVE__", repr(closed_day_move)))
     return _no_braces(code, "products_facts_code")
 
 
