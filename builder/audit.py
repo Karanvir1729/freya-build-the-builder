@@ -26,7 +26,7 @@ each batch is one model call with the same context. One more small call ranks th
 Needs a Claude login (or ANTHROPIC_API_KEY). AUDIT_MODEL overrides the model (default claude-opus-5-5).
 Progress and every model call go to stderr ("model call: <model> | purpose: ..."); the one-line summary goes to stdout.
 """
-import argparse, asyncio, json, os, pathlib, re, sys, time
+import argparse, asyncio, difflib, json, os, pathlib, re, sys, time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -149,7 +149,7 @@ def _cond(c):
     return json.dumps(c)
 
 
-def _tool_text(t):
+def _tool_text(t, code_text=None):
     f = t.get("function") or {}
     name = f.get("name", "?")
     L = ["description: " + " ".join(str(f.get("description", "")).split())]
@@ -181,7 +181,7 @@ def _tool_text(t):
             L.append("  %s: %s" % (k, json.dumps(v["default"])))
     for key in ("pre_process_code", "post_process_code"):
         if t.get(key):
-            L.append(key + ":\n" + _indent(str(t[key]), 4))
+            L.append(code_text("%s %s" % (name, key), str(t[key]), key) if code_text else key + ":\n" + _indent(str(t[key]), 4))
     if t.get("response_mapping"):
         L.append("response_mapping: " + json.dumps(t["response_mapping"]))
     return name, "\n".join(L)
@@ -198,12 +198,34 @@ def workflow_digest(wf):
         wf = wf["workflow"]
     nodes = wf.get("nodes") or {}
     tools, labels, counts = {}, {}, {}
+    # Code built on one shared library (builder/policy.py: the same ~40 KB core in every policy node; the normalisation
+    # hook on every identity/promise tool) would be repeated in full: the v3 digests were ~1 MB, too long for one
+    # command-line argument of the Claude CLI. A block that shares most of its lines with one printed earlier is printed
+    # as a unified diff against the closest such block.
+    seen_code = []
+
+    def code_text(where, code, head="code"):
+        lines = code.splitlines()
+        if len(lines) >= 40:
+            best, best_r = None, 0.0
+            for ref, ref_lines in seen_code:
+                sm = difflib.SequenceMatcher(None, ref_lines, lines, autojunk=False)
+                if sm.real_quick_ratio() >= 0.6 and sm.quick_ratio() >= 0.6:
+                    r = sm.ratio()
+                    if r > best_r:
+                        best, best_r = (ref, ref_lines), r
+            seen_code.append((where, lines))
+            if best and best_r >= 0.6:
+                diff = [l for l in difflib.unified_diff(best[1], lines, lineterm="", n=0)][2:]
+                return ("  %s: the %s with these changes (unified diff, '-' = only there, '+' = only here):\n"
+                        % (head, best[0]) + _indent("\n".join(diff) or "(identical)", 4))
+        return "  %s:\n" % head + _indent(code, 4)
 
     def register(t):
         key = json.dumps(t, sort_keys=True)
         if key in labels:
             return labels[key]
-        name, text = _tool_text(t)
+        name, text = _tool_text(t, code_text)
         counts[name] = counts.get(name, 0) + 1
         label = name if counts[name] == 1 else "%s#%d" % (name, counts[name])
         labels[key] = label
@@ -231,7 +253,7 @@ def workflow_digest(wf):
             f = pa.get("function") or {}
             if f.get("name") == "code_exec":
                 code = (((f.get("parameters") or {}).get("properties") or {}).get("code") or {}).get("default", "")
-                body.append("  code:\n" + _indent(code, 4))
+                body.append(code_text("code of node " + name, code))
             else:
                 body.append("  pre_action tool: " + register(pa))
         if n.get("response_mapping"):

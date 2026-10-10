@@ -473,6 +473,12 @@ def test_offer_when_resolved_in_code():
     G2 = {"vars": V}
     exec(src + "\nout = {}\nfor w in ['Monday the 26th', 'Sunday the 25th', 'this Saturday, the 17th', 'on Friday the 23rd']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G2)
     o2 = G2["out"]
+    P3 = pol.Policy(HOL, texts=TEXTS, weekday_rule="first_after")
+    G3 = {"vars": {"today_iso": "2026-10-16"}}   # a Friday
+    exec(P3.core() + "\nout = [resolve_when(vars, w)[0].isoformat() for w in ('this friday', 'next friday', 'friday', 'this saturday')]\n", G3)
+    assert G3["out"] == ["2026-10-23", "2026-10-23", "2026-10-16", "2026-10-17"], G3["out"]
+    n = P3.hardship_node("t", "a", "k", "d", "m", human=True)
+    assert n["transitions"][0]["target_node"] == "pol_human" and "human" in n["extraction_schema"][0]["enum_values"], n["transitions"][0]
     assert o2 == {'Monday the 26th': ('2026-10-26', 'exact'), 'Sunday the 25th': ('2026-10-25', 'exact'),
                   'this Saturday, the 17th': ('2026-10-17', 'exact'), 'on Friday the 23rd': ('2026-10-23', 'exact')}, o2
     assert out[""] == (None, "none"), out

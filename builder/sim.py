@@ -661,7 +661,15 @@ def finish(ctx, case, rep, row, chat, ledger):
         row["tools"] = [x.get("tool") for x in ledger["calls"]]
     elif chat:
         row["failed"].append("mock bank: no ledger for " + str(row["customer_id"]))
-    if chat and not chat.call_id:                                  # nothing was said: no judge call for a '(no reply: HTTP 500)' transcript
+    # close_call is an end_of_call lifecycle tool: it lands in the bank's ledger seconds after the call ended and is
+    # often not yet in the call log fetched above (Brief C v3 PUB-02: the judge failed a correct call for 'no close_call').
+    # Give the judge the ledger's close_call when the call log has none.
+    if ledger and not any(t.get("tool") == "close_call" for t in tools):
+        for c in [c for c in ledger.get("calls") or [] if c.get("tool") == "close_call"][-1:]:
+            tools.append({"tool": "close_call", "args": c.get("args"), "result": c.get("result")})
+            lines.append("   [tool] close_call %s (end of call; from the bank's ledger, after the last line)" % tool_args_line(c.get("args")))
+            row["close_call_from_ledger"] = True
+    if chat and not chat.call_id:                                 # nothing was said: no judge call for a '(no reply: HTTP 500)' transcript
         row["failed"].append("conversation: no call was started, nothing to judge")
     elif chat and lines:
         try:

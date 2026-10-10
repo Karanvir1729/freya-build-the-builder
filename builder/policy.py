@@ -524,7 +524,9 @@ def resolve_when(V, text):
     m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
     if m:
         wd = WDN.index(m.group(2))
-        if m.group(1) == 'next':
+        if P.get('weekday_rule') == 'first_after' and m.group(1) in ('this', 'next', 'coming'):
+            delta = (wd - today.weekday()) % 7 or 7   # the first such weekday AFTER today, also when said on that weekday
+        elif m.group(1) == 'next':
             if P.get('weekday_rule') == 'first_after':
                 delta = (wd - today.weekday()) % 7 or 7
             else:   # that weekday in the following calendar week
@@ -1261,14 +1263,18 @@ class Policy:
                                                       mapping=[{"path": "data.%s" % ok_field, "variable": "note_ok"}])
         return nodes
 
-    def hardship_node(self, task, answer_desc, kind_desc, date_desc, amount_desc, name=None, conf=0.5):
+    def hardship_node(self, task, answer_desc, kind_desc, date_desc, amount_desc, name=None, conf=0.5, human=False):
         """Hardship (sympathy + support offer spoken from {{say_next}}, no persuasion by routing): hs_answer in
         {support_yes, support_no, accept_offer, none}; a named date or amount still goes through the offer guard
-        and the read-back; support_no without a named offer closes the open products as hardship."""
+        and the read-back; support_no without a named offer closes the open products as hardship.
+        human=True adds hs_answer 'human' -> pol_human (the human-request counter) for a brief whose human-request rule
+        also applies during hardship; describe the value in answer_desc."""
         name = name or self.targets["hardship"]
-        ext = [fl.ext("hs_answer", ["none", "support_yes", "support_no", "accept_offer"], answer_desc, conf)] + \
+        vals = ["none", "support_yes", "support_no", "accept_offer"] + (["human"] if human else [])
+        ext = [fl.ext("hs_answer", vals, answer_desc, conf)] + \
             self.offer_extraction(date_desc, amount_desc, kind_desc, conf)
-        trs = [fl.eq("hs_answer", "support_yes", self.targets["xfer_support"], "the customer accepts the support team"),
+        trs = ([fl.eq("hs_answer", "human", "pol_human", "the customer asks for a person")] if human else []) + [
+               fl.eq("hs_answer", "support_yes", self.targets["xfer_support"], "the customer accepts the support team"),
                fl.tr("check_offer", "the customer names a date or an amount", fl.cond("offer_kind", "equals", "exact")),
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]

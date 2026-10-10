@@ -112,7 +112,18 @@ for name, q, fin, line in [
 # ---------------------------------------------------------------- setup: dates, callback window
 # R6: a callback slot today or on one of the next two business days, 09:00 to 18:00 inclusive, later than now
 CALLBACK = {"open": "09:00", "close": "18:00", "same_day": True, "days_ahead": 2}
-SETUP = fl.SETUP_CODE(HOLIDAYS, BWD, callback_rule=CALLBACK, weekday_rule=WEEKDAY_RULE)
+# R47/R46: every call ends with one close_call; a hang-up before any ending still needs a valid outcome and reason:
+# before the check = the person did not stay for it (R46 withheld once the customer confirmed, else R3 unconfirmed);
+# prepare moves it to no_promise / declined_offer (R46 after the check).
+DEFAULT_OUTCOME = r'''
+if str(vars.get('who1') or '') == 'customer':
+    vars['outcome'] = 'not_verified'
+    vars['reason'] = 'withheld'
+else:
+    vars['outcome'] = 'not_reached'
+    vars['reason'] = 'unconfirmed'
+'''
+SETUP = fl.SETUP_CODE(HOLIDAYS, BWD, callback_rule=CALLBACK, weekday_rule=WEEKDAY_RULE, extra=DEFAULT_OUTCOME)
 
 # ---------------------------------------------------------------- opening (R1-R4, R43, R46)
 WHO_VALUES = ["customer", "someone_else", "wrong_number", "deceased", "refuses", "wants_agent", "unclear"]
@@ -301,6 +312,8 @@ else:                                      # R19 amber: the 4th business day aft
     deadline = addbd(today, 4)
     rungs = [('full_or_floor', a1)]
 register_product(vars, pid, words, past_due, floor, 'floor', deadline, rungs)
+vars['outcome'] = 'no_promise'             # R46: a hang-up after the check closes no_promise / declined_offer
+vars['reason'] = 'declined_offer'
 vars['product_id'] = pid
 vars['product_words'] = words
 vars['past_due_fmt'] = fmt(past_due)
@@ -373,12 +386,13 @@ nodes["confirm"] = POLICY.confirm_node(CONFIRM, CONFIRM_DESC, DATE_DESC, AMOUNT_
 HS_ANSWER_DESC = ("From the customer's LATEST message. support_yes = they want to be connected with the care team. "
                   "support_no = they do not want to be connected, say no to that offer, or say they cannot pay and want nothing more. "
                   "accept_offer = they agree to the date and amount the agent just proposed. "
+                  "human = they ask to speak to a person, a human or an agent (not the care team). "
                   "none = anything else, for example a question or a request for a discount.")
 HARDSHIP = ("The customer mentioned a hardship (illness, a bereavement, job loss or similar). You said \"I am sorry to hear that. I will not ask you for a payment today.\" and asked whether you may connect them with the bank's care team now.\n"
             "- Make NO persuasion attempt. Never propose an amount or a date yourself.\n"
             "- If they ask a question or for a discount, answer in one short sentence, then ask whether you may connect them with the care team now.\n"
             + COMMON + FACTS)
-nodes["hardship"] = POLICY.hardship_node(HARDSHIP, HS_ANSWER_DESC, KIND_DESC, DATE_DESC, AMOUNT_DESC)
+nodes["hardship"] = POLICY.hardship_node(HARDSHIP, HS_ANSWER_DESC, KIND_DESC, DATE_DESC, AMOUNT_DESC, human=True)   # R43 applies during hardship too
 
 WRAP_DESC = ("From the customer's LATEST message, after the agent said the promise is noted and asked whether there is anything else. "
              "done = nothing else ('no', 'that's all', 'thanks', 'goodbye'). "
