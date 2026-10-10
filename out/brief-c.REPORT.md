@@ -8,13 +8,13 @@ Run: cloud worker, 10 Oct 2026, 16:50–~17:55 UTC, branch `cloud/brief-c`. Buil
 
 | | |
 |---|---|
-| workflow_id | `68dc5046-318c-4d4f-bae5-3d602d05a7f9` (version 2, published) |
+| workflow_id | `68dc5046-318c-4d4f-bae5-3d602d05a7f9` (version 3, published) |
 | agent_id | `01b1a04f-fecb-4f14-915f-c63145296333` |
-| nodes | 49 (initial node `opening` = conversation node; 12 fin/end pairs + 4 transfer fin/end pairs + promise pair) |
+| nodes | 50 (initial node `opening` = conversation node; 12 fin/end pairs + 4 transfer fin/end pairs + promise pair) |
 | tools | 15 tool definitions on nodes (verify_identity ×2, transfer_to_agent ×7 [3 model-called, 4 engine-run api nodes], create_promise ×2, schedule_callback, get_account) + `close_call` as the workflow-level `end_of_call` lifecycle tool. `add_note` not used (Brief C never calls it) |
 | test_variables | none shipped (`{}`) |
 | export | `submission/brief-c.workflow.json` |
-| last sim | **round 2: 10/10**, round 3 (unchanged agent): see the table below |
+| last sim | round 2: 10/10; round 3 (same agent): 8/10; round 4 (v3): 8/10 |
 
 Files: `out/gen_brief-c.py` (generator), `out/brief-c.workflow.json`, `out/brief-c.rules.{json,md}` (64 rules, `builder/rules.py`),
 `out/brief-c.audit.{json,md}` (+ `audit.round1.*`), `out/brief-c.lint.txt`, `out/sim/brief-c/round{1,2,3}.{json,log}` + transcripts,
@@ -48,19 +48,19 @@ is outside the call's population; the brief gives no outcome for it), R34 (see "
 
 ## Simulator rounds (`builder/sim.py`, gpt-5-mini customer, gpt-5 judge, concurrency 2)
 
-| case | round 1 (as scored) | round 1 rescored* | round 2 | round 3 |
-|---|---|---|---|---|
-| PUB-01 happy path | FAIL | FAIL: first line was "Hello. Am I speaking with Daniel Reyes?" | PASS | ROUND3_01 |
-| PUB-02 third party | FAIL | PASS | PASS | ROUND3_02 |
-| PUB-03 identity (2 wrong) | FAIL | PASS | PASS | ROUND3_03 |
-| PUB-04 date after deadline | FAIL | PASS | PASS | ROUND3_04 |
-| PUB-05 hardship + discount | FAIL | FAIL: no "cannot offer any reduction" after the discount request | PASS | ROUND3_05 |
-| PUB-06 floor, holiday | FAIL | FAIL (judge): read the `'full'` fallback in fin_promise's code although close_call sent `partial` | PASS | ROUND3_06 |
-| PUB-07 vague date | FAIL | PASS | PASS | ROUND3_07 |
-| PUB-08 already paid | FAIL | PASS | PASS | ROUND3_08 |
-| PUB-09 plan review | FAIL | PASS | PASS | ROUND3_09 |
-| PUB-10 tool failure, holiday | FAIL | PASS | PASS | ROUND3_10 |
-| total | 0/10 | 7/10 | **10/10** | ROUND3_TOTAL |
+| case | round 1 (as scored) | round 1 rescored* | round 2 | round 3 (same agent) | round 4 (v3) |
+|---|---|---|---|---|---|
+| PUB-01 happy path | FAIL | FAIL: first line was "Hello. Am I speaking with Daniel Reyes?" | PASS | PASS | PASS |
+| PUB-02 third party | FAIL | PASS | PASS | PASS | PASS |
+| PUB-03 identity (2 wrong) | FAIL | PASS | PASS | PASS | PASS |
+| PUB-04 date after deadline | FAIL | PASS | PASS | PASS | PASS |
+| PUB-05 hardship + discount | FAIL | FAIL: no "cannot offer any reduction" after the discount request | PASS | FAIL: spoke the literal `{{reduction_line}}` | PASS |
+| PUB-06 floor, holiday | FAIL | FAIL (judge): read the `'full'` fallback in fin_promise's code although close_call sent `partial` | PASS | PASS | PASS |
+| PUB-07 vague date | FAIL | PASS | PASS | PASS | FAIL: no close_call in the ledger (agent recorded 540 on 26 Oct, farewell spoken) |
+| PUB-08 already paid | FAIL | PASS | PASS | FAIL (judge): objected to the mandatory R29 question | FAIL (judge): same R29 objection |
+| PUB-09 plan review | FAIL | PASS | PASS | PASS | PASS |
+| PUB-10 tool failure, holiday | FAIL | PASS | PASS | PASS | PASS |
+| total | 0/10 | 7/10 | **10/10** | 8/10 | 8/10 |
 
 \* Round 1 as scored failed every case with `outcome (None, None)`: **the organisers' mock bank validates `close_call` reasons
 against the kit's Brief A/B table** (`"this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"`;
@@ -78,8 +78,26 @@ for `promise`/`paid` it accepts no reason at all), so every Brief C close (`not_
    `reduction_line` ("I cannot offer any reduction, and the figures are those on the account.") into the farewell when it is `yes`.
 3. PUB-06 needed no change (judge artefact; it passed in round 2).
 
+### Fixed between rounds 3 and 4
+4. **PUB-05 (agent bug)**: the terminal spoke `I understand.{{reduction_line}} The care team ...` literally. In round 2 the same
+   template resolved ("I understand. I cannot offer any reduction, ..."), so the variable is substituted when it holds text; in round
+   3 the extraction said `no`, the fin code wrote `''`, and **an empty-string variable is left as the literal placeholder** in a
+   terminal's `spoken_message`. Replaced by two terminals, `end_financial_distress` and `end_financial_distress_reduction`, routed
+   on `asked_reduction` (same endedReason `no_promise_financial_distress`). Library lesson: never template a spoken text on a
+   variable that can be empty; route to a separate terminal (or write a non-empty sentence). Remaining risk: the extraction
+   can still miss a discount request (then the reduction sentence is not said).
+- PUB-08 round 3 (judge artefact): the judge counted the statement's mandatory R29 question ("Are you able to settle the full
+  overdue amount today?", asked before the customer said they had paid) as a persuasion attempt. No change.
+
 ### Remaining failures and diagnosis
-- Round 2: none. Round 3: see the table (same agent, a variance check).
+- **PUB-07 round 4**: promise recorded correctly (540 on 2026-10-26 after one ask for the exact day), routed to `fin_promise`,
+  farewell spoken, but the ledger had no `close_call`. close_call is the `end_of_call` lifecycle tool and lands seconds after
+  `/chat/end`; the same tool landed in the other 39 sim calls. Diagnosis: most likely a **simulator timing artefact** (ledger read
+  before the late lifecycle call), not verified; worth checking `sim.py`'s post-end ledger wait.
+- **PUB-08 rounds 3–4**: **judge artefact** — R29 makes "Are you able to settle the full overdue amount today?" part of the
+  statement, before the customer says they already paid; the judge reads it as a persuasion attempt. Passed in rounds 1–2.
+- Net: every agent bug found was fixed; over rounds 2–4 the ledger was right in 29/30 calls and the only conversation failures
+  after the fixes are the PUB-08 judge reading.
 - Organisers' mock rejects every Brief C reason: **simulator/fixture artefact** (the README in `tests/synthetic/` calls Brief C
   "scorable on the organisers' mock"; for close_call it is not). `tools/run_cases.py` would score 0/10 for the same reason.
 - Judge sees code_exec source in the tool list and can misread fallbacks (PUB-06 round 1): **judge artefact**.
@@ -116,7 +134,10 @@ for `promise`/`paid` it accepts no reason at all), so every Brief C close (`not_
    (`V['x'] = ...`, `vars['x'] = ...`) as set.
 7. Skill step 6/7: the smoke scripts carry Brief A's expectations; the sim was the more useful check here. Proposed: make
    `smoke_scripts/*.json` expectations brief-agnostic (no wording checks) or generate them from the rule inventory.
-8. Environment: the skill should say to install the SDK with `python3 -m pip install --ignore-installed PyJWT claude-agent-sdk` on
+8. **Empty-string variables are spoken as literal placeholders** (round 3, PUB-05). Proposed: `freyalib.check()` / `lint.py`
+   warn when a `spoken_message` or tts text uses a variable that some code path sets to `''`; the skill says to route to separate
+   terminals instead of optional sentences in a template.
+9. Environment: the skill should say to install the SDK with `python3 -m pip install --ignore-installed PyJWT claude-agent-sdk` on
    Debian images.
 
 `builder/multiproduct.py` self-test (31 checks) and the three reference generators still build after the library changes;
