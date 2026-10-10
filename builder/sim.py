@@ -16,7 +16,7 @@ otherwise the Claude CLI (`claude -p`, defaults claude-haiku-5-5 / claude-sonnet
 the repo's CLAUDE.md, settings and skills never reach the customer or the judge). Standard library only.
 See builder/SIM.md for how this differs from the organisers' simulation and for the chat route's caveats.
 """
-import argparse, json, os, pathlib, re, socket, subprocess, sys, tempfile, threading, time, urllib.error, urllib.request
+import argparse, json, os, pathlib, re, shutil, socket, subprocess, sys, tempfile, threading, time, urllib.error, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -27,7 +27,8 @@ from run_cases import STYLES, persona_for         # noqa: E402  the organisers' 
 
 OPENAI_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 DEFAULTS = {"openai": {"customer": "gpt-5-mini", "judge": "gpt-5"}, "claude": {"customer": "claude-haiku-5-5", "judge": "claude-sonnet-5-5"}}
-CLAUDE_CLI = os.environ.get("CLAUDE_CLI", str(pathlib.Path.home() / ".local/bin/claude"))
+CLAUDE_CLI = os.environ.get("CLAUDE_CLI") or (str(pathlib.Path.home() / ".local/bin/claude") if (pathlib.Path.home() / ".local/bin/claude").exists()
+                                              else (shutil.which("claude") or str(pathlib.Path.home() / ".local/bin/claude")))
 TURN_TIMEOUT_S = 240          # one chat turn; the gateway itself gives up after about 60 s (504)
 RECOVER_S = 60                # after a 504 mid-call: how long to look for the reply in the call log
 PHONE_RULE = "You are on a phone call. Reply with ONLY your next spoken line."
