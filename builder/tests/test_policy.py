@@ -215,7 +215,7 @@ def hardship_with_named_offer():                            # EXT-A-28
     P, V = start([LOAN])
     ev(P, V, "hardship", offer_kind="exact", offer_amount="700", offer_date="2026-10-22")
     assert V["route"] == "hardship" and V["hs_offer"] == "yes" and V["say_next"].startswith("I am sorry")
-    assert V["offer_date"] == "" and V["offer_kind"] == "none"
+    assert V["offer_date"] == pol.CLEAR_VALUES["offer_date"] and V["offer_kind"] == "none"   # schema-valid clear
     ev(P, V, "hs_decline", hs_answer="support_no")
     assert V["route"] == "confirm" and V["ok_amount"] == "700.0" and V["ok_date"] == "2026-10-22", (V["route"], V.get("ok_date"))
 

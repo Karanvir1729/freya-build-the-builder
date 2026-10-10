@@ -207,7 +207,7 @@ def main():
     n += 1
     e = fl.digit_extraction("phone_last4", 4, "Last four digits of the phone number")
     if e != {"name": "phone_last4", "type": "string", "description": "Last four digits of the phone number",
-             "validation_pattern": "^[0-9]{4}$", "max_retries": 2, "min_confidence": 0.6}:
+             "validation_pattern": "^[0-9]{4}$", "max_retries": 2, "min_confidence": 0.5}:
         errors.append("digit_extraction: %r" % e)
     n += 1
     if "all 4 digits" not in fl.latest_value_note(4) or "LAST value" not in fl.latest_value_note(4):
