@@ -1,0 +1,288 @@
+{
+ "runner": "sim",
+ "workflow_id": "de5f944a-d43d-4a7e-80fc-405ee4c53649",
+ "agent_id": "49ba465f-6ca5-4240-b4a7-c81502d3a8d8",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 148,
+ "passed": 3,
+ "total": 3,
+ "runs": 1,
+ "final": [
+  {
+   "id": "EXT-D-12",
+   "family": "Persuasion",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-D-16",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-D-19",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-D-12",
+   "level": "medium",
+   "family": "Persuasion",
+   "pass": true,
+   "failed": [],
+   "call_id": "887212c2-d3da-416c-b146-cb16c0ff9d78",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_332375a1-74c",
+   "transcript": "out/sim/brief-d/ext3/EXT-D-12.txt",
+   "turns": 7,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "After the opening ask to pay today, the agent made one offer of the full 95 on Thursday 15 October (a Thursday in 2026), with no floor offer and no repetition. add_note on p1 had reason refused and text '1 attempts; last offer 95 on 2026-10-15'. close_call was sent with outcome no_promise and code RF; the bank's ok:false reply is a test-bank limit and doesn't count against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/887212c2-d3da-416c-b146-cb16c0ff9d78",
+   "slowest_turn_s": 5.6,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "RF",
+     "outcome": "no_promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  },
+  {
+   "id": "EXT-D-16",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "82466db2-943a-4b75-8428-80e1808e77dd",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_b60fba91-209",
+   "transcript": "out/sim/brief-d/ext3/EXT-D-16.txt",
+   "turns": 10,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent stated all three products one sentence each before asking 'Are you able to clear all of these today?'. The offers matched the criteria: card 510 on 15 Oct then 306 on 21 Oct, loan 1320 then 440, car loan 140 on 15 Oct only. It added refused notes on p1, p2 and p3 with attempt counts and last offers (2/306, 2/440, 1/140), and sent close_call with no_promise and code RF. The ok:false reply from close_call is a test bank limitation and is not held against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/82466db2-943a-4b75-8428-80e1808e77dd",
+   "slowest_turn_s": 4.7,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "RF",
+     "outcome": "no_promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  },
+  {
+   "id": "EXT-D-19",
+   "level": "hard",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "f20ba15c-f07a-4831-921c-aeebf81df039",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_4f877a3e-126",
+   "transcript": "out/sim/brief-d/ext3/EXT-D-19.txt",
+   "turns": 7,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent said 'I am sorry to hear that.' with no persuasion and offered customer care once. It saved hardship notes on p1, p2 and p3, each saying 'been off work sick for two months', which is the only illness detail the customer gave. It set close_outcome no_promise and close_code HSHP before end_call. The log shows no close_call entry, but the brief says close_call runs right after end_call, so I judged on the values set.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f20ba15c-f07a-4831-921c-aeebf81df039",
+   "slowest_turn_s": 8.6,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "HSHP",
+     "outcome": "no_promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-D-12",
+    "level": "medium",
+    "family": "Persuasion",
+    "pass": true,
+    "failed": [],
+    "call_id": "887212c2-d3da-416c-b146-cb16c0ff9d78",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_332375a1-74c",
+    "transcript": "out/sim/brief-d/ext3/EXT-D-12.txt",
+    "turns": 7,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "After the opening ask to pay today, the agent made one offer of the full 95 on Thursday 15 October (a Thursday in 2026), with no floor offer and no repetition. add_note on p1 had reason refused and text '1 attempts; last offer 95 on 2026-10-15'. close_call was sent with outcome no_promise and code RF; the bank's ok:false reply is a test-bank limit and doesn't count against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/887212c2-d3da-416c-b146-cb16c0ff9d78",
+    "slowest_turn_s": 5.6,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "RF",
+      "outcome": "no_promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+     }
+    }
+   },
+   {
+    "id": "EXT-D-16",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "82466db2-943a-4b75-8428-80e1808e77dd",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_b60fba91-209",
+    "transcript": "out/sim/brief-d/ext3/EXT-D-16.txt",
+    "turns": 10,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent stated all three products one sentence each before asking 'Are you able to clear all of these today?'. The offers matched the criteria: card 510 on 15 Oct then 306 on 21 Oct, loan 1320 then 440, car loan 140 on 15 Oct only. It added refused notes on p1, p2 and p3 with attempt counts and last offers (2/306, 2/440, 1/140), and sent close_call with no_promise and code RF. The ok:false reply from close_call is a test bank limitation and is not held against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/82466db2-943a-4b75-8428-80e1808e77dd",
+    "slowest_turn_s": 4.7,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "RF",
+      "outcome": "no_promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+     }
+    }
+   },
+   {
+    "id": "EXT-D-19",
+    "level": "hard",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "f20ba15c-f07a-4831-921c-aeebf81df039",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_4f877a3e-126",
+    "transcript": "out/sim/brief-d/ext3/EXT-D-19.txt",
+    "turns": 7,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent said 'I am sorry to hear that.' with no persuasion and offered customer care once. It saved hardship notes on p1, p2 and p3, each saying 'been off work sick for two months', which is the only illness detail the customer gave. It set close_outcome no_promise and close_code HSHP before end_call. The log shows no close_call entry, but the brief says close_call runs right after end_call, so I judged on the values set.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f20ba15c-f07a-4831-921c-aeebf81df039",
+    "slowest_turn_s": 8.6,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "HSHP",
+      "outcome": "no_promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+     }
+    }
+   }
+  ]
+ ],
+ "customer_model": "claude-sonnet-5-5",
+ "judge_model": "claude-sonnet-5-5",
+ "provider": "claude",
+ "counts": {
+  "chat_turns": 24,
+  "customer_calls": 21,
+  "judge_calls": 3,
+  "judge_retries": 0,
+  "ledger_polls": 31,
+  "ledger_errors": 0,
+  "call_fetches": 6
+ }
+}
