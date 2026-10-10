@@ -117,7 +117,7 @@ PREPARE = mp.prepare_code(
 WHO_VALUES = ["customer", "someone_else", "wrong_number", "deceased", "refuses", "unclear"]
 WHO_DESC = ("Who answered, judged ONLY from the person's latest message. "
             "customer = they confirm: 'yes', 'speaking', 'that's me', or they say their own name ({{first_name}} / {{last_name}}). "
-            "someone_else = another person answered (a relative, partner, flatmate, colleague), says the customer is not here or not available, or offers to take a message. "
+            "someone_else = another person answered: they say they are not {{first_name}} {{last_name}}, or they are a relative, partner, flatmate or colleague, or the customer is not here or not available, or they offer to take a message (this wins over unclear, even when they also ask who is calling or what it is about). "
             "wrong_number = says this number does not belong to that person / they do not know them. "
             "deceased = says the customer has died / passed away. "
             "refuses = says they do not want to talk / not interested. "
@@ -143,7 +143,7 @@ nodes["opening_retry"] = fl.conv(
     "No tool call is allowed in this turn. " + NEVER_SAY + "\n"
     "If the person asked a question, answer it first in one sentence: who is this -> you are the digital assistant of Kestrel Bank; "
     "a robot or an AI -> say exactly \"I am Kestrel Bank's digital assistant.\"; a scam -> they are welcome to hang up and call the number on the back of their card or on their statement; "
-    "what it is about -> you can only discuss that with {{first_name}} {{last_name}}. "
+    "what it is about -> it is a personal banking matter that you can only discuss with {{title}} {{last_name}}. "
     "If they said they do not want to talk, say this will only take a moment. "
     "Then ask exactly: \"" + ASK_NAME + "\"",
     extraction=[fl.ext("who2", WHO_VALUES, WHO_DESC)],
@@ -167,7 +167,7 @@ cb_tool = fl.api_tool(
 nodes["third_party"] = fl.conv(
     "third_party",
     "You called for {{title}} {{last_name}} ({{first_name}}) but someone else is on the line.\n"
-    "Say that this is a personal banking matter that you can only discuss with {{title}} {{last_name}}, and ask when they can be reached. Nothing more.\n"
+    "In your first reply ALWAYS say that this is a personal banking matter that you can only discuss with {{title}} {{last_name}} (also when they already said when the customer can be reached), and ask when they can be reached. Nothing more.\n"
     "STRICT: " + NEVER_SAY + " Never mention any account, amount or the reason for the call. Ask no security question. "
     "If they offer to pay, to answer questions, or to help, decline politely (you can only discuss it with {{title}} {{last_name}}) and ask again when they can be reached.\n"
     "Now: {{today_text}}, {{now_time}}.\n{{callback_text}}\n"
