@@ -1,0 +1,52 @@
+# EXT-C-07 Deflects twice: asks what the call is about instead of answering
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call a03acdc1-066f-443b-81a8-43cf27937fa5 | customer c_98ecf5f6-ace | 2026-10-10 22:15:42
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/a03acdc1-066f-443b-81a8-43cf27937fa5
+# RESULT: PASS
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Priya Nair?
+customer: Yes, this is Priya Nair.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: First tell me what this is about.
+   [route] ask_phone -> count_decline_phone: refuses or deflects (R16) refusal_phone == 'refused'
+   [node] ask_phone -> count_decline_phone
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_dob'] = 'none'\n vars['refusal_phone'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_phone -> ask_phone: always always
+   [node] count_decline_phone -> ask_phone
+agent: The bank cannot discuss anything until the security check is complete. What are the last four digits of the mobile number registered with the bank?
+customer: No, I want to know what this is about before I tell you anything.
+   [route] ask_phone -> count_decline_phone: refuses or deflects (R16) refusal_phone == 'refused'
+   [node] ask_phone -> count_decline_phone
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_dob'] = 'none'\n vars['refusal_phone'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_phone -> fin_withheld: second refusal decline_route == 'close'
+   [node] count_decline_phone -> fin_withheld
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_withheld -> end_withheld: always always
+   [node] fin_withheld -> end_withheld
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. The bank cannot discuss anything until the security check is complete. Thank you for your time. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: I understand. The bank cannot discuss anything until the security check is complete. Thank you for your time. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "withheld", "outcome": "not_verified", "customer_id": "c_98ecf5f6-ace"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## tool calls (6)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_dob'] = 'none'\n vars['refusal_phone'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_dob'] = 'none'\n vars['refusal_phone'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+4. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+5. end_call args={"message_mode": "custom", "spoken_message": "I understand. The bank cannot discuss anything until the security check is complete. Thank you for your time. Goodbye from Nordvik Savings Bank."} -> success Call ended
+6. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "withheld", "outcome": "not_verified", "customer_id": "c_98ecf5f6-ace"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=withheld promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): pass - All criteria hold: the agent gave the single required security-check reminder after the first deflection and re-asked, no prohibited topics were mentioned, no verify_identity or get_account misuse occurred, and close_call was not_verified with reason withheld after the second deflection.

@@ -1,0 +1,275 @@
+{
+ "case": "EXT-C-21",
+ "rep": 1,
+ "workflow_id": "239c5d00-d0cc-4202-83a2-71794aff95c6",
+ "call_id": "4d6ba628-e63e-43e4-aa69-42f6d3652689",
+ "customer_id": "c_7c3fa76c-2c3",
+ "variables": {
+  "customer_id": "c_7c3fa76c-2c3",
+  "first_name": "Lena",
+  "last_name": "Hoffmann",
+  "title": "Ms",
+  "now": "2026-10-14T11:00"
+ },
+ "turns": [
+  {
+   "n": 1,
+   "customer": "Hello?",
+   "agent": "Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Lena Hoffmann?",
+   "status": 200,
+   "seconds": 12.6,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_4_1791671136690"
+  },
+  {
+   "n": 2,
+   "customer": "Yes, this is Lena Hoffmann.",
+   "agent": "What are the last four digits of the mobile number registered with the bank?",
+   "status": 200,
+   "seconds": 6.4,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_10_1791671145483"
+  },
+  {
+   "n": 3,
+   "customer": "I want to speak to a real person, now.",
+   "agent": "I will connect you with a colleague now.",
+   "status": 200,
+   "seconds": 5.6,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_7_1791671152438"
+  },
+  {
+   "n": 4,
+   "customer": "Okay, thank you.",
+   "agent": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank.",
+   "status": 504,
+   "seconds": 26.6,
+   "error": "HTTP 504: error code: 504 | reply recovered from the call log after 7 s; the agent ended the call",
+   "ended_by_agent": true
+  }
+ ],
+ "end": {
+  "callId": "4d6ba628-e63e-43e4-aa69-42f6d3652689",
+  "ended": true,
+  "endedReason": "assistant-ended-call",
+  "alreadyEnded": true
+ },
+ "transcript": [
+  "customer: Hello?",
+  "agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Lena Hoffmann?",
+  "customer: Yes, this is Lena Hoffmann.",
+  "   [route] opening -> setup: always always",
+  "   [node] opening -> setup",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"import datetime, json, re\\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\\nBWD = set([0, 1, 2, 3, 4, 5])\\nWDRULE = 'first_after'\\nWD = ['Monday', 'Tu...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'",
+  "   [node] setup -> ask_phone",
+  "agent: What are the last four digits of the mobile number registered with the bank?",
+  "customer: I want to speak to a real person, now.",
+  "   [route] ask_phone -> xfer_general: asks for a person (R43) refusal_phone == 'human'",
+  "   [node] ask_phone -> xfer_general",
+  "   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={\"queue\": \"general\", \"customer_id\": \"c_7c3fa76c-2c3\"}",
+  "agent: I will connect you with a colleague now.",
+  "   [tool] api_call -> HTTP 200 data={\"ok\": true}",
+  "   [route] xfer_general -> fin_agent_request: always always",
+  "   [node] xfer_general -> fin_agent_request",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"try:\\n rec = str(vars.get('recorded_pids') or '').strip()\\n if True and rec and rec.lower() not in ('none', 'null'):\\n vars['outcome'] = 'promise'\\n vars['reason'] = str(vars.get('promise_reason') or '')\\n if vars['reason'].lo...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] fin_agent_request -> end_agent_request: always always",
+  "   [node] fin_agent_request -> end_agent_request",
+  "   [tool] end_call args={\"message_mode\": \"custom\", \"spoken_message\": \"A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank.\"}",
+  "customer: Okay, thank you.",
+  "   [route] xfer_general -> fin_agent_request: always always",
+  "   [node] xfer_general -> fin_agent_request",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"try:\\n rec = str(vars.get('recorded_pids') or '').strip()\\n if True and rec and rec.lower() not in ('none', 'null'):\\n vars['outcome'] = 'promise'\\n vars['reason'] = str(vars.get('promise_reason') or '')\\n if vars['reason'].lo...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] fin_agent_request -> end_agent_request: always always",
+  "   [node] fin_agent_request -> end_agent_request",
+  "   [tool] end_call args={\"message_mode\": \"custom\", \"spoken_message\": \"A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank.\"}",
+  "   [call] ended: assistant-ended-call",
+  "agent: A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank.",
+  "   [tool] end_call -> success Call ended",
+  "   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={\"reason\": \"agent_request\", \"outcome\": \"transferred\", \"customer_id\": \"c_7c3fa76c-2c3\"}",
+  "   [tool] close_call -> HTTP 200 data={\"ok\": false, \"error\": \"this outcome needs one of these reasons: restructuring, human, support\"}"
+ ],
+ "tool_calls": [
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']\nMO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']\ndef isbd(d):\n    return d.weekday() in BWD and d.isoformat() not in HOL\ndef txt(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)\ndef txt_short(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1]\ndef addbd(d, n):\n    c = 0\n    guard = 0\n    while c < n and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n        if isbd(d):\n            c += 1\n    return d\ndef next_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef prev_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d - datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef lastbd_of_week(monday):\n    for k in range(6, -1, -1):\n        d = monday + datetime.timedelta(days=k)\n        if isbd(d):\n            return d\n    return None\ndef weekday_table(today):\n    monday = today - datetime.timedelta(days=today.weekday())\n    tab = []\n    for i in range(7):\n        a = monday + datetime.timedelta(days=i)\n        b = a + datetime.timedelta(days=7)\n        t1 = '\"this ' + WD[i] + '\" = ' + txt(a) + (' (already past)' if a < today else '')\n        tab.append(t1 + '; \"next ' + WD[i] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\ndef weekday_table_first_after(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"this ' + WD[a.weekday()] + '\" = \"next ' + WD[a.weekday()] + '\" = ' + txt(a))\n    return '\\n'.join(tab)\nif WDRULE == 'first_after':\n    weekday_table = weekday_table_first_after\ndef calendar_text(today, deadline, extra_days=10):\n    cal = []\n    d = today\n    while d <= deadline + datetime.timedelta(days=extra_days):\n        if d > deadline:\n            tag = 'AFTER THE DEADLINE, not allowed'\n        elif isbd(d):\n            tag = 'allowed'\n        elif d.weekday() not in BWD:\n            tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'\n        else:\n            tag = 'bank holiday, not allowed'\n        nb = next_bd(d)\n        extra = ''\n        if tag.startswith('not a business day') or tag.startswith('bank'):\n            extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')\n        cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)\n        d = d + datetime.timedelta(days=1)\n    return '\\n'.join(cal)\ndef fmt(x):\n    try:\n        x = float(x)\n    except Exception:\n        return str(x)\n    s = '%.2f' % x\n    return s[:-3] if s.endswith('.00') else s\ntry:\n    raw = str(vars.get('now') or '').strip()\n    try:\n        nowdt = datetime.datetime.fromisoformat(raw[:16])\n    except Exception:\n        nowdt = datetime.datetime.fromisoformat(raw[:10] + 'T09:00')\n    today = nowdt.date()\n    vars['today_iso'] = today.isoformat()\n    vars['today_text'] = txt(today)\n    vars['now_time'] = nowdt.strftime('%H:%M')\n    vars['weekday_table'] = weekday_table(today)\n    lines = []\n    cur = nowdt.strftime('%H:%M')\n    if cur < '18:00':\n        start = '09:00' if cur < '09:00' else 'after ' + cur\n        lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to 18:00.')\n    nbd = today\n    for _i in range(2):\n        nbd = addbd(nbd, 1)\n        lines.append(txt(nbd) + ' (' + nbd.isoformat() + '), from 09:00 up to 18:00 included.')\n    tom = today + datetime.timedelta(days=1)\n    extra = 'Tomorrow is ' + txt(tom) + '.'\n    if not isbd(tom):\n        extra += ' Tomorrow is NOT allowed, it is not a business day.'\n    vars['callback_text'] = 'The ONLY allowed callback times are:\\n- ' + '\\n- '.join(lines) + '\\n' + extra + ' Any other day or time is outside the window.'\n    if str(vars.get('who1') or '') == 'customer':\n        vars['outcome'] = 'not_verified'\n        vars['reason'] = 'withheld'\n    else:\n        vars['outcome'] = 'not_reached'\n        vars['reason'] = 'unconfirmed'\n    vars['setup_state'] = 'ok'\nexcept Exception as e:\n    vars['setup_state'] = 'error ' + str(e)\n    vars.setdefault('callback_text', 'Callbacks: today later than now up to 18:00, or the next business day from 09:00 to 18:00.')\n    vars.setdefault('today_text', str(vars.get('now')))\n    vars.setdefault('today_iso', str(vars.get('now'))[:10])\n    vars.setdefault('now_time', '')\n    vars.setdefault('weekday_table', '')\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "api_call",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "queue": "general",
+     "customer_id": "c_7c3fa76c-2c3"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "try:\n    rec = str(vars.get('recorded_pids') or '').strip()\n    if True and rec and rec.lower() not in ('none', 'null'):\n        vars['outcome'] = 'promise'\n        vars['reason'] = str(vars.get('promise_reason') or '')\n        if vars['reason'].lower() in ('none', 'null'):\n            vars['reason'] = ''\n    else:\n        vars['outcome'] = 'transferred'\n        vars['reason'] = 'agent_request'\nexcept Exception:\n    pass\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "end_call",
+   "args": {
+    "message_mode": "custom",
+    "spoken_message": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank."
+   },
+   "result": null
+  },
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "try:\n    rec = str(vars.get('recorded_pids') or '').strip()\n    if True and rec and rec.lower() not in ('none', 'null'):\n        vars['outcome'] = 'promise'\n        vars['reason'] = str(vars.get('promise_reason') or '')\n        if vars['reason'].lower() in ('none', 'null'):\n            vars['reason'] = ''\n    else:\n        vars['outcome'] = 'transferred'\n        vars['reason'] = 'agent_request'\nexcept Exception:\n    pass\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "end_call",
+   "args": {
+    "message_mode": "custom",
+    "spoken_message": "A colleague will take over now. Thank you for your time. Goodbye from Nordvik Savings Bank."
+   },
+   "result": {
+    "status": "success",
+    "message": "Call ended"
+   }
+  },
+  {
+   "tool": "close_call",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "reason": "agent_request",
+     "outcome": "transferred",
+     "customer_id": "c_7c3fa76c-2c3"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: restructuring, human, support"
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200,
+    "header": {
+     "Date": "Sat, 10 Oct 2026 22:26:12 GMT",
+     "Content-Type": "application/json",
+     "Transfer-Encoding": "chunked",
+     "Connection": "keep-alive",
+     "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=cCByix6nQRy%2FD0xUgwHlqBeyQ9mVMlMpAcrHyApgBrO3bTiwwqM4H5SlvmY3mD4ItJOVJAv4TzP8MYt2jjSNfTQe26QyGAx%2BfnpFx5aV%2BfyLc8sJcPmXo0rxT%2BPs3MEFJ3qjZ%2FcQM965%2BbleSZOUhU0vnePNuMF95A%3D%3D\"}]}",
+     "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+     "Content-Encoding": "gzip",
+     "Server": "cloudflare",
+     "CF-RAY": "a4890b997b8dd9dc-FRA",
+     "alt-svc": "h3=\":443\"; ma=86400"
+    }
+   }
+  }
+ ],
+ "ledger": {
+  "ok": true,
+  "case": "PUB-04",
+  "team": "4d03f63f4e0d8cc0ec31bb9b",
+  "now": "2026-10-14T11:00",
+  "verified": {},
+  "wrong": 0,
+  "hinted": false,
+  "promises": [],
+  "notes": [],
+  "callbacks": [],
+  "transfers": [
+   {
+    "queue": "general"
+   }
+  ],
+  "outcome": "transferred",
+  "reason": "agent_request",
+  "failures": {
+   "transfer_to_agent": 0,
+   "close_call": 0
+  },
+  "calls": [
+   {
+    "n": 1,
+    "tool": "transfer_to_agent",
+    "args": {
+     "queue": "general"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   },
+   {
+    "n": 2,
+    "tool": "close_call",
+    "args": {
+     "reason": "agent_request",
+     "outcome": "transferred"
+    },
+    "status": 200,
+    "result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: restructuring, human, support"
+    }
+   }
+  ],
+  "last_at": 1791671172075
+ },
+ "judge": {
+  "outcome": "pass",
+  "reason": "All criteria hold: no help-first or repeated security questions; no verify_identity/get_account or account details; transfer_to_agent used queue general and close_call had outcome transferred with reason agent_request.",
+  "model": "gpt-5"
+ },
+ "failed": [],
+ "pass": true,
+ "stop": "close_call in the ledger"
+}

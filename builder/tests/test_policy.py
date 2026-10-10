@@ -565,5 +565,19 @@ def test_repeated_change_is_bounded():
     assert routes[-1] == "fin" and V["final_route"] == "refused" and len(routes) <= 4, routes
 
 
+@test
+def test_above_full_again():
+    """A repeated above-full correction at the read-back gets the optional above_full_again sentence."""
+    import json
+    tx = dict(TEXTS, above_full_again="AGAIN [named] [full].")
+    P = pol.Policy(HOL, texts=tx, above_full="agree")
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="exact", offer_when="this friday", offer_amount="500")
+    assert V["readback_line"].startswith("The past-due amount is 420"), V["readback_line"]
+    ev(P, V, "change", confirm="change", offer_when="friday", offer_amount="500")
+    assert V["route"] == "confirm" and V["readback_line"].startswith("AGAIN 500 420."), V["readback_line"]
+
+
 if __name__ == "__main__":
     sys.exit(main())

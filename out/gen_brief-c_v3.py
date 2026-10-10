@@ -41,6 +41,7 @@ POLICY = pol.Policy(
         "before_today": "[named] has already passed.",                                                # R20 (today or later)
         "below_floor": "The smallest amount the bank can record is [floor].",                         # R28
         "above_full": "The full overdue amount is [full], so [named] is more than is overdue. I will record [full], the full amount.",  # R28 above the full amount
+        "above_full_again": "The bank can record at most the overdue amount, [full], and a promise of [full] covers the whole overdue amount.",  # R28, repeated
         "vague": "Which exact day would that be?",                                                    # R23
         "vague_deadline": "The latest date the bank can record is [deadline].",                       # unused (vague_again='refuse')
         "too_much_floor": "I understand. I can propose [floor]. The remainder stays overdue, and the account stays in arrears until it is cleared.",  # R27

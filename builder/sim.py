@@ -644,6 +644,14 @@ def finish(ctx, case, rep, row, chat, ledger):
     if call:
         lines, tools, var_table, slowest = transcript_from_call(call)
         row["ended"] = call.get("endedReason")
+        # The chat route sometimes resumes a turn from an OLDER message (event conversation_resumed, isBranch true): the
+        # engine then routes the customer's line from a node the call had already left (Brief C v3 PUB-07 round 2: after
+        # 504s the payment answer was routed from the date-of-birth question). Not the agent's doing: flag it.
+        for m in call.get("messages") or []:
+            if m.get("role") == "system" and '"isBranch":true' in (m.get("message") or "").replace(" ", ""):
+                row["chat_branched"] = True
+                lines.append("   [harness] the chat route resumed this call from an older message (conversation_resumed isBranch=true): a chat-route artefact")
+                break
         row["transcript_source"] = "GET /api/v2/call/" + chat.call_id
     elif chat:
         lines, tools, var_table, slowest = transcript_from_log(chat, ledger)
@@ -690,6 +698,8 @@ def finish(ctx, case, rep, row, chat, ledger):
               " > ".join(x.replace("verify_identity", "verify").replace("create_promise", "promise") for x in row["tools"]) or "(no tool calls)", flush=True)
         for f in row["failed"]:
             print("       -", f[:260], flush=True)
+        if row.get("chat_branched"):
+            print("       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent", flush=True)
     return row
 
 

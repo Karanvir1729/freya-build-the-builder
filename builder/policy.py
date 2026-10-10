@@ -68,6 +68,7 @@ DEFAULT_TEXTS = {
     "before_today": "[named] has already passed.",
     "below_floor": "I cannot record [named]. The lowest amount I can record is [floor].",
     "above_full": "The past-due amount is [full], so I can record at most [full].",
+    "above_full_again": "",   # optional: a repeated higher amount at the read-back (above_full='agree')
     "vague": "Which exact day would that be?",
     "vague_deadline": "The latest date I can record is [deadline].",
     "too_much_floor": "The lowest amount I can accept is [floor], the [floor_name].",
@@ -413,7 +414,13 @@ def check_one(V, pid, a, d, kind):
         agree(V, pid, na, nd)
         return
     if P.get('above_full') == 'agree' and [x[0] for x in issues] == ['above_full']:
-        agree(V, pid, na, nd, prefix=issues[0][1])   # the brief: above the full amount, record the full amount and say so
+        pre = issues[0][1]
+        if pg(V, pid, 'above_full_said') == okey(na, nd) and T('above_full_again'):
+            # the customer repeats the same higher amount at the read-back: explain once more in other words (a customer
+            # who heard 'I will record 310.50' kept answering 'No, 320', Brief C v3 EXT-C-09)
+            pre = T('above_full_again', full=fmt(full), named=fmt(na if a is None else a), words=pg(V, pid, 'words'))
+        pset(V, pid, 'above_full_said', okey(na, nd))
+        agree(V, pid, na, nd, prefix=pre)   # the brief: above the full amount, record the full amount and say so
         V['offer_verdict'] = 'above_full'
         return
     V['offer_verdict'] = issues[0][0]
