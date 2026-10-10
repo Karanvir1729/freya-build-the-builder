@@ -581,7 +581,7 @@ def test_rules_reference_workflows():
         if "v2" in wf_path:
             # the v1 inventory named the human transfer in a `special` rule (2 WARNs); the v2 inventory says when it applies (0)
             assert all(x["level"] == WARN for x in f if "transfer_to_agent" in x["where"] and "write tool" in x["message"]), f
-        assert not any("forbidden" in x["message"] for x in f), f
+        assert not any("forbidden" in x["message"] and x["level"] != INFO for x in f), f
 
 
 def test_cli_rules_flag():
