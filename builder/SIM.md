@@ -22,7 +22,7 @@ python3 builder/sim.py brief-b --brief B --style talkative --customer-model gpt-
 | `--max-turns 30` | Customer lines per call at most. |
 | `--out results/sim.json` | A JSON record shaped like `run_cases.py`'s (`final`, `rows`, `all_rows`; rows have `id`, `pass`, `failed`, `tools`, `customer_id`, `call_id`, `transcript`, `judge`, `stop`). |
 | `--transcripts results/transcripts/` | One `<case>.txt` (and `.json`) per case: customer/agent lines, tool calls in place, the ledger and the judge's verdict. `-rN` suffix with reps. |
-| `--customer-model`, `--judge-model`, `--provider openai\|claude` | OpenAI chat completions (urllib, `OPENAI_API_KEY`; defaults `gpt-5-mini` / `gpt-5`) or the Claude CLI `claude -p` (used when the key is missing; defaults `claude-haiku-5-5` / `claude-sonnet-5-5`). |
+| `--customer-model`, `--judge-model`, `--provider openai\|claude` | OpenAI chat completions (urllib, `OPENAI_API_KEY`; defaults `gpt-5-mini` / `gpt-5`) or the Claude CLI `claude -p` (used when the key is missing; defaults `claude-haiku-5-5` / `claude-sonnet-5-5`). The CLI runs from an **empty scratch directory**: run from the repo, Claude Code loads `CLAUDE.md`, `.claude/` settings and skills into the session, so the customer and the judge would read the builder's scoring rules and the known chat-route bugs (verified 10 Oct: asked to quote any project instruction, `claude -p` from the repo returned the CLAUDE.md heading, from an empty directory `NONE`). The runs described under "Chat route findings" predate this fix; their ledger failures stand on their own, their judge verdicts were produced with that extra context. |
 | `--opening "Hello?"` | The customer's first line. The chat route needs a user message to produce the agent's opening (see below). |
 | `--verbose` | Print every turn as it happens, prefixed with the case id. |
 
@@ -39,17 +39,31 @@ with `"runner": "sim"` (so it can be told apart from the organisers' scorer), an
    conversation is kept as alternating messages (customer = `assistant`, agent = `user`); for the CLI it is
    serialised as `You:` / `Agent:` lines.
 3. `POST /api/v2/chat/message {workflowId, message: "Hello?", customerVariables}` starts the call and returns the
-   agent's opening line; every later turn is `{callId, message}`. After every agent turn the mock ledger is polled.
-4. The call stops when: the ledger shows a `close_call`; the response has `endedByAgent: true`; the reply is empty
-   twice in a row; the customer said goodbye twice; `--max-turns` is reached; or a 500/504 happened 3 times. Then
-   `POST /api/v2/chat/end {callId}`.
+   agent's opening line; every later turn is `{callId, message}`. After every agent turn the mock ledger is polled
+   (a poll that fails, times out or answers without `calls` keeps the previous ledger and is counted as a ledger
+   error; it never aborts the call). A first turn that answers 502/503/504 or nothing is sent again after 15 s, up to
+   3 times, each time with a **fresh practice customer**: the engine may have created a call for the failed attempt
+   and there is no `callId` to end it with, so the orphan's later `close_call` must not land in this case's ledger.
+   The transcript notes the earlier customer ids. A bare 500 on the first turn is not retried (the workflow cannot
+   start a call): the case stops at once, with one ledger read, no 30 s wait and no judge call.
+4. The call stops when, checked in this order after every turn: the ledger shows a `close_call`; the agent ended the
+   call (`endedByAgent: true` in the response, or, after a 502/504, an `end_call`/`call_ended` event in the call log:
+   `stop` says which); the reply is empty twice in a row; three turns in the call got a 5xx or no answer **and** no
+   reply could be recovered from the call log (a recovered 504 under load does not count); the customer said goodbye
+   twice; `--max-turns` is reached. Then `POST /api/v2/chat/end {callId}`. A harness error mid-call (an exception
+   outside the model and mock calls) also ends the call, and the case is still fetched, scored and judged, with
+   `stop: harness error: ...` and a `harness: ...` failure.
 5. `GET /api/v2/call/{callId}` gives the full transcript with the engine events (tool calls with args and results,
    routes, node entries). It does serve the chat route's `callId`; if it ever does not, the harness's own log plus the
    ledger's calls are used instead (`transcript_source` says which).
 6. `score_ledger(case, ledger)` checks the bank records; the judge gets `All of these are true:` + the checks (the
-   organisers' `successCriteria` wording), the transcript with tool events in place, and the tool list, and must
-   answer `{"outcome": "pass"|"fail", "reason": "..."}` (parsed robustly: JSON anywhere in the text, else the words).
-   Judge failures are appended as `conversation: ...`, like `run_cases.py`.
+   organisers' `successCriteria` wording), the transcript with tool events in place (it is told that the customer's
+   first line, `--opening`, is them picking up the phone), and the tool list, and must answer
+   `{"outcome": "pass"|"fail", "reason": "..."}`. Parsing is strict: a JSON object with `outcome` (fenced or not), an
+   `outcome: pass|fail` field, or the bare word `pass`/`fail`; prose that merely contains the words is no verdict
+   (an earlier fallback read "I cannot pass judgment" as a pass). With no verdict the judge is asked once more for the
+   JSON object; still none -> `fail` with `no verdict`. Judge failures are appended as `conversation: ...`, like
+   `run_cases.py`. The cost line counts judge retries and ledger errors when there were any.
 
 ## How it differs from the organisers' simulation
 
@@ -129,15 +143,23 @@ and `error`, the chat calls carried `function_call_error` (a 4xx from the tool A
 `turn_completed` (with `responseText`), `conversation_resumed` and `call_ended`. `sim.py` reads `function_call_error`
 as the tool's result so the judge sees the failure.
 
-**5. When the agent ends the call inside a turn, the chat route answers 502, not `endedByAgent: true`.** PUB-02, turn 11:
+**5. The turn in which the agent ends the call has so far always come back as a 502 or 504, never as a 200 with
+`endedByAgent: true`.** Observed on the Brief A workflow first (PUB-02, turn 11, two calls in parallel):
 `POST /chat/message {"callId": ..., "message": "Tomorrow morning around eleven is the only time ..."}` -> `502 error code: 502`
 after 65 s, while the call log shows the turn fully processed: `node_enter fin_no_callback`, `code_exec`, `end_call ->
 success Call ended`, `close_call -> 200 {"ok": true}`, and the farewell "Thank you for your help. Goodbye." as an
-assistant message. `endedByAgent` was never seen as `true` in 24 turns. A first version of the harness re-sent the line
-on 502: the engine processed it again each time (four identical user messages, the end node ran four times, three
-`close_call`s, the later ones answered `{"ok": false, "error": "the call is already closed"}`). **A line is now never
-re-sent mid-call**; after a 502/504 the reply is read from the call log and an `end_call`/`call_ended` event there, or a
-`close_call` in the ledger, ends the loop.
+assistant message. Then on the `brief-a-v2` workflow (`4045179c-...`, `results/brief-a-v2-sim.json`, 10 cases at
+concurrency 5, transcripts in `results/transcripts-v2/`): the agent-ending turn answered 502 in 7 cases and 504 in 3,
+the reply and the end were recovered from the call log 6 to 7 s later every time, and no turn of any run (the
+two brief-a runs, 59 turns on brief-a-v2) carried `endedByAgent: true` in a 200 response. So this is not a one-off under load, but it
+is also only two workflows on one day; the harness handles both outcomes and the `stop` field now says which one was
+seen (`ended by the agent (endedByAgent in the response)` vs `ended by the agent (end_call in the call log after HTTP
+502)`). Note for readers of the older results files: their `stop` label `ended by the agent (endedByAgent)` was
+written for both cases and in every one of them the end came from the call log after a 502/504.
+A first version of the harness re-sent the line on 502: the engine processed it again each time (four identical user
+messages, the end node ran four times, three `close_call`s, the later ones answered `{"ok": false, "error": "the call
+is already closed"}`). **A line is now never re-sent mid-call**; after a 502/504 the reply is read from the call log
+and an `end_call`/`call_ended` event there, or a `close_call` in the ledger, ends the loop.
 
 **6. `close_call` at `end_of_call` lands after `POST /chat/end`, asynchronously.** PUB-01: `/chat/end` at ~238 s into
 the call, `close_call -> 200 {"ok": true}` at 249.9 s. A ledger read 2 s after `/chat/end` still said "not closed". The

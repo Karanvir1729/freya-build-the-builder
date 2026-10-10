@@ -12,10 +12,11 @@ a time, no simulation queue, so cases run in parallel) against the PUBLISHED wor
 ledger (tools/score.py) plus a judge model that reads the transcript against the case's conversation checks.
 
 Customer and judge models: OpenAI chat completions over urllib when OPENAI_API_KEY is set (defaults gpt-5-mini / gpt-5),
-otherwise the Claude CLI (`claude -p`, defaults claude-haiku-5-5 / claude-sonnet-5-5). Standard library only.
+otherwise the Claude CLI (`claude -p`, defaults claude-haiku-5-5 / claude-sonnet-5-5, run from an empty scratch directory so
+the repo's CLAUDE.md, settings and skills never reach the customer or the judge). Standard library only.
 See builder/SIM.md for how this differs from the organisers' simulation and for the chat route's caveats.
 """
-import argparse, json, os, pathlib, re, socket, subprocess, sys, threading, time, urllib.error, urllib.request
+import argparse, json, os, pathlib, re, socket, subprocess, sys, tempfile, threading, time, urllib.error, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -39,12 +40,25 @@ GOODBYE = re.compile(r"\b(good-?bye|bye|bye-bye)\b", re.I)
 
 _print_lock = threading.Lock()
 _count_lock = threading.Lock()
-COUNTS = {"chat_turns": 0, "customer_calls": 0, "judge_calls": 0, "ledger_polls": 0, "call_fetches": 0}
+COUNTS = {"chat_turns": 0, "customer_calls": 0, "judge_calls": 0, "judge_retries": 0, "ledger_polls": 0, "ledger_errors": 0, "call_fetches": 0}
+_cli_dir = None
 
 
 def count(key, n=1):
     with _count_lock:
         COUNTS[key] += n
+
+
+def cli_dir():
+    """An EMPTY scratch directory to run `claude -p` from, made once per process. Run from the repo, Claude Code loads the
+    project's CLAUDE.md, .claude/ settings and skills into the session, and the customer and the judge would read the
+    builder's scoring rules (verified 10 Oct: asked to quote any project instruction, a run from the repo returned the
+    CLAUDE.md heading, a run from an empty directory 'NONE')."""
+    global _cli_dir
+    with _count_lock:
+        if _cli_dir is None or not os.path.isdir(_cli_dir):
+            _cli_dir = tempfile.mkdtemp(prefix="sim-claude-")
+        return _cli_dir
 
 
 def say(*a):
@@ -182,11 +196,12 @@ class Provider:
         raise RuntimeError("openai: no answer (%s)" % last)
 
     def _claude(self, model, system, prompt):
+        """One `claude -p` call with the persona as the system prompt, no tools, from an empty directory (see cli_dir)."""
         last = None
         for attempt in range(3):
             try:
                 r = subprocess.run([CLAUDE_CLI, "-p", "--model", model, "--system-prompt", system, "--tools", "", "--output-format", "text",
-                                    "--no-session-persistence", prompt], capture_output=True, text=True, timeout=240, cwd=str(ROOT))
+                                    "--no-session-persistence", prompt], capture_output=True, text=True, timeout=240, cwd=cli_dir())
             except subprocess.TimeoutExpired:
                 last = "claude -p timed out"; continue
             if r.returncode == 0 and r.stdout.strip():
@@ -225,22 +240,34 @@ def clean_line(s):
     return s or "Hello?"
 
 
-def judge(provider, model, checks, transcript_lines, tool_calls):
-    """The organisers' wording ('All of these are true:' + checks) over the transcript and the tool list -> (outcome, reason)."""
+def judge(provider, model, checks, transcript_lines, tool_calls, opening="Hello?"):
+    """The organisers' wording ('All of these are true:' + checks) over the transcript and the tool list -> (outcome, reason).
+    `opening` is the customer's first line (--opening), which the judge is told to read as picking up the phone."""
     criteria = "All of these are true:\n- " + "\n- ".join(checks)
     tools = "\n".join("%d. %s %s -> %s" % (i, t["tool"], tool_args_line(t.get("args")), tool_result_line(t.get("result")))
                       for i, t in enumerate(tool_calls, 1)) or "(no tool calls)"
-    prompt = ("SUCCESS CRITERIA:\n%s\n\nTRANSCRIPT (the customer's first 'Hello?' is them picking up the phone; the agent then opens the call; "
+    prompt = ("SUCCESS CRITERIA:\n%s\n\nTRANSCRIPT (the customer's first line %s is them picking up the phone; the agent then opens the call; "
               "tool calls are shown where they happened):\n%s\n\nTOOL CALLS IN ORDER:\n%s\n\n"
               'Is every criterion true? Answer with JSON only: {"outcome": "pass" or "fail", "reason": "..."}'
-              % (criteria, "\n".join(transcript_lines), tools))
+              % (criteria, json.dumps(opening, ensure_ascii=False), "\n".join(transcript_lines), tools))
     count("judge_calls")
     raw = provider.chat(model, JUDGE_SYSTEM, [("user", scrub(prompt))], json_mode=True)
-    return parse_verdict(raw)
+    outcome, reason = parse_verdict(raw)
+    if outcome is None:
+        # Prose without a verdict. OpenAI's json_object mode makes this rare; the CLI path has no such guard: ask once more.
+        count("judge_calls"); count("judge_retries")
+        nudge = prompt + ("\n\nYour previous answer contained no verdict. Reply with the JSON object only, nothing else: "
+                          '{"outcome": "pass" or "fail", "reason": "..."}')
+        outcome, reason = parse_verdict(provider.chat(model, JUDGE_SYSTEM, [("user", scrub(nudge))], json_mode=True))
+        if outcome is None:
+            return "fail", "no verdict (the judge answered twice without pass/fail): " + reason
+    return outcome, reason
 
 
 def parse_verdict(raw):
-    """Robust: a JSON object anywhere in the text, else the words pass/fail."""
+    """(outcome, reason): a JSON object with "outcome" (anywhere in the text, fenced or not), an `outcome: pass|fail`
+    field, or a reply that IS the one word pass/fail. Anything else -> (None, text): prose that merely contains 'pass'
+    or 'fail' is not a verdict (an earlier fallback read 'I cannot pass judgment' as a pass)."""
     text = raw.strip()
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text, flags=re.S)
     cands = [text] + re.findall(r"\{.*?\}", text, flags=re.S)
@@ -251,26 +278,31 @@ def parse_verdict(raw):
             continue
         if isinstance(j, dict) and "outcome" in j:
             o = str(j.get("outcome", "")).strip().lower()
-            return ("pass" if o.startswith("pass") or o in ("true", "yes", "ok") else "fail"), " ".join(str(j.get("reason") or "").split())[:600]
+            if o.startswith("pass") or o in ("true", "yes", "ok"):
+                return "pass", " ".join(str(j.get("reason") or "").split())[:600]
+            if o.startswith("fail") or o in ("false", "no"):
+                return "fail", " ".join(str(j.get("reason") or "").split())[:600]
     m = re.search(r'"?outcome"?\s*[:=]\s*"?(pass|fail)', text, re.I)
     if m:
         return m.group(1).lower(), " ".join(text.split())[:600]
-    low = text.lower()
-    if "fail" in low and "pass" not in low:
-        return "fail", " ".join(text.split())[:600]
-    if "pass" in low and "fail" not in low:
-        return "pass", " ".join(text.split())[:600]
-    return "fail", "no verdict: " + " ".join(text.split())[:400]
+    m = re.fullmatch(r"\W*(pass|fail)(?:ed|es)?\W*", text, re.I)        # the bare word: 'PASS', 'Fail.'
+    if m:
+        return m.group(1).lower(), " ".join(text.split())[:600]
+    return None, " ".join(text.split())[:400]
 
 
 # ----------------------------------------------------------------------------------------------------- the chat call
 def post(path, body, timeout=TURN_TIMEOUT_S):
-    """POST to Freya; (status, result). Never raises on an HTTP status; 0 = no answer at all."""
+    """POST to Freya; (status, result). Never raises: an HTTP status comes back as is (a non-JSON body as text), 0 = no answer."""
     req = urllib.request.Request(freya.URL + path, data=json.dumps(body).encode(), headers=freya.HEADERS, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            out = json.load(r)
-            return r.status, (out.get("data", {}).get("result", out) if isinstance(out, dict) else out)
+            status, text = r.status, r.read().decode(errors="replace")
+        try:
+            out = json.loads(text)
+        except ValueError:
+            return status, "not JSON: " + " ".join(re.sub(r"<[^>]+>", " ", text).split())[:200]
+        return status, (out.get("data", {}).get("result", out) if isinstance(out, dict) else out)
     except urllib.error.HTTPError as e:
         text = e.read().decode(errors="replace")
         try:
@@ -278,17 +310,18 @@ def post(path, body, timeout=TURN_TIMEOUT_S):
         except Exception:
             msg = re.sub(r"<[^>]+>", " ", text)
         return e.code, " ".join(str(msg).split())[:400]
-    except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError) as e:
+    except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, OSError) as e:
         return 0, repr(e)
 
 
 class Chat:
     """One chat-route call. send() a customer line -> the agent's reply; the harness keeps its own transcript log."""
 
-    def __init__(self, workflow_id, variables):
+    def __init__(self, workflow_id, variables, new_session=None):
         self.workflow_id, self.variables = workflow_id, variables
-        self.call_id, self.log, self.seen, self.ended_by_agent, self.end_result = None, [], 0, False, None
-        self.server_errors, self.warnings = 0, []
+        self.call_id, self.log, self.ended_by_agent, self.ended_how, self.end_result = None, [], False, None, None
+        self.server_errors, self.unrecovered_errors, self.warnings = 0, 0, []
+        self.new_session, self.retried_customers = new_session, []     # a first-turn retry runs on a fresh practice customer
 
     def send(self, text, first_turn_retries=3):
         body = {"message": text}
@@ -296,7 +329,7 @@ class Chat:
             body["callId"] = self.call_id
         else:
             body["workflowId"] = self.workflow_id; body["customerVariables"] = self.variables
-        t0, status, res = time.time(), 0, None
+        t0, status, res, attempt = time.time(), 0, None, 0
         for attempt in range(first_turn_retries + 1):
             count("chat_turns")
             status, res = post("/api/v2/chat/message", body)
@@ -305,9 +338,21 @@ class Chat:
             # line re-ran the end node and close_call three times), so the reply is recovered from the call log instead.
             if status in (502, 503, 504, 0) and not self.call_id and attempt < first_turn_retries:
                 self.server_errors += 1
+                # The engine may well have created a call for this attempt (a 504 is the gateway giving up, not the
+                # engine) and there is no callId to end it with. So the retry opens a FRESH practice customer: whatever
+                # that orphan does later (its end_of_call close_call, for one) lands in another ledger, never in this case's.
+                try:
+                    fresh = self.new_session() if self.new_session else None
+                except Exception:
+                    fresh = None                                   # the mock hiccuped: retry on the same customer
+                if fresh:
+                    self.retried_customers.append(self.variables.get("customer_id"))
+                    self.variables = body["customerVariables"] = fresh
                 time.sleep(15); continue
             break
         turn = {"n": len(self.log) + 1, "customer": text, "agent": "", "status": status, "seconds": round(time.time() - t0, 1), "error": None, "ended_by_agent": False}
+        if attempt:
+            turn["first_turn_retries"] = attempt
         if status == 200 and isinstance(res, dict):
             self.call_id = res.get("callId") or self.call_id
             turn["agent"] = (res.get("response") or "").strip()
@@ -315,7 +360,7 @@ class Chat:
             if res.get("warning"):
                 turn["warning"] = compact(res["warning"], 300); self.warnings.append(turn["warning"])
             if res.get("endedByAgent"):
-                self.ended_by_agent = True
+                self.ended_by_agent, self.ended_how = True, "endedByAgent in the response"
         else:
             if status in (500, 502, 503, 504):
                 self.server_errors += 1
@@ -323,15 +368,21 @@ class Chat:
             if status == 500 and not self.call_id:
                 turn["error"] += " (a bare 500 on the first turn: the workflow cannot start a call at all)"
         if status in (502, 503, 504, 0) and self.call_id:
-            # The gateway gave up (504: after ~60 s; 502: 'no response', seen when the agent ended the call in that turn)
-            # while the engine finished the turn. The reply usually lands in the call log: poll for it.
+            # The gateway gave up (504: after ~60 s; 502: 'no response', seen on every turn in which the agent ended the
+            # call) while the engine finished the turn. The reply usually lands in the call log: poll for it.
             t1, limit = time.time(), RECOVER_S if status == 504 else 30
             while time.time() - t1 < limit and not turn["agent"] and not self.ended_by_agent:
                 time.sleep(6)
                 turn["agent"] = self.collect()
+            if self.ended_by_agent and not self.ended_how:
+                self.ended_how = "end_call in the call log after HTTP %s" % status
             turn["error"] += " | reply %s the call log after %.0f s%s" % ("recovered from" if turn["agent"] else "NOT found in", time.time() - t1,
                                                                         "; the agent ended the call" if self.ended_by_agent else "")
             turn["seconds"] = round(time.time() - t0, 1)
+            if not turn["agent"] and not self.ended_by_agent:
+                self.unrecovered_errors += 1                   # a recovered 504 under load is not an error of the call
+        elif turn["error"] and self.call_id:                   # a 500 or a non-JSON 200 mid-call: nothing to recover
+            self.unrecovered_errors += 1
         turn["ended_by_agent"] = self.ended_by_agent
         self.log.append(turn)
         return turn
@@ -366,8 +417,9 @@ class Chat:
         return " ".join(s for s in said if s)
 
     def end(self):
-        if not self.call_id:
-            return None
+        """POST /chat/end once (idempotent, never raises): also called from the error path of run_case."""
+        if not self.call_id or self.end_result is not None:
+            return self.end_result
         status, res = post("/api/v2/chat/end", {"callId": self.call_id}, timeout=60)
         self.end_result = res if status == 200 else "HTTP %s: %s" % (status, res)
         return self.end_result
@@ -443,23 +495,52 @@ def transcript_from_log(chat, ledger):
 
 
 # ----------------------------------------------------------------------------------------------------- one case
+def ledger_poll(cid, ledger=None):
+    """GET the mock ledger. On a transport error, a timeout or a body without `calls`, the previous ledger (or {}) comes
+    back and `ledger_errors` counts it, so one transient mock error never aborts a call that is in progress."""
+    count("ledger_polls")
+    try:
+        led = http("/v1/practice/ledger/" + cid)
+        if isinstance(led, dict) and "calls" in led:
+            return led
+    except Exception:
+        pass
+    count("ledger_errors")
+    return ledger if ledger is not None else {}
+
+
+def closed(ledger):
+    return any(c.get("tool") == "close_call" for c in (ledger or {}).get("calls") or [])
+
+
 def run_case(ctx, case, rep):
     """One practice customer on one chat-route call. Returns a row shaped like run_cases.py's rows."""
-    cid, started = None, time.time()
+    cid, chat, ledger = None, None, None
     row = {"id": case["id"], "level": case["level"], "family": case["family"], "pass": False, "failed": [], "call_id": None, "tools": [], "customer_id": None,
            "transcript": None, "turns": 0, "stop": None, "judge": None}
+
+    def new_session():
+        s = http("/v1/practice/sessions", {"case": case["id"]})
+        return s.get("variables") if isinstance(s, dict) else None
+
     try:
-        sess = http("/v1/practice/sessions", {"case": case["id"]})
-        if not sess.get("variables"):
-            row["failed"].append("mock bank: could not open a practice session: " + compact(sess, 200)); return finish(ctx, case, rep, row, None, None)
-        variables = sess["variables"]; cid = row["customer_id"] = variables["customer_id"]
+        variables = new_session()
+        if not variables:
+            row["failed"].append("mock bank: could not open a practice session for " + case["id"]); row["stop"] = "no practice session"
+            return finish(ctx, case, rep, row, None, None)
+        cid = row["customer_id"] = variables["customer_id"]
         persona = persona_for(case, {"identity": case["identity"]}, ctx.style)
         customer = Customer(ctx.provider, ctx.customer_model, persona["prompt"])
-        chat = Chat(ctx.workflow_id, variables)
-        line, goodbyes, empties, ledger = ctx.opening, 0, 0, None
+        chat = Chat(ctx.workflow_id, variables, new_session=new_session)
+        line, goodbyes, empties = ctx.opening, 0, 0
         for turn in range(1, ctx.max_turns + 1):
             t = chat.send(line)
             row["call_id"] = chat.call_id
+            if chat.variables.get("customer_id") != cid:           # the first turn was retried on a fresh practice customer
+                cid = row["customer_id"] = chat.variables["customer_id"]
+                chat.warnings.append("first turn retried %d time(s) after a 502/503/504/no answer; practice customer(s) %s may hold an orphan "
+                                     "call on the engine (no callId to end it with), harmless to this case's ledger"
+                                     % (len(chat.retried_customers), ", ".join(map(str, chat.retried_customers))))
             if ctx.verbose:
                 say("[%s] customer: %s\n[%s] agent (%.1fs): %s%s" % (case["id"], line, case["id"], t["seconds"], t["agent"] or "(no reply)", (" !! " + t["error"]) if t.get("error") else ""))
             customer.record(line, t["agent"])
@@ -469,19 +550,19 @@ def run_case(ctx, case, rep):
                 say("WARNING %s: an agent line contains '{{' (unresolved variable): %s" % (case["id"], compact(t["agent"], 200)))
             if not chat.call_id:
                 row["stop"] = "no call started: " + (t.get("error") or "no callId in the response"); break
-            if chat.server_errors >= 3:
-                row["stop"] = "3 server errors (5xx)"; break
-            count("ledger_polls"); ledger = http("/v1/practice/ledger/" + cid)
-            if any(c.get("tool") == "close_call" for c in ledger.get("calls") or []):
+            ledger = ledger_poll(cid, ledger)
+            if closed(ledger):
                 row["stop"] = "close_call in the ledger"; break
             if t["ended_by_agent"]:
-                row["stop"] = "ended by the agent (endedByAgent)"; break
+                row["stop"] = "ended by the agent (%s)" % chat.ended_how; break
             if not t["agent"]:
                 empties += 1
                 if empties >= 2:
                     row["stop"] = "two empty replies in a row"; break
             else:
                 empties = 0
+            if chat.unrecovered_errors >= 3:
+                row["stop"] = "3 server errors without a reply (5xx or no answer)"; break
             if goodbyes >= 2:
                 row["stop"] = "the customer said goodbye twice"; break
             if turn == ctx.max_turns:
@@ -492,27 +573,31 @@ def run_case(ctx, case, rep):
                 row["stop"] = "customer model failed: " + compact(str(e), 200); break
             if GOODBYE.search(line):
                 goodbyes += 1
-        row["turns"] = len(chat.log)
-        chat.end()
-        ledger = wait_for_close(cid, ledger)                       # end-of-call tool calls land a few seconds after /chat/end
-        return finish(ctx, case, rep, row, chat, ledger)
     except Exception as e:
         row["failed"].append("harness: %s: %s" % (type(e).__name__, compact(str(e), 240)))
-        row["pass"] = False
-        return finish(ctx, case, rep, row, None, None)
+        row["stop"] = row.get("stop") or "harness error: " + type(e).__name__
+    row["turns"] = len(chat.log) if chat else 0
+    # Whatever happened above, a call that was started is ended and scored: a harness error (the mock bank down for one
+    # poll, say) must not leave the call open on the engine or lose its transcript. No call: no 30 s wait, one ledger read.
+    try:
+        if chat and chat.call_id:
+            chat.end()
+            ledger = wait_for_close(cid, ledger)                   # end-of-call tool calls land a few seconds after /chat/end
+        elif cid:
+            ledger = ledger_poll(cid, ledger)
+    except Exception as e:
+        row["failed"].append("harness (after the call): %s: %s" % (type(e).__name__, compact(str(e), 200)))
+    return finish(ctx, case, rep, row, chat, ledger)
 
 
 def wait_for_close(cid, ledger, seconds=30):
     """A tool with alwaysRunsAt end_of_call (close_call) runs asynchronously after POST /chat/end: seen 12 s later.
-    Poll the ledger until a close_call shows up, 30 s at most."""
+    Poll the ledger until a close_call shows up, 30 s at most; nothing to wait for when the ledger is already closed."""
     t0 = time.time()
-    while True:
-        count("ledger_polls"); led = http("/v1/practice/ledger/" + cid)
-        if "calls" in led:
-            ledger = led
-        if any(c.get("tool") == "close_call" for c in (ledger or {}).get("calls") or []) or time.time() - t0 > seconds:
-            return ledger
+    while not closed(ledger) and time.time() - t0 < seconds:
         time.sleep(3)
+        ledger = ledger_poll(cid, ledger)
+    return ledger
 
 
 def finish(ctx, case, rep, row, chat, ledger):
@@ -527,15 +612,21 @@ def finish(ctx, case, rep, row, chat, ledger):
         lines, tools, var_table, slowest = transcript_from_log(chat, ledger)
         row["transcript_source"] = "harness log (the call route did not serve the chat callId)"
     row["slowest_turn_s"] = slowest
+    if chat:
+        row["ended_how"] = chat.ended_how
     if ledger is not None and "calls" in ledger:
-        r = score_ledger(case, ledger)
-        row["failed"] += r["failed"]
-        row["tools"] = [x["tool"] for x in ledger["calls"]]
+        try:
+            row["failed"] += score_ledger(case, ledger)["failed"]
+        except Exception as e:
+            row["failed"].append("mock bank: the ledger could not be scored: %s: %s" % (type(e).__name__, compact(str(e), 160)))
+        row["tools"] = [x.get("tool") for x in ledger["calls"]]
     elif chat:
         row["failed"].append("mock bank: no ledger for " + str(row["customer_id"]))
-    if chat and lines:
+    if chat and not chat.call_id:                                  # nothing was said: no judge call for a '(no reply: HTTP 500)' transcript
+        row["failed"].append("conversation: no call was started, nothing to judge")
+    elif chat and lines:
         try:
-            outcome, reason = judge(ctx.provider, ctx.judge_model, case["checks"], lines, tools)
+            outcome, reason = judge(ctx.provider, ctx.judge_model, case["checks"], lines, tools, ctx.opening)
         except Exception as e:
             outcome, reason = "fail", "judge model failed: " + compact(str(e), 200)
         row["judge"] = {"outcome": outcome, "reason": reason, "model": ctx.judge_model}
@@ -649,8 +740,9 @@ def main():
         else:
             print("NOTE: the first code node %r ran on the chat route: all of %s appeared in the variable table." % (ctx.first_node[0], ", ".join(ctx.first_node[2])))
     model_calls = COUNTS["customer_calls"] + COUNTS["judge_calls"]
-    print("cost: %d chat turns, %d model calls (%d customer on %s, %d judge on %s), %d ledger polls, %d call fetches." % (
-        COUNTS["chat_turns"], model_calls, COUNTS["customer_calls"], ctx.customer_model, COUNTS["judge_calls"], ctx.judge_model, COUNTS["ledger_polls"], COUNTS["call_fetches"]))
+    extra = "".join(", %d %s" % (COUNTS[k], label) for k, label in (("judge_retries", "judge retries"), ("ledger_errors", "ledger errors")) if COUNTS[k])
+    print("cost: %d chat turns, %d model calls (%d customer on %s, %d judge on %s), %d ledger polls, %d call fetches%s." % (
+        COUNTS["chat_turns"], model_calls, COUNTS["customer_calls"], ctx.customer_model, COUNTS["judge_calls"], ctx.judge_model, COUNTS["ledger_polls"], COUNTS["call_fetches"], extra))
     with open(ROOT / "results" / "log.jsonl", "a") as f:
         f.write(json.dumps({"at": time.strftime("%Y-%m-%d %H:%M:%S"), "runner": "sim", "workflow_id": ctx.workflow_id, "agent_id": agent_id, "brief": a.brief,
                             "runs": a.reps, "passed": n, "total": len(final), "seconds": round(total_s), "failed": [f["id"] for f in final if not f["pass"]],
