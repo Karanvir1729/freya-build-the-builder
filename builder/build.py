@@ -123,7 +123,7 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
     test_line = ("No practice cases exist for this brief: test with lint, dry run, the smoke scripts and the audit only."
                  if not cases else
                  "Practice cases: %s%s. Test runner: %s (%s)." % (cases, (" --brief " + brief_filter) if brief_filter else "", runner,
-                 "python3 builder/sim.py <slot> --cases <file>%s --concurrency 5" % ((" --brief " + brief_filter) if brief_filter else "")
+                 "python3 builder/sim.py <slot> --cases <file>%s --concurrency 3 (the chat route answers 504 above that)" % ((" --brief " + brief_filter) if brief_filter else "")
                  if runner == "sim" else "python3 tools/run_cases.py <agent_id> --cases <file>%s" % ((" --brief " + brief_filter) if brief_filter else "")))
     deadline = time.strftime("%H:%M:%S", time.localtime(time.time() + minutes_left * 60))
     prompt = ("Use the %s skill to build a phone agent. Brief file(s): %s. Tool API file: %s. Slot name: %s. "
