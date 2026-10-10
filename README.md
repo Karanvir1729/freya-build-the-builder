@@ -32,6 +32,7 @@ Everything the organisers published is in this repo:
 3. Python 3.10+. The kit itself is standard library only. The builder uses the Claude Agent SDK, installed in `.venv`:
    ```bash
    uv venv && uv pip install -r requirements.txt && source .venv/bin/activate
+   # or: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt   (Debian images: add --ignore-installed PyJWT)
    ```
    It also needs a Claude login (Claude Code) or `ANTHROPIC_API_KEY`.
 

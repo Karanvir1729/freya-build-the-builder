@@ -244,6 +244,17 @@ def test_every_node_reaches_end():
     assert has(f, ERROR, "nodes.setup", "end_call"), f
 
 
+def test_empty_variable_in_spoken_text():
+    """Brief C round 3: a terminal said 'I understand.{{reduction_line}}' because code had set reduction_line = ''."""
+    wf = minimal()
+    code = wf["nodes"]["setup"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]
+    code["default"] = "try:\n    vars['line'] = 'Thank you.' if vars.get('x') == 'yes' else ''\n    vars['full'] = 'Goodbye.'\nexcept Exception:\n    pass\n"
+    wf["nodes"]["bye"]["terminal"]["function"]["parameters"]["properties"]["spoken_message"]["default"] = "I understand.{{line}} {{full}}"
+    f = lint(wf)
+    assert has(f, WARN, "nodes.bye.terminal.spoken_message", "{{line}} can be ''"), f
+    assert not has(f, WARN, "nodes.bye.terminal.spoken_message", "{{full}}"), f
+
+
 def test_lifecycle_and_hooks():
     wf = minimal()
     t = api_tool("close_call", {"customer_id": {"type": "string", "default": "{{customer_id}}"},

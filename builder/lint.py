@@ -73,6 +73,7 @@ class _Linter:
         self.all_nodes.update(self.globals)
         # variable knowledge
         self.known_vars = set()         # exact names set by something in the workflow
+        self.empty_vars = set()         # names some code path sets to '' (spoken as the literal placeholder)
         self.var_writers = {}           # var name -> set of node keys ('$' = test_variables / workflow level)
         self.var_writer_desc = {}       # var name -> set of human-readable writers ("code node 'setup'", ...)
         self.reach = {}                 # node key -> set of node keys reachable from it (itself included)
@@ -188,6 +189,32 @@ class _Linter:
                         for k in node.args[0].keys:
                             if isinstance(k, ast.Constant) and isinstance(k.value, str):
                                 names.add(k.value)
+        return names
+
+    @staticmethod
+    def code_empty_vars(code):
+        """Names the snippet can set to the empty string: vars['x'] = '' or vars['x'] = <a> if <c> else '' (either branch)."""
+        names = set()
+        try:
+            tree = ast.parse(code)
+        except Exception:
+            return names
+
+        def empty(v):
+            if isinstance(v, ast.Constant) and v.value == "":
+                return True
+            if isinstance(v, ast.IfExp):
+                return empty(v.body) or empty(v.orelse)
+            if isinstance(v, ast.BoolOp):
+                return any(empty(x) for x in v.values)
+            return False
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and empty(node.value):
+                for t in node.targets:
+                    if isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == "vars":
+                        key = t.slice
+                        if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                            names.add(key.value)
         return names
 
     def check_python(self, code, where, kind):
@@ -358,12 +385,14 @@ class _Linter:
             if isinstance(tool.get(hook), str):
                 for v in self.code_assigned_vars(tool[hook]):
                     self.note_var(v, hook)
+                self.empty_vars |= self.code_empty_vars(tool[hook])
         if handler == HANDLER_CODE:
             props = (fn.get("parameters") or {}).get("properties") if isinstance(fn.get("parameters"), dict) else None
             code = (props or {}).get("code") if isinstance(props, dict) else None
             if isinstance(code, dict) and isinstance(code.get("default"), str):
                 for v in self.code_assigned_vars(code["default"]):
                     self.note_var(v, "code")
+                self.empty_vars |= self.code_empty_vars(code["default"])
 
     # ------------------------------------------------------------ pass 2: nodes
     def check_nodes(self):
@@ -1188,6 +1217,8 @@ class _Linter:
                     self.warn(where, f"{{{{{v}}}}} is never set: the agent would say the literal placeholder aloud")
                 else:
                     self.warn(where, f"{{{{{v}}}}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder")
+            elif spoken and v in self.empty_vars:
+                self.warn(where, f"{{{{{v}}}}} can be '' (some code sets it to the empty string) and an EMPTY variable in spoken text is said as the literal placeholder (seen on the platform): always write a sentence into it, or route to a separate terminal instead of an optional line")
 
     # ------------------------------------------------------------ workflow-level tools
     def check_workflow_tools(self):

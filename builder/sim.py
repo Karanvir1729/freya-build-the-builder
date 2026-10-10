@@ -592,9 +592,9 @@ def run_case(ctx, case, rep):
     return finish(ctx, case, rep, row, chat, ledger)
 
 
-def wait_for_close(cid, ledger, seconds=30):
+def wait_for_close(cid, ledger, seconds=60):
     """A tool with alwaysRunsAt end_of_call (close_call) runs asynchronously after POST /chat/end: seen 12 s later.
-    Poll the ledger until a close_call shows up, 30 s at most; nothing to wait for when the ledger is already closed."""
+    Poll the ledger until a close_call shows up, 60 s at most (one Brief C call had none after 30 s); nothing to wait for when the ledger is already closed."""
     t0 = time.time()
     while not closed(ledger) and time.time() - t0 < seconds:
         time.sleep(3)

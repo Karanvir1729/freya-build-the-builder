@@ -38,3 +38,5 @@ Results on the two real builds (10 Oct), new findings only:
   the workflow.
 
 Tests: `python3 builder/tests/test_lint.py` (`test_rules_*`, `test_budget_checks`, `test_cli_rules_flag`).
+
+- **Empty variable in spoken text** (WARN): a `spoken_message` or tts line uses `{{x}}` and some code or hook sets `vars['x']` to `''` (directly, in an `a if c else ''`, or an `or ''`). On the platform an empty variable is spoken as the literal placeholder (Brief C, round 3). Write a sentence into it on every path, or route to a separate terminal.
