@@ -1,0 +1,815 @@
+[
+ {
+  "id": "G-01",
+  "brief": "G",
+  "mock_case": "PUB-10",
+  "family": "Happy path",
+  "level": "medium",
+  "title": "Offers more than owed, today; first create_promise fails",
+  "variables": {
+   "first_name": "Grace",
+   "last_name": "Lin",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1989-02-23",
+   "phone_last4": "9904"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "7740",
+    "past_due": 365.0,
+    "days_late": 8,
+    "minimum_payment": 109.5
+   }
+  ],
+  "script": "Confirms she is Grace Lin. Gives her date of birth (23 February 1989), then 9904. Asked to pay in full today, says 'Yes, I'll pay four hundred today, just to be safe.' Accepts the amount the assistant reads back. Confirms. If the assistant says something went wrong, waits.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "FULLPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 365.0,
+     "date": "2026-10-14"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the opening is 'Hello, this is the automated assistant of Corran Bay Bank. This call may be recorded.' followed by 'Could I speak to Grace Lin, please?'",
+   "date of birth is asked before the last four phone digits, and both pass before get_account",
+   "none of 'overdue', 'arrears', 'missed', 'owe', 'debt', 'balance', 'payment', 'account', 'card' or 'loan' is said before both security questions have passed",
+   "400 is not recorded: the read-back is 365.00 for the credit card today and ends with 'Is that right?'",
+   "create_promise is tried a second time after the first failure, and 'Your payment arrangement is recorded.' is said only after the call that returned ok",
+   "the closing sentence is 'Thank you, Ms Lin. Your arrangement is in place. Goodbye.' and close_call is promise / FULLPTP"
+  ],
+  "faults": [
+   {
+    "tool": "create_promise",
+    "fail_first_n": 1
+   }
+  ]
+ },
+ {
+  "id": "G-02",
+  "brief": "G",
+  "mock_case": "PUB-06",
+  "family": "Amounts",
+  "level": "hard",
+  "title": "One wrong answer on each question; full amount too much, floor on a Sunday",
+  "variables": {
+   "first_name": "Priya",
+   "last_name": "Nair",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1986-05-17",
+   "phone_last4": "1502"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "1903",
+    "past_due": 2125.1,
+    "days_late": 12,
+    "minimum_payment": 637.5
+   }
+  ],
+  "script": "Confirms she is Priya Nair. Asked for her date of birth, first says '17 June 1986'; when asked again, says 17 May 1986. Asked for the last four digits, first says 1205; when asked again, 1502. Then says the full amount is too much right now. Never names an amount. Accepts the reduced amount the assistant proposes and asks 'Can I pay that on Sunday?'. Accepts the day the assistant offers instead. Confirms.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "PARTPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 1065.0,
+     "date": "2026-10-16"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the check does not end after the first wrong date of birth or after the first wrong phone digits: each question is asked again once and the call goes on to get_account",
+   "the reduced amount offered is 1065.00 (half of 2125.10 rounded up to a multiple of 5); 637.50 is never offered; the agent says the rest stays overdue and the bank will contact her about it",
+   "the agent never asks her how much she can pay",
+   "Sunday 18 October is not accepted and Friday 16 October is offered (Monday 19 October is past the part-payment last date)",
+   "create_promise once for 1065.00 on 2026-10-16 after 'Is that right?' and a yes; close_call promise / PARTPTP with the sentence 'Thank you, Ms Nair. The rest of the overdue amount is still due and we will be in touch about it. Goodbye.'"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-03",
+  "brief": "G",
+  "mock_case": "PUB-01",
+  "family": "Dates",
+  "level": "hard",
+  "title": "Another call date: vague week, then the cut-over Friday",
+  "variables": {
+   "first_name": "Daniel",
+   "last_name": "Reyes",
+   "title": "Mr",
+   "now": "2026-10-30T10:00"
+  },
+  "identity": {
+   "date_of_birth": "1988-03-14",
+   "phone_last4": "4471"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "4821",
+    "past_due": 420.0,
+    "days_late": 6,
+    "minimum_payment": 126.0
+   }
+  ],
+  "script": "Confirms he is Daniel Reyes; date of birth 14 March 1988, then 4471. Cannot pay today. Says he can pay all of it 'sometime next week'. When asked for the exact day, says 'Friday next week'. Accepts the day the assistant offers instead. Confirms.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "FULLPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 420.0,
+     "date": "2026-11-09"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the agent asks once for the exact day after 'sometime next week'",
+   "Friday 6 November is not accepted because it is a closure day (the cut-over), and Monday 9 November is offered",
+   "create_promise once for 420.00 on 2026-11-09; 'Your payment arrangement is recorded.' after ok",
+   "close_call promise / FULLPTP"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-04",
+  "brief": "G",
+  "mock_case": "PUB-09",
+  "family": "Persuasion",
+  "level": "hard",
+  "title": "Late band: two attempts turned down, second-look call booked",
+  "variables": {
+   "first_name": "Victor",
+   "last_name": "Ionescu",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1981-08-11",
+   "phone_last4": "5560"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 2100.0,
+    "days_late": 28,
+    "instalment_amount": 700.0
+   }
+  ],
+  "script": "Verified (11 August 1981, then 5560). Says no to paying in full today, with no date. Says no flatly to every proposal of an amount or a date. Never names a date or an amount. When offered a call from a colleague, says yes, 'half two in the afternoon'.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "TDN2L",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [
+    {
+     "date": "2026-10-19",
+     "time": "14:30"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "attempt 1 proposes 2100.00 on Thursday 15 October; attempt 2 proposes 700.00 on Friday 16 October; there is no third proposal",
+   "the second-look call is offered for Monday 19 October and booked at 14:30, and the agent says 'Your second-look call is booked for Monday 19 October at 14:30.' (wording of the date may vary)",
+   "add_note refused on p1, the text giving 2 attempts and the last offer 700.00 on 16 October",
+   "create_promise is never called; close_call no_promise / TDN2L"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-05",
+  "brief": "G",
+  "mock_case": "PUB-03",
+  "family": "Persuasion",
+  "level": "medium",
+  "title": "Early band: one attempt, second look declined",
+  "variables": {
+   "first_name": "Owen",
+   "last_name": "Park",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1992-07-21",
+   "phone_last4": "6630"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "0377",
+    "past_due": 95.0,
+    "days_late": 4,
+    "minimum_payment": 28.5
+   }
+  ],
+  "script": "Verified (21 July 1992, then 6630). Says no to paying today, with no date. Says no to the next proposal too. Never names a date or an amount. Declines the offer of a call from a colleague.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "TDN",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "exactly one proposal is made after the 'no' to today: 95.00 on Wednesday 28 October; the floor (50.00) is never offered",
+   "a second-look call on Monday 19 October is offered once; schedule_callback is not called",
+   "add_note refused on p1 with 1 attempt and the last offer 95.00 on 28 October",
+   "close_call no_promise / TDN with 'Thank you for your time, Mr Park. Goodbye.'"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-06",
+  "brief": "G",
+  "mock_case": "PUB-08",
+  "family": "Identity",
+  "level": "medium",
+  "title": "Second wrong answer to the same question ends the check",
+  "variables": {
+   "first_name": "Hannah",
+   "last_name": "Schmidt",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1993-04-28",
+   "phone_last4": "3317"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "5512",
+    "past_due": 180.0,
+    "days_late": 5,
+    "minimum_payment": 54.0
+   }
+  ],
+  "script": "Confirms she is Hannah Schmidt. Asked for her date of birth, says 28 April 1994. Asked again, says 29 April 1993. Never gives another date. If asked anything else, waits.",
+  "expected": {
+   "outcome": "not_verified",
+   "reason": "IDNO",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "verify_identity is called twice, both for date_of_birth; the phone digits are never asked",
+   "get_account is never called",
+   "none of 'overdue', 'arrears', 'missed', 'owe', 'debt', 'balance', 'payment', 'account', 'card' or 'loan' is said before both security questions have passed",
+   "the agent says 'For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.'",
+   "close_call not_verified / IDNO"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-07",
+  "brief": "G",
+  "mock_case": "PUB-02",
+  "family": "Identity",
+  "level": "medium",
+  "title": "Asks what it is about instead of answering, then declines",
+  "variables": {
+   "first_name": "Maria",
+   "last_name": "Costa",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1979-11-02",
+   "phone_last4": "0358"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 310.5,
+    "days_late": 11,
+    "instalment_amount": 103.5
+   }
+  ],
+  "script": "Confirms she is Maria Costa. When asked for her date of birth, asks 'What's this about first?'. After the explanation, says 'I'm not giving that out over the phone.'",
+  "expected": {
+   "outcome": "not_verified",
+   "reason": "IDREF",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the agent explains once that the questions protect her personal details, without saying what the call is about",
+   "none of 'overdue', 'arrears', 'missed', 'owe', 'debt', 'balance', 'payment', 'account', 'card' or 'loan' is said before both security questions have passed",
+   "verify_identity and get_account are never called",
+   "close_call not_verified / IDREF with 'I understand. You can use the Corran Bay app or visit any branch. Goodbye.'"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-08",
+  "brief": "G",
+  "mock_case": "PUB-07",
+  "family": "Third party",
+  "level": "hard",
+  "title": "Partner answers; tomorrow is a closure day",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-10-21T15:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "script": "You are Samuel Ortiz's partner. Say he is at work. Asked when he can be reached, say 'Tomorrow at three.' Accept the alternative the caller proposes. Do not offer any other information.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "TPCB",
+   "promises": [],
+   "notes": [],
+   "callbacks": [
+    {
+     "date": "2026-10-23",
+     "time": "15:00"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "no security question is asked and nothing about the reason for the call is said; none of 'overdue', 'arrears', 'missed', 'owe', 'debt', 'balance', 'payment', 'account', 'card' or 'loan' is said at any point",
+   "Thursday 22 October is not booked (closure day); Friday 23 October at 15:00 is proposed and booked",
+   "close_call not_reached / TPCB"
+  ],
+  "faults": [],
+  "third_party": true
+ },
+ {
+  "id": "G-09",
+  "brief": "G",
+  "mock_case": "PUB-05",
+  "family": "Third party",
+  "level": "medium",
+  "title": "Flatmate wants this evening; declines the proposed slot",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "script": "You are Tomas Novak's flatmate. Say he is out. Asked when he can be reached, say 'Tonight around seven.' Turn down whatever the caller proposes instead: he works days and is only in in the evening.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "NOCON",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the agent does not book today and does not book 19:00",
+   "the agent proposes once Thursday 15 October at 16:00",
+   "schedule_callback is never called; close_call not_reached / NOCON"
+  ],
+  "faults": [],
+  "third_party": true
+ },
+ {
+  "id": "G-10",
+  "brief": "G",
+  "mock_case": "PUB-05",
+  "family": "Restructuring",
+  "level": "easy",
+  "title": "Asks for smaller monthly amounts",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "script": "Verified (9 September 1990, then 8846). After hearing the amount, asks whether he can set up a plan with smaller monthly payments.",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XRST",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "restructuring"
+    }
+   ]
+  },
+  "checks": [
+   "the agent describes no plan or term",
+   "'I am putting you through now. Please stay on the line.' then transfer_to_agent restructuring",
+   "no create_promise and no add_note; close_call transferred / XRST"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-11",
+  "brief": "G",
+  "mock_case": "PUB-09",
+  "family": "Hardship",
+  "level": "medium",
+  "title": "Illness: put through to Customer Care",
+  "variables": {
+   "first_name": "Victor",
+   "last_name": "Ionescu",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1981-08-11",
+   "phone_last4": "5560"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 2100.0,
+    "days_late": 28,
+    "instalment_amount": 700.0
+   }
+  ],
+  "script": "Verified (11 August 1981, then 5560). After hearing the amount, says he has just come out of hospital and has not been able to work. Agrees to be put through.",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XCARE",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "support"
+    }
+   ]
+  },
+  "checks": [
+   "the agent says 'I'm sorry to hear that.' and makes no proposal of an amount or a date",
+   "transfer_to_agent support after 'I am putting you through to Customer Care now. Please stay on the line.'",
+   "no add_note; close_call transferred / XCARE"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-12",
+  "brief": "G",
+  "mock_case": "PUB-07",
+  "family": "Hardship",
+  "level": "medium",
+  "title": "Bereavement, does not want to be put through",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "script": "Verified (5 December 1975, then 7093). After hearing the amount, says 'My mother died last month, I haven't been on top of things.' When told he will be put through to Customer Care, says he does not want to be passed around. Never names a date or an amount.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "HDNX",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "hardship"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "'I'm sorry to hear that.' is said and no persuasion attempt is made",
+   "transfer_to_agent is never called",
+   "add_note hardship on p1 with his circumstance in his words; no second-look call is offered",
+   "close_call no_promise / HDNX with 'Thank you for telling me. Take care, Mr Ortiz. Goodbye.'"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-13",
+  "brief": "G",
+  "mock_case": "PUB-02",
+  "family": "Already paid",
+  "level": "easy",
+  "title": "Paid at the branch on Monday",
+  "variables": {
+   "first_name": "Maria",
+   "last_name": "Costa",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1979-11-02",
+   "phone_last4": "0358"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 310.5,
+    "days_late": 11,
+    "instalment_amount": 103.5
+   }
+  ],
+  "script": "Verified (2 November 1979, then 0358). Says she paid it on Monday at the branch.",
+  "expected": {
+   "outcome": "paid",
+   "reason": "CLMPD",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "paid"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the agent says 'Thank you. A payment can take up to two business days to reach us.'",
+   "add_note paid on p1 naming the branch and Monday",
+   "no create_promise; close_call paid / CLMPD"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-14",
+  "brief": "G",
+  "mock_case": "PUB-13",
+  "family": "Multi-product",
+  "level": "hard",
+  "title": "Most days late first: loan past its last date, card below the floor",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "script": "Verified (8 January 1991, then 6604). Cannot pay both today. For the loan, says she can pay all of it next Friday; accepts the date the assistant offers instead. For the card, says she can only manage 100 this Friday; accepts the amount the assistant offers instead, for this Friday. Confirms each read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "PARTPTP",
+   "promises": [
+    {
+     "product_id": "p2",
+     "amount": 900.0,
+     "date": "2026-10-20"
+    },
+    {
+     "product_id": "p1",
+     "amount": 150.0,
+     "date": "2026-10-16"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "the personal loan (20 days) is stated and dealt with before the credit card (4 days)",
+   "'next Friday' (23 October) is not accepted for the loan; Tuesday 20 October is offered as its last date",
+   "100 is not accepted for the card; 150.00 is offered (half of 300); 90.00 is never offered",
+   "the loan is read back and recorded before the card is discussed; 'Your payment arrangement is recorded.' after each ok",
+   "create_promise p2 900.00 2026-10-20, then p1 150.00 2026-10-16; close_call promise / PARTPTP"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-15",
+  "brief": "G",
+  "mock_case": "PUB-12",
+  "family": "Multi-product",
+  "level": "hard",
+  "title": "Dispute, already paid, turned down with a second look",
+  "variables": {
+   "first_name": "Marcus",
+   "last_name": "Bell",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1983-10-19",
+   "phone_last4": "4410"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "9015",
+    "past_due": 510.0,
+    "days_late": 16,
+    "minimum_payment": 153.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 1320.0,
+    "days_late": 16,
+    "instalment_amount": 440.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 140.0,
+    "days_late": 7,
+    "instalment_amount": 46.0
+   }
+  ],
+  "script": "Verified (19 October 1983, then 4410). Cannot pay all today. Says the card ending 9015 is not his, he never had it. Says he paid the personal loan yesterday by bank transfer. For the car loan, says no flatly to every proposal and never names a date or an amount. Accepts a call from a colleague, at five in the afternoon.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "DSPT",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "dispute"
+    },
+    {
+     "product_id": "p2",
+     "reason": "paid"
+    },
+    {
+     "product_id": "p3",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [
+    {
+     "date": "2026-10-19",
+     "time": "17:00"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "the agent does not argue about the card and goes on to the other products",
+   "for the car loan exactly one proposal is made: 140.00 on Wednesday 28 October",
+   "the second-look call is booked for Monday 19 October at 17:00",
+   "add_note dispute p1, paid p2, refused p3; no create_promise",
+   "close_call no_promise / DSPT with 'We will look into this and write to you. Goodbye.'"
+  ],
+  "faults": []
+ },
+ {
+  "id": "G-16",
+  "brief": "G",
+  "mock_case": "PUB-11",
+  "family": "Multi-product",
+  "level": "hard",
+  "title": "Split on the card, then asks for a person twice",
+  "variables": {
+   "first_name": "Sofia",
+   "last_name": "Almeida",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1987-06-03",
+   "phone_last4": "2288"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "2288",
+    "past_due": 220.0,
+    "days_late": 9,
+    "minimum_payment": 66.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 640.0,
+    "days_late": 9,
+    "instalment_amount": 213.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 75.0,
+    "days_late": 3,
+    "instalment_amount": 25.0
+   }
+  ],
+  "script": "Verified (3 June 1987, then 2288). Cannot pay all of them today. For the card, says 'I can pay a hundred and ten today and the rest when I get paid at the end of the month.' Confirms the read-back. On the personal loan, says 'I'd rather talk to a real person about this.' When asked whether she is happy to continue, says 'No, put me through please.'",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XGEN",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 110.0,
+     "date": "2026-10-14"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "general"
+    }
+   ]
+  },
+  "checks": [
+   "only one arrangement is recorded for the card: 110.00 today; the agent says the rest stays overdue and no second part is recorded",
+   "'Your payment arrangement is recorded.' after the ok for p1",
+   "the agent asks once 'I can help you with this now. Are you happy to continue with me?' before transferring",
+   "transfer_to_agent general; no add_note for the loan or the car loan; close_call transferred / XGEN"
+  ],
+  "faults": []
+ }
+]
