@@ -1010,14 +1010,37 @@ PERSONA_CONDUCT = (
     "or say amounts and dates in words. The facts stay the same.\n"
     "- Keep to the business of the call. Do not comment on small talk (a busy day, the traffic, a family event) and do not "
     "sympathise with it: sympathy is only for what the rules name.\n"
-    "- A message with no answer in it (small talk, a cut-off sentence, 'hmm') is NOT a refusal and NOT a request: repeat the "
-    "same question in one short sentence.\n"
+    "- A message with no answer in it (small talk, a cut-off sentence, 'hmm') is NOT a refusal and NOT a request. If it "
+    "stops mid-sentence, say only: 'Sorry, I think you were cut off. Please go on.' Otherwise ask for the answer in one short "
+    "sentence; at a security question repeat the question, at a payment proposal do not repeat the amount or the date word "
+    "for word (an offer is made once).\n"
     "- A question back (why do you need that, which account, who is this) gets one short answer, then the same question again, "
     "unless the rules say such a question counts. Only what the rules name counts as a refusal.\n"
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
     "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
     "the rules give you.")
+# appended by builder/policy.py to every enum on the payment nodes (topic, stance, offer_kind, confirm, hs_answer, wrap,
+# aside): a persona's cut-off line ("I've been so stressed because my cousin's") was labelled hardship on Freya, and a
+# string of cut-off small-talk lines became refusals (talkative style, 10 Oct)
+CUTOFF_CLAUSE = (" A cut-off message (it stops mid-sentence, e.g. on 'my', 'the', 'because', 'at') or small talk with no "
+                 "answer in it gets the neutral value, even when it contains words like stressed, busy, tired, family, "
+                 "wedding or work: judge only what the customer actually said, never where the sentence might be going.")
+
+
+def with_cutoff(entries, neutral=("none", "other")):
+    """Copies of extraction entries with CUTOFF_CLAUSE appended to every enum entry that has a neutral value
+    (none/other) and does not carry the clause yet. Non-enum entries are returned unchanged."""
+    out = []
+    for e in entries or []:
+        e = dict(e)
+        vals = e.get("enum_values") or []
+        if vals and any(v in neutral for v in vals) and CUTOFF_CLAUSE not in str(e.get("description") or ""):
+            e["description"] = str(e.get("description") or "") + CUTOFF_CLAUSE
+        out.append(e)
+    return out
+
+
 # append to every refusal / decline enum description (the brief's own list of what counts goes first)
 REFUSAL_NONE_CLAUSE = (" Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back "
                        "that the rules do not count is none, never refused: only what the rules name counts.")

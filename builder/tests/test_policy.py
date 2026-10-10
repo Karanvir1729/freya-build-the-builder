@@ -458,7 +458,7 @@ def test_offer_when_resolved_in_code():
     P, V = start([CARD])
     src = P.core()
     G = {"vars": V}
-    exec(src + "\nout = {}\nfor w in ['tomorrow', 'next friday', 'this saturday', 'friday', 'the 23rd', 'the sixth of november', 'end of the month', 'day after tomorrow', 'in two weeks', 'November 6th', '']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G)
+    exec(src + "\nout = {}\nfor w in ['tomorrow', 'next friday', 'this saturday', 'friday', 'the 23rd', 'the sixth of november', 'end of the month', 'day after tomorrow', 'in two weeks', 'November 6th', 'Monday the 26th', 'monday the twenty-sixth', 'next friday the 23rd', 'on friday 30', '']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G)
     out = G["out"]
     assert out["tomorrow"] == ("2026-10-15", "exact"), out
     assert out["day after tomorrow"] == ("2026-10-16", "exact"), out
@@ -469,6 +469,12 @@ def test_offer_when_resolved_in_code():
     assert out["the sixth of november"] == ("2026-11-06", "exact"), out
     assert out["November 6th"] == ("2026-11-06", "exact"), out
     assert out["in two weeks"] == ("2026-10-28", "exact"), out
+    # a day of the month said with a weekday is that day, never the weekday's next occurrence (Freya PUB-07 talkative:
+    # 'Monday the twenty-sixth' was read back as Monday 19 October)
+    assert out["Monday the 26th"] == ("2026-10-26", "exact"), out
+    assert out["monday the twenty-sixth"] == ("2026-10-26", "exact"), out
+    assert out["next friday the 23rd"] == ("2026-10-23", "exact"), out
+    assert out["on friday 30"] == ("2026-10-30", "exact"), out
     assert out["end of the month"] == (None, "vague"), out
     assert out[""] == (None, "none"), out
     # the offer event: the extraction said 2026-10-11 (real clock) but the words say tomorrow -> 15 Oct is checked

@@ -19,7 +19,7 @@
   {"after_turn": 4, "tool": {"name": "verify_identity", "count": 1},
    "tools_not_called": ["close_call", "transfer_to_agent", "get_account"],
    "note": "a sentence cut off before the answer is not an answer and not a refusal: no call with a half value, no close"},
-  {"after_turn": 4, "contains_any": ["?"], "note": "the agent asks again (any question) instead of moving on"},
+  {"after_turn": 4, "contains_any": ["?", "go on", "cut off", "again"], "note": "the agent asks again or asks the customer to go on, instead of moving on"},
   {"after_turn": 4, "cumulative": true,
    "not_contains": ["debt", "collection", "payment", "amount", "overdue", "past due", "re:\\bowes?\\b", "re:\\blate\\b", "loan", "credit card", "balance", "arrears"]},
   {"after_turn": 5, "tool": {"name": "verify_identity", "count": 2, "values_in_order": ["{{answer1_raw}}", "{{answer2_raw}}"], "results_true": ["ok", "verified"]}},
