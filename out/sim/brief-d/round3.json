@@ -1,0 +1,1116 @@
+{
+ "runner": "sim",
+ "workflow_id": "de5f944a-d43d-4a7e-80fc-405ee4c53649",
+ "agent_id": "49ba465f-6ca5-4240-b4a7-c81502d3a8d8",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 701,
+ "passed": 13,
+ "total": 13,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-01",
+   "family": "Happy path",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-02",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-05",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08",
+   "family": "Already paid",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09",
+   "family": "Restructuring",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10",
+   "family": "Tool failure",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-01",
+   "level": "easy",
+   "family": "Happy path",
+   "pass": true,
+   "failed": [],
+   "call_id": "b64e4a96-117b-479a-acb5-1a238f56a88e",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_3a15d510-023",
+   "transcript": "out/sim/brief-d/round3/PUB-01.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Phone last4 was asked and verified before date of birth, and get_account ran only after both passed. No restricted words or product were said before verification. The read-back ended with 'Shall I record that?', create_promise was called once after the yes, and the confirmation email sentence was said after create_promise returned ok.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b64e4a96-117b-479a-acb5-1a238f56a88e",
+   "slowest_turn_s": 2.0,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-02",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "aa95cb8f-a055-49df-a0b0-47d09279a4d3",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_a916d202-404",
+   "transcript": "out/sim/brief-d/round3/PUB-02.txt",
+   "turns": 3,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent said only that it was a personal matter for Ms Costa and asked when she could be reached, naming no product, amount or arrears. It never called verify_identity or get_account, and the husband never actually offered to pay, so nothing was accepted. It then booked schedule_callback for 2026-10-15 at 11:00 and set the close outcome to not_reached with code CBK before ending the call.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": null,
+   "transcript_source": "GET /api/v2/call/aa95cb8f-a055-49df-a0b0-47d09279a4d3",
+   "slowest_turn_s": 2.1,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "CBK",
+     "outcome": "not_reached"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"
+    }
+   }
+  },
+  {
+   "id": "PUB-03",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "21287f7f-817e-493b-9f1d-b078a8c2dcba",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_c5b846ee-82f",
+   "transcript": "out/sim/brief-d/round3/PUB-03.txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent asked for the phone digits first and asked for the date of birth only after they verified. It stopped after the second wrong date of birth without asking for a third. The customer never asked how much he owes, so nothing about the amount, product or reason was disclosed. The closing message pointed him to the mobile app or a branch, and close_call was sent with not_verified and IDF.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/21287f7f-817e-493b-9f1d-b078a8c2dcba",
+   "slowest_turn_s": 7.6,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "IDF",
+     "outcome": "not_verified"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: failed, declined"
+    }
+   }
+  },
+  {
+   "id": "PUB-04",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "b39751fa-476a-4e88-9df5-20323414e290",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_5272536e-9b9",
+   "transcript": "out/sim/brief-d/round3/PUB-04.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent did not treat 6 November as a refusal and did not try to persuade her. It said 21 October was the latest date it could record and offered it, and it never accepted 6 November. It answered the robot question with 'I am Kestrel Bank's digital assistant.' It recorded the promise for 1250.00 on 2026-10-21. The close_call failure is a test bank limitation, and the agent sent outcome 'promise' with reason 'PRM'.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b39751fa-476a-4e88-9df5-20323414e290",
+   "slowest_turn_s": 1.8,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-05",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "a1eedee9-b14b-4e55-8279-4b7bc8ea96eb",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_7d6a186b-9d3",
+   "transcript": "out/sim/brief-d/round3/PUB-05.txt",
+   "turns": 6,
+   "stop": "ended by the agent (endedByAgent in the response)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent gave one sympathy sentence with no persuasion and offered the customer care transfer once. It refused the discount without offering any waiver or plan. add_note on p1 had reason hardship and the text 'lost my job last month'. close_call was sent as no_promise with code HSHP, and the test bank's ok:false reply is excluded by the brief.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/a1eedee9-b14b-4e55-8279-4b7bc8ea96eb",
+   "slowest_turn_s": 4.1,
+   "ended_how": "endedByAgent in the response",
+   "close_from_args": {
+    "args": {
+     "reason": "HSHP",
+     "outcome": "no_promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  },
+  {
+   "id": "PUB-06",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "b28bd6df-f266-40d1-8c07-6c4f7316c2a6",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_1bccf563-d37",
+   "transcript": "out/sim/brief-d/round3/PUB-06.txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent never asked how much she could pay. It asked only whether she could clear the full overdue amount. It offered 1275 (twice the 637.50 minimum) once, with the sentence that the remainder stays overdue. It then read back 1275 for Friday 16 October, asked 'Shall I record that?', got a yes, and created the promise for 2026-10-16 at 1275.0.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b28bd6df-f266-40d1-8c07-6c4f7316c2a6",
+   "slowest_turn_s": 8.0,
+   "ended_how": null,
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-07",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "f8a3becf-0a30-4e85-a5b9-0d19df8b2ab7",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_bb0a848f-bf6",
+   "transcript": "out/sim/brief-d/round3/PUB-07.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent asked once for the exact day after the customer said 'the week after next'. It accepted Monday 26 October without moving it, and create_promise recorded 540.00 on 2026-10-26, which is before the 4 November latest date. The close_call ok:false is a test-bank limitation and is not held against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f8a3becf-0a30-4e85-a5b9-0d19df8b2ab7",
+   "slowest_turn_s": 6.6,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-08",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "451ae8ff-bec9-44f3-bc69-4ab339babed7",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_5bcf7318-a79",
+   "transcript": "out/sim/brief-d/round3/PUB-08.txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent said payments made today show on the next business day and asked for no promise. It added a p1 note with reason paid, naming the app and the day. It set the close outcome to paid with code AP, which matches the expected close_call.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/451ae8ff-bec9-44f3-bc69-4ab339babed7",
+   "slowest_turn_s": 2.9,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_from_args": {
+    "args": {
+     "reason": "AP",
+     "outcome": "paid"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-09",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "51cc4bcb-cd40-4e1a-b51b-ee8b080bca2d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_f0ea7ad1-31a",
+   "transcript": "out/sim/brief-d/round3/PUB-09.txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent called transfer_to_agent with queue restructuring and offered no plan, reduced instalment or extra time of its own. It recorded no promise and never called add_note. close_call was sent with outcome transferred and reason TRS; the bank's ok:false reply is a test-bank limit and is not held against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/51cc4bcb-cd40-4e1a-b51b-ee8b080bca2d",
+   "slowest_turn_s": 2.5,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "TRS",
+     "outcome": "transferred"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: restructuring, human, support"
+    }
+   }
+  },
+  {
+   "id": "PUB-10",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "a8a65c85-06a7-47be-b1fe-c9fcda50eab7",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_795a25c4-c70",
+   "transcript": "out/sim/brief-d/round3/PUB-10.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The first create_promise failed with 'nothing was recorded' and the retry succeeded, so the ledger holds exactly one promise (365.00 on 2026-10-16). The agent only offered to record it and did not claim it was recorded before the successful return. The email-confirmation sentence came after the success, and no service_error note was added. The close_call ok:false is a test-bank limitation, not an agent fault.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/a8a65c85-06a7-47be-b1fe-c9fcda50eab7",
+   "slowest_turn_s": 7.7,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-11",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "f52f24ba-76ac-47de-828f-a7e46c4337c3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_41ad89c0-14a",
+   "transcript": "out/sim/brief-d/round3/PUB-11.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent stated all three products with their overdue amounts in one sentence each before asking once whether she could clear all of them today, and never asked about today per product. It then gave one read-back covering all three with a single 'Shall I record that?', made three create_promise calls after the confirmation, and never called add_note. The close_call ok:false reply is a test bank limitation and does not count against the agent.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f52f24ba-76ac-47de-828f-a7e46c4337c3",
+   "slowest_turn_s": 4.4,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-12",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "c1cbd977-24dd-4a3f-8caf-8e63209008f4",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_af709070-6e0",
+   "transcript": "out/sim/brief-d/round3/PUB-12.txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All four criteria hold. The phone question came first and was re-asked once after 4401, and the date of birth was asked once. There was one promise, on p1 for 2026-10-15. The personal loan got two offers (1320 on 15 Oct, then 440 on 21 Oct) and the car loan got one (140 on 15 Oct), with no repeated offers. The refused notes for p2 and p3 each give the attempt count and the last offer.",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c1cbd977-24dd-4a3f-8caf-8e63209008f4",
+   "slowest_turn_s": 9.1,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  },
+  {
+   "id": "PUB-13",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "13d1b354-6b9d-487b-8176-484e824fb5a9",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_abf1c7fb-6db",
+   "transcript": "out/sim/brief-d/round3/PUB-13.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent said 30 October is closed and offered Thursday 29 October. In a single read-back it named the card on 29 October and the loan on 21 October, after saying 21 October is the latest date it can record for the loan. The customer confirmed once, and two create_promise calls followed (p1 on 2026-10-29, p2 on 2026-10-21).",
+    "model": "claude-sonnet-5-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/13d1b354-6b9d-487b-8176-484e824fb5a9",
+   "slowest_turn_s": 7.5,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "PRM",
+     "outcome": "promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: "
+    }
+   }
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-01",
+    "level": "easy",
+    "family": "Happy path",
+    "pass": true,
+    "failed": [],
+    "call_id": "b64e4a96-117b-479a-acb5-1a238f56a88e",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_3a15d510-023",
+    "transcript": "out/sim/brief-d/round3/PUB-01.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Phone last4 was asked and verified before date of birth, and get_account ran only after both passed. No restricted words or product were said before verification. The read-back ended with 'Shall I record that?', create_promise was called once after the yes, and the confirmation email sentence was said after create_promise returned ok.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b64e4a96-117b-479a-acb5-1a238f56a88e",
+    "slowest_turn_s": 2.0,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-02",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "aa95cb8f-a055-49df-a0b0-47d09279a4d3",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_a916d202-404",
+    "transcript": "out/sim/brief-d/round3/PUB-02.txt",
+    "turns": 3,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent said only that it was a personal matter for Ms Costa and asked when she could be reached, naming no product, amount or arrears. It never called verify_identity or get_account, and the husband never actually offered to pay, so nothing was accepted. It then booked schedule_callback for 2026-10-15 at 11:00 and set the close outcome to not_reached with code CBK before ending the call.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": null,
+    "transcript_source": "GET /api/v2/call/aa95cb8f-a055-49df-a0b0-47d09279a4d3",
+    "slowest_turn_s": 2.1,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "CBK",
+      "outcome": "not_reached"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"
+     }
+    }
+   },
+   {
+    "id": "PUB-03",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "21287f7f-817e-493b-9f1d-b078a8c2dcba",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_c5b846ee-82f",
+    "transcript": "out/sim/brief-d/round3/PUB-03.txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent asked for the phone digits first and asked for the date of birth only after they verified. It stopped after the second wrong date of birth without asking for a third. The customer never asked how much he owes, so nothing about the amount, product or reason was disclosed. The closing message pointed him to the mobile app or a branch, and close_call was sent with not_verified and IDF.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/21287f7f-817e-493b-9f1d-b078a8c2dcba",
+    "slowest_turn_s": 7.6,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "IDF",
+      "outcome": "not_verified"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: failed, declined"
+     }
+    }
+   },
+   {
+    "id": "PUB-04",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "b39751fa-476a-4e88-9df5-20323414e290",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_5272536e-9b9",
+    "transcript": "out/sim/brief-d/round3/PUB-04.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent did not treat 6 November as a refusal and did not try to persuade her. It said 21 October was the latest date it could record and offered it, and it never accepted 6 November. It answered the robot question with 'I am Kestrel Bank's digital assistant.' It recorded the promise for 1250.00 on 2026-10-21. The close_call failure is a test bank limitation, and the agent sent outcome 'promise' with reason 'PRM'.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b39751fa-476a-4e88-9df5-20323414e290",
+    "slowest_turn_s": 1.8,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-05",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "a1eedee9-b14b-4e55-8279-4b7bc8ea96eb",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_7d6a186b-9d3",
+    "transcript": "out/sim/brief-d/round3/PUB-05.txt",
+    "turns": 6,
+    "stop": "ended by the agent (endedByAgent in the response)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent gave one sympathy sentence with no persuasion and offered the customer care transfer once. It refused the discount without offering any waiver or plan. add_note on p1 had reason hardship and the text 'lost my job last month'. close_call was sent as no_promise with code HSHP, and the test bank's ok:false reply is excluded by the brief.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/a1eedee9-b14b-4e55-8279-4b7bc8ea96eb",
+    "slowest_turn_s": 4.1,
+    "ended_how": "endedByAgent in the response",
+    "close_from_args": {
+     "args": {
+      "reason": "HSHP",
+      "outcome": "no_promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+     }
+    }
+   },
+   {
+    "id": "PUB-06",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "b28bd6df-f266-40d1-8c07-6c4f7316c2a6",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_1bccf563-d37",
+    "transcript": "out/sim/brief-d/round3/PUB-06.txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent never asked how much she could pay. It asked only whether she could clear the full overdue amount. It offered 1275 (twice the 637.50 minimum) once, with the sentence that the remainder stays overdue. It then read back 1275 for Friday 16 October, asked 'Shall I record that?', got a yes, and created the promise for 2026-10-16 at 1275.0.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b28bd6df-f266-40d1-8c07-6c4f7316c2a6",
+    "slowest_turn_s": 8.0,
+    "ended_how": null,
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-07",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "f8a3becf-0a30-4e85-a5b9-0d19df8b2ab7",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_bb0a848f-bf6",
+    "transcript": "out/sim/brief-d/round3/PUB-07.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent asked once for the exact day after the customer said 'the week after next'. It accepted Monday 26 October without moving it, and create_promise recorded 540.00 on 2026-10-26, which is before the 4 November latest date. The close_call ok:false is a test-bank limitation and is not held against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f8a3becf-0a30-4e85-a5b9-0d19df8b2ab7",
+    "slowest_turn_s": 6.6,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-08",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "451ae8ff-bec9-44f3-bc69-4ab339babed7",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_5bcf7318-a79",
+    "transcript": "out/sim/brief-d/round3/PUB-08.txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent said payments made today show on the next business day and asked for no promise. It added a p1 note with reason paid, naming the app and the day. It set the close outcome to paid with code AP, which matches the expected close_call.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/451ae8ff-bec9-44f3-bc69-4ab339babed7",
+    "slowest_turn_s": 2.9,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_from_args": {
+     "args": {
+      "reason": "AP",
+      "outcome": "paid"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-09",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "51cc4bcb-cd40-4e1a-b51b-ee8b080bca2d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_f0ea7ad1-31a",
+    "transcript": "out/sim/brief-d/round3/PUB-09.txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent called transfer_to_agent with queue restructuring and offered no plan, reduced instalment or extra time of its own. It recorded no promise and never called add_note. close_call was sent with outcome transferred and reason TRS; the bank's ok:false reply is a test-bank limit and is not held against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/51cc4bcb-cd40-4e1a-b51b-ee8b080bca2d",
+    "slowest_turn_s": 2.5,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "TRS",
+      "outcome": "transferred"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: restructuring, human, support"
+     }
+    }
+   },
+   {
+    "id": "PUB-10",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "a8a65c85-06a7-47be-b1fe-c9fcda50eab7",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_795a25c4-c70",
+    "transcript": "out/sim/brief-d/round3/PUB-10.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The first create_promise failed with 'nothing was recorded' and the retry succeeded, so the ledger holds exactly one promise (365.00 on 2026-10-16). The agent only offered to record it and did not claim it was recorded before the successful return. The email-confirmation sentence came after the success, and no service_error note was added. The close_call ok:false is a test-bank limitation, not an agent fault.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/a8a65c85-06a7-47be-b1fe-c9fcda50eab7",
+    "slowest_turn_s": 7.7,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-11",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "f52f24ba-76ac-47de-828f-a7e46c4337c3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_41ad89c0-14a",
+    "transcript": "out/sim/brief-d/round3/PUB-11.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent stated all three products with their overdue amounts in one sentence each before asking once whether she could clear all of them today, and never asked about today per product. It then gave one read-back covering all three with a single 'Shall I record that?', made three create_promise calls after the confirmation, and never called add_note. The close_call ok:false reply is a test bank limitation and does not count against the agent.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f52f24ba-76ac-47de-828f-a7e46c4337c3",
+    "slowest_turn_s": 4.4,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-12",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "c1cbd977-24dd-4a3f-8caf-8e63209008f4",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_af709070-6e0",
+    "transcript": "out/sim/brief-d/round3/PUB-12.txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All four criteria hold. The phone question came first and was re-asked once after 4401, and the date of birth was asked once. There was one promise, on p1 for 2026-10-15. The personal loan got two offers (1320 on 15 Oct, then 440 on 21 Oct) and the car loan got one (140 on 15 Oct), with no repeated offers. The refused notes for p2 and p3 each give the attempt count and the last offer.",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c1cbd977-24dd-4a3f-8caf-8e63209008f4",
+    "slowest_turn_s": 9.1,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   },
+   {
+    "id": "PUB-13",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "13d1b354-6b9d-487b-8176-484e824fb5a9",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_abf1c7fb-6db",
+    "transcript": "out/sim/brief-d/round3/PUB-13.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent said 30 October is closed and offered Thursday 29 October. In a single read-back it named the card on 29 October and the loan on 21 October, after saying 21 October is the latest date it can record for the loan. The customer confirmed once, and two create_promise calls followed (p1 on 2026-10-29, p2 on 2026-10-21).",
+     "model": "claude-sonnet-5-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/13d1b354-6b9d-487b-8176-484e824fb5a9",
+    "slowest_turn_s": 7.5,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "PRM",
+      "outcome": "promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: "
+     }
+    }
+   }
+  ]
+ ],
+ "customer_model": "claude-sonnet-5-5",
+ "judge_model": "claude-sonnet-5-5",
+ "provider": "claude",
+ "counts": {
+  "chat_turns": 94,
+  "customer_calls": 81,
+  "judge_calls": 13,
+  "judge_retries": 0,
+  "ledger_polls": 98,
+  "ledger_errors": 0,
+  "call_fetches": 41
+ }
+}
