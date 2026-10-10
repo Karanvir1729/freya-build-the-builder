@@ -179,3 +179,32 @@ opening prompt should quote the opening line too.
 `Policy(asides={value: {'when': ..., 'say': ...}})`: side questions (robot? scam?) extracted as `aside` on the negotiate, confirm, hardship and wrap-up nodes; the core prefixes the brief's answer to the line the route speaks, so a turn that goes through code into a tts line still answers the question (measured: v3 ignored 'Am I talking to a robot?' on an accepted offer).
 
 **Dates named by the customer are resolved in code against the call's `now`.** The platform's `date`-type extraction resolves relative words with the REAL clock (Brief B PUB-12: 'tomorrow' arrived as a date before the call's today, and the agent repeated 'has already passed' eight times). The policy nodes therefore also extract `offer_when` (the customer's own words) and `resolve_when()` in the core turns today/tomorrow/this or next <weekday>/the 23rd/the sixth of November/in two weeks into a date from `today_iso`; vague periods become 'vague'; an extracted date before today with no words is treated as vague (ask once for the exact day). `Policy(weekday_rule='this_week'|'first_after')` is the brief's rule for 'next <weekday>'.
+
+## Identity questions: two forms
+
+**Default (prompt-driven), what every generator and both v3 agents use.** The identity question is one
+conversation node holding `verify_identity` as a model-called tool (`api_tool(api, "verify_identity",
+baked={"field": <field>}, post=verify_post(...))`); the node prompt says "when they give all N digits, call
+verify_identity with the digits only; if they give part, ask for the rest", `PERSONA_CONDUCT` says "wait for a
+complete number", and routes read `verify_identity_response.data.*`. Measured over the chat route with
+`builder/smoke_scripts/talkative.json` (a cut-off line with no answer at the second question, then the answer) and
+`asks_back.json` on brief-a-v3 and brief-b-v3 (10 Oct): the tool was called exactly once per question with the right
+value, never on the cut-off line; on the organisers' simulator `pieces` scored 9/10 on the v2 reference, its miss not
+identity. So the default stays.
+
+**Opt-in gate (`gated_digits_identity`), for a brief or a run where half numbers reach the service.**
+
+| Function | What it gives |
+|---|---|
+| `digits_from_spec(api, field_value)` | N read from the identity tool's `answer` description in the API file ("For phone_last4: four digits." → 4; "exactly eight digits" → 8); `None` when the file gives no count (pass the brief's N) |
+| `gated_digits_identity(api, stage, field_value, n_digits, ask_task, answer_desc, on_verified, on_all_verified, on_exhausted, wrong_line, unreadable_line, extraction=None, transitions=None, tool_post="", extra_routes=None, stop_left=("0",))` | dict of nodes: `ask_<stage>` (conversation, NO tool, extraction `<stage>_digits` with `validation_pattern ^[0-9]{N}$`, first route `is_set(<stage>_digits) AND != sentinel` → `check_<stage>`), `ask_<stage>_wrong` / `ask_<stage>_unread` (the same node entered with the brief's fixed wrong / unreadable line as tts), `check_<stage>` (api_request: `verify_identity` with field and answer BAKED, `{{<stage>_digits}}`; node mapping to `<stage>_ok/_verified/_all/_left`), `route_<stage>` (code: writes the sentinel `'0'*N`, schema-valid for the pattern, so the same answer is not sent twice; routes `extra_routes` → all verified → verified → `stop_left` → ok false → wrong) |
+
+What it buys: the model never fills `answer`, so '44', words the extractor cannot turn into N digits, an 11-digit
+whole phone number or a cut-off line never reach the service as a counted wrong answer; a wrong answer re-enters the
+question with the brief's fixed wording. What it costs: three conversation nodes per question instead of one, the
+brief's other identity routes (refusal, question back, transfer) must be passed in `extraction`/`transitions` (they
+are copied onto all three ask nodes after the gate), and a real answer equal to the sentinel ('0000') is never sent
+(use the default form for such a brief). Dates keep the default form (the service answers an unreadable date with
+`ok: false`, not counted). Tests: `python3 builder/tests/test_gated_identity.py` (route code exec'd as a code node,
+transitions walked for verified / all verified / wrong / exhausted / unreadable / stricter-brief paths, an 8-digit
+field from the transfer-test API, `check()` on an assembled workflow).
