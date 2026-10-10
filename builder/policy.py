@@ -334,7 +334,7 @@ def too_much(V, pid, prefix=''):
     if g(V, 'mode') != 'hardship' and pg(V, pid, 'offered_floor') != 'yes' and fl_ < a0 - 0.005:
         pset(V, pid, 'offered_floor', 'yes')
         set_prop(V, pid, fl_, d0)
-        say(V, join([prefix, T('too_much_floor', floor=fmt(fl_), floor_name=pg(V, pid, 'floor_name')), V['offer_question']]))
+        say(V, join([prefix, T('too_much_floor', floor=fmt(fl_), floor_name=pg(V, pid, 'floor_name'), words=pg(V, pid, 'words')), V['offer_question']]))
         return
     refuse(V, pid, prefix)
 def check_one(V, pid, a, d, kind):
@@ -355,7 +355,7 @@ def check_one(V, pid, a, d, kind):
             say(V, T('vague'))
             return
         set_prop(V, pid, pa, dl)
-        say(V, join([T('vague_deadline', deadline=txt_short(dl)), V['offer_question']]))
+        say(V, join([T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
         return
     amt = pa if a is None or a <= 0 else a
     day = pd if d is None else d
@@ -365,7 +365,7 @@ def check_one(V, pid, a, d, kind):
         issues.append(('before_today', T('before_today', named=txt_short(nd))))
         nd = t if isbd(t) else next_bd(t)
     elif nd > dl:
-        issues.append(('after_deadline', T('after_deadline', deadline=txt_short(dl), named=txt_short(nd))))
+        issues.append(('after_deadline', T('after_deadline', deadline=txt_short(dl), named=txt_short(nd), words=pg(V, pid, 'words'))))
         nd = dl
     elif not isbd(nd):
         nb = next_bd(nd)
@@ -384,11 +384,11 @@ def check_one(V, pid, a, d, kind):
             V['offer_verdict'] = 'below_floor'
             refuse(V, pid)
             return
-        issues.append(('below_floor', T('below_floor', named=fmt(na), floor=fmt(fl_), floor_name=pg(V, pid, 'floor_name'))))
+        issues.append(('below_floor', T('below_floor', named=fmt(na), floor=fmt(fl_), floor_name=pg(V, pid, 'floor_name'), words=pg(V, pid, 'words'))))
         pset(V, pid, 'offered_floor', 'yes')
         na = fl_
     elif na > full + 0.005:
-        issues.append(('above_full', T('above_full', full=fmt(full), named=fmt(na))))
+        issues.append(('above_full', T('above_full', full=fmt(full), named=fmt(na), words=pg(V, pid, 'words'))))
         na = full
     if not issues:
         agree(V, pid, na, nd)
@@ -427,6 +427,9 @@ def ev_offer(V):
     kind = g(V, 'offer_kind')
     a = num(g(V, 'offer_amount'))
     d = pdate(g(V, 'offer_date'))
+    if multi(V) and g(V, 'stage') != 'all' and g(V, 'offer_for') == 'all' and d is not None and a is None and kind == 'exact':
+        all_offer(V, d)
+        return
     if multi(V) and g(V, 'stage') == 'all':
         tp = offer_target(V)
         if tp:

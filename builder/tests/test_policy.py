@@ -367,6 +367,15 @@ def multi_refuse_all_today_goes_one_by_one():
 
 
 @test
+def multi_one_date_for_all_after_one_by_one_started():     # PUB-11
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse")
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-16", offer_for="all")
+    assert V["route"] == "confirm" and all(V["agreed_" + p].startswith(x) for p, x in
+                                           (("p1", "420.0|2026-10-16"), ("p2", "2100.0|2026-10-16"), ("p3", "75.0|2026-10-16"))), V["readback_line"]
+
+
+@test
 def multi_no_promise_closing_order():
     P, V = start([CARD, LOAN], multi=True, notes=True)
     ev(P, V, "paid", topic="already_paid", offer_for="first")

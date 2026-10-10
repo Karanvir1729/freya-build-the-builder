@@ -120,3 +120,49 @@ the `conv` calls. Nothing in the library names a holiday, an amount, a band or a
 `python3 out/gen_brief-a_lib.py && python3 out/compare_brief-a_lib.py` — 46 nodes both, 3 differing paths
 (setup code, prepare code, the schedule_callback post hook), each executed on the same inputs with identical
 results; no other path differs. `freya.validate_workflow('lib-port-check', wf)` dry-run accepted the port.
+
+## Policy as code (`builder/policy.py`): the default payment architecture
+
+`builder/policy.py` takes every decision the brief makes deterministic out of the prompt (docs/research/sota-techniques.md
+T1 offer guard, T2 counters in code, T3 state first, T20, T22 code-built read-back, T26). The model only phrases what code
+decided: every offer, correction and read-back is a finished sentence written by code and spoken by a tts `on_enter`
+(`{{say_next}}`, `{{readback_line}}`, `{{wrap_line}}`), and every write runs in an `api_request` node with the approved
+values baked in. Reference generators: `out/gen_brief-a_v3.py` (one product), `out/gen_brief-b_v3.py` (one to three
+products, notes). Tests: `python3 builder/tests/test_policy.py` (each scenario execs the generated code-node source
+with sample `vars`: weekends, a holiday, both deadlines, amounts around the floor and the full amount, hardship,
+read-back changes, record retries, wrap-up, multi-product order and notes).
+
+```
+prepare (POLICY.prepare_code: register_product per product + init_negotiation(statement))
+  └─> negotiate (tts {{say_next}}; STATE {{state_line}} first; extracts topic, stance, offer_kind/date/amount[, offer_for])
+        ├─ topic hardship|human|no_talk|already_paid|dispute ─> pol_hardship|pol_human|pol_notalk|pol_paid|pol_dispute
+        ├─ topic new_plan                                    ─> xfer_restructuring
+        ├─ offer_kind exact|vague ─> check_offer      stance accept ─> accept_offer      (the offer guard)
+        └─ stance too_much ─> too_much                stance refuse ─> count_refusal     (the stance counter)
+  confirm (tts {{readback_line}}; confirm yes|no|change) ─ yes ─> rec_next ─> record_promise (api_request) ─> rec_after
+                                                         ─ change ─> change_offer (guard, read back again) ; no ─> confirm_no
+  record_note (api_request, only with notes) ─> note_after          wrapup (tts {{wrap_line}}; wrap done|human|new_plan|change|question)
+  hardship (tts {{say_next}}; hs_answer support_yes|support_no|accept_offer; a named offer still goes to check_offer)
+  every policy code node: route ─> negotiate | hardship | confirm | record | note | wrapup | xfer_* | fin (+ final_route ─> fin_<key>)
+```
+
+| Piece | What it gives |
+|---|---|
+| `Policy(holidays, texts, multi, notes, note_reasons, fin_keys, fail_max, max_checks, human_limit, notalk_limit, wrap_turns, closed_day_move, business_weekdays, ordinals, targets)` | one instance per generator; every value from the brief (texts = finished-sentence templates with `[amount] [when] [date] [deadline] [floor] [floor_name] [full] [words] [named] [past_due] [list]`; `DEFAULT_TEXTS` are generic and MUST be replaced by the brief's own sentences, verbatim ones above all) |
+| `prepare_code(body, statement_expr, fallbacks)` | the prepare node: the guarded `body` reads the products and calls `register_product(vars, pid, words, full, floor, floor_name, deadline, rungs)` per product in `get_account` order, `rungs = [(amount_rule, date), ...]` the brief's persuasion ladder (`full`, `floor`, `full_or_floor` = the floor once the customer said the full amount is too much); then `init_negotiation(vars, statement)` |
+| `offer_extraction(...)`, `offer_guard_transitions()` | (a) `offer_date` (date), `offer_amount` (float), `offer_kind` (exact\|vague\|none, min_confidence 0.6) and the routes to `check_offer` / `accept_offer`. The guard writes `offer_verdict` ∈ {ok, weekend_or_holiday, after_deadline, below_floor, above_full, vague, before_today}, `offer_text` (the finished sentence), the approved `ok_pid/ok_amount/ok_date`, clears the extraction, and routes ok → confirm (one product) or the next product (several), anything else back with the corrected offer; `max_checks` is the loop exit |
+| `confirm_node(task, confirm_desc, date_desc, amount_desc, topic_entry, topic_trs)` | (b) the read-back: tts `{{readback_line}}` built in code from the agreed values; `confirm` ∈ {yes, no, change, other}; change → the guard → read back again (never a transfer); no → a flat refusal of that offer |
+| `record_nodes(nodes, api)` + `promise_assert_pre()` | the only place `create_promise` (and `add_note`) exists: an `api_request` node entered from a confirmed read-back, body baked from `rec_pid/rec_amount/rec_date`; its pre hook asserts the body equals those approved values (a mismatch is replaced by them and logged in `promise_guard`, never capped to something else); `rec_after` retries up to `fail_max` tries, then `service_error` |
+| `stance_extraction(desc)`, `stance_transitions()` | (c) `stance` ∈ {refuse, too_much, offer, accept, other} with the brief's own definitions (a proposed date or amount is never a refusal); `count_refusal` increments `attempts_used_<pid>`, writes `next_offer_text` from the ladder (skipping offers already refused), routes `exhausted` → the refused ending (or the next product / its note); `too_much` offers the floor once (`offered_floor_<pid>`), a second 'too much' is a refusal |
+| `topic_transitions()` | hardship / human (ask once, then transfer) / no_talk (twice closes) / already_paid / dispute / new_plan, all counted and settled in code |
+| `hardship_node(...)` | no persuasion by routing: a refusal there settles the product as hardship; a named date or amount still goes through the guard and the read-back; support_no without a named offer closes as hardship |
+| `wrapup_node(task, wrap_desc)` | after a recorded promise: the recorded sentence + the brief's after-promise sentence + "anything else?"; done → the promise ending; human → ask once, then transfer (the promise stays, the transfer's close code); new_plan → restructuring transfer; change → the brief's change sentence, promise unchanged; question → the model answers; `max_turns` then finalize. `outcome`/`reason` are set to the promise ending before it, so a hang-up closes correctly |
+| `state_first(task)` / `{{state_line}}` | (d) one variable rewritten by every policy node: per product what is settled, the offers already refused, attempts used, whether the floor was offered, the current offer word for word, what is recorded. It is FIRST in the negotiate, confirm, hardship and wrap-up prompts |
+| `add_event_nodes(nodes)`, `route_transitions()` | the policy code nodes (`EVENT_NODES`), each = CAL_HELPERS + core + `main(vars, event)` in one try, sharing one transition list (endings first, the default ending once and last: the engine merges transitions with the same target) |
+
+Rules the module keeps: every per-product variable is a string written only by code (`state_<pid>`, `attempts_used_<pid>`,
+`too_much_<pid>`, `offered_floor_<pid>`, `refused_offers_<pid>`, `agreed_<pid>`, `checks_<pid>`, `fails_<pid>`,
+`noted_<pid>`); every policy node clears the extraction variables it routes on (`CLEAR_ENUMS`, `CLEAR_VALUES`) so a stale
+value never routes twice; no '{{' in code (the parameters travel as a JSON literal with escaped braces); a failing core
+still leaves `route` and `state_line`. On the chat route an initial node's tts is replaced by a model turn, so the
+opening prompt should quote the opening line too.
