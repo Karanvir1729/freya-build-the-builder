@@ -71,6 +71,7 @@ class _Linter:
         # variable knowledge
         self.known_vars = set()         # exact names set by something in the workflow
         self.var_writers = {}           # var name -> set of node keys ('$' = test_variables / workflow level)
+        self.var_writer_desc = {}       # var name -> set of human-readable writers ("code node 'setup'", ...)
         self.reach = {}                 # node key -> set of node keys reachable from it (itself included)
         self._current_node = "$"
         self.result_prefixes = set()    # names N for which N_response.* / N_args.* / N_*_count exist
@@ -117,9 +118,15 @@ class _Linter:
         v = m.group(1).strip()
         return v.split(":", 1)[0].strip() if ":" in v else v
 
-    def note_var(self, name):
+    def note_var(self, name, kind="variable"):
         self.known_vars.add(name)
         self.var_writers.setdefault(name, set()).add(self._current_node)
+        where = "the workflow" if self._current_node == "$" else f"node '{self._current_node}'"
+        desc = "test_variables (call variable)" if kind == "test_variables" else f"{kind} in {where}"
+        self.var_writer_desc.setdefault(name, set()).add(desc)
+
+    def writer_text(self, name):
+        return ", ".join(sorted(self.var_writer_desc.get(name, ()))) or "?"
 
     def writer_can_precede(self, name, node_key):
         """True when some writer of the variable is test_variables, workflow level, a global node,
@@ -303,19 +310,19 @@ class _Linter:
         if isinstance(tv, dict):
             for k in tv:
                 if isinstance(k, str):
-                    self.note_var(k)
+                    self.note_var(k, "test_variables")
         for key, n in self.all_nodes.items():
             if not isinstance(n, dict):
                 continue
             self._current_node = key
             for e in n.get("extraction_schema") or []:
                 if isinstance(e, dict) and isinstance(e.get("name"), str):
-                    self.note_var(e["name"])
+                    self.note_var(e["name"], "extraction_schema")
             if n.get("node_type") in ACTION_NODE_TYPES and n.get("pre_actions"):
                 self.result_prefixes.add(key)
                 for m in n.get("response_mapping") or []:
                     if isinstance(m, dict) and isinstance(m.get("variable"), str):
-                        self.note_var(m["variable"])
+                        self.note_var(m["variable"], "response_mapping")
             for tool in n.get("tools") or []:
                 self._collect_tool_vars(tool, in_tools=True)
                 if isinstance(tool, dict) and isinstance(tool.get("function"), dict) \
@@ -340,17 +347,17 @@ class _Linter:
         if in_tools:
             for m in tool.get("response_mapping") or []:
                 if isinstance(m, dict) and isinstance(m.get("variable"), str):
-                    self.note_var(m["variable"])
+                    self.note_var(m["variable"], "tool response_mapping")
         for hook in ("pre_process_code", "post_process_code"):
             if isinstance(tool.get(hook), str):
                 for v in self.code_assigned_vars(tool[hook]):
-                    self.note_var(v)
+                    self.note_var(v, hook)
         if handler == HANDLER_CODE:
             props = (fn.get("parameters") or {}).get("properties") if isinstance(fn.get("parameters"), dict) else None
             code = (props or {}).get("code") if isinstance(props, dict) else None
             if isinstance(code, dict) and isinstance(code.get("default"), str):
                 for v in self.code_assigned_vars(code["default"]):
-                    self.note_var(v)
+                    self.note_var(v, "code")
 
     # ------------------------------------------------------------ pass 2: nodes
     def check_nodes(self):
@@ -867,6 +874,9 @@ class _Linter:
                                     elif model_intended:
                                         writers = ", ".join(sorted(self.var_writers.get(ph, ())))
                                         self.warn(fwhere, f"model-filled field shares its name with a variable written in {writers}; those nodes cannot precede this one today, but a re-entry or a new path would bake the value. Rename one of them")
+                                    else:
+                                        # no description/enum/required: probably meant to be baked; say from where
+                                        self.info(fwhere, f"field {fk} is baked by {self.writer_text(ph)} ({{{{{ph}}}}}): the model never fills it")
                                 elif not model_intended and ph == fk:
                                     self.info(fwhere, f"{{{{{ph}}}}} is not set by test_variables, extraction, mapping or code: unless it is a call variable, the model fills it with no description")
                                 elif not model_intended and ph != fk:

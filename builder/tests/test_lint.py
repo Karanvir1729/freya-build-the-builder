@@ -8,7 +8,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "builder"))
-from lint import lint, ERROR, WARN  # noqa: E402
+from lint import lint, ERROR, WARN, INFO  # noqa: E402
 
 API = json.load(open(ROOT / "tools" / "openapi.json"))
 BASE = API["servers"][0]["url"].rstrip("/")
@@ -312,6 +312,25 @@ def test_reference_workflows():
     f = errors(base, API)
     assert has(f, ERROR, "$.nodes.identity.max_turn_transition", "null"), f
     assert has(f, ERROR, "tools[close_call].parameters.body.outcome", "close_call outcome"), f
+
+
+def test_baked_field_info():
+    """A bare {{x}} body field (no description/enum/required) set by code, extraction, mapping or a call variable
+    is reported as baked (INFO); a described one stays an ERROR."""
+    def tool_with(field, extra=None):
+        wf = minimal()
+        body = wf["nodes"]["greet"]["tools"][0]["function"]["parameters"]["properties"]["body"]["properties"]
+        body[field] = dict({"type": "string", "default": "{{%s}}" % field}, **(extra or {}))
+        return wf
+    wf = tool_with("state")                          # written by the setup code node
+    f = lint(wf)
+    assert has(f, INFO, "parameters.body.state", "field state is baked by code in node 'setup'"), f
+    wf = tool_with("first_name")                     # a call variable
+    assert has(lint(wf), INFO, "parameters.body.first_name", "baked by test_variables"), lint(wf)
+    wf = tool_with("wants_end")                      # an extraction_schema entry
+    assert has(lint(wf), INFO, "parameters.body.wants_end", "baked by extraction_schema in node 'greet'")
+    wf = tool_with("state", {"description": "The state."})
+    assert has(errors(wf), ERROR, "parameters.body.state", "model-filled field"), errors(wf)
 
 
 def test_cli_exit_codes():
