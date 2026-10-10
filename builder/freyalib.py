@@ -1015,7 +1015,8 @@ PERSONA_CONDUCT = (
     "sentence; at a security question repeat the question, at a payment proposal do not repeat the amount or the date word "
     "for word (an offer is made once).\n"
     "- A question back (why do you need that, which account, who is this) gets one short answer, then the same question again, "
-    "unless the rules say such a question counts. Only what the rules name counts as a refusal.\n"
+    "unless the rules say such a question counts. When the message contains the answer AND a question, use the answer (call the "
+    "tool) and answer the question in the same turn. Only what the rules name counts as a refusal.\n"
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
     "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
@@ -1045,8 +1046,9 @@ def with_cutoff(entries, neutral=("none", "other")):
 REFUSAL_NONE_CLAUSE = (" Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back "
                        "that the rules do not count is none, never refused: only what the rules name counts.")
 # the `question` value of a refusal/decline enum (a question back is not a refusal until it replaces the answer twice)
-QUESTION_ENUM_CLAUSE = (" question = asks something back instead of answering (why do you need that, which account or what this is "
-                        "about, who is calling) without refusing; refused is only an explicit refusal or not wanting to talk.")
+QUESTION_ENUM_CLAUSE = (" question = asks something back INSTEAD of answering (why do you need that, which account or what this is "
+                        "about, who is calling) with NO answer in the message; a message that contains the answer and also a question is none "
+                        "(the answer is processed and the question answered in the same turn); refused is only an explicit refusal or not wanting to talk.")
 
 
 def reset_pre(names):

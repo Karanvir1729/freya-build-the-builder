@@ -516,7 +516,9 @@ def resolve_when(V, text):
         return today + D(2), 'exact'
     if ' tomorrow ' in t:
         return today + D(1), 'exact'
-    if re.search(r' (today|tonight|right now|now|this morning|this afternoon|this evening) ', t):
+    # 'now' counts as today only next to a paying verb: 'too much for me right now' is not an offer for today (Freya PUB-06)
+    if re.search(r' (today|tonight|this morning|this afternoon|this evening) ', t) or \
+            re.search(r' (pay|paying|settle|clear|transfer|send|do)( it| that| this| them| everything| all of it| the money)? (right )?(now|straight away|immediately) ', t):
         return today, 'exact'
     m = re.search(r' in (\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten|fourteen) (day|week|fortnight)s? ', t)
     if m:

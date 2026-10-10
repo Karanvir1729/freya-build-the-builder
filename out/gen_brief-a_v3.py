@@ -317,7 +317,7 @@ AMOUNT_DESC = ("The amount of money the customer offers to pay in their LATEST m
                "Leave it empty when the latest message names no amount. A day of the month is not an amount.")
 REF_DESC = ("Whether the customer's LATEST message names the payment amount BY REFERENCE instead of as a number. "   # A25/A26: the floor by name
             "floor = the lowest amount the agent can accept: 'the minimum', 'the minimum payment', 'the instalment', 'the monthly instalment', 'the lowest amount'. "
-            "full = the whole past-due amount ('all of it', 'the full amount', 'everything'). none = no such reference (also when they say a number).")
+            "full = the whole past-due amount ('all of it', 'the full amount', 'everything') ONLY when they offer to pay it; a message saying they cannot, will not or do not want to pay that amount is none. none = no such reference (also when they say a number).")
 CONFIRM_DESC = ("The customer's answer to the read-back question 'Do you confirm?', from their latest message only. "
                 "yes = a clear yes ('yes', 'correct', 'I confirm', 'that's right'). "
                 "change = they give a different amount or a different date for this promise ('make it 250 instead', 'actually Monday'). "
