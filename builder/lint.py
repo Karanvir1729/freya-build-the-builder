@@ -1609,6 +1609,13 @@ class _Linter:
     PRE_VERIFICATION_RE = re.compile(r"before (identity|verification|the security|verif)|before and after verif|"
                                      r"during (identity|verification|the security)|at any (time|point)|any point in the call|"
                                      r"whenever|even before", re.I)
+    POST_VERIFICATION_RE = re.compile(r"(only|just) (after|once) (identity|verification|the security|verif|the customer is verified)|"
+                                      r"not before (identity|verification|verif)|once (identity|the customer) (is|has been) verified|"
+                                      r"after (identity|the customer) (is|has been) verified", re.I)
+
+    # rules of these categories describe the verified part of the call: a write tool only they name must not be
+    # reachable before verification. special / hardship / other / closing rules may apply at any point.
+    VERIFIED_PART_CATEGORIES = {"amounts", "persuasion", "confirmation", "dates", "recording", "multi_product", "disclosure"}
 
     def check_pre_verification_tools(self, pre):
         writes = self._write_tool_names()
@@ -1628,8 +1635,15 @@ class _Linter:
                 if any(r.get("category") in ("third_party", "identity") or self.PRE_VERIFICATION_RE.search(self._rule_blob(r))
                        for r in naming):
                     continue
-                if naming:
-                    self.err(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified, and no third_party/identity rule of the inventory allows it there ({', '.join(str(r.get('id')) for r in naming)} name it)")
+                ids = ', '.join(str(r.get('id')) for r in naming)
+                if naming and any(self.POST_VERIFICATION_RE.search(self._rule_blob(r)) for r in naming):
+                    self.err(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified, and the inventory allows it only after verification ({ids})")
+                elif naming and all(r.get("category") in self.VERIFIED_PART_CATEGORIES for r in naming):
+                    self.err(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified, and the only rules naming it ({ids}) belong to the verified part of the call; no third_party/identity rule allows it there")
+                elif naming:
+                    # a 'special'/'hardship' rule such as "a request for a human: transfer" usually applies at any point of
+                    # the call; the brief rarely says so. Point at the rules and let the builder decide.
+                    self.warn(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified; check the brief whether that is allowed there ({ids} name it without saying when)")
                 else:
                     self.warn(f"{base}.{kind}[{name}]", f"write tool {name} is available before identity is verified; the inventory says nothing about it")
 

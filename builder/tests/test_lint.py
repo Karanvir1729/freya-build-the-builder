@@ -493,7 +493,7 @@ def test_rules_no_verified_route():
 def test_rules_write_tools_before_verification():
     wf = gated()
     wf["nodes"]["ask_id"]["tools"].append(api_tool("create_promise", {"customer_id": {"type": "string", "default": "{{customer_id}}"}}))
-    assert has(rl(wf), ERROR, "nodes.ask_id.tools[create_promise]", "no third_party/identity rule"), rl(wf)
+    assert has(rl(wf), ERROR, "nodes.ask_id.tools[create_promise]", "verified part of the call"), rl(wf)
     # the inventory is silent about the tool: WARN
     wf = gated()
     wf["nodes"]["ask_id"]["tools"].append(api_tool("add_note", {"customer_id": {"type": "string", "default": "{{customer_id}}"}}))
@@ -512,9 +512,13 @@ def test_rules_write_tools_before_verification():
                                                                     "queue": {"type": "string", "default": "general"}}))
     special = RULES + [{"id": "R09", "category": "special", "text": "A request for a human: call `transfer_to_agent`.",
                         "verbatim": [], "values": {}}]
-    assert has(rl(wf, special), ERROR, "tools[transfer_to_agent]", "write tool"), rl(wf, special)
-    special[-1]["text"] += " Applies before and after verification."
+    assert has(rl(wf, special), WARN, "tools[transfer_to_agent]", "check the brief"), rl(wf, special)
     assert not has(rl(wf, special), ERROR, "tools[transfer_to_agent]"), rl(wf, special)
+    post = RULES + [{"id": "R09", "category": "special", "text": "A request for a human: call `transfer_to_agent`, only after identity is verified.",
+                     "verbatim": [], "values": {}}]
+    assert has(rl(wf, post), ERROR, "tools[transfer_to_agent]", "only after verification"), rl(wf, post)
+    special[-1]["text"] += " Applies before and after verification."
+    assert not any("transfer_to_agent" in x["where"] and x["level"] in (ERROR, WARN) for x in rl(wf, special)), rl(wf, special)
     # write tools after the verified route are not reported
     assert not any("nodes.talk.tools" in x["where"] and "write tool" in x["message"] for x in rl(gated()))
 
@@ -555,13 +559,16 @@ def test_budget_checks():
 
 def test_rules_reference_workflows():
     """The two real workflows with their inventories: no new ERROR on the cloud build (its inventory allows a human
-    transfer before verification); brief-a_v2 with the older inventory gets the two transfer_to_agent ERRORs."""
+    transfer before verification); brief-a_v2 with the older inventory gets two transfer_to_agent WARNs (the rule
+    naming the tool is a `special` rule that does not say when it applies), no ERROR."""
     for wf_path, rules_path, n_err in (("brief-a-cloud.workflow.json", "brief-a-cloud.rules.json", 0),
-                                       ("brief-a_v2.workflow.json", "brief-a.rules.json", 2)):
+                                       ("brief-a_v2.workflow.json", "brief-a.rules.json", 0)):
         wf = json.load(open(ROOT / "out" / wf_path))
         f = lint(wf, API, rules=json.load(open(ROOT / "out" / rules_path)))
         errs = [x for x in f if x["level"] == ERROR]
-        assert len(errs) == n_err and all("transfer_to_agent" in x["where"] for x in errs), errs
+        assert len(errs) == n_err, errs
+        if "v2" in wf_path:
+            assert sum(1 for x in f if x["level"] == WARN and "transfer_to_agent" in x["where"] and "check the brief" in x["message"]) == 2, f
         assert not any("forbidden" in x["message"] for x in f), f
 
 
