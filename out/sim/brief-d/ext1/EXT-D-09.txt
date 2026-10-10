@@ -1,0 +1,46 @@
+# EXT-D-09 Two wrong phone answers: IDF on the first question
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call c7e0a2e8-b600-4fa2-8529-d881bd3e4393 | customer c_8c9dddf0-ed0 | 2026-10-10 20:43:39
+# customer model claude-sonnet-5-5 | judge model claude-sonnet-5-5 (claude) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/c7e0a2e8-b600-4fa2-8529-d881bd3e4393
+# RESULT: PASS
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Hannah Schmidt?
+customer: Yes, this is Hannah Schmidt.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Ms Schmidt. For security, could you please tell me the last four digits of your phone number?
+customer: 3371.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "3371", "customer_id": "c_8c9dddf0-ed0"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer (this was the first). Tell the customer it does not match our records and ask again: What are the last four digits of your phone number?"}
+agent: I'm sorry, that does not match our records. What are the last four digits of your phone number?
+customer: 3713.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "3713", "customer_id": "c_8c9dddf0-ed0"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Second wrong answer: the security check has FAILED. Do not ask anything else and do not say what the call is about."}
+   [route] ask_phone -> fin_failed: second wrong answer (verify_identity_response.data.wrong_answers_left == '1' OR verify_identity_response.data.wrong_answers_left == '0')
+   [node] ask_phone -> fin_failed
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_verified'\n vars['close_code'] = 'IDF'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_failed -> end_failed: always always
+   [node] fin_failed -> end_failed
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "For security I cannot continue by phone. You can use the Kestrel mobile app or visit a branch. Thank you, goodbye."}
+   [call] ended: assistant-ended-call
+agent: For security I cannot continue by phone. You can use the Kestrel mobile app or visit a branch. Thank you, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "IDF", "outcome": "not_verified", "customer_id": "c_8c9dddf0-ed0"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## tool calls (6)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "3371", "customer_id": "c_8c9dddf0-ed0"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer (this was the first). Tell the customer it does not match our records and ask again: What are the last four digits of your phone number?"}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "3713", "customer_id": "c_8c9dddf0-ed0"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Second wrong answer: the security check has FAILED. Do not ask anything else and do not say what the call is about."}
+4. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_verified'\n vars['close_code'] = 'IDF'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+5. end_call args={"message_mode": "custom", "spoken_message": "For security I cannot continue by phone. You can use the Kestrel mobile app or visit a branch. Thank you, goodbye."} -> success Call ended
+6. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "IDF", "outcome": "not_verified", "customer_id": "c_8c9dddf0-ed0"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=IDF promises=[] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'close_call']
+
+## judge (claude-sonnet-5-5): pass - The agent asked phone_last4 first and again after 3371, stopped after the second wrong answer (3713) without asking the date of birth, and told her it cannot continue by phone and she can use the app or a branch without giving the call reason. It sent close_call not_verified with IDF; the ok:false reply is a test bank limit and not the agent's fault.
