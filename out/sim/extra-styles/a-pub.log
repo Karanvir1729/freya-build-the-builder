@@ -1,0 +1,1 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 90 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
