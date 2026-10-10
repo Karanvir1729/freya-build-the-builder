@@ -229,6 +229,26 @@ def hardship_without_offer():                               # PUB-05
 
 
 @test
+def hardship_refusal_words_are_not_an_offer():              # Freya talkative PUB-05: 'I cannot pay anything right now'
+    P, V = start([LOAN])
+    ev(P, V, "hardship", stance="refuse", offer_when="right now")
+    assert V.get("hs_offer") != "yes", V.get("hs_offer")
+    ev(P, V, "hs_decline", hs_answer="support_no")
+    assert V["route"] == "fin" and V["final_route"] == "hardship", (V["route"], V.get("final_route"))
+    P, V = start([LOAN])                                    # the same words with an offer stance are a day: today
+    ev(P, V, "hardship", stance="offer", offer_when="right now", offer_amount="700")
+    assert V.get("hs_offer") == "yes"
+
+
+@test
+def hardship_route_fires_once():
+    trs = pol.Policy.topic_transitions()
+    h = [t for t in trs if t["target_node"] == "pol_hardship"][0]
+    leaves = h["condition"]["conditions"][0]["conditions"]
+    assert {"variable": "mode", "operator": "not_equals", "operand": "hardship"} in leaves, leaves
+
+
+@test
 def hardship_refusal_is_no_persuasion():
     P, V = start([LOAN])
     ev(P, V, "hardship")

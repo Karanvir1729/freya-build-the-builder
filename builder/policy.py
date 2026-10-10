@@ -655,7 +655,10 @@ def ev_notalk(V):
 def ev_hardship(V):
     V['mode'] = 'hardship'
     hd, hk = offer_date_of(V)
-    if g(V, 'offer_kind') == 'exact' or hk == 'exact':
+    # a day the customer NAMES as a payment (offer_kind exact, or their words with an offer/accept stance); words
+    # inside a refusal ('I cannot pay anything right now') are not an offer (Freya talkative PUB-05: 'right now'
+    # became 'your loan, 780, today. Do you confirm?' after the customer declined the support team)
+    if g(V, 'offer_kind') == 'exact' or (hk == 'exact' and g(V, 'stance') in ('offer', 'accept')):
         V['hs_offer'] = 'yes'
         V['hs_date'] = hd.isoformat() if hd is not None else ''
         V['hs_amount'] = g(V, 'offer_amount')
@@ -1112,7 +1115,11 @@ class Policy:
              "no_talk": "pol_notalk", "already_paid": "pol_paid", "dispute": "pol_dispute"}
         if values is not None:
             m = dict(values)
-        return [fl.eq(topic_var, v, t, "topic %s" % v) for v, t in m.items()]
+        # hardship is handled once (one sympathy sentence, one support offer): later mentions in the same call do
+        # not re-enter it (Freya talkative PUB-05: 'a stressful week with all the job[...]' at the read-back re-offered
+        # the support team). `mode` is written by init_negotiation before any of these nodes.
+        return [fl.tr(t, "topic %s" % v, fl.and_group(fl.cond(topic_var, "equals", v), fl.cond("mode", "not_equals", "hardship")))
+                if v == "hardship" else fl.eq(topic_var, v, t, "topic %s" % v) for v, t in m.items()]
 
     @staticmethod
     def state_first(task, label="STATE (decided by the system; follow it, do not recompute it)"):
