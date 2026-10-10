@@ -198,7 +198,7 @@ def workflow_digest(wf):
         wf = wf["workflow"]
     nodes = wf.get("nodes") or {}
     tools, labels, counts = {}, {}, {}
-    code_seen, code_seen_src = {}, {}
+    code_seen = {}
 
     def register(t):
         key = json.dumps(t, sort_keys=True)
@@ -232,13 +232,22 @@ def workflow_digest(wf):
             f = pa.get("function") or {}
             if f.get("name") == "code_exec":
                 code = (((f.get("parameters") or {}).get("properties") or {}).get("code") or {}).get("default", "")
-                # the policy-as-code nodes share one 40 KB core: print it once (the digest was 872 KB and E2BIG otherwise)
-                ck = hash(code)
-                if ck in code_seen:
-                    body.append("  code: same code as node %s" % code_seen[ck] +
-                                ("" if code == code_seen_src[ck] else " (identical core)"))
+                # the policy-as-code nodes share one 40 KB core and differ only in their last lines: print the shared
+                # prefix once and only the tail afterwards (the full digest was 872 KB: E2BIG on Linux, 220k tokens)
+                ref = None
+                for rname, rcode in code_seen.items():
+                    n_common = 0
+                    for ch1, ch2 in zip(code, rcode):
+                        if ch1 != ch2:
+                            break
+                        n_common += 1
+                    if n_common >= 2000 and (ref is None or n_common > ref[1]):
+                        ref = (rname, n_common)
+                if ref:
+                    cut = code.rfind("\n", 0, ref[1]) + 1
+                    body.append("  code: the first %d characters are the same as node %s's code; then:\n%s" % (cut, ref[0], _indent(code[cut:], 4)))
                 else:
-                    code_seen[ck] = name; code_seen_src[ck] = code
+                    code_seen[name] = code
                     body.append("  code:\n" + _indent(code, 4))
             else:
                 body.append("  pre_action tool: " + register(pa))
