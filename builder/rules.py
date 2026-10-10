@@ -76,7 +76,7 @@ RULE_SCHEMA = {
                 "type": "object",
                 "properties": {
                     "id": {"type": "string", "description": "R01, R02, ... in document order"},
-                    "source": {"type": "string", "description": "e.g. 'brief-a.md rule 6', 'brief-a.md section 7 table row early', 'memo 2026-10-12 item 3', 'openapi.json /close_call'"},
+                    "source": {"type": "string", "description": "e.g. 'brief-a.md rule 6', 'brief-a.md section 7 table row early', 'memo of <date> item 3', 'openapi.json /close_call'"},
                     "category": {"type": "string", "enum": CATEGORIES},
                     "topic": {"type": "string", "description": "snake_case name of the policy point, WITHOUT any number or value (e.g. 'callback_window', 'band_deadline', 'card_floor', 'closure_days'); an old statement and the later one that changes it get the SAME topic"},
                     "text": {"type": "string", "description": "the rule, one or two sentences, numbers/dates/enum values quoted exactly"},

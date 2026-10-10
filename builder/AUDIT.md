@@ -9,12 +9,15 @@ and print a one-line summary on stdout. Progress and every model call go to stde
 source .venv/bin/activate          # or prefix the commands with .venv/bin/python
 ```
 
-## 1. `builder/rules.py`: rule inventory of a brief
+## 1. `builder/rules.py`: rule inventory of a brief (v2)
 
 ```
 python3 builder/rules.py <brief.md> [<brief2.md> ...] --api <tool_api.json> --out out/<slot>.rules.json
 python3 builder/rules.py briefs/brief-a.md --api tools/openapi.json --out out/brief-a.rules.json
-python3 builder/rules.py briefs/brief-a.md briefs/brief-b.md --api tools/openapi.json --out out/brief-b.rules.json
+python3 builder/rules.py briefs/brief-a.md briefs/brief-b.md --api tools/openapi.json --out out/brief-ab.rules.json
+options: --samples 1|2|3 (default 3)   --split N (parallel calls per sample, default 2)   --no-verify (skip T14/T15)   --model
+env:     RULES_MODEL (default claude-opus-5-5), RULES_EFFORT (default low for extraction/merge/verification),
+         RULES_SAMPLE_MODELS ("m_A,m_B,m_C"; default: the main model for all three)
 ```
 
 ```python
@@ -23,35 +26,88 @@ from rules import extract_rules
 rules = extract_rules(["briefs/brief-a.md"], "tools/openapi.json", "out/brief-a.rules.json")   # returns the list
 ```
 
-Output `out/<slot>.rules.json`: a JSON list, one entry per rule:
+Outputs, next to `--out`:
+
+| file | content |
+|---|---|
+| `<slot>.rules.json` | the inventory, one entry per rule (fields below) |
+| `<slot>.rules.md` | the same, grouped by category, with confidence / verification / supersession flags and deciding quotes |
+| `<slot>.spec.json` | the structured spec compiled from the `values` of the rules in force (T28; schema in `builder/spec_check.py`) |
+| `<slot>.rules.conflicts.md` | everything doubtful, to resolve FIRST by re-reading the source sentence (the skill says so) |
+| `<slot>.rules.meta.json` | model, samples, calls, seconds and cost per stage, counts |
+
+Fields of a rule:
 
 | field | meaning |
 |---|---|
-| `id` | `R01`, `R02`, ... in document order (renumbered after validation) |
-| `source` | where it comes from: `brief-a.md rule 6`, `brief-a.md section 7 definition`, `memo 2026-10-12`, `openapi.json /close_call` |
+| `id` | `R01`, `R02`, ... in document order (order of sample A) |
+| `source` | `brief-a.md rule 6`, `brief-d.md CP-7 4.1 table`, `memo item 3`, `openapi.json /close_call` |
 | `category` | one of `opening, third_party, identity, disclosure, dates, amounts, persuasion, hardship, confirmation, recording, special, multi_product, closing, wording, other` |
-| `text` | the rule in force, one or two sentences, numbers / dates / enum values quoted exactly |
+| `topic` | snake_case name of the policy point without any value; an old statement and the one that changes it share it |
+| `text` | the rule, one or two sentences, numbers / dates / enum values quoted exactly |
 | `verbatim` | sentences the agent must say word for word (`[]` if none) |
-| `values` | structured values when present: holidays, bands `[{min_days, max_days, deadline_rule, attempts}]`, floor rules, callback window, outcome/reason mapping, identity fields order, max wrong answers, ... |
-| `overrides` | id of the earlier rule this one replaces (memos that change a policy), else `""` |
-| `in_force` | `false` when a later rule overrides this one; `superseded_by` then names it |
+| `values` | a PARTIAL SPEC: only the spec keys this rule sets (`calendar`, `bands`, `floors`, `attempt_ladder`, `callback`, `identity`, `max_wrong_answers`, `outcomes`, `note_reasons`, `forbidden_words_before_verification`, `text`) |
+| `overrides` | id of the earlier rule this one replaces, else `""` |
+| `in_force` / `superseded_by` | `false` + the replacing id when a later decided rule changes it |
+| `doc`, `doc_date`, `author_role`, `status`, `status_words` | where the statement is, its date, and whether it is `decided` or a `proposal` / `discussion` / `rejected` / `distractor` / `unclear` |
+| `confidence`, `samples` | `high` (all 3 samples), `medium` (2), `low` (1, or failed verification, or a stale value); which samples found it |
+| `alternatives`, `value_difference` | when the samples disagree on a value: the other members' values and what differs |
+| `not_policy` | T14 judged it a proposal / discussion / distractor |
+| `deciding_quote`, `deciding_quote_found` | T14's quoted deciding sentence, and whether it occurs verbatim in the brief |
+| `effective_from`, `effective_until` | a decision with an effective date; `effective_until` on an older version kept in force because the change takes effect inside the range of call dates (key the code on `now`) |
+| `verification` | T15: `{status: ok / mismatch / quote_not_found / not_found / no_answer, missing, verifier_value, quotes[{quote, in_force, found}]}` |
+| `stale_values` | values a later rule replaced that this rule (in force) still carries |
 
-`out/<slot>.rules.md` is the same inventory grouped by category.
+Pipeline (techniques T13, T14, T15, T28 of `docs/research/sota-techniques.md`):
+1. **T13 self-consistency.** The brief files are cut into parts (on `---`, else on `## ` headings); each part gets its header
+   date. Three samples read the parts in three orders: forward, reverse, latest-dated first (memo first; undated files: the
+   last file first). Each sample is written by `--split` (2) parallel calls that list the rules of one half of the parts
+   while seeing all of them (cross-half `overrides` are written as a source and resolved by `resolve_ref`), so 6 calls run
+   at once. One merge call (USC style) returns only groups of ids (`members`, `best`, `values_differ`, `difference`); the
+   union is built deterministically: best member's text and values, `confidence` by the number of samples, differing values
+   (the model's judgement or numbers/dates that conflict both ways) kept as `alternatives`.
+2. **Self-check** (unchanged): every numbered rule cited, every ISO date and `backticked` token present (tokens that occur only
+   in an "Example" column are ignored); one gap-fill call when something is missing.
+3. **T14 and T15 in parallel.**
+   - T14: candidate blocks = rules linked by `overrides`, by the same `topic`, or by the same structured entity (callback,
+     wrong-answer limit, holidays, a band name, a floor's product type, an attempt number), max 8 per block, plus every single
+     statement that is not `decided`. One call gets the documents and the blocks (document, date, author role, status words,
+     values per candidate) and returns `in_force` / `superseded` / `not_policy` per candidate with the deciding quote and
+     effective date, plus the plausible range of call dates. Applied deterministically; a superseded rule whose successor
+     takes effect after the earliest call date stays in force with `effective_until` (both versions kept).
+   - T15: for every rule in force with checkable values (numbers except order/attempt/min_days, ISO dates, HH:MM, codes,
+     outcomes, fields), a question built from its source, topic and spec keys only ("give ALL of them (17 outcomes)"),
+     never the value. Fresh calls (30 questions each) see only the brief and the API. The rule's atoms must all occur in the
+     verifier's own statement of the value in force (number words and "the next day" count as numbers); at least one quote
+     must occur verbatim in the brief. Anything else lowers the rule to `confidence: low`.
+4. **Stale values** (deterministic): a value the superseded rule had, that its replacement names in its text but no longer has
+   in its values, is stale wherever another rule in force still carries it (flagged; outcome rows with a stale reason are
+   left out of the spec).
+5. **T28 spec.** `values` of the rules in force are merged in order (API-sourced rules first, so the brief wins): holidays
+   united, bands merged by name or range, floors per product type, ladder per attempt, callback field by field, identity
+   per field, outcomes per (outcome, reason), note reasons per reason, verbatim from the rules' `verbatim`. Two rules in
+   force that set different values are listed as merge conflicts (the later one is used). With effective dates inside the
+   call range, `timeline` holds one spec per period. `spec_check.check` validates it; problems go to the conflicts file.
 
-What the script does:
-1. One model call with the brief file(s) (concatenated with a `DOCUMENT FILE:` header each) and a compact digest of the tool
-   API (paths, body fields, enums, formats, required). The system prompt asks for every numbered rule, every table row,
-   every definition / "never" sentence, every mandatory sentence (into `verbatim`), API constraints the brief does not state,
-   and for multi-document briefs (mail + policy extract + memo + code list, or Brief A + Brief B) the new rule with
-   `overrides` pointing at the old one. Output is validated against a JSON schema; invalid JSON is retried once.
-2. A deterministic self-check: every numbered rule of every brief must be cited by at least one `source`, and every ISO date
-   and every `` `backticked` `` token of the brief must appear somewhere in the inventory. Anything missing triggers one
-   gap-fill call that returns only the rules to add (or completed `values` for an existing id), which are merged and renumbered.
-3. Normalisation: ids renumbered, categories validated, `overrides` resolved, `in_force` / `superseded_by` set.
+`builder/spec_check.py out/<slot>.spec.json --api <api>` validates a spec by itself: weekdays, ISO holidays, bands
+(integers, min <= max, contiguous, deadline type/n/adjust, `same_as` names a band), floors (product types and fields from the
+API's `get_account` schema, percent/factor), ladder (1..n, amount enum, band names, enough steps for every band's attempts),
+callback (HH:MM, open < close, some day allowed), identity (API field and hint enums, order 1..n), `max_wrong_answers`,
+outcomes (API outcome enum, reason enum when the API has one, every API outcome used), note reasons (API enum). Exit 1 on ERROR.
 
-Measured on Brief A (47 numbered rules, three tables): **64 rules, 2 model calls, 73 s, $0.29** (the second call was a
-gap-fill triggered by a self-check false positive that is fixed now; a clean run is one call, about 60 s, about $0.25).
-Brief A + Brief B together: **74 rules (64 in force, 10 superseded), 1 call, 86 s, $0.28**; the 10 Brief B rules that change a Brief A rule carry `overrides` and restate the complete rule in force (e.g. B rule 8 `add_note` overrides "Brief A never uses `add_note`", B rule 4 overrides A rule 28, B rule 11 overrides A rule 37 and keeps its "recorded only after ok: true, retry once" part).
+Measured (10 Oct, `claude-opus-5-5`, effort low except T14; details in `out/rules-v2.REPORT.md`):
+
+| brief | rules (in force) | low confidence in force | conflict items | calls | wall time | cost |
+|---|---|---|---|---|---|---|
+| Brief A | 60 (60) | 2 | 1 | 9 | 78 s | $0.96 |
+| Brief A + B | 77 (70; 7 A rules superseded by B) | 2 | 3 | 9 | 102 s | $1.28 |
+| Brief D (mail + policy + memo + code list) | 117 (101) | 14 | 12 | 11 | 171 s | $2.41 |
+
+Against the hand-written Brief D inventory (64 rules in force, graded by `tests/compare_inventory.py`): 61 covered, 3
+partial, 0 missed, 1 wrongly in force (the email's "hardship code (HARD in v3)", flagged by the stale-value pass and kept
+out of `spec.json`). The spec matches every memo change (Band S 5th business day and 2 attempts, card floor 2 x minimum
+payment capped at the overdue amount, Founders' Day closure, callback to 18:00, HSHP). v1 for comparison: one call,
+60-86 s, $0.25-0.30, no confidence, no verification, no spec.
 
 ## 2. `builder/audit.py`: coverage audit of a workflow against the inventory
 
@@ -103,8 +159,10 @@ Measured on Brief A (64 rules, 46-step workflow, the 10/10 generator): **run 1: 
 
 | run | model calls | wall time | cost |
 |---|---|---|---|
-| `rules.py` Brief A (47 numbered rules) | 1 (+1 gap-fill when the self-check finds a hole) | ~60-75 s | ~$0.25-0.30 |
-| `rules.py` Brief A + Brief B (74 rules, 10 of them overrides of Brief A rules) | 1 | 86 s | $0.28 |
+| `rules.py` v2 Brief A (3 samples x 2 calls, merge, T14, T15) | 9 | 78 s | $0.96 |
+| `rules.py` v2 Brief A + Brief B | 9 | 102 s | $1.28 |
+| `rules.py` v2 Brief D (raw material: mail, policy, memo, code list) | 11 (incl. 1 gap-fill) | 171 s | $2.41 |
+| `rules.py` v1 Brief A / A + B (one call; `--samples 1 --split 1 --no-verify` is close to it) | 1 | 60-86 s | $0.25-0.30 |
 | `audit.py` Brief A (64 rules, 6 batches of 12, 3 in parallel, + 1 ranking call), first run | 7 | 69 s | $0.95 |
 | `audit.py` Brief A, second run minutes later (prompt-cache hits on the shared context) | 7 | 57 s | $0.34 |
 
@@ -115,6 +173,6 @@ which lowers the cost of the later batches.
 
 ## Using them inside a build
 
-Within the 30-minute build budget, a sensible order is: `rules.py` right after reading the brief (about 1 minute), build the
+Within the 30-minute build budget, a sensible order is: `rules.py` right after reading the brief (1.5-3 minutes), build the
 workflow, then `audit.py` (about 3-4 minutes) and fix the `top_fixes` before the practice run. The audit is a static
 check: it finds rules the prompts, routes and code do not cover; it does not replace a simulation.
