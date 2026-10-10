@@ -1,6 +1,6 @@
 # Brief C (Nordvik Savings Bank) transfer test — report
 
-Run: cloud worker, 10 Oct 2026, 16:50–~17:55 UTC, branch `cloud/brief-c`. Builder = the skill
+Run: cloud worker, 10 Oct 2026, 16:50–18:06 UTC, branch `cloud/brief-c`. Builder = the skill
 `.claude/skills/build-phone-agent/SKILL.md`, followed by hand (no `build.py`). Inputs: `tests/synthetic/brief-c.md`,
 `tools/openapi.json`, slot `brief-c`, cases `tests/synthetic/brief-c.cases.json`. `brief-c.rationale.md` was not read.
 
@@ -17,7 +17,7 @@ Run: cloud worker, 10 Oct 2026, 16:50–~17:55 UTC, branch `cloud/brief-c`. Buil
 | last sim | round 2: 10/10; round 3 (same agent): 8/10; round 4 (v3): 8/10 |
 
 Files: `out/gen_brief-c.py` (generator), `out/brief-c.workflow.json`, `out/brief-c.rules.{json,md}` (64 rules, `builder/rules.py`),
-`out/brief-c.audit.{json,md}` (+ `audit.round1.*`), `out/brief-c.lint.txt`, `out/sim/brief-c/round{1,2,3}.{json,log}` + transcripts,
+`out/brief-c.audit.{json,md}` (+ `audit.round1.*`), `out/brief-c.lint.txt`, `out/sim/brief-c/round{1,2,3,4}.{json,log}` + transcripts,
 `out/sim/brief-c/round1.rescored.txt`.
 
 ## Environment incidents
@@ -28,7 +28,7 @@ Files: `out/gen_brief-c.py` (generator), `out/brief-c.workflow.json`, `out/brief
 
 ## Lint (`builder/lint.py out/brief-c.workflow.json --api tools/openapi.json`)
 
-`0 error(s), 51 warning(s), 27 info`. Every warning was read; none is a real defect:
+`0 error(s), 53 warning(s), 27 info` (final v3). Every warning was read; none is a real defect:
 - ~44 are "`{{first_name}}`/`{{last_name}}`/`{{title}}`/`{{customer_id}}` is never set": lint learns call variables only from
   `test_variables`, which we must not ship. They are call variables (brief section 2) and resolve in the sim transcripts.
 - `id_route` / `promise_route` "not set by anything": they are written by the post hooks (`verify_count_post`, `promise_state_post`); the round-1 transcript shows `negotiate -> fin_promise: promise_route == 'recorded'`, so hook-written vars do route.
@@ -67,7 +67,7 @@ against the kit's Brief A/B table** (`"this outcome needs one of these reasons: 
 for `promise`/`paid` it accepts no reason at all), so every Brief C close (`not_reached/scheduled`, `promise/full`, ...) gets
 `ok: false` and the ledger outcome stays empty. The agent sent the expected outcome/reason in all 10 cases. I added an opt-in
 `--close-from-args` to `builder/sim.py` (scores the outcome/reason the agent sent when the mock rejected it, recorded in the row as
-`close_from_args`), and rescored round 1's saved ledgers with the same function (`round1.rescored.txt`). Rounds 2–3 use the flag.
+`close_from_args`), and rescored round 1's saved ledgers with the same function (`round1.rescored.txt`). Rounds 2–4 use the flag.
 
 ### Fixed between rounds 1 and 2
 1. **Opening line (PUB-01)**: on the chat route the initial conversation node answered the customer's first "Hello?" with the
@@ -132,7 +132,7 @@ for `promise`/`paid` it accepts no reason at all), so every Brief C close (`not_
 6. **lint.py** proposals: accept a `--call-vars first_name,last_name,title,now,customer_id` list (or read the brief's call-variable
    table) so call variables without `test_variables` do not raise ~44 warnings; recognise vars written by post/pre hooks
    (`V['x'] = ...`, `vars['x'] = ...`) as set.
-7. Skill step 6/7: the smoke scripts carry Brief A's expectations; the sim was the more useful check here. Proposed: make
+7. Skill step 7 (smoke) was skipped: the smoke scripts carry Brief A's expectations, and the sim covered the same ground. Proposed: make
    `smoke_scripts/*.json` expectations brief-agnostic (no wording checks) or generate them from the rule inventory.
 8. **Empty-string variables are spoken as literal placeholders** (round 3, PUB-05). Proposed: `freyalib.check()` / `lint.py`
    warn when a `spoken_message` or tts text uses a variable that some code path sets to `''`; the skill says to route to separate
