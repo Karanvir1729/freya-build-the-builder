@@ -469,6 +469,10 @@ def resolve_when(V, text):
         return None, 'none'
     today = today_of(V)
     D = datetime.timedelta
+    if re.search(r' (twenty|thirty) $', t):
+        # the words stop on a bare tens word ('I can pay on the twenty'): a cut-off day, never the 20th or the 30th
+        # and never the extractor's guess (Freya talkative PUB-04 recorded the 20th for 'the twenty[-third]')
+        return None, 'vague'
     if ' day after tomorrow ' in t:
         return today + D(2), 'exact'
     if ' tomorrow ' in t:
