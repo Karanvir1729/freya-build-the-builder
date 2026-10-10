@@ -155,6 +155,20 @@
    "node_type": "code",
    "transitions": [
     {
+     "target_node": "end_financial_distress_reduction",
+     "description": "the customer asked for a reduction",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "asked_reduction",
+        "operator": "equals",
+        "operand": "yes"
+       }
+      ]
+     }
+    },
+    {
      "target_node": "end_financial_distress",
      "description": "always",
      "condition": {
@@ -181,7 +195,7 @@
        "properties": {
         "code": {
          "type": "string",
-         "default": "try:\n    vars['outcome'] = 'no_promise'\n    vars['reason'] = 'financial_distress'\nexcept Exception:\n    pass\ntry:\n    vars['reduction_line'] = ' I cannot offer any reduction, and the figures are those on the account.' if str(vars.get('asked_reduction') or '') == 'yes' else ''\nexcept Exception:\n    vars['reduction_line'] = ''\n"
+         "default": "try:\n    vars['outcome'] = 'no_promise'\n    vars['reason'] = 'financial_distress'\nexcept Exception:\n    pass\n"
         },
         "timeout_ms": {
          "type": "number",
@@ -217,7 +231,7 @@
        },
        "spoken_message": {
         "type": "string",
-        "default": "I understand.{{reduction_line}} The care team will contact you within three business days. Thank you for your time, {{title}} {{last_name}}. Goodbye from Nordvik Savings Bank."
+        "default": "I understand. The care team will contact you within three business days. Thank you for your time, {{title}} {{last_name}}. Goodbye from Nordvik Savings Bank."
        }
       }
      }
@@ -810,6 +824,37 @@
        "spoken_message": {
         "type": "string",
         "default": "I am sorry, I could not confirm who I am speaking with. Thank you for your time. Goodbye from Nordvik Savings Bank."
+       }
+      }
+     }
+    }
+   }
+  },
+  "end_financial_distress_reduction": {
+   "name": "end_financial_distress_reduction",
+   "node_type": "end_call",
+   "transitions": [],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": true,
+   "on_enter": {
+    "type": "silent"
+   },
+   "terminal": {
+    "type": "function",
+    "function": {
+     "name": "no_promise_financial_distress",
+     "handler": "__function__:end_call",
+     "parameters": {
+      "type": "object",
+      "properties": {
+       "message_mode": {
+        "type": "string",
+        "default": "custom"
+       },
+       "spoken_message": {
+        "type": "string",
+        "default": "I understand. I cannot offer any reduction, and the figures are those on the account. The care team will contact you within three business days. Thank you for your time, {{title}} {{last_name}}. Goodbye from Nordvik Savings Bank."
        }
       }
      }

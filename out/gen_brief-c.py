@@ -24,7 +24,7 @@ nodes = {}
 FINS = {
     "paid": ("paid", "self_reported", "Thank you for letting me know. The bank will check for the payment within two business days and will not call you again before then. " + BYE_T),  # R40
     "declined_offer": ("no_promise", "declined_offer", "I understand. " + BYE_T),  # R32, R42, R46
-    "financial_distress": ("no_promise", "financial_distress", "I understand.{{reduction_line}} The care team will contact you within three business days. " + BYE_T),  # R33 (+R34 when asked)
+    "financial_distress": ("no_promise", "financial_distress", "I understand. The care team will contact you within three business days. " + BYE_T),  # R33
     "system_fault": ("no_promise", "system_fault", "I am sorry, the promise could not be saved because of a technical problem. " + BYE_T),  # R38
     "exhausted": ("not_verified", "exhausted", "I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. " + BYE),  # R15
     "withheld": ("not_verified", "withheld", "I understand. The bank cannot discuss anything until the security check is complete. " + BYE),  # R16, R46
@@ -36,11 +36,14 @@ FINS = {
 }
 for key, (outcome, reason, farewell) in FINS.items():
     fl.end_pair(key, outcome, reason, farewell, nodes)
-# R34 on the hardship path: the farewell answers a reduction request ("cannot offer any reduction")
-nodes["fin_financial_distress"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"] = (
-    fl.outcome_code("no_promise", "financial_distress") +
-    "try:\n    vars['reduction_line'] = ' I cannot offer any reduction, and the figures are those on the account.' if str(vars.get('asked_reduction') or '') == 'yes' else ''\n"
-    "except Exception:\n    vars['reduction_line'] = ''\n")
+# R34 on the hardship path: when the customer asked for a reduction, the farewell answers it ("cannot offer any
+# reduction"). Two terminals routed on the extraction: a template variable set to '' is spoken as the literal placeholder.
+nodes["fin_financial_distress"]["transitions"] = [
+    fl.eq("asked_reduction", "yes", "end_financial_distress_reduction", "the customer asked for a reduction"),
+    fl.always("end_financial_distress")]
+nodes["end_financial_distress_reduction"] = fl.end_node(
+    "end_financial_distress_reduction", "no_promise_financial_distress",
+    "I understand. I cannot offer any reduction, and the figures are those on the account. The care team will contact you within three business days. " + BYE_T)
 
 # R47: promise reason full if the recorded amount equals the overdue amount, otherwise partial; R39 sentence
 nodes["fin_promise"] = fl.code_node("fin_promise", fl.promise_reason_code(), [fl.always("end_promise")])

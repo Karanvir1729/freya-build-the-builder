@@ -6,6 +6,8 @@ WARN nodes.end_financial_distress.terminal.spoken_message: {{title}} is never se
 WARN nodes.end_financial_distress.terminal.spoken_message: {{last_name}} is never set: the agent would say the literal placeholder aloud
 WARN nodes.end_system_fault.terminal.spoken_message: {{title}} is never set: the agent would say the literal placeholder aloud
 WARN nodes.end_system_fault.terminal.spoken_message: {{last_name}} is never set: the agent would say the literal placeholder aloud
+WARN nodes.end_financial_distress_reduction.terminal.spoken_message: {{title}} is never set: the agent would say the literal placeholder aloud
+WARN nodes.end_financial_distress_reduction.terminal.spoken_message: {{last_name}} is never set: the agent would say the literal placeholder aloud
 WARN nodes.end_promise.terminal.spoken_message: {{title}} is never set: the agent would say the literal placeholder aloud
 WARN nodes.end_promise.terminal.spoken_message: {{last_name}} is never set: the agent would say the literal placeholder aloud
 WARN nodes.end_plan_review.terminal.spoken_message: {{title}} is never set: the agent would say the literal placeholder aloud
@@ -76,4 +78,4 @@ INFO nodes.hardship.tools[transfer_to_agent].parameters.body.customer_id: {{cust
 INFO nodes.plan_offer.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
 INFO nodes.plan_offer.tools[transfer_to_agent].parameters.body.customer_id: {{customer_id}} is not set by test_variables, extraction, mapping or code: unless it is a call variable, the model fills it with no description
 INFO tools[close_call].parameters.body.customer_id: lifecycle tool: {{customer_id}} is never set; one model call fills the parameter at run time
--- 0 error(s), 51 warning(s), 27 info
+-- 0 error(s), 53 warning(s), 27 info
