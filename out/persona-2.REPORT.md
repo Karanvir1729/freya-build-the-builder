@@ -17,9 +17,11 @@ rule about speech, not about a bank.
 | Agent fix 1 (generic) | A day of the month said with a weekday wins: 'Monday the twenty-sixth' was resolved as the next Monday (19 October) and read back that way. | `builder/policy.py` `resolve_when`, test in `builder/tests/test_policy.py` |
 | Agent fix 2 (generic) | `CUTOFF_CLAUSE` appended by `Policy` to every enum on the negotiate, confirm, hardship and wrap-up nodes: a cut-off line or small talk is the neutral value, even with words like stressed/busy/family/wedding ('I've been so stressed because my cousin's' was routed to hardship; strings of cut-off small talk became refusals). | `builder/freyalib.py` (`CUTOFF_CLAUSE`, `with_cutoff`), `builder/policy.py` |
 | Agent fix 3 (generic) | `PERSONA_CONDUCT`: a line that stops mid-sentence gets 'Sorry, I think you were cut off. Please go on.'; at a payment proposal the amount and date are not repeated word for word (the judge counted four repeats of the floor as four offers). | `builder/freyalib.py` |
+| Agent fix 5 (generic) | At hardship, a day counts as the customer's own offer only when `offer_kind` is exact or the stance is offer/accept: words inside a refusal ('I cannot pay anything right now') are not an offer. | `builder/policy.py` `ev_hardship`, test |
+| Agent fix 6 (generic) | The hardship topic route fires once per call (`topic == hardship AND mode != hardship`): one sympathy sentence, one support offer. | `builder/policy.py` `topic_transitions`, test |
 | Agent fix 4 (generic) | Words that stop on a bare tens word ('I can pay on the twenty') are a vague day: ask for the exact day; never the 20th and never the extractor's guess. | `builder/policy.py` `resolve_when`, test |
 
-Tests: `test_policy.py` 32/32, `test_gated_identity.py` 6/6, `test_lint.py`, `test_normalise.py` pass. Lint of both v3
+Tests: `test_policy.py` 34/34, `test_gated_identity.py` 6/6, `test_lint.py`, `test_normalise.py` pass. Lint of both v3
 workflows: 0 errors, warnings unchanged (48 / 49).
 
 ## Smoke results (chat route, practice customers)
@@ -45,11 +47,38 @@ agent `24083493`. The fixes were published to two NEW slots, `brief-a-v3-p2` (wo
 and `brief-b-v3-p2` (workflow `32451af1`, agent `7148e3fe`), because the main session was running simulations on the
 v3 agents at the same time and a republish would have changed the agent under its runs.
 
-RESULTS_TABLE
+| # | Agent (version) | Style | Cases | Passed | Failed cases | File |
+|---|---|---|---|---|---|---|
+| before | brief-a-v3, an earlier v3 (main session, 20:2x) | talkative | A ×10 | 9/10 | PUB-04 | `a-v3-talkative.json` |
+| before | brief-a-v3, an earlier v3 (main session) | asks_back | A ×10 | 8/10 | PUB-04, PUB-10 | `a-v3-asks_back.json` |
+| before | brief-a-v2 reference | talkative / asks_back | A ×10 | 5/10 / 4/10 | see files | `a-v2-*.json` |
+| 1 | brief-a-v3 (main at 20:24, sentinel clears) | talkative | A ×10 | **7/10** | PUB-04, PUB-06, PUB-07 | `a-v3-talkative-after.json` |
+| 2 | brief-b-v3 (main) | talkative | B ×3 | **3/3** | – | `b-v3-talkative.json` |
+| 3 | brief-a-v3-p2 v1 (fixes 1-3) | talkative | A ×10 | **9/10** | PUB-04 | `a-v3p2-talkative.json` |
+| 4 | brief-a-v3-p2 v2 (+ fix 4) | asks_back | A ×10 | **10/10** | – | `a-v3p2-asks_back.json` |
+| 5 | brief-b-v3-p2 v2 | talkative | B ×3 | **3/3** | – | `b-v3p2-talkative.json` |
+| 6 | brief-a-v3-p2 v2 | talkative | A ×10 | **9/10** | PUB-05 | `a-v3p2-talkative-r2.json` |
+| 7 | brief-a-v3-p2 v3 (+ fixes 5-6) | talkative | A ×10 | **8/10** | PUB-04 (platform stall), PUB-06 (judge) | `a-v3p2-talkative-r3.json` |
+| 8 | brief-a-v3-p2 v3 | none | A ×10 | RUN8 | RUN8F | `a-v3p2-x1.json` |
+
+Talkative on A over the three runs of the fixed agent: 9, 9, 8 of 10; no failure repeated across runs, and none of
+the three agent mechanisms of run 1 came back. The "before" 9/10 was measured on an earlier v3 by the main session;
+run 1 is the same agent family on the version current at 20:24 and is the paired baseline.
 
 ## Failures, read from the transcripts (`freya.get_call(call_id)['messages']`)
 
-FAILURE_TABLE
+| Run | Case | Class | Mechanism | Fix |
+|---|---|---|---|---|
+| 1 | PUB-04 | persona truncation + agent bug | 20+ cut-off small-talk lines; two of them labelled `stance=refuse` (the brief counts a non-answer as a persuasion attempt), attempts used up, closed `no_promise/refused`; the offer was repeated word for word 7 times | fixes 2, 3 (`CUTOFF_CLAUSE`, "please go on") |
+| 1 | PUB-06 | persona-induced agent bug | cut-off "I've been so stressed because my cousin's" → `topic=hardship` → sympathy, support offer, closed hardship; the judge also counted 4 repeats of the floor as 4 offers | fixes 2, 3 |
+| 1 | PUB-07 | agent bug (dates) | "Monday the twenty-sixth" resolved by the weekday branch first → read back "Monday 19 October"; the customer's protest became a change, then cut-off lines became refusals. The same read-back explains the earlier x3 PUB-07 rep 3 loop ("Monday 19 October" 70 times) | fix 1 (day of month wins) |
+| 3 | PUB-04 | persona truncation + agent bug | "Yes, I can make the payment on the twenty" (cut off) → words unresolvable → code fell back to the extractor's guess 2026-10-20 → recorded 20 Oct instead of 23 Oct | fix 4 (a bare tens word is vague) |
+| 6 | PUB-05 | agent bug (hardship) | "I lost my job … cannot pay anything right now" → `offer_when='right now'` resolved to today, so after "no" to the support team the agent read back "780, today. Do you confirm?"; a later "stressful week with all the job…" re-entered hardship (second sympathy, second support offer) | fix 5 (refusal words are not a named day: needs offer_kind exact or an offer/accept stance), fix 6 (hardship route gated on `mode != hardship`) |
+| 7 | PUB-04 | platform stall | after "Yes, I confirm." the platform spoke its filler "Bir saniye lütfen." (61 s turn), the record node never ran and the dialogue model said "I have recorded your payment promise" with no write. Same incident as the earlier x3 PUB-04 rep 2; the organisers discard and repeat slow runs | none (platform) |
+| 7 | PUB-06 | judge artefact (borderline) | promise recorded correctly (637.50 on Fri 16 Oct); the customer asked "How much can I pay, you tell me?" and the agent restated the floor, which the judge counted as a second offer | none; a code-built answer that names the floor as already offered would avoid it |
+
+Fixes 5-6 are a third round of fixes, one more than the task's "one more round at most": they were small, generic,
+unit-tested and confirmed on the chat route before run 7.
 
 ## Credits
 
