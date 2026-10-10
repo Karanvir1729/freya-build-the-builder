@@ -1639,12 +1639,26 @@
        }
       ]
      }
+    },
+    {
+     "target_node": "qb_dob",
+     "description": "asks a question back",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "refusal_dob",
+        "operator": "equals",
+        "operand": "question"
+       }
+      ]
+     }
     }
    ],
    "max_node_turns": 60,
    "truncation_strategy": "keep_all",
    "disable_inactivity_monitor": false,
-   "task_message": "The person confirmed they are {{title}} {{last_name}}. You must check identity with two security questions, one at a time. Now ask the first: their date of birth.\nWhen they give it, call verify_identity with answer = the date as YYYY-MM-DD, whatever way they said it. A date said only as numbers is day, then month, then year (05/03/1990 = 1990-03-05). If they give only part of the date, ask for the rest before calling the tool.\nRules for this step:\n- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.\n- If the customer refuses to answer, or asks what the call is about instead of answering: explain that these questions protect their account, and ask the question again.\n- If the customer asks for a human: the first time, ask whether you can help them yourself. If they insist, call transfer_to_agent.\n- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.",
+   "task_message": "The person confirmed they are {{title}} {{last_name}}. You must check identity with two security questions, one at a time. Now ask the first: their date of birth.\nWhen they give it, call verify_identity with answer = the date as YYYY-MM-DD, whatever way they said it. A date said only as numbers is day, then month, then year (05/03/1990 = 1990-03-05). If they give only part of the date, ask for the rest before calling the tool.\nRules for this step:\n- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.\n- If the customer asks a question back (why you need it, what this is about, who is calling): answer in one short sentence without naming the reason for the call, then ask the same question again. If they refuse to answer: explain that these questions protect their account, and ask the question again.\n- If the customer asks for a human: the first time, ask whether you can help them yourself. If they insist, call transfer_to_agent.\n- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.",
    "on_enter": {
     "type": "llm"
    },
@@ -1703,7 +1717,8 @@
        }
       }
      },
-     "post_process_code": "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n        if isinstance(d, dict):\n            left = d.get('wrong_answers_left')\n            if d.get('hint') == 'day_month_swapped':\n                d['what_to_do_next'] = 'Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988.'\n            elif d.get('all_verified') is True or str(d.get('all_verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Both answers are correct. Identity verified.'\n            elif d.get('verified') is True or str(d.get('verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Correct. Ask the next security question.'\n            elif d.get('ok') is False or str(d.get('ok')).lower() == 'false':\n                d['what_to_do_next'] = 'The answer could not be read. It does not count as wrong. Ask again: What is your date of birth?'\n            elif str(left) == '0':\n                d['what_to_do_next'] = 'Three wrong answers. The check has ended. Say nothing about the account.'\n            else:\n                d['what_to_do_next'] = 'Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?'\nexcept Exception:\n    pass\n"
+     "post_process_code": "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n        if isinstance(d, dict):\n            left = d.get('wrong_answers_left')\n            if d.get('hint') == 'day_month_swapped':\n                d['what_to_do_next'] = 'Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988.'\n            elif d.get('all_verified') is True or str(d.get('all_verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Both answers are correct. Identity verified.'\n            elif d.get('verified') is True or str(d.get('verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Correct. Ask the next security question.'\n            elif d.get('ok') is False or str(d.get('ok')).lower() == 'false':\n                d['what_to_do_next'] = 'The answer could not be read. It does not count as wrong. Ask again: What is your date of birth?'\n            elif str(left) == '0':\n                d['what_to_do_next'] = 'Three wrong answers. The check has ended. Say nothing about the account.'\n            else:\n                d['what_to_do_next'] = 'Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?'\nexcept Exception:\n    pass\n",
+     "pre_process_code": "try:\n    vars['question_count_dob'] = 0\nexcept Exception:\n    pass\n"
     },
     {
      "type": "function",
@@ -1761,9 +1776,10 @@
      "type": "string",
      "enum_values": [
       "none",
-      "refused"
+      "refused",
+      "question"
      ],
-     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask what the call is about instead of answering it. none if they give an answer or say anything else. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
+     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask the same thing back again instead of answering. none if they give an answer or say anything else. question = asks something back instead of answering (why do you need that, which account or what this is about, who is calling) without refusing; refused is only an explicit refusal or not wanting to talk. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
      "min_confidence": 0.6
     }
    ],
@@ -1833,12 +1849,26 @@
        }
       ]
      }
+    },
+    {
+     "target_node": "qb_phone",
+     "description": "asks a question back",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "refusal_phone",
+        "operator": "equals",
+        "operand": "question"
+       }
+      ]
+     }
     }
    ],
    "max_node_turns": 60,
    "truncation_strategy": "keep_all",
    "disable_inactivity_monitor": false,
-   "task_message": "The date of birth was correct. Now ask the second security question: the last four digits of the phone number on file.\nWhen they give four digits, call verify_identity with answer = the four digits only.\nRules for this step:\n- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.\n- If the customer refuses to answer, or asks what the call is about instead of answering: explain that these questions protect their account, and ask the question again.\n- If the customer asks for a human: the first time, ask whether you can help them yourself. If they insist, call transfer_to_agent.\n- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.",
+   "task_message": "The date of birth was correct. Now ask the second security question: the last four digits of the phone number on file.\nWhen they give four digits, call verify_identity with answer = the four digits only.\nRules for this step:\n- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.\n- If the customer asks a question back (why you need it, what this is about, who is calling): answer in one short sentence without naming the reason for the call, then ask the same question again. If they refuse to answer: explain that these questions protect their account, and ask the question again.\n- If the customer asks for a human: the first time, ask whether you can help them yourself. If they insist, call transfer_to_agent.\n- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.",
    "on_enter": {
     "type": "llm"
    },
@@ -1897,7 +1927,8 @@
        }
       }
      },
-     "post_process_code": "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n        if isinstance(d, dict):\n            left = d.get('wrong_answers_left')\n            if d.get('hint') == 'day_month_swapped':\n                d['what_to_do_next'] = 'Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988.'\n            elif d.get('all_verified') is True or str(d.get('all_verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Both answers are correct. Identity verified.'\n            elif d.get('verified') is True or str(d.get('verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Correct. Ask the next security question.'\n            elif d.get('ok') is False or str(d.get('ok')).lower() == 'false':\n                d['what_to_do_next'] = 'The answer could not be read. It does not count as wrong. Ask again: What are the last four digits of the phone number on file?'\n            elif str(left) == '0':\n                d['what_to_do_next'] = 'Three wrong answers. The check has ended. Say nothing about the account.'\n            else:\n                d['what_to_do_next'] = 'Wrong answer. Tell the customer it does not match our records and ask again: What are the last four digits of the phone number on file?'\nexcept Exception:\n    pass\n"
+     "post_process_code": "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n        if isinstance(d, dict):\n            left = d.get('wrong_answers_left')\n            if d.get('hint') == 'day_month_swapped':\n                d['what_to_do_next'] = 'Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988.'\n            elif d.get('all_verified') is True or str(d.get('all_verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Both answers are correct. Identity verified.'\n            elif d.get('verified') is True or str(d.get('verified')).lower() == 'true':\n                d['what_to_do_next'] = 'Correct. Ask the next security question.'\n            elif d.get('ok') is False or str(d.get('ok')).lower() == 'false':\n                d['what_to_do_next'] = 'The answer could not be read. It does not count as wrong. Ask again: What are the last four digits of the phone number on file?'\n            elif str(left) == '0':\n                d['what_to_do_next'] = 'Three wrong answers. The check has ended. Say nothing about the account.'\n            else:\n                d['what_to_do_next'] = 'Wrong answer. Tell the customer it does not match our records and ask again: What are the last four digits of the phone number on file?'\nexcept Exception:\n    pass\n",
+     "pre_process_code": "try:\n    vars['question_count_phone'] = 0\nexcept Exception:\n    pass\n"
     },
     {
      "type": "function",
@@ -1955,13 +1986,71 @@
      "type": "string",
      "enum_values": [
       "none",
-      "refused"
+      "refused",
+      "question"
      ],
-     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask what the call is about instead of answering it. none if they give an answer or say anything else. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
+     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask the same thing back again instead of answering. none if they give an answer or say anything else. question = asks something back instead of answering (why do you need that, which account or what this is about, who is calling) without refusing; refused is only an explicit refusal or not wanting to talk. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
      "min_confidence": 0.6
     }
    ],
    "on_enter_first_entry_only": false
+  },
+  "qb_dob": {
+   "name": "qb_dob",
+   "node_type": "code",
+   "transitions": [
+    {
+     "target_node": "fin_declined",
+     "description": "a second question back instead of an answer",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "qb_route",
+        "operator": "equals",
+        "operand": "close"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "ask_dob",
+     "description": "always",
+     "condition": {
+      "operator": "always"
+     }
+    }
+   ],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": true,
+   "passthrough": true,
+   "passthrough_default_transition": "ask_dob",
+   "on_enter": {
+    "type": "silent"
+   },
+   "pre_actions": [
+    {
+     "type": "function",
+     "function": {
+      "name": "code_exec",
+      "handler": "__function__:code_exec",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "code": {
+         "type": "string",
+         "default": "try:\n    n = int(float(vars.get('question_count_dob') or 0)) + 1\n    vars['question_count_dob'] = n\n    vars['refusal_dob'] = 'none'\n    vars['qb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n    vars['qb_route'] = 'retry'\n"
+        },
+        "timeout_ms": {
+         "type": "number",
+         "default": 10000
+        }
+       }
+      }
+     }
+    }
+   ]
   },
   "count_decline_dob": {
    "name": "count_decline_dob",
@@ -2009,6 +2098,63 @@
         "code": {
          "type": "string",
          "default": "try:\n    n = int(float(vars.get('decline_count') or 0)) + 1\n    vars['decline_count'] = n\n    vars['refusal_dob'] = 'none'\n    vars['refusal_phone'] = 'none'\n    vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n    vars['decline_route'] = 'retry'\n"
+        },
+        "timeout_ms": {
+         "type": "number",
+         "default": 10000
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "qb_phone": {
+   "name": "qb_phone",
+   "node_type": "code",
+   "transitions": [
+    {
+     "target_node": "fin_declined",
+     "description": "a second question back instead of an answer",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "qb_route",
+        "operator": "equals",
+        "operand": "close"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "ask_phone",
+     "description": "always",
+     "condition": {
+      "operator": "always"
+     }
+    }
+   ],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": true,
+   "passthrough": true,
+   "passthrough_default_transition": "ask_phone",
+   "on_enter": {
+    "type": "silent"
+   },
+   "pre_actions": [
+    {
+     "type": "function",
+     "function": {
+      "name": "code_exec",
+      "handler": "__function__:code_exec",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "code": {
+         "type": "string",
+         "default": "try:\n    n = int(float(vars.get('question_count_phone') or 0)) + 1\n    vars['question_count_phone'] = n\n    vars['refusal_phone'] = 'none'\n    vars['qb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n    vars['qb_route'] = 'retry'\n"
         },
         "timeout_ms": {
          "type": "number",

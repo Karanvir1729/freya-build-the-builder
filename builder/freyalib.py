@@ -1020,6 +1020,28 @@ PERSONA_CONDUCT = (
 # append to every refusal / decline enum description (the brief's own list of what counts goes first)
 REFUSAL_NONE_CLAUSE = (" Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back "
                        "that the rules do not count is none, never refused: only what the rules name counts.")
+# the `question` value of a refusal/decline enum (a question back is not a refusal until it replaces the answer twice)
+QUESTION_ENUM_CLAUSE = (" question = asks something back instead of answering (why do you need that, which account or what this is "
+                        "about, who is calling) without refusing; refused is only an explicit refusal or not wanting to talk.")
+
+
+def reset_pre(names):
+    """Tool pre hook: zero the named counters (e.g. question_count_<stage> once an answer reaches the identity tool)."""
+    return "try:\n" + "".join("    vars[%r] = 0\n" % n for n in names) + "except Exception:\n    pass\n"
+
+
+def question_back_node(stage, ask_node, close_node, limit=2, flag=None):
+    """Code node qb_<stage> for a question asked back at an identity question. The first question is answered and the
+    question is asked again (always -> ask_node); the `limit`-th question in a row with no answer in between is a
+    deflection and routes to close_node (the brief's "asked instead of answering" close). Measured on the organisers'
+    simulator: counting every question back as a refusal closed 4 of 10 calls as declined under the kit's asks_back
+    style, whose customer asks twice and then answers. Reset the counter with reset_pre on the identity tool."""
+    flag = flag or "refusal_%s" % stage
+    code = counter_code("question_count_%s" % stage, limit, "qb_route", reset={flag: "none"})
+    return code_node("qb_%s" % stage, code, [eq("qb_route", "close", close_node, "a second question back instead of an answer"),
+                                            always(ask_node)])
+
+
 # append to every plan-request enum description
 PLAN_REQUEST_CLAUSE = (" Asking how much they can, should or have to pay, or naming an amount or a date, is NOT a plan "
                        "request: the agent proposes the amount.")

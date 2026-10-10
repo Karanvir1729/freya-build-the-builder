@@ -173,3 +173,5 @@ opening prompt should quote the opening line too.
 ## How customers talk (persona conduct)
 
 `assemble(..., conduct=True)` appends `PERSONA_CONDUCT` to the system prompt: keep to the business of the call, no sympathy for small talk, a message without an answer is neither a refusal nor a request, one short answer to a question back then the same question again, wait for a complete number, the last corrected value counts, 'how much can I pay' is not a plan request. `REFUSAL_NONE_CLAUSE` and `PLAN_REQUEST_CLAUSE` are appended to the matching enum descriptions by the generator. Brief-agnostic; the brief's own definitions of a refusal or a deflection come first in the description and win.
+
+`question_back_node(stage, ask_node, close_node, limit=2)` + `QUESTION_ENUM_CLAUSE` + `reset_pre([...])`: a question asked back at an identity question is answered and the question repeated; the second question in a row with no answer in between is the deflection the brief closes on. The identity tool's pre hook zeroes the counter when an answer arrives.

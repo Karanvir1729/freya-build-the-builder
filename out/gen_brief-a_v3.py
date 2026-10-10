@@ -153,47 +153,50 @@ transfer_general = fl.api_tool(API, "transfer_to_agent", baked={"queue": "genera
 
 ID_COMMON = ("Rules for this step:\n"
              "- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.\n"
-             "- If the customer refuses to answer, or asks what the call is about instead of answering: explain that these questions protect their account, and ask the question again.\n"
+             "- If the customer asks a question back (why you need it, what this is about, who is calling): answer in one short sentence without naming the reason for the call, then ask the same question again. If they refuse to answer: explain that these questions protect their account, and ask the question again.\n"
              "- If the customer asks for a human: the first time, ask whether you can help them yourself. If they insist, call transfer_to_agent.\n"
              "- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.")
 
 REFUSAL_DESC = ("From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, "
-                "or ask what the call is about instead of answering it. none if they give an answer or say anything else." + fl.REFUSAL_NONE_CLAUSE)
+                "or ask the same thing back again instead of answering. none if they give an answer or say anything else." + fl.QUESTION_ENUM_CLAUSE + fl.REFUSAL_NONE_CLAUSE)
 
 nodes["ask_dob"] = fl.conv(
     "ask_dob",
     "The person confirmed they are {{title}} {{last_name}}. You must check identity with two security questions, one at a time. Now ask the first: their date of birth.\n"
     "When they give it, call verify_identity with answer = the date as YYYY-MM-DD, whatever way they said it. A date said only as numbers is day, then month, then year (05/03/1990 = 1990-03-05). "
     "If they give only part of the date, ask for the rest before calling the tool.\n" + ID_COMMON,
-    tools=[fl.api_tool(API, "verify_identity", baked={"field": "date_of_birth"},
+    tools=[fl.api_tool(API, "verify_identity", baked={"field": "date_of_birth"}, pre=fl.reset_pre(["question_count_dob"]),
                        description="Check the date of birth. CALL it every time the customer gives a full date of birth.",
                        field_descriptions={"answer": "The date of birth as YYYY-MM-DD."},
                        post=fl.verify_post("What is your date of birth?", HINTS, MAX_WRONG, all_verified_text=ALL_VERIFIED)), transfer_general],
-    extraction=[fl.ext("refusal_dob", ["none", "refused"], REFUSAL_DESC)],
+    extraction=[fl.ext("refusal_dob", ["none", "refused", "question"], REFUSAL_DESC)],
     transitions=[
         fl.eq("verify_identity_response.data.wrong_answers_left", "0", "fin_failed", "three wrong answers"),
         fl.is_true("verify_identity_response.data.verified", "ask_phone", "date of birth correct"),
         fl.transferred("fin_transferred_human", "transferred"),
         fl.eq("refusal_dob", "refused", "count_decline_dob", "customer refused"),
+        fl.eq("refusal_dob", "question", "qb_dob", "asks a question back"),
     ])
 
 nodes["ask_phone"] = fl.conv(
     "ask_phone",
     "The date of birth was correct. Now ask the second security question: the last four digits of the phone number on file.\n"
     "When they give four digits, call verify_identity with answer = the four digits only.\n" + ID_COMMON,
-    tools=[fl.api_tool(API, "verify_identity", baked={"field": "phone_last4"},
+    tools=[fl.api_tool(API, "verify_identity", baked={"field": "phone_last4"}, pre=fl.reset_pre(["question_count_phone"]),
                        description="Check the last four digits of the phone number. CALL it every time the customer gives four digits.",
                        field_descriptions={"answer": "Exactly four digits."},
                        post=fl.verify_post("What are the last four digits of the phone number on file?", HINTS, MAX_WRONG, all_verified_text=ALL_VERIFIED)), transfer_general],
-    extraction=[fl.ext("refusal_phone", ["none", "refused"], REFUSAL_DESC)],
+    extraction=[fl.ext("refusal_phone", ["none", "refused", "question"], REFUSAL_DESC)],
     transitions=[
         fl.is_true("verify_identity_response.data.all_verified", "load_account", "identity verified"),
         fl.eq("verify_identity_response.data.wrong_answers_left", "0", "fin_failed", "three wrong answers"),
         fl.transferred("fin_transferred_human", "transferred"),
         fl.eq("refusal_phone", "refused", "count_decline_phone", "customer refused"),
+        fl.eq("refusal_phone", "question", "qb_phone", "asks a question back"),
     ])
 
 for stage in ["dob", "phone"]:
+    nodes[f"qb_{stage}"] = fl.question_back_node(stage, f"ask_{stage}", "fin_declined")   # a question back: answer, ask again; twice in a row = deflection
     code = fl.counter_code("decline_count", 2, "decline_route", reset={"refusal_dob": "none", "refusal_phone": "none"})
     nodes[f"count_decline_{stage}"] = fl.code_node(f"count_decline_{stage}", code, [
         fl.eq("decline_route", "close", "fin_declined", "second refusal"), fl.always(f"ask_{stage}")])
