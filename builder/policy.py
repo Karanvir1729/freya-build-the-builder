@@ -469,6 +469,10 @@ def resolve_when(V, text):
         return None, 'none'
     today = today_of(V)
     D = datetime.timedelta
+    if re.search(r' (twenty|thirty) $', t):
+        # the words stop on a bare tens word ('I can pay on the twenty'): a cut-off day, never the 20th or the 30th
+        # and never the extractor's guess (Freya talkative PUB-04 recorded the 20th for 'the twenty[-third]')
+        return None, 'vague'
     if ' day after tomorrow ' in t:
         return today + D(2), 'exact'
     if ' tomorrow ' in t:
@@ -501,7 +505,10 @@ def resolve_when(V, text):
             return d, 'exact'
         except Exception:
             return None, 'vague'
-    m = re.search(r' (?:the )?(\d{1,2})(?:st|nd|rd|th) ', t)
+    # a day of the month wins over a weekday said with it ('Monday the twenty-sixth' is the 26th, never the next
+    # Monday): the read-back then names the date's real weekday, so a mismatch is the customer's to correct
+    m = (re.search(r' (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday) (?:the )?(\d{1,2})(?:st|nd|rd|th)? ', t)
+         or re.search(r' (?:the )?(\d{1,2})(?:st|nd|rd|th) ', t))
     if m:
         n = int(m.group(1))
         y, mo = today.year, today.month
@@ -1118,7 +1125,7 @@ class Policy:
         state_line first in its prompt, no tools (every write happens in the record nodes)."""
         name = name or self.targets["negotiate"]
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=list(extraction) + self.aside_extraction(), transitions=transitions)
+                       extraction=fl.with_cutoff(list(extraction) + self.aside_extraction()), transitions=transitions)
 
     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
                      name=None, conf=0.5):
@@ -1141,7 +1148,7 @@ class Policy:
             fl.eq("confirm", "no", "confirm_no", "the customer said no to the read-back"),
         ] + list(topic_trs or [])
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{readback_line}}"},
-                       extraction=ext + self.aside_extraction(conf), transitions=trs)
+                       extraction=fl.with_cutoff(ext + self.aside_extraction(conf)), transitions=trs)
 
     def promise_assert_pre(self, pid_field="product_id", amount_field="amount", date_field="date"):
         """Pre hook of the record node: the body MUST equal the approved values (rec_pid, rec_amount, rec_date,
@@ -1215,7 +1222,7 @@ class Policy:
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=ext + self.aside_extraction(conf), transitions=trs)
+                       extraction=fl.with_cutoff(ext + self.aside_extraction(conf)), transitions=trs)
 
     def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):
         """After a recorded promise (on_enter tts {{wrap_line}}: the recorded sentence, the brief's sentence after
@@ -1230,6 +1237,6 @@ class Policy:
                fl.eq("wrap", "new_plan", self.targets["xfer_restructuring"], "asks for a new plan"),
                fl.eq("wrap", "change", "wrap_change", "asks to change or cancel the promise")]
         n = fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{wrap_line}}"},
-                    extraction=ext + self.aside_extraction(conf), transitions=trs, max_turns=max_turns)
+                    extraction=fl.with_cutoff(ext + self.aside_extraction(conf)), transitions=trs, max_turns=max_turns)
         n["max_turn_transition"] = "finalize"
         return n

@@ -2,7 +2,7 @@
 """Local simulator: run the practice customers against a published phone agent over Freya's chat route, no simulation.
 
     source env.sh
-    python3 builder/sim.py <workflow_id|slot> [--brief A|B] [--only PUB-01,PUB-02] [--reps 1] [--style talkative]
+    python3 builder/sim.py <workflow_id|slot> [--brief A|B] [--only PUB-01,PUB-02] [--reps 1] [--style talkative | --styles none,terse|kit|extra|all]
                            [--concurrency 5] [--max-turns 30] [--out results/sim.json] [--transcripts results/transcripts/]
                            [--customer-model gpt-5-mini] [--judge-model gpt-5] [--verbose]
 
@@ -24,6 +24,43 @@ sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "tools"))
 import freya                                      # noqa: E402  stdlib client (FREYA_API_KEY, FREYA_API_URL)
 from score import http, score_ledger              # noqa: E402  the mock bank + the ledger check
 from run_cases import STYLES, persona_for         # noqa: E402  the organisers' persona text (PERSONA template inside)
+
+# Extra ways of talking, in the organisers' STYLES format (one "HOW YOU TALK:" paragraph appended to the PERSONA; the
+# facts of the case never change, so the expected ledger stays the case's). Brief-agnostic: no bank, product, value or
+# rule. From docs/personas-plan.md section 3 and the habits of the organisers' persona model seen on Freya (terse lines,
+# digits and dates in words unasked, cut-off turns). Local runs only (--provider claude while OpenAI is closed).
+EXTRA_STYLES = {
+    "terse": "HOW YOU TALK: you answer in one short line, never more than a few words. You say dates, years and digits in words even when nobody asked you to, like 'fourteenth of March nineteen eighty-eight' and 'four four seven one'. Once in the call your sentence stops early, as if you were cut off, and you finish it only when the caller asks.",
+    "rambling_corrects": "HOW YOU TALK: you talk a lot and add a sentence about your day before most answers. The first time you say a payment day or an amount, you say a slightly different one. When the caller reads it back to you, you say 'no, sorry, I meant' and give the right one, which is the one written above. Do this once in the call. Never do it with a security answer.",
+    "pieces_identity": "HOW YOU TALK: when the caller asks a security question, you give the answer in two parts: say the first half, stop, and give the rest in your next turn or when asked, like 'forty-four' and then 'seventy-one', or 'the fourteenth of March' and then 'nineteen eighty-eight'. This replaces the rule about saying all of it in one turn. Everything else you say in one turn.",
+    "impatient": "HOW YOU TALK: you are in a hurry. Your answers are short and a bit irritated. Once in the call, before you answer, you say something like 'Can we make this quick? I'm at work.' or 'How long is this going to take?'. You still give every answer when asked, and you never hang up before the caller says goodbye.",
+    "previous_question": "HOW YOU TALK: once in the call, you answer the question the caller asked BEFORE the current one again, as if you had not heard the new question, like repeating your date of birth when asked for something else. When the caller asks again, you answer the current question correctly.",
+    "volunteer": "HOW YOU TALK: you like to get things done. As soon as the caller asks the first security question, you give all your security answers in one go. When the caller tells you why they are calling, you say straight away what you can do, as written above, without waiting to be asked. This replaces the rule about not volunteering information. The facts stay exactly as written above.",
+    "silent_turn": "HOW YOU TALK: once in the call, right after the caller asks you something, you reply only '...' as if you did not hear or were distracted. In your next turn you answer normally. Once more in the call, when the caller reads a payment back to you, you reply only 'Sorry, say that again?' and confirm only after the caller repeats it.",
+    "hangs_up_after_promise": "HOW YOU TALK: you want the call over. As soon as you have said 'Yes, I confirm.' to a payment read-back, your next line is 'Great, thanks, bye.' and after that you say nothing more, whatever the caller says.",
+    "final_like": "HOW YOU TALK: you answer in short lines, sometimes with a sentence about your day first. Once in the call you give a long number or date in two parts (the first half, then the rest in your next turn). Once in the call, before you answer, you ask a short question back, like 'why do you need that?'. You say amounts and dates in words, like 'four hundred and twenty' and 'the sixteenth of October'. Whatever the caller replies, you then give your answer. The facts stay exactly as written above.",
+}
+STYLES.update(EXTRA_STYLES)        # the dict run_cases.persona_for reads; tools/run_cases.py itself stays as shipped
+KIT_STYLES = ("pieces", "corrects", "talkative", "asks_back", "in_words")
+
+
+def styled_cases(cases, spec):
+    """One copy of every case per style. `spec` is a comma list of style names, or kit | extra | all; `none` in the
+    list adds the unstyled copy (so a run can say 'passes unstyled, fails styled'). A styled copy keeps the original
+    mock customer (`mock_case`, else the original id: public cases carry none) and its expected ledger, and gets the
+    id '<id>[<style>]' so transcripts do not overwrite each other."""
+    names = {"kit": KIT_STYLES, "extra": tuple(EXTRA_STYLES), "all": KIT_STYLES + tuple(EXTRA_STYLES)}.get(spec)
+    if names is None:
+        names = tuple(x.strip() for x in spec.split(",") if x.strip())
+    unknown = [x for x in names if x != "none" and x not in STYLES]
+    if unknown:
+        raise SystemExit("unknown style(s): %s (known: none, %s)" % (", ".join(unknown), ", ".join(sorted(STYLES))))
+    out = []
+    for c in cases:
+        for st in names:
+            st = None if st == "none" else st
+            out.append(dict(c, id=c["id"] + ("[%s]" % st if st else ""), mock_case=c.get("mock_case", c["id"]), style=st, base_id=c["id"]))
+    return out
 
 OPENAI_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 DEFAULTS = {"openai": {"customer": "gpt-5-mini", "judge": "gpt-5"}, "claude": {"customer": "claude-sonnet-5-5", "judge": "claude-sonnet-5-5"}}
@@ -536,7 +573,7 @@ def run_case(ctx, case, rep):
     """One practice customer on one chat-route call. Returns a row shaped like run_cases.py's rows."""
     cid, chat, ledger = None, None, None
     row = {"id": case["id"], "level": case["level"], "family": case["family"], "pass": False, "failed": [], "call_id": None, "tools": [], "customer_id": None,
-           "transcript": None, "turns": 0, "stop": None, "judge": None}
+           "transcript": None, "turns": 0, "stop": None, "judge": None, "style": case_style(ctx, case), "mock_case": case.get("mock_case", case["id"])}
 
     def new_session():
         # an extended case reuses a mock customer (fixed identity, products, faults) under its own id and script
@@ -550,7 +587,7 @@ def run_case(ctx, case, rep):
             return finish(ctx, case, rep, row, None, None)
         variables = dict(variables); cid = row["customer_id"] = variables["customer_id"]
         if (case.get("variables") or {}).get("now"): variables["now"] = case["variables"]["now"]   # another call date: the mock enforces no date rule
-        persona = persona_for(case, {"identity": case["identity"]}, ctx.style)
+        persona = persona_for(case, {"identity": case["identity"]}, case_style(ctx, case))
         customer = Customer(ctx.provider, ctx.customer_model, persona["prompt"])
         chat = Chat(ctx.workflow_id, variables, new_session=new_session)
         line, goodbyes, empties = ctx.opening, 0, 0
@@ -637,6 +674,11 @@ def close_from_args(ledger, row):
     return led
 
 
+def case_style(ctx, case):
+    """--style for every case, else the case's own `style` (a --styles copy, or a generated case that carries one)."""
+    return ctx.style or case.get("style")
+
+
 def finish(ctx, case, rep, row, chat, ledger):
     """Score the ledger, judge the transcript, write the transcript file, print the run_cases-style line."""
     lines, tools, var_table, slowest = [], [], None, 0.0
@@ -691,7 +733,9 @@ def write_transcript(ctx, case, rep, row, chat, ledger, lines, tools):
     ctx.transcripts.mkdir(parents=True, exist_ok=True)
     stem = case["id"] + ("" if ctx.reps == 1 else "-r%d" % (rep + 1))
     path = ctx.transcripts / (stem + ".txt")
-    head = ["# %s %s%s" % (case["id"], case["title"], " [%s]" % ctx.style if ctx.style else ""),
+    st = case_style(ctx, case)
+    head = ["# %s %s%s" % (case["id"], case["title"], " [style: %s]" % st if st else " [style: none]"),
+            "# mock customer: %s | style text: %s" % (case.get("mock_case", case["id"]), STYLES[st] if st else "(none)"),
             "# workflow %s | call %s | customer %s | %s" % (ctx.workflow_id, row.get("call_id"), row.get("customer_id"), time.strftime("%Y-%m-%d %H:%M:%S")),
             "# customer model %s | judge model %s (%s) | stop: %s | transcript from: %s" % (ctx.customer_model, ctx.judge_model, ctx.provider.kind, row.get("stop"), row.get("transcript_source")),
             "# RESULT: %s%s" % ("PASS" if row["pass"] else "FAIL", "" if row["pass"] else " | " + " | ".join(row["failed"])), ""]
@@ -727,7 +771,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("workflow", help="workflow id, or a slot name from .freya-agents.json (brief-a, brief-b, ...)")
     ap.add_argument("--cases", default=str(ROOT / "public-test-set.json")); ap.add_argument("--brief"); ap.add_argument("--only")
-    ap.add_argument("--reps", type=int, default=1); ap.add_argument("--style", choices=sorted(STYLES))
+    ap.add_argument("--reps", type=int, default=1); ap.add_argument("--style", choices=sorted(STYLES), help="one way of talking for every case (kit styles plus EXTRA_STYLES)")
+    ap.add_argument("--styles", help="comma list of styles (none = unstyled), or kit | extra | all: run every selected case once per style and report per style")
     ap.add_argument("--concurrency", type=int, default=5); ap.add_argument("--max-turns", type=int, default=30)
     ap.add_argument("--out"); ap.add_argument("--transcripts", default=str(ROOT / "results" / "transcripts"))
     ap.add_argument("--customer-model"); ap.add_argument("--judge-model")
@@ -750,6 +795,10 @@ def main():
     cases = [c for c in json.load(open(a.cases)) if (not a.brief or c["brief"] == a.brief) and (not a.only or c["id"] in a.only.split(","))]
     if not cases:
         sys.exit("no cases selected")
+    if a.style and a.styles:
+        sys.exit("give --style or --styles, not both")
+    if a.styles:
+        cases = styled_cases(cases, a.styles)
     ctx.first_node = first_node_info(ctx.workflow_id)
     print("sim | workflow %s%s | %d case(s) x %d rep(s) | concurrency %d | customer %s, judge %s (%s)" % (
         ctx.workflow_id, " (slot %s)" % a.workflow if agent_id else "", len(cases), a.reps, a.concurrency, ctx.customer_model, ctx.judge_model, ctx.provider.kind), flush=True)
@@ -780,8 +829,17 @@ def main():
         if a.reps > 1:
             print(f"-- run {rep + 1} of {a.reps}: {sum(r['pass'] for r in rows)} / {len(rows)} passed, {took:.0f} s\n", flush=True)
     need = a.reps                                                # a customer counts only when every run passes
-    final = [{"id": c["id"], "family": c["family"], "passes": sum(r[k]["pass"] for r in reps), "runs": a.reps, "pass": sum(r[k]["pass"] for r in reps) >= need} for k, c in enumerate(cases)]
+    final = [{"id": c["id"], "family": c["family"], "style": case_style(ctx, c), "passes": sum(r[k]["pass"] for r in reps), "runs": a.reps,
+              "pass": sum(r[k]["pass"] for r in reps) >= need} for k, c in enumerate(cases)]
     n = sum(f["pass"] for f in final)
+    if a.styles:                                               # per style: k / n, and the cases that pass unstyled but fail styled
+        base = {c["id"]: c.get("base_id", c["id"]) for c in cases}
+        plain = {base[f["id"]]: f["pass"] for f in final if f["style"] is None}
+        for st in dict.fromkeys(f["style"] for f in final):
+            fs = [f for f in final if f["style"] == st]
+            regress = [base[f["id"]] for f in fs if st and not f["pass"] and plain.get(base[f["id"]])]
+            print("style %s: %d / %d passed%s" % (st or "none", sum(f["pass"] for f in fs), len(fs),
+                                                  "; pass unstyled, fail styled: " + ", ".join(regress) if regress else ""))
     if a.reps > 1:
         for f in final:
             print(("PASS" if f["pass"] else "FAIL"), f["id"], f"{f['passes']}/{f['runs']}")
@@ -802,7 +860,7 @@ def main():
     with open(ROOT / "results" / "log.jsonl", "a") as f:
         f.write(json.dumps({"at": time.strftime("%Y-%m-%d %H:%M:%S"), "runner": "sim", "workflow_id": ctx.workflow_id, "agent_id": agent_id, "brief": a.brief,
                             "runs": a.reps, "passed": n, "total": len(final), "seconds": round(total_s), "failed": [f["id"] for f in final if not f["pass"]],
-                            "style": a.style, "chat_turns": COUNTS["chat_turns"], "model_calls": model_calls,
+                            "style": a.style or a.styles, "chat_turns": COUNTS["chat_turns"], "model_calls": model_calls,
                             "customer_model": ctx.customer_model, "judge_model": ctx.judge_model, "provider": ctx.provider.kind}) + "\n")
     if a.out:
         pathlib.Path(a.out).parent.mkdir(parents=True, exist_ok=True)
