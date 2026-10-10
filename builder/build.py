@@ -10,10 +10,15 @@ Every argument ending in .md is a brief; the argument ending in .json is the ban
 The slot (and the name of every output file) is the file name of the last brief without .md.
 Options: --cases <file> (practice cases to test against; auto-detected for the kit and synthetic briefs, none for
 hidden briefs), --runner sim|freya (local simulator or the organisers' simulation; default sim), --minutes N (budget,
-default 29), --no-rules / --no-audit to skip those steps.
+default 29), --no-rules / --no-audit / --no-gen-cases to skip those steps, --gen-cases to generate rule-branch cases
+even when a cases file exists (they are then an extra set; the given file stays the practice set).
 
 One run, with no manual step:
   1. rules:    builder/rules.py extracts the rule inventory of the brief(s) -> out/<slot>.rules.json (one model call)
+     cases:    at the same time (thread), when the brief has no practice cases: builder/cases.py, an independent case
+               writer, generates 12-20 rule-branch cases -> out/<slot>.cases.json (the building agent never writes its
+               own tests; it never reads the .rationale.md). Brief rule numbers in the cases are mapped to inventory ids
+               once both are done.
   2. build:    Claude (Claude Agent SDK) with the `build-phone-agent` skill writes out/gen_<slot>.py on builder/freyalib,
                generates out/<slot>.workflow.json, lints, dry-runs, saves it on Freya (freya.save_workflow), smoke-tests it
                over the chat route, audits rule coverage, runs the practice cases when there are any, and fixes what fails
@@ -25,7 +30,7 @@ Needs FREYA_API_KEY and FREYA_BANK_TEAM_KEY (env.sh), a Claude login or ANTHROPI
 local simulator's customer/judge models (otherwise it falls back to the Claude CLI).
 BUILDER_MODEL sets the builder's own model (default claude-opus-5-5). The phone agent's model is fixed in freya.py.
 """
-import asyncio, dataclasses, json, os, pathlib, re, subprocess, sys, time
+import asyncio, dataclasses, json, os, pathlib, re, subprocess, sys, threading, time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -52,10 +57,12 @@ class Trace:
         self.t0 = time.time()
         self.log = (d / (slot + ".log")).open("w")
         self.jsonl = (d / (slot + ".jsonl")).open("w")
+        self.lock = threading.Lock()
 
     def line(self, msg):
         s = "[%s +%5.0fs] %s" % (time.strftime("%H:%M:%S"), time.time() - self.t0, scrub(msg))
-        self.log.write(s + "\n"); self.log.flush(); print(s, flush=True)
+        with self.lock:
+            self.log.write(s + "\n"); self.log.flush(); print(s, flush=True)
 
     def raw(self, obj):
         self.jsonl.write(scrub(json.dumps(obj, default=str)) + "\n"); self.jsonl.flush()
@@ -94,7 +101,7 @@ def detect_cases(briefs):
     return None, None
 
 
-async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner, minutes_left):
+async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner, minutes_left, generated=None):
     from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, ToolResultBlock,
                                   ToolUseBlock, UserMessage, query)
     model = os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL)
@@ -103,14 +110,26 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
         allowed_tools=["Read", "Write", "Edit", "Glob", "Grep", "Bash"], permission_mode="dontAsk", max_turns=200,
         env={"BASH_DEFAULT_TIMEOUT_MS": "900000", "BASH_MAX_TIMEOUT_MS": "1200000", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"},
     )
+    gen_line = ""
+    if generated and generated == cases:
+        runner = "sim"   # generated cases reuse mock customers (mock_case) and other dates: only builder/sim.py runs them
+        gen_line = (" These practice cases were GENERATED from the brief by an independent case writer (builder/cases.py), not by "
+                    "the organisers: each carries expected_confidence and rule_ids. Run them once (skill step 9, repair round for "
+                    "generated cases: --concurrency 2, fix only deterministic agent errors, never on a low/medium-confidence "
+                    "expectation, at most 2 rounds). Do not read out/%s.cases.rationale.md." % slot)
+    elif generated:
+        gen_line = (" Extra generated rule-branch cases (independent case writer, sim.py only): %s; use them only if time is "
+                    "left after the practice cases, under skill step 9's rules for generated cases." % generated)
     test_line = ("No practice cases exist for this brief: test with lint, dry run, the smoke scripts and the audit only."
                  if not cases else
                  "Practice cases: %s%s. Test runner: %s (%s)." % (cases, (" --brief " + brief_filter) if brief_filter else "", runner,
                  "python3 builder/sim.py <slot> --cases <file>%s --concurrency 5" % ((" --brief " + brief_filter) if brief_filter else "")
                  if runner == "sim" else "python3 tools/run_cases.py <agent_id> --cases <file>%s" % ((" --brief " + brief_filter) if brief_filter else "")))
+    deadline = time.strftime("%H:%M:%S", time.localtime(time.time() + minutes_left * 60))
     prompt = ("Use the %s skill to build a phone agent. Brief file(s): %s. Tool API file: %s. Slot name: %s. "
-              "The rule inventory is at out/%s.rules.json (and .md). %s Time budget: %d minutes from now for everything, "
-              "including your own tests; save a working agent early and improve it." % (SKILL, " ".join(briefs), tool_api, slot, slot, test_line, int(minutes_left)))
+              "The rule inventory is at out/%s.rules.json (and .md). %s%s Time budget: %d minutes from now (stop by %s local "
+              "time; check `date` before starting a test round) for everything, including your own tests; save a working "
+              "agent early and improve it." % (SKILL, " ".join(briefs), tool_api, slot, slot, test_line, gen_line, int(minutes_left), deadline))
     trace.line("model call: %s | purpose: build, test and fix the phone agent from the brief | prompt: %s" % (model, prompt))
     async for message in query(prompt=prompt, options=options):
         trace.raw({"type": type(message).__name__, **dataclasses.asdict(message)})
@@ -158,7 +177,7 @@ async def main(argv):
     while i < len(argv):
         a = argv[i]
         if a in opts and i + 1 < len(argv): opts[a] = argv[i + 1]; i += 2; continue
-        if a in ("--no-rules", "--no-audit"): flags.add(a); i += 1; continue
+        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases"): flags.add(a); i += 1; continue
         args.append(a); i += 1
     briefs = [a for a in args if a.lower().endswith(".md")]
     apis = [a for a in args if a.lower().endswith(".json")]
@@ -176,11 +195,34 @@ async def main(argv):
     trace.line("build start %s | briefs=%s tool_api=%s slot=%s | cases=%s runner=%s budget=%.0f min | builder model=%s | phone agent model=%s"
                % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), briefs, tool_api, slot, cases, opts["--runner"], budget, os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL), os.environ.get("FREYA_AGENT_MODEL", "experimental-5")))
     (ROOT / "out").mkdir(exist_ok=True)
+    # rules and generated cases run at the same time (T31); the case writer reads the brief itself (independent reader)
+    gen_cases = None
+    want_cases = "--no-gen-cases" not in flags and (not cases or "--gen-cases" in flags)
+    rules_out = "out/%s.rules.json" % slot
+    cases_out = "out/%s.cases.json" % slot
+    jobs = []
     if "--no-rules" not in flags:
-        run_step(trace, "rules", [PY, "builder/rules.py", *briefs, "--api", tool_api, "--out", "out/%s.rules.json" % slot], timeout=420)
+        jobs.append(threading.Thread(target=run_step, args=(trace, "rules", [PY, "builder/rules.py", *briefs, "--api", tool_api, "--out", rules_out], 420)))
+    if want_cases:
+        (ROOT / cases_out).unlink(missing_ok=True)
+        cmd = [PY, "builder/cases.py", "--brief", *briefs, "--api", tool_api, "--out", cases_out]
+        if "--no-rules" in flags and (ROOT / rules_out).exists():
+            cmd += ["--rules", rules_out]
+        jobs.append(threading.Thread(target=run_step, args=(trace, "cases", cmd, 420)))
+    for j in jobs: j.start()
+    for j in jobs: j.join()
+    if want_cases and (ROOT / cases_out).exists():
+        if (ROOT / rules_out).exists():
+            run_step(trace, "cases-map", [PY, "builder/cases.py", "--map-rules", cases_out, "--rules", rules_out], 60)
+        rc, _ = run_step(trace, "cases-check", [PY, "builder/cases.py", "--check", cases_out, "--api", tool_api], 60)
+        gen_cases = str(ROOT / cases_out)
+        if not cases:
+            cases, brief_filter = gen_cases, None
+    elif want_cases:
+        trace.line("cases: no generated cases file; the build runs without practice cases")
     try:
         left = budget - trace.elapsed_min() - 3          # keep 3 minutes for verify + export
-        await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left), timeout=max(60, left * 60))
+        await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left, generated=gen_cases), timeout=max(60, left * 60))
     except asyncio.TimeoutError:
         trace.line("STOPPED: the build budget was reached. Verifying and exporting whatever is saved on Freya.")
     except Exception as e:
