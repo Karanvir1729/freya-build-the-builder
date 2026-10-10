@@ -52,7 +52,7 @@ and raises `ValueError` at generation time when a name is not there; without `ap
 | `note_reasons(api, note_tool="add_note", reason_field="reason")` | the note tool's reason enum from the API file (`[]` when the field has no enum) |
 | `product_fields(api, account_tool="get_account", products_field=None)` | `{field: {type, description, enum}}` of one product in the account tool's response (`products_field` None = its first array property; `$ref` resolved) |
 | `state_fn_code(promise_tool, note_tool, still_open_text=None)` | the shared `_getv` / `_status` source (braces in `still_open_text` are refused) |
-| `promise_pre_code(cap_to_deadline=True, cap_to_amount=True, id_prefix="p", pid_field, amount_field, date_field, promise_tool, note_tool, api=None)` | promise tool pre hook: id normalised (`'1'` -> `'p1'`), amount -> float, date -> `[:10]`, `pending_pid`, date capped to `dl_<pid>`, amount capped to `pd_<pid>`; `api` checks the three request field names |
+| `promise_pre_code(cap_to_deadline=True, cap_to_amount=True, id_prefix="p", pid_field, amount_field, date_field, promise_tool, note_tool, api=None, snap_closed=None, holidays=(), business_weekdays)` | promise tool pre hook: id normalised (`'1'` -> `'p1'`), amount -> float, date -> `[:10]`, `pending_pid`, date capped to `dl_<pid>`, amount capped to `pd_<pid>`; `snap_closed="before"/"after"` then moves a weekend/closure date to the business day before/after it; `api` checks the three request field names |
 | `promise_post_code(max_fails=2, fail_reason="service_error", promise_tool, note_tool, ok_field="ok", api=None, reason_field="reason")` | promise tool post hook: "recorded" only on ok true (-> `rec_pids`), else retry once, at `max_fails` note `fail_reason`; `+ _status`; `api` checks `fail_reason` against the note tool's reason enum and `ok_field` against the response |
 | `note_pre_code(id_prefix, pid_field, reason_field, promise_tool, note_tool, api=None)` | note tool pre hook: id normalised, `pending_note`; `api` checks the two request field names |
 | `note_post_code(promise_tool, note_tool, ok_field, api=None)` | note tool post hook: `note_log` on ok true, else retry; `+ _status` |
@@ -60,7 +60,7 @@ and raises `ValueError` at generation time when a name is not there; without `ap
 | `done_intent_tr(target, desc, intent_desc)` | the tool-call fallback `transition_to_<target>` for the same event |
 | `finalize_code(precedence, promise_key, paid_key, default_key, paid_reason=None, order="product", promise_tool, route_var, ok_field, api=None, note_tool, reason_field)` | the finalize code node: writes `final_route` (see below); `api` checks every precedence reason and `paid_reason` against the note tool's enum |
 | `finalize_transitions(precedence, promise_key, paid_key, default_key, route_var, fin_prefix="fin_")` | `eq(final_route, key, fin_<key>)` for promise, paid and every precedence key, then `always(fin_<default_key>)` |
-| `products_facts_code(bands, floor_rules, wording, statement, attempt1_var, id_prefix, unknown_type_words, line_template, attempt2_template, one_attempt_template, calendar_extra_days, pid_field, amount_field, days_late_field, type_field, api=None, account_tool, products_field)` | the prepare body (after `freyalib.products_from_vars()`, inside `guarded()`) |
+| `products_facts_code(bands, floor_rules, wording, statement, attempt1_var, id_prefix, unknown_type_words, line_template, attempt2_template, one_attempt_template, calendar_extra_days, pid_field, amount_field, days_late_field, type_field, api=None, account_tool, products_field, closed_day_move="after")` | the prepare body (`closed_day_move="before"`: the calendar offers the business day BEFORE a named weekend/closure day, and the product's own deadline when that day is past it) (after `freyalib.products_from_vars()`, inside `guarded()`) |
 | `products_facts_fallbacks(statement_fallback, id_prefix)` | the `guarded()` fallbacks of the prepare node |
 | `prepare_code(holidays, statement_fallback, business_weekdays, state_var, products_var, extra_code="", **facts)` | the complete prepare node source: `guarded(CAL_HELPERS + products_from_vars() + extra_code + products_facts_code(**facts))` |
 
@@ -118,7 +118,7 @@ mp.products_facts_code(...), "prepare_state", mp.products_facts_fallbacks(...))`
 | hook fields `pid_field`, `amount_field`, `date_field`, `reason_field`, `ok_field` | `product_id`, `amount`, `date`, `reason`, `ok` | the tools' request / response schemas |
 | product fields `pid_field`, `amount_field`, `days_late_field`, `type_field` | `product_id`, `past_due`, `days_late`, `type` | the account tool's product schema |
 | `fail_reason` | `service_error` | the note reason the brief gives a promise that keeps failing (must be in the API's enum: pass `api`) |
-| `max_fails` | 2 | how many failures the brief allows before that note |
+| `max_fails` | 2 | how many tries in total the brief allows before that note ("up to three tries in total" = 3) |
 | `promise_key`, `paid_key`, `default_key` | `promise`, `paid`, `refused` | the generator's own fin node names for those endings |
 | `paid_reason` | = `paid_key` | the note reason meaning "already paid" |
 | `id_prefix` | `p` | how the account tool names products (`p1`); None when ids are not numbered |

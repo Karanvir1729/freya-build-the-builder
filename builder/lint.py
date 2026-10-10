@@ -314,7 +314,8 @@ class _Linter:
             for k in tv:
                 if isinstance(k, str):
                     self.note_var(k, "test_variables")
-        for k in self.call_vars:  # call variables from the brief: set by every call even without test_variables
+        # call variables the dialler passes (--call-vars): a workflow shipped without test_variables still has them
+        for k in self.call_vars:
             self.note_var(k, "test_variables")
         for key, n in self.all_nodes.items():
             if not isinstance(n, dict):
