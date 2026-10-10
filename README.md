@@ -27,7 +27,7 @@ Everything the organisers published is in this repo:
 
 ## Setup
 
-1. `env.sh` (gitignored) holds the keys. The team key is already generated. Put your Freya API key in it: sign in at https://staging-app.freyavoice.ai, open **API keys**, create one (`fak_...`).
+1. `cp env.example env.sh` (gitignored) and fill in the three variables the builder needs: `FREYA_API_KEY` (sign in at https://staging-app.freyavoice.ai, open **API keys**, create one, `fak_...`), `FREYA_API_URL` (`https://staging-app.freyavoice.ai`) and `FREYA_BANK_TEAM_KEY` (your team key for the mock bank). Claude access for the builder's model calls: either `ANTHROPIC_API_KEY` in the environment or `claude login` on the machine (the SDK bundles the Claude Code binary). No OpenAI key is needed: the local simulator plays the customer and judge with Claude.
 2. `source env.sh`
 3. Python 3.10+. The kit itself is standard library only. The builder uses the Claude Agent SDK, installed in `.venv`:
    ```bash

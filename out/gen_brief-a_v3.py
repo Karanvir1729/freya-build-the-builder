@@ -218,6 +218,8 @@ POLICY = pol.Policy(
         "too_much_floor": "I understand. The lowest amount I can accept is [floor], your [floor_name]. The rest stays overdue.",  # R26
         "exhausted": "I understand.",                                                                                 # R31
         "hardship": "I am sorry to hear that. Would you like me to connect you with our customer support team?",      # R32
+        "paid": "Thank you for letting me know. Payments can take one business day to appear, so I will not take a promise.",   # R39
+        "dispute": "Thank you for telling me. I will not take a payment promise today.",   # R40
         "human_first": "I can help you with most things myself. Is there anything I can help you with before I transfer you?",  # R42
         "notalk_first": "I understand. This will only take a moment.",                                               # R45
         "readback_head": "To confirm: your ",                                                                         # R34

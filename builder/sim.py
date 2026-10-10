@@ -27,7 +27,24 @@ from run_cases import STYLES, persona_for         # noqa: E402  the organisers' 
 
 OPENAI_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 DEFAULTS = {"openai": {"customer": "gpt-5-mini", "judge": "gpt-5"}, "claude": {"customer": "claude-haiku-5-5", "judge": "claude-sonnet-5-5"}}
-CLAUDE_CLI = os.environ.get("CLAUDE_CLI", str(pathlib.Path.home() / ".local/bin/claude"))
+def _find_claude_cli():
+    """The Claude Code binary for the Claude provider: $CLAUDE_CLI, then `claude` on PATH, then the binary bundled in the
+    claude-agent-sdk package (a clean clone with only requirements.txt installed), then the user-local install."""
+    import shutil
+    cand = [os.environ.get("CLAUDE_CLI") or "", shutil.which("claude") or ""]
+    try:
+        import claude_agent_sdk
+        cand.append(str(pathlib.Path(claude_agent_sdk.__file__).parent / "_bundled" / "claude"))
+    except Exception:
+        pass
+    cand.append(str(pathlib.Path.home() / ".local/bin/claude"))
+    for c in cand:
+        if c and os.path.exists(c):
+            return c
+    return "claude"
+
+
+CLAUDE_CLI = _find_claude_cli()
 TURN_TIMEOUT_S = 240          # one chat turn; the gateway itself gives up after about 60 s (504)
 RECOVER_S = 60                # after a 504 mid-call: how long to look for the reply in the call log
 PHONE_RULE = "You are on a phone call. Reply with ONLY your next spoken line."
@@ -204,6 +221,8 @@ class Provider:
                                     "--no-session-persistence", prompt], capture_output=True, text=True, timeout=240, cwd=cli_dir())
             except subprocess.TimeoutExpired:
                 last = "claude -p timed out"; continue
+            except FileNotFoundError:
+                raise RuntimeError("the Claude Code binary was not found (%s): install claude-agent-sdk (it bundles one), put `claude` on PATH, or set CLAUDE_CLI" % CLAUDE_CLI)
             if r.returncode == 0 and r.stdout.strip():
                 return r.stdout.strip()
             last = "claude -p rc=%d: %s" % (r.returncode, (r.stderr or r.stdout)[-300:])

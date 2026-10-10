@@ -52,6 +52,11 @@ AMOUNT_RULES = ("full", "floor", "full_or_floor")
 
 # Generic wording. Every generator should pass the brief's own sentences (verbatim ones above all: the
 # text-message sentence after a promise, the mobile-app sentence, the hardship sympathy line).
+# Texts a brief decides: the generator MUST pass them (Policy() refuses to build without them), so no other bank's
+# wording can reach a hidden brief's agent. The defaults below are neutral placeholders for tests and docs only.
+REQUIRED_TEXTS = ("too_much_floor", "paid", "dispute", "hardship", "wrap_change", "human_first", "notalk_first", "recorded",
+                  "anything_else", "vague", "after_deadline", "weekend_or_holiday", "below_floor")
+REQUIRED_TEXTS_MULTI = ("question_all", "one_by_one", "next_product", "recorded_many", "rec_failed")
 DEFAULT_TEXTS = {
     "today_word": "today",
     "on_date": "on [date]",
@@ -65,15 +70,15 @@ DEFAULT_TEXTS = {
     "above_full": "The past-due amount is [full], so I can record at most [full].",
     "vague": "Which exact day would that be?",
     "vague_deadline": "The latest date I can record is [deadline].",
-    "too_much_floor": "I understand. The lowest amount I can accept is [floor], the [floor_name]. The rest stays overdue.",
+    "too_much_floor": "The lowest amount I can accept is [floor], the [floor_name].",
     "exhausted": "I understand.",
     "one_by_one": "Let us go through them one by one.",
     "next_product": "Your [words] has [past_due] past due.",
-    "paid": "Thank you for letting me know. Payments can take one business day to appear, so I will not take a promise for your [words].",
+    "paid": "Thank you for letting me know. I will not take a promise for your [words].",
     "dispute": "Thank you for telling me. I will not take a promise for your [words].",
-    "hardship": "I am sorry to hear that. Would you like me to connect you with our customer support team?",
-    "human_first": "Before I transfer you, is there anything I can help you with myself?",
-    "notalk_first": "I understand. This will only take a moment.",
+    "hardship": "I am sorry to hear that.",
+    "human_first": "Is there anything I can help you with myself first?",
+    "notalk_first": "I understand.",
     "readback_head": "To confirm: ",
     "readback_item": "[words], [amount], [when]",
     "readback_sep": "; ",
@@ -84,7 +89,7 @@ DEFAULT_TEXTS = {
     "recorded_many": "Your promises for [list] are recorded.",
     "rec_failed": "I could not record the promise for your [words] because of a technical problem.",
     "anything_else": "Is there anything else I can help you with?",
-    "wrap_change": "A recorded promise cannot be changed on this call, but you can change it in the mobile app.",
+    "wrap_change": "A recorded promise cannot be changed on this call.",
     "and": " and ",
 }
 
@@ -944,6 +949,9 @@ class Policy:
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
                  outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None,
                  weekday_rule="this_week"):
+        missing = [k for k in REQUIRED_TEXTS + (REQUIRED_TEXTS_MULTI if multi else ()) if k not in (texts or {})]
+        if missing and not (texts or {}).get("_allow_defaults"):
+            raise ValueError("Policy texts must come from the brief; missing: %s (pass texts={'_allow_defaults': True} only in tests)" % ", ".join(missing))
         t = dict(DEFAULT_TEXTS)
         for k, v in (texts or {}).items():
             t[k] = v

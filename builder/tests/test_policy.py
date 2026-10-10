@@ -18,7 +18,15 @@ import policy as pol  # noqa: E402
 HOL = ["2026-10-26", "2026-11-11"]
 TODAY = "2026-10-14"
 
-TEXTS = {"after_recorded": "You will receive a text message confirming this promise.",
+TEXTS = {
+    "_allow_defaults": True,
+    # the former library defaults (Brief A wording) that the older tests assert on; a real generator passes the brief's own
+    "too_much_floor": "I understand. The lowest amount I can accept is [floor], the [floor_name]. The rest stays overdue.",
+    "paid": "Thank you for letting me know. Payments can take one business day to appear, so I will not take a promise for your [words].",
+    "hardship": "I am sorry to hear that. Would you like me to connect you with our customer support team?",
+    "notalk_first": "I understand. This will only take a moment.",
+    "wrap_change": "A recorded promise cannot be changed on this call, but you can change it in the mobile app.",
+    "human_first": "Before I transfer you, is there anything I can help you with myself?","after_recorded": "You will receive a text message confirming this promise.",
          "wrap_change": "You can change it in the mobile app."}
 
 BODY = r'''

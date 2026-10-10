@@ -75,15 +75,24 @@ class Trace:
         self.log.close(); self.jsonl.close()
 
 
+NO_CREDENTIAL = []   # steps that failed for lack of a Claude credential (fail fast, see run_step)
+
+
 def run_step(trace, name, cmd, timeout):
     """Run a helper script, copy its 'model call' lines and summary into the trace, return (returncode, stdout)."""
     trace.line("step %s: %s" % (name, " ".join(cmd)))
     try:
         p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as e:
+        partial = e.stderr.decode(errors="replace") if isinstance(e.stderr, bytes) else (e.stderr or "")
+        for l in partial.splitlines():
+            if "model call" in l: trace.line(l.strip())
         trace.line("step %s: TIMEOUT after %d s" % (name, timeout)); return 1, ""
     for l in (p.stderr or "").splitlines():
         if "model call" in l: trace.line(l.strip())
+    if "Not logged in" in (p.stderr or "") or "Invalid API key" in (p.stderr or ""):
+        trace.line("FATAL step %s: no Claude credential. Set ANTHROPIC_API_KEY or run `claude login` on this machine, then rerun." % name)
+        NO_CREDENTIAL.append(name)
     out = (p.stdout or "").strip()
     tail = out.splitlines()[-3:] if out else []
     trace.line("step %s: exit %d%s" % (name, p.returncode, (" | " + " | ".join(t.strip()[:160] for t in tail)) if tail else ""))
@@ -222,6 +231,10 @@ async def main(argv):
             cases, brief_filter = gen_cases, None
     elif want_cases:
         trace.line("cases: no generated cases file; the build runs without practice cases")
+    if NO_CREDENTIAL:
+        trace.line("build end %s | ABORTED: no Claude credential (steps %s)" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), NO_CREDENTIAL))
+        trace.close()
+        return 2
     try:
         left = budget - trace.elapsed_min() - 3          # keep 3 minutes for verify + export
         await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left, generated=gen_cases), timeout=max(60, left * 60))
@@ -231,11 +244,18 @@ async def main(argv):
         trace.line("ERROR in the agent run: %r" % (e,))
     wf_path = ROOT / "out" / ("%s.workflow.json" % slot)
     if wf_path.exists():
-        run_step(trace, "lint", [PY, "builder/lint.py", str(wf_path), "--api", tool_api], timeout=120)
-        if "--no-audit" not in flags and (ROOT / "out" / ("%s.rules.json" % slot)).exists() and trace.elapsed_min() < budget - 1:
+        rules_file = ROOT / "out" / ("%s.rules.json" % slot)
+        lint_cmd = [PY, "builder/lint.py", str(wf_path), "--api", tool_api] + (["--rules", str(rules_file), "--budget"] if rules_file.exists() else [])
+        run_step(trace, "lint", lint_cmd, timeout=max(30, min(120, int((budget - trace.elapsed_min() - 1) * 60))))
+        # the audit only when it cannot push the trace's end past the budget (worst case was 34 min before this guard)
+        left_min = budget - trace.elapsed_min()
+        if "--no-audit" not in flags and rules_file.exists() and left_min > 7:
             gen = ROOT / "out" / ("gen_%s.py" % slot)
-            run_step(trace, "audit", [PY, "builder/audit.py", "--rules", "out/%s.rules.json" % slot, "--workflow", str(wf_path),
-                                      "--generator", str(gen) if gen.exists() else "", "--out", "out/%s.audit.json" % slot], timeout=360)
+            run_step(trace, "audit", [PY, "builder/audit.py", "--rules", str(rules_file), "--workflow", str(wf_path),
+                                      "--generator", str(gen) if gen.exists() else "", "--out", "out/%s.audit.json" % slot],
+                     timeout=int(min(360, (left_min - 1.5) * 60)))
+        elif "--no-audit" not in flags:
+            trace.line("audit skipped: %.1f minutes left of the %d-minute budget" % (left_min, budget))
     try:
         export(slot, trace)
     except Exception as e:
@@ -252,4 +272,4 @@ async def main(argv):
 
 
 if __name__ == "__main__":
-    asyncio.run(main(sys.argv[1:]))
+    sys.exit(asyncio.run(main(sys.argv[1:])) or 0)
