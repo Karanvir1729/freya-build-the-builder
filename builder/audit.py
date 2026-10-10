@@ -238,7 +238,7 @@ def workflow_digest(wf):
                     body.append("  code: same code as node %s" % code_seen[ck] +
                                 ("" if code == code_seen_src[ck] else " (identical core)"))
                 else:
-                    code_seen[ck] = key; code_seen_src[ck] = code
+                    code_seen[ck] = name; code_seen_src[ck] = code
                     body.append("  code:\n" + _indent(code, 4))
             else:
                 body.append("  pre_action tool: " + register(pa))
