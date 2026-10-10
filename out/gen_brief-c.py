@@ -24,7 +24,7 @@ nodes = {}
 FINS = {
     "paid": ("paid", "self_reported", "Thank you for letting me know. The bank will check for the payment within two business days and will not call you again before then. " + BYE_T),  # R40
     "declined_offer": ("no_promise", "declined_offer", "I understand. " + BYE_T),  # R32, R42, R46
-    "financial_distress": ("no_promise", "financial_distress", "I understand. The care team will contact you within three business days. " + BYE_T),  # R33
+    "financial_distress": ("no_promise", "financial_distress", "I understand.{{reduction_line}} The care team will contact you within three business days. " + BYE_T),  # R33 (+R34 when asked)
     "system_fault": ("no_promise", "system_fault", "I am sorry, the promise could not be saved because of a technical problem. " + BYE_T),  # R38
     "exhausted": ("not_verified", "exhausted", "I am sorry, the security check could not be completed. A colleague can complete the check if you call the number on the back of your card or on your latest statement. " + BYE),  # R15
     "withheld": ("not_verified", "withheld", "I understand. The bank cannot discuss anything until the security check is complete. " + BYE),  # R16, R46
@@ -36,6 +36,11 @@ FINS = {
 }
 for key, (outcome, reason, farewell) in FINS.items():
     fl.end_pair(key, outcome, reason, farewell, nodes)
+# R34 on the hardship path: the farewell answers a reduction request ("cannot offer any reduction")
+nodes["fin_financial_distress"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"] = (
+    fl.outcome_code("no_promise", "financial_distress") +
+    "try:\n    vars['reduction_line'] = ' I cannot offer any reduction, and the figures are those on the account.' if str(vars.get('asked_reduction') or '') == 'yes' else ''\n"
+    "except Exception:\n    vars['reduction_line'] = ''\n")
 
 # R47: promise reason full if the recorded amount equals the overdue amount, otherwise partial; R39 sentence
 nodes["fin_promise"] = fl.code_node("fin_promise", fl.promise_reason_code(), [fl.always("end_promise")])
@@ -143,7 +148,9 @@ ROUTES = [
 ]
 nodes["opening"] = fl.conv(
     "opening",
-    "You have just introduced yourself and asked whether you are speaking with {{first_name}} {{last_name}}. Do not call any tool in this turn. Do not say why you are calling.",
+    # the chat route answers the first customer line with the dialogue model instead of the tts: repeat the line here
+    "If you have not spoken yet in this call, your message is exactly: \"" + OPENING_LINE + " " + ASK_NAME + "\" (word for word, nothing before it). "
+    "Otherwise you have just introduced yourself and asked whether you are speaking with {{first_name}} {{last_name}}. Do not call any tool in this turn. Do not say why you are calling.",
     on_enter={"type": "tts", "text": OPENING_LINE + " " + ASK_NAME},
     extraction=[fl.ext("who1", WHO_VALUES, WHO_DESC)], first_only=True)
 INITIAL = fl.conversation_first("opening", SETUP, "who1", ROUTES, "opening_retry", nodes)
@@ -364,7 +371,9 @@ nodes["hardship"] = fl.conv(
     first_only=True,
     tools=[promise_tool(), transfer_general],
     extraction=[fl.ext("care_choice", ["none", "accept", "decline"],
-                       "Answer to the offer to connect with the care team, from the customer's LATEST message: accept if they want to be connected, decline if they say no or do not want it, none otherwise.")],
+                       "Answer to the offer to connect with the care team, from the customer's LATEST message: accept if they want to be connected, decline if they say no or do not want it, none otherwise."),
+                fl.ext("asked_reduction", ["no", "yes"],
+                       "yes if the customer has asked, at any point in the call, for a discount, a waiver, a fee reversal, a reduction or an instalment plan; otherwise no.")],
     transitions=PROMISE_TR + [
         fl.transferred("fin_agent_request", "transferred to a person (R43)"),
         fl.eq("care_choice", "accept", "xfer_care", "accepts the care team"),

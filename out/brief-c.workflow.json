@@ -181,7 +181,7 @@
        "properties": {
         "code": {
          "type": "string",
-         "default": "try:\n    vars['outcome'] = 'no_promise'\n    vars['reason'] = 'financial_distress'\nexcept Exception:\n    pass\n"
+         "default": "try:\n    vars['outcome'] = 'no_promise'\n    vars['reason'] = 'financial_distress'\nexcept Exception:\n    pass\ntry:\n    vars['reduction_line'] = ' I cannot offer any reduction, and the figures are those on the account.' if str(vars.get('asked_reduction') or '') == 'yes' else ''\nexcept Exception:\n    vars['reduction_line'] = ''\n"
         },
         "timeout_ms": {
          "type": "number",
@@ -217,7 +217,7 @@
        },
        "spoken_message": {
         "type": "string",
-        "default": "I understand. The care team will contact you within three business days. Thank you for your time, {{title}} {{last_name}}. Goodbye from Nordvik Savings Bank."
+        "default": "I understand.{{reduction_line}} The care team will contact you within three business days. Thank you for your time, {{title}} {{last_name}}. Goodbye from Nordvik Savings Bank."
        }
       }
      }
@@ -1201,7 +1201,7 @@
    "max_node_turns": 60,
    "truncation_strategy": "keep_all",
    "disable_inactivity_monitor": false,
-   "task_message": "You have just introduced yourself and asked whether you are speaking with {{first_name}} {{last_name}}. Do not call any tool in this turn. Do not say why you are calling.",
+   "task_message": "If you have not spoken yet in this call, your message is exactly: \"Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?\" (word for word, nothing before it). Otherwise you have just introduced yourself and asked whether you are speaking with {{first_name}} {{last_name}}. Do not call any tool in this turn. Do not say why you are calling.",
    "on_enter": {
     "type": "tts",
     "text": "Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?"
@@ -2838,6 +2838,16 @@
       "decline"
      ],
      "description": "Answer to the offer to connect with the care team, from the customer's LATEST message: accept if they want to be connected, decline if they say no or do not want it, none otherwise.",
+     "min_confidence": 0.6
+    },
+    {
+     "name": "asked_reduction",
+     "type": "string",
+     "enum_values": [
+      "no",
+      "yes"
+     ],
+     "description": "yes if the customer has asked, at any point in the call, for a discount, a waiver, a fee reversal, a reduction or an instalment plan; otherwise no.",
      "min_confidence": 0.6
     }
    ],

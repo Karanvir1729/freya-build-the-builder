@@ -18,6 +18,8 @@ WARN nodes.opening.on_enter.text: {{first_name}} is never set: the agent would s
 WARN nodes.opening.on_enter.text: {{last_name}} is never set: the agent would say the literal placeholder aloud
 WARN nodes.opening.task_message: {{first_name}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder
 WARN nodes.opening.task_message: {{last_name}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder
+WARN nodes.opening.task_message: {{first_name}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder
+WARN nodes.opening.task_message: {{last_name}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder
 WARN nodes.setup.pre_actions[code_exec].code: code has statements outside try/except (Assign, If); wrap the whole body
 WARN nodes.opening_retry.task_message: {{first_name}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder
 WARN nodes.opening_retry.task_message: {{last_name}} is never set by test_variables, extraction, mapping, code or tool results: the model sees the literal placeholder
@@ -74,4 +76,4 @@ INFO nodes.hardship.tools[transfer_to_agent].parameters.body.customer_id: {{cust
 INFO nodes.plan_offer.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
 INFO nodes.plan_offer.tools[transfer_to_agent].parameters.body.customer_id: {{customer_id}} is not set by test_variables, extraction, mapping or code: unless it is a call variable, the model fills it with no description
 INFO tools[close_call].parameters.body.customer_id: lifecycle tool: {{customer_id}} is never set; one model call fills the parameter at run time
--- 0 error(s), 49 warning(s), 27 info
+-- 0 error(s), 51 warning(s), 27 info
