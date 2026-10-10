@@ -2413,6 +2413,48 @@
    "node_type": "conversation",
    "transitions": [
     {
+     "target_node": "change_offer",
+     "description": "the customer changes the date or the amount",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "confirm",
+        "operator": "equals",
+        "operand": "change"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "rec_next",
+     "description": "the customer confirmed the read-back",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "confirm",
+        "operator": "equals",
+        "operand": "yes"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "confirm_no",
+     "description": "the customer said no to the read-back",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "confirm",
+        "operator": "equals",
+        "operand": "no"
+       }
+      ]
+     }
+    },
+    {
      "target_node": "pol_hardship",
      "description": "topic hardship",
      "condition": {
@@ -2492,48 +2534,6 @@
         "variable": "topic",
         "operator": "equals",
         "operand": "dispute"
-       }
-      ]
-     }
-    },
-    {
-     "target_node": "change_offer",
-     "description": "the customer changes the date or the amount",
-     "condition": {
-      "logic": "or",
-      "conditions": [
-       {
-        "variable": "confirm",
-        "operator": "equals",
-        "operand": "change"
-       }
-      ]
-     }
-    },
-    {
-     "target_node": "rec_next",
-     "description": "the customer confirmed the read-back",
-     "condition": {
-      "logic": "or",
-      "conditions": [
-       {
-        "variable": "confirm",
-        "operator": "equals",
-        "operand": "yes"
-       }
-      ]
-     }
-    },
-    {
-     "target_node": "confirm_no",
-     "description": "the customer said no to the read-back",
-     "condition": {
-      "logic": "or",
-      "conditions": [
-       {
-        "variable": "confirm",
-        "operator": "equals",
-        "operand": "no"
        }
       ]
      }

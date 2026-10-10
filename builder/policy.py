@@ -972,11 +972,13 @@ class Policy:
                {"name": "offer_amount", "type": "float", "description": amount_desc, "min_confidence": conf}]
         if topic_entry:
             ext.append(topic_entry)
-        trs = list(topic_trs or []) + [
+        # confirm routes FIRST: a read-back answer labelled both confirm=change and topic=new_plan is a change of the
+        # offer, not a plan request (a different amount or date for this promise is never a restructuring transfer)
+        trs = [
             fl.eq("confirm", "change", "change_offer", "the customer changes the date or the amount"),
             fl.eq("confirm", "yes", "rec_next", "the customer confirmed the read-back"),
             fl.eq("confirm", "no", "confirm_no", "the customer said no to the read-back"),
-        ]
+        ] + list(topic_trs or [])
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{readback_line}}"},
                        extraction=ext, transitions=trs)
 
