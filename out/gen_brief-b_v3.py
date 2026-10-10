@@ -237,6 +237,7 @@ POLICY = pol.Policy(
     multi=True,                                                 # B1: one to three products
     notes=True,                                                 # B8: a note per product without a promise
     note_reasons={s: s for s in ("refused", "hardship", "dispute", "paid", "service_error") if s in NOTE_ENUM},
+    notes_on_transfer=False,                                    # B10: on any transfer no notes at all, before or after it
     fin_keys={"promise": "promise", "paid": "paid", "default": "refused", "refused": "refused",
               "hardship": "hardship", "dispute": "dispute", "service_error": "service_error"},  # B closing
     fail_max=2, human_limit=2, notalk_limit=2, closed_day_move="after",

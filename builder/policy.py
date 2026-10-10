@@ -268,6 +268,7 @@ def init_negotiation(V, statement):
     V['vague_all'] = 'no'
     V['hs_offer'] = 'no'
     V['same_change'] = '0'
+    V['wrap_done'] = 'no'
     if ids:
         a, d = prop_of(V, ids[0])
         set_prop(V, ids[0], a, d)
@@ -365,6 +366,8 @@ def too_much(V, pid, prefix=''):
         return
     refuse(V, pid, prefix)
 def check_one(V, pid, a, d, kind):
+    if recorded_guard(V, pid):
+        return
     n = int(num(pg(V, pid, 'checks'), 0) or 0) + 1
     pset(V, pid, 'checks', n)
     if n > int(P['max_checks']):
@@ -433,23 +436,43 @@ def offer_target(V):
         if i < len(ids):
             return ids[i]
     return ''
-def all_offer(V, d):
+def fit_day(V, p, dd):
+    # one day named for several products: each product gets it, moved to the next business day or capped at its own
+    # deadline (the read-back says so: tag 'bd' / 'dl')
     t = today_of(V)
+    tag = ''
+    dl = deadline_of(V, p)
+    if dd < t:
+        dd = t if isbd(t) else next_bd(t)
+    if not isbd(dd):
+        dd = next_bd(dd)
+        tag = 'bd'
+    if dd > dl:
+        dd = dl
+        tag = 'dl'
+    return dd, tag
+def moved_note(V, named, moved):
+    # why a named day was moved: the read-back's ', the next business day' alone left the customer insisting on the
+    # holiday (extended Brief B EXT-B-14)
+    out = []
+    for n, m in zip(named, moved):
+        if n is None or m is None or n == m or n < today_of(V) or isbd(n):
+            continue
+        s = T('weekend_or_holiday', named=txt_short(n), date=txt_short(m))
+        if s and s not in out:
+            out.append(s)
+    return join(out)
+def all_offer(V, d):
+    named, moved = [], []
     for p in [x for x in pids(V) if state(V, x) == 'open']:
-        dd = d
-        tag = ''
-        dl = deadline_of(V, p)
-        if dd < t:
-            dd = t if isbd(t) else next_bd(t)
-        if not isbd(dd):
-            dd = next_bd(dd)
-            tag = 'bd'
-        if dd > dl:
-            dd = dl
-            tag = 'dl'
+        dd, tag = fit_day(V, p, d)
+        if tag == 'bd':
+            named.append(d)
+            moved.append(dd)
         agree(V, p, full_of(V, p), dd, tag, move=False)
     V['offer_verdict'] = 'ok'
     advance(V, '')
+    spoken_prefix(V, moved_note(V, named[:1], moved[:1]))
 WDN = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 MON = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
        'september': 9, 'october': 10, 'november': 11, 'december': 12}
@@ -512,6 +535,19 @@ def resolve_when(V, text):
             return d, 'exact'
         except Exception:
             return None, 'vague'
+    # 'Monday the 26th': the day number is the more specific part (the weekday alone would be next Monday)
+    m = re.search(r' (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday) (?:the )?(\d{1,2})(?:st|nd|rd|th)? ', t)
+    if m:
+        n = int(m.group(1))
+        y, mo = today.year, today.month
+        if n < today.day:
+            mo += 1
+            if mo > 12:
+                mo, y = 1, y + 1
+        try:
+            return datetime.date(y, mo, n), 'exact'
+        except Exception:
+            return None, 'vague'
     m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
     if m:
         wd = WDN.index(m.group(2))
@@ -567,17 +603,21 @@ def spoken_prefix(V, pre):
         return
     key = {'confirm': 'readback_line', 'wrapup': 'wrap_line'}.get(g(V, 'route'), 'say_next')
     V[key] = join([pre, g(V, key)])
-def claims(V):
-    # per_product: 'first=dispute;second=paid;third=pay' (one extraction string, parsed here) -> {pid: claim}
+def claims(V, words=False):
+    # per_product: 'first=dispute;second=paid;third=pay@monday the 26th' (one extraction string, parsed here) ->
+    # {pid: claim} or, with words=True, {pid: the customer's words for that product's day ('' when none)}
     out = {}
     ids = pids(V)
     order = P['ordinals']
-    for part in re.split(r'[;,]', g(V, 'per_product').lower()):
+    for part in g(V, 'per_product').lower().split(';'):
         if '=' not in part:
             continue
         k, v = [x.strip() for x in part.split('=', 1)]
+        w = ''
+        if '@' in v:
+            v, w = [x.strip() for x in v.split('@', 1)]
         if k in order and order.index(k) < len(ids):
-            out[ids[order.index(k)]] = v
+            out[ids[order.index(k)]] = w if words else v
     return out
 def settle_claims(V):
     # one turn about several products ('the card is not mine, I paid the loan, the car loan today'): the paid and
@@ -598,6 +638,7 @@ def pay_claimed(V, pre):
     # after settle_claims: the products the same turn says will be paid go through the guard (amount: the one
     # named, by reference, else the full amount; day: the one named, else today). False when there is none.
     cl = claims(V)
+    cw = claims(V, words=True)
     opn = [p for p in pids(V) if state(V, p) == 'open']
     pay = [p for p in opn if cl.get(p) == 'pay']
     if not pay:
@@ -613,12 +654,31 @@ def pay_claimed(V, pre):
         V['stage'] = 'one'
         V['cur_pid'] = p
         a = ref_amount(V, p, a)
+        if cw.get(p):
+            d, k = resolve_when(V, cw[p])
+            d0 = d or d0
         if k == 'vague':
             check_one(V, p, a, None, 'vague')
         else:
             check_one(V, p, full_of(V, p) if a is None else a, d0, 'exact')
-    elif len(pay) == len(opn) and a is None:
-        all_offer(V, d0)
+    elif a is None:
+        # several products, each with its own day words or the turn's day ('the card and the loan today, the car
+        # loan on Monday the 26th'); a vague day for any of them -> not decided here
+        days = {}
+        named, moved = [], []
+        for p in pay:
+            dd, kk = resolve_when(V, cw.get(p, '')) if cw.get(p) else (None, 'none')
+            if kk == 'vague':
+                return False
+            days[p] = fit_day(V, p, dd or d0)
+            if days[p][1] == 'bd':
+                named.append(dd or d0)
+                moved.append(days[p][0])
+        for p in pay:
+            agree(V, p, full_of(V, p), days[p][0], days[p][1], move=False)
+        V['offer_verdict'] = 'ok'
+        advance(V, '')
+        pre = join([pre, moved_note(V, named, moved)])
     else:
         return False
     spoken_prefix(V, pre)
@@ -628,10 +688,11 @@ def claims_first(V):
     if not (multi(V) and g(V, 'stage') == 'all'):
         return False
     pre = settle_claims(V)
+    if pay_claimed(V, pre):
+        return True
     if not pre:
         return False
-    if not pay_claimed(V, pre):
-        advance(V, pre)
+    advance(V, pre)
     return True
 def ev_offer(V):
     if claims_first(V):
@@ -797,6 +858,8 @@ def ev_confirm_no(V):
     V['same_change'] = '0'
     agreed = [p for p in pids(V) if state(V, p) == 'agreed']
     pid = g(V, 'cur_pid') if g(V, 'cur_pid') in agreed else (agreed[-1] if agreed else g(V, 'cur_pid'))
+    if recorded_guard(V, pid):
+        return
     V['cur_pid'] = pid
     V['stage'] = 'one'
     parts = pg(V, pid, 'agreed').split('|')
@@ -806,7 +869,44 @@ def ev_confirm_no(V):
         set_prop(V, pid, a, d)
     pset(V, pid, 'state', 'open')
     refuse(V, pid)
+def change_claims(V):
+    # a change at the read-back that names each product's own day ('the card today and the loan on Monday the 26th')
+    if not multi(V):
+        return False
+    cl = claims(V)
+    cw = claims(V, words=True)
+    ag = [p for p in pids(V) if state(V, p) == 'agreed' and cl.get(p) == 'pay' and cw.get(p)]
+    if not ag:
+        return False
+    days = {}
+    named, moved = [], []
+    for p in ag:
+        dd, kk = resolve_when(V, cw[p])
+        if dd is None:
+            return False
+        days[p] = fit_day(V, p, dd)
+        if days[p][1] == 'bd':
+            named.append(dd)
+            moved.append(days[p][0])
+    for p in ag:
+        parts = pg(V, p, 'agreed').split('|')
+        a = num(parts[0]) if parts else None
+        agree(V, p, full_of(V, p) if a is None else a, days[p][0], days[p][1], move=False)
+    V['same_change'] = '0'
+    V['offer_verdict'] = 'ok'
+    advance(V, '')
+    spoken_prefix(V, moved_note(V, named, moved))   # say why a day was moved (the read-back tag alone did not)
+    return True
+def recorded_guard(V, pid):
+    # one promise per product: a recorded promise is never reopened or recorded again (the brief's change sentence)
+    if pid and state(V, pid) == 'recorded':
+        V['wrap_line'] = join([T('wrap_change'), T('anything_else')])
+        V['route'] = 'wrapup'
+        return True
+    return False
 def ev_change(V):
+    if change_claims(V):
+        return
     agreed = [p for p in pids(V) if state(V, p) == 'agreed']
     a = num(g(V, 'offer_amount'))
     if a is not None and a <= 0:
@@ -819,6 +919,8 @@ def ev_change(V):
         all_offer(V, d)
         return
     pid = tp or (g(V, 'cur_pid') if g(V, 'cur_pid') in agreed else (agreed[-1] if agreed else g(V, 'cur_pid')))
+    if recorded_guard(V, pid):
+        return
     parts = pg(V, pid, 'agreed').split('|')
     pa = num(parts[0]) if parts else None
     pd = pdate(parts[1]) if len(parts) > 1 else None
@@ -855,6 +957,10 @@ def rec_next(V):
             V['rec_ok'] = 'pending'
             V['route'] = 'record'
             return
+    if P.get('defer_notes') and g(V, 'wrap_done') != 'yes' and [p for p in pids(V) if state(V, p) == 'recorded']:
+        # notes wait until the wrap-up has decided the ending: a transfer from the wrap-up adds no notes at all
+        enter_wrapup(V)
+        return
     note_next(V)
 def ev_confirm_yes(V):
     V['same_change'] = '0'
@@ -888,7 +994,7 @@ def note_next(V):
                 V['note_ok'] = 'pending'
                 V['route'] = 'note'
                 return
-    if [p for p in pids(V) if state(V, p) == 'recorded']:
+    if [p for p in pids(V) if state(V, p) == 'recorded'] and g(V, 'wrap_done') != 'yes':
         enter_wrapup(V)
         return
     finalize(V)
@@ -950,12 +1056,14 @@ def ev_wrap_change(V):
     c = int(num(g(V, 'wrap_count'), 0) or 0) + 1
     V['wrap_count'] = str(c)
     if c > int(P['wrap_turns']):
-        finalize(V)
+        ev_finalize(V)
         return
     V['wrap_line'] = join([T('wrap_change'), T('anything_else')])
     V['route'] = 'wrapup'
 def ev_finalize(V):
-    finalize(V)
+    # the wrap-up is over without a transfer: the notes still owed are written now, then the ending
+    V['wrap_done'] = 'yes'
+    note_next(V)
 def state_line(V):
     ids = pids(V)
     out = []
@@ -1060,7 +1168,7 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
-           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change")
+           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done")
 
 
 def _declare():
@@ -1100,13 +1208,16 @@ class Policy:
     wrap_turns: how many change requests the wrap-up node answers before it closes.
     closed_day_move: 'after' (offer the next business day) or 'before'.
     ordinals: offer_for enum values naming products in get_account order.
-    targets: route -> node name overrides (DEFAULT_TARGETS)."""
+    targets: route -> node name overrides (DEFAULT_TARGETS).
+    notes_on_transfer: False when the brief adds no notes on a call that ends in a transfer: the notes are then written
+        only once the wrap-up after a recorded promise has ended without one (a transfer from the wrap-up, e.g. a
+        restructuring request after the promise, adds none). True (default): notes right after the promises."""
 
     def __init__(self, holidays, texts=None, multi=False, notes=False, note_reasons=None, fin_keys=None,
                  fail_max=2, max_checks=8, human_limit=2, notalk_limit=2, wrap_turns=2, closed_day_move="after",
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
                  outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None,
-                 weekday_rule="this_week"):
+                 weekday_rule="this_week", notes_on_transfer=True):
         missing = [k for k in REQUIRED_TEXTS + (REQUIRED_TEXTS_MULTI if multi else ()) if k not in (texts or {})]
         if missing and not (texts or {}).get("_allow_defaults"):
             raise ValueError("Policy texts must come from the brief; missing: %s (pass texts={'_allow_defaults': True} only in tests)" % ", ".join(missing))
@@ -1138,7 +1249,7 @@ class Policy:
         self.targets.update(targets or {})
         self.asides = {str(k): {"when": str(v.get("when") or ""), "say": str(v.get("say") or "")} for k, v in (asides or {}).items()}
         self.P = {"texts": t, "multi": self.multi, "notes": self.notes, "note_reasons": nr, "fin_keys": fk, "asides": self.asides, "weekday_rule": str(weekday_rule),
-                  "fail_max": int(fail_max), "max_checks": int(max_checks), "human_limit": int(human_limit),
+                  "fail_max": int(fail_max), "defer_notes": bool(notes) and not notes_on_transfer, "max_checks": int(max_checks), "human_limit": int(human_limit),
                   "notalk_limit": int(notalk_limit), "wrap_turns": int(wrap_turns),
                   "closed_day_move": closed_day_move, "ordinals": list(ordinals),
                   "clear_enums": dict(CLEAR_ENUMS), "clear_values": dict(CLEAR_VALUES),
@@ -1225,9 +1336,11 @@ class Policy:
         desc = ("Only when the customer's LATEST message says DIFFERENT things about DIFFERENT products: one pair per product "
                 "it mentions, '<position>=<claim>' separated by ';', where position is the product's place in the order the "
                 "agent listed them (" + ", ".join(o) + ") and claim is one of: dispute (not theirs, never had it, closed or paid "
-                "off in the past), paid (already paid it), pay (will pay it: accepts, or names a day or an amount for it), "
-                "refuse (will not or cannot pay it). Example: '" + o[0] + "=dispute;" + o[min(1, len(o) - 1)] + "=paid;" +
-                o[min(2, len(o) - 1)] + "=pay'. Empty when the message is about all products together or about one only.")
+                "off in the past), paid (already paid it), pay (will pay it: accepts, or names a day or an amount for it; "
+                "add '@' and the customer's OWN WORDS for that product's day when they name one), "
+                "refuse (will not or cannot pay it). Example: '" + o[0] + "=dispute;" + o[min(1, len(o) - 1)] + "=pay@today;" +
+                o[min(2, len(o) - 1)] + "=pay@monday the 26th'. Empty when the message is about all products together "
+                "in one answer or about one product only.")
         return [{"name": "per_product", "type": "string", "description": desc, "min_confidence": conf}]
 
     @staticmethod
@@ -1304,7 +1417,7 @@ class Policy:
             fl.eq("confirm", "no", "confirm_no", "the customer said no to the read-back"),
         ] + list(topic_trs or [])
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{readback_line}}"},
-                       extraction=ext + self.aside_extraction(conf), transitions=trs)
+                       extraction=ext + self.claims_extraction(conf) + self.aside_extraction(conf), transitions=trs)
 
     def promise_assert_pre(self, pid_field="product_id", amount_field="amount", date_field="date"):
         """Pre hook of the record node: the body MUST equal the approved values (rec_pid, rec_amount, rec_date,

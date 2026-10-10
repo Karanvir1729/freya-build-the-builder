@@ -469,6 +469,9 @@ def test_offer_when_resolved_in_code():
     assert out["the sixth of november"] == ("2026-11-06", "exact"), out
     assert out["November 6th"] == ("2026-11-06", "exact"), out
     assert out["in two weeks"] == ("2026-10-28", "exact"), out
+    G2 = {"vars": V}
+    exec(src + "\nr = resolve_when(vars, 'monday the 26th')\nr2 = resolve_when(vars, 'on monday the twenty sixth')\n", G2)
+    assert G2["r"][0].isoformat() == "2026-10-26" and G2["r2"][0].isoformat() == "2026-10-26", (G2["r"], G2["r2"])   # EXT-B-14
     assert out["end of the month"] == (None, "vague"), out
     assert out[""] == (None, "none"), out
     # the offer event: the extraction said 2026-10-11 (real clock) but the words say tomorrow -> 15 Oct is checked
@@ -567,6 +570,72 @@ def test_per_product_claims_in_one_turn():
     assert V["state_p1"] == "dispute" and V["state_p2"] == "dispute"
     # single product: no per_product extraction at all
     assert not mk().claims_extraction() and mk(multi=True).claims_extraction()[0]["name"] == "per_product"
+
+
+@test
+def test_per_product_days_in_one_turn():
+    """EXT-B-09: 'the card and the loan today, the car loan on Monday the 26th of October' (a holiday): the one
+    extracted date was applied to every product, so the two 'today' products were capped at their deadline. Each
+    product now gets its own day words; the holiday moves to the next business day and the read-back says so."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-26", offer_when="monday the twenty-sixth of october", offer_amount="",
+       per_product="first=pay@today;second=pay@today;third=pay@monday the twenty-sixth of october")
+    assert V["route"] == "confirm", (V["route"], V.get("say_next"))
+    assert V["agreed_p1"].split("|")[:2] == ["420.0", TODAY] and V["agreed_p2"].split("|")[:2] == ["2100.0", TODAY], (V["agreed_p1"], V["agreed_p2"])
+    assert V["agreed_p3"] == "75.0|2026-10-27|bd", V["agreed_p3"]
+    assert "car loan, 75, on Tuesday 27 October" in V["readback_line"] and "today" in V["readback_line"], V["readback_line"]
+
+
+@test
+def test_no_notes_before_a_later_transfer():
+    """EXT-B-06: card promised, loan refused, then a restructuring request in the wrap-up. With
+    notes_on_transfer=False the loan's note waits for the wrap-up: the transfer adds none; 'nothing else' writes it."""
+    import json
+    def go():
+        P = pol.Policy(HOL, texts=TEXTS, multi=True, notes=True, notes_on_transfer=False,
+                       note_reasons={"refused": "refused", "hardship": "hardship", "dispute": "dispute", "paid": "paid", "service_error": "service_error"})
+        V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD, LOAN])}
+        run(P.prepare_code(BODY, "statement"), V)
+        ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_amount="", per_product="first=pay@today;second=refuse")
+        assert V["state_p1"] == "agreed" and V["cur_pid"] == "p2", (V["state_p1"], V["cur_pid"], V.get("say_next"))
+        ev(P, V, "refuse", stance="refuse"); ev(P, V, "refuse", stance="refuse")
+        assert V["state_p2"] == "refused" and V["route"] == "confirm", (V["state_p2"], V["route"])
+        ev(P, V, "confirm_yes", confirm="yes"); V["rec_ok"] = "true"; ev(P, V, "rec_after")
+        return P, V
+    P, V = go()
+    assert V["route"] == "wrapup" and V["noted_p2"] == "no", (V["route"], V["noted_p2"])     # no note yet
+    P, V = go()
+    ev(P, V, "finalize", wrap="done")
+    assert V["route"] == "note" and V["note_pid"] == "p2" and V["note_reason"] == "refused", (V["route"], V.get("note_pid"))
+    V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert V["route"] == "fin" and V["final_route"] == "promise", (V["route"], V.get("final_route"))
+    # default (notes_on_transfer=True): the note right after the promises, as before
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "accept", stance="accept")
+    ev(P, V, "confirm_yes", confirm="yes"); V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    assert V["route"] == "wrapup", V["route"]
+
+
+@test
+def test_change_per_product_and_recorded_guard():
+    """EXT-B-14: (1) a holiday moved for one product is explained, not only tagged ', the next business day';
+    (2) a change at the read-back naming each product's day is applied per product (it had put the loan's amount on
+    the card: 'that is the most I can record', in a loop); (3) a recorded product is never reopened or recorded again."""
+    P, V = start([CARD, CAR], multi=True, notes=True)
+    ev(P, V, "offer", offer_kind="exact", offer_when="", offer_amount="", per_product="first=pay@today;second=pay@monday the 26th of october")
+    assert V["route"] == "confirm" and V["agreed_p2"] == "75.0|2026-10-27|bd", (V["route"], V.get("agreed_p2"))
+    assert V["readback_line"].startswith("Monday 26 October is not a business day. The next business day is Tuesday 27 October."), V["readback_line"]
+    ev(P, V, "change", confirm="change", offer_amount="75", offer_when="monday the 26th", per_product="first=pay@today;second=pay@monday the 26th")
+    assert V["route"] == "confirm" and V["agreed_p1"].startswith("420.0|" + TODAY) and V["agreed_p2"] == "75.0|2026-10-27|bd", (V["route"], V["agreed_p1"], V["agreed_p2"])
+    assert "Monday 26 October is not a business day" in V["readback_line"], V["readback_line"]
+    ev(P, V, "confirm_yes", confirm="yes"); V["rec_ok"] = "true"; ev(P, V, "rec_after"); V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    assert V["state_p1"] == "recorded" and V["state_p2"] == "recorded"
+    for e, kw in (("change", dict(confirm="change", offer_when="friday", offer_amount="")), ("confirm_no", dict(confirm="no")),
+                  ("accept", dict(stance="accept")), ("offer", dict(offer_kind="exact", offer_when="friday"))):
+        ev(P, V, e, **kw)
+        assert V["state_p1"] == "recorded" and V["state_p2"] == "recorded", (e, V["state_p1"], V["state_p2"])
+        assert V["route"] in ("wrapup", "fin", "note"), (e, V["route"])
 
 
 if __name__ == "__main__":
