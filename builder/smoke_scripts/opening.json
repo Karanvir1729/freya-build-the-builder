@@ -1,0 +1,14 @@
+{
+ "name": "opening: the customer answers; no debt talk before identity, then a security question",
+ "variables": {"customer_id": "c_smoke", "first_name": "Daniel", "last_name": "Reyes", "title": "Mr", "now": "2026-10-14T11:00"},
+ "turns": ["Hello?", "Yes, this is me"],
+ "expect": [
+  {"after_turn": 1, "contains_any": ["Freya Bank"],
+   "not_contains": ["debt", "collection", "payment", "amount", "overdue", "past due", "re:\\bowes?\\b", "re:\\blate\\b", "loan", "credit card", "balance"]},
+  {"after_turn": 1, "contains_any": ["Reyes"]},
+  {"after_turn": 2, "cumulative": true,
+   "not_contains": ["debt", "collection", "payment", "amount", "overdue", "past due", "re:\\bowes?\\b", "re:\\blate\\b", "loan", "credit card", "balance"]},
+  {"after_turn": 2, "contains_any": ["date of birth", "re:\\bborn\\b", "birth", "last four", "last 4", "postcode", "post code", "company number", "founded", "security", "re:\\bverif"]},
+  {"after_turn": 2, "no_tool_calls": true}
+ ]
+}

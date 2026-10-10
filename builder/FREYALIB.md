@@ -1,0 +1,80 @@
+# freyalib — a brief-agnostic library for Freya phone-agent workflows
+
+`builder/freyalib.py` (standard library, Python 3.10+) holds everything **platform-specific** about a Freya
+workflow: tool JSON shapes, node shapes, transition forms, hooks, the lifecycle `close_call` tool, the code-node
+templates and the final checks. Everything **bank-specific** — holidays, bands, floors, wording, outcome table,
+identity fields, prompts — is a parameter the generator for one brief passes in. The shapes are those of the
+organisers' proven generator (`out/gen_brief-a.py`, 10/10 practice cases). `out/gen_brief-a_lib.py` is that
+generator ported onto the library; `out/compare_brief-a_lib.py` proves the two outputs equivalent.
+
+## API
+
+| Area | Function | What it gives |
+|---|---|---|
+| OpenAPI | `load_api(path)` | the tool API file as a dict |
+| | `base_url(api)` | server URL; tool `name` is `POST <base_url>/<name>` |
+| | `tool_spec(api, name)` | `{"fields": {f: {type, description, enum, required}}, "required": [...], "summary", "response_props": {...}}` from `paths["/<name>"]["post"]` |
+| | `tool_names(api)` | every tool in the file |
+| Tools | `api_tool(api, name, baked=None, description="", required=None, retries=0, pre=None, post=None, mapping=None, field_descriptions=None, omit=None, var_map=None)` | the `api_call` tool. url/method/headers baked; `body.properties` = every spec field as a leaf; `customer_id` baked from `{{customer_id}}`; `baked` fields get a literal default (hidden from the model, checked against the enum; `"{{var}}"` bakes from a variable an earlier node always sets); all other fields are model-filled with `default: "{{<field>}}"` and the spec's type/description/enum (`field_descriptions` overrides). **A model-filled field must not share its name with an existing variable.** `required` = spec required − customer_id − baked. `post` defaults to `STRIP_HEADER` |
+| | `close_call_tool(api, outcome_desc, reason_desc, no_reason_outcomes=None)` | the workflow-level `end_of_call` lifecycle tool reading `{{outcome}}`/`{{reason}}`; enum from the spec; pre-hook drops an empty reason (and the reason of `no_reason_outcomes`) |
+| Nodes | `conv(name, task, on_enter=None, tools=None, extraction=None, transitions=None, first_only=False, max_turns=60)` | conversation node |
+| | `code_node(name, code, transitions)` | passthrough code node (`code_exec`, 10 s) |
+| | `api_node(name, tool, transitions, mapping=None, on_enter=None)` | passthrough `api_request` node with node-level `response_mapping` |
+| | `end_node(name, ended_reason, farewell)` | `end_call` node: silent entry, farewell in the terminal |
+| | `end_pair(key, outcome, reason, farewell, nodes)` | adds `fin_<key>` (code: sets `outcome`/`reason`) + `end_<key>` (terminal named `<outcome>_<reason>`) |
+| Transitions | `always(t)`, `eq(var, val, t, desc)`, `neq`, `is_set`, `is_true(var, t, desc)` ("true" and "True"), `count_gt(var, n, t, desc)`, `intent(t, desc, intent)`, `intent_tool(t, desc, intent)` (tool-call transition `transition_to_<t>`), `ok_true(tool, t, desc)`, `transferred(t, desc)`, `tool_failed_twice(tool, t, desc)` | ready-made transitions |
+| | `cond(var, op, operand)`, `and_group(*conds)`, `tr(target, desc, *conds)`, `not_true(var)` | build any OR-of-ANDs condition |
+| | `ext(name, values, desc, conf=0.6)` | an enum extraction entry |
+| Hooks | `STRIP_HEADER` | drop the response headers |
+| | `what_next_post(branches, else_text, prelude=None)` | strips headers and sets `result['data']['what_to_do_next']` from ordered `(python_condition_on_d, text)` pairs |
+| | `ok_post(ok_text, fail_text)`, `promise_post()`, `promise_pre()` | write-tool hooks: say "recorded" only on `ok` true, retry once; amount→float, date→`[:10]` |
+| | `verify_post(question, hints, max_wrong_text, ...)` | identity-question hook: hint (not a wrong answer) → all verified → verified → unreadable → counter at 0 → wrong |
+| | `truthy(field)`, `falsy(field)` | condition expressions on `d` that accept booleans and strings |
+| Code | `CAL_HELPERS(holidays, business_weekdays)` | source defining `isbd, txt, txt_short, addbd, next_bd, lastbd_of_week, weekday_table, calendar_text, fmt` |
+| | `SETUP_CODE(holidays, business_weekdays, callback_rule, extra="", fallbacks=None)` | first code node: parses `now`, always sets `today_iso, today_text, now_time, weekday_table, setup_state` (+ `callback_text` from `{"open","close","same_day","days_ahead"}`); `extra` is brief-specific source run inside the try |
+| | `products_from_vars()` | reads the mapped product list (list / JSON string / flattened keys) |
+| | `guarded(body, state_var, fallbacks)` | try/except wrapper with `vars.setdefault` fallbacks |
+| | `counter_code(counter, limit, route_var, reset)` | count-and-route snippet (e.g. second refusal closes) |
+| Assembly | `assemble(initial_node, nodes, system_prompt, tools, test_variables)` | the workflow dict, after `check()` |
+| | `check(wf)` | raises `ValueError` listing: nulls, unknown targets, passthrough without `always`, tools/pre_actions on the wrong node type, code or hook that does not compile or has `{{`/`}}`, end_call without terminal, a node from which no end_call is reachable. Returns warnings (unreachable nodes, model-filled field named like a known variable) |
+| | `write_workflow(wf, path)` | JSON with indent 1 |
+
+Rules the helpers encode: fixed values use `default`, never `const`; booleans from results are tested as both
+spellings; routing flags written by code are strings; code never raises and reads everything from `vars`; every
+passthrough node ends with `always`; the farewell comes from the terminal and `endedReason` is its function name;
+`close_call` runs once per call as a lifecycle tool, from the `outcome`/`reason` the `fin_*` node wrote.
+
+## Reference architecture (gen_brief-a.py, 46 nodes)
+
+```
+setup (code: dates, callback window, attempt/deadline dates)
+  └─> opening (tts greeting; extract who1)
+        ├─ customer     ─> ask_<q1> (verify_identity field=q1; transfer_to_agent)
+        ├─ someone_else ─> third_party (schedule_callback) ─> fin_callback | fin_no_callback | fin_deceased | fin_wrong_number
+        ├─ deceased / wrong_number ─> fin_deceased | fin_wrong_number
+        └─ else ─> opening_retry (who2) ─> ask_<q1> | third_party | fin_declined | fin_unclear | ...
+ask_<q1> ─ verified ─> ask_<q2> ─ all_verified ─> load_account (api_request get_account, maps data.products)
+   │ refused ─> count_decline_<q> (code) ─> back to ask_<q> | fin_declined          └─> prepare (code: product facts,
+   │ 3 wrong ─> fin_failed ; transferred ─> fin_transferred_human                        band, floor, deadline, calendar)
+                                                                                           └─> negotiate (tts statement;
+negotiate ─ ok true ─> fin_promise ; failed twice ─> fin_service_error                          create_promise, transfer_to_agent)
+   ├─ topic=hardship ─> hardship (create_promise) ─> xfer_support | fin_hardship | fin_promise
+   ├─ topic=already_paid ─> fin_paid ; topic=dispute ─> fin_dispute
+   ├─ topic=new_plan ─> xfer_restructuring (api_request transfer_to_agent queue=restructuring) ─> fin_transferred_restructuring
+   ├─ transferred ─> fin_transferred_human
+   └─ transition_to_fin_refused (tool-call) ─> fin_refused
+fin_<key> (code: outcome, reason) ─> end_<key> (end_call, farewell)      × 16 outcomes
+workflow tools: close_call (end_of_call lifecycle, reads {{outcome}}/{{reason}})
+```
+
+What goes where when a new brief arrives: the outcome table → `end_pair` calls; holidays, windows and deadline
+rules → `SETUP_CODE(..., extra=...)`; bands, floors and product wording → the prepare body (with
+`products_from_vars()` and the `CAL_HELPERS` functions); identity questions → one `ask_<q>` node per question with
+`api_tool(api, "verify_identity", baked={"field": q})` and `verify_post`; prompts and extraction descriptions →
+the `conv` calls. Nothing in the library names a holiday, an amount, a band or an outcome.
+
+## Proof of equivalence
+
+`python3 out/gen_brief-a_lib.py && python3 out/compare_brief-a_lib.py` — 46 nodes both, 3 differing paths
+(setup code, prepare code, the schedule_callback post hook), each executed on the same inputs with identical
+results; no other path differs. `freya.validate_workflow('lib-port-check', wf)` dry-run accepted the port.

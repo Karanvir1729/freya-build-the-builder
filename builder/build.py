@@ -3,37 +3,43 @@
 
     source env.sh
     python3 builder/build.py briefs/brief-a.md tools/openapi.json
-    python3 builder/build.py briefs/brief-a.md briefs/brief-b.md tools/openapi.json    # Brief B builds on A: pass both
+    python3 builder/build.py briefs/brief-a.md briefs/brief-b.md tools/openapi.json     # Brief B builds on A: pass both
     python3 builder/build.py briefs/hidden-1.md briefs/hidden-1.openapi.json 2>&1 | tee traces/hidden-1.console.log
 
 Every argument ending in .md is a brief; the argument ending in .json is the bank's tool API file.
 The slot (and the name of every output file) is the file name of the last brief without .md.
+Options: --cases <file> (practice cases to test against; auto-detected for the kit and synthetic briefs, none for
+hidden briefs), --runner sim|freya (local simulator or the organisers' simulation; default sim), --minutes N (budget,
+default 29), --no-rules / --no-audit to skip those steps.
 
-What one run does, with no manual step:
-  1. runs Claude through the Claude Agent SDK with the `build-phone-agent` skill on the brief(s) and the tool API file.
-     Claude writes out/<slot>.workflow.json, saves it on Freya with freya.save_workflow(<slot>, ...), runs the practice
-     cases when the brief has any, and fixes what fails.
-  2. exports the phone agent as it is on Freya to submission/<slot>.workflow.json (what gets scored).
-  3. writes the trace: traces/<slot>.log (plain text: start/end time, every model turn and tool call in one line, test
-     results, what was created on Freya) and traces/<slot>.jsonl (every SDK message). API keys are scrubbed from both.
+One run, with no manual step:
+  1. rules:    builder/rules.py extracts the rule inventory of the brief(s) -> out/<slot>.rules.json (one model call)
+  2. build:    Claude (Claude Agent SDK) with the `build-phone-agent` skill writes out/gen_<slot>.py on builder/freyalib,
+               generates out/<slot>.workflow.json, lints, dry-runs, saves it on Freya (freya.save_workflow), smoke-tests it
+               over the chat route, audits rule coverage, runs the practice cases when there are any, and fixes what fails
+  3. verify:   builder/lint.py on the final workflow, builder/audit.py coverage summary (evidence for the trace)
+  4. export:   freya.export_workflow -> submission/<slot>.workflow.json (what gets scored)
+  5. trace:    traces/<slot>.log (plain text: start/end, every model call, tests, what was created) + traces/<slot>.jsonl
 
-Needs FREYA_API_KEY and FREYA_BANK_TEAM_KEY (env.sh) and a Claude login or ANTHROPIC_API_KEY.
+Needs FREYA_API_KEY and FREYA_BANK_TEAM_KEY (env.sh), a Claude login or ANTHROPIC_API_KEY; OPENAI_API_KEY for the
+local simulator's customer/judge models (otherwise it falls back to the Claude CLI).
 BUILDER_MODEL sets the builder's own model (default claude-opus-5-5). The phone agent's model is fixed in freya.py.
 """
-import asyncio, dataclasses, json, os, pathlib, re, sys, time
+import asyncio, dataclasses, json, os, pathlib, re, subprocess, sys, time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 SKILL = "build-phone-agent"
-BUILD_TIME_LIMIT_S = 29 * 60          # the rules allow 30 minutes per brief, self-tests included
 DEFAULT_BUILDER_MODEL = "claude-opus-5-5"
+PY = sys.executable
 
 
 def scrub(text):
     """Remove API keys and the team key from anything that goes into a trace."""
     text = re.sub(r"fak_[A-Za-z0-9_\-]{8,}", "fak_***", text)
-    for name in ("FREYA_API_KEY", "FREYA_BANK_TEAM_KEY", "ANTHROPIC_API_KEY"):
+    text = re.sub(r"sk-[A-Za-z0-9_\-]{12,}", "sk-***", text)
+    for name in ("FREYA_API_KEY", "FREYA_BANK_TEAM_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"):
         v = os.environ.get(name)
         if v and len(v) >= 8:
             text = text.replace(v, "<" + name + ">")
@@ -54,28 +60,57 @@ class Trace:
     def raw(self, obj):
         self.jsonl.write(scrub(json.dumps(obj, default=str)) + "\n"); self.jsonl.flush()
 
+    def elapsed_min(self):
+        return (time.time() - self.t0) / 60
+
     def close(self):
         self.log.close(); self.jsonl.close()
 
 
-async def run_claude(briefs, tool_api, slot, trace):
+def run_step(trace, name, cmd, timeout):
+    """Run a helper script, copy its 'model call' lines and summary into the trace, return (returncode, stdout)."""
+    trace.line("step %s: %s" % (name, " ".join(cmd)))
+    try:
+        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        trace.line("step %s: TIMEOUT after %d s" % (name, timeout)); return 1, ""
+    for l in (p.stderr or "").splitlines():
+        if "model call" in l: trace.line(l.strip())
+    out = (p.stdout or "").strip()
+    tail = out.splitlines()[-3:] if out else []
+    trace.line("step %s: exit %d%s" % (name, p.returncode, (" | " + " | ".join(t.strip()[:160] for t in tail)) if tail else ""))
+    if p.returncode != 0 and p.stderr:
+        trace.line("step %s stderr: %s" % (name, " ".join(p.stderr.split())[-400:]))
+    return p.returncode, out
+
+
+def detect_cases(briefs):
+    """Practice cases for the kit's and the synthetic briefs; none for a hidden brief."""
+    last = pathlib.Path(briefs[-1])
+    if last.resolve() == (ROOT / "briefs" / "brief-a.md").resolve(): return str(ROOT / "public-test-set.json"), "A"
+    if last.resolve() == (ROOT / "briefs" / "brief-b.md").resolve(): return str(ROOT / "public-test-set.json"), "B"
+    cand = last.with_name(last.stem + ".cases.json")
+    if cand.exists(): return str(cand), None
+    return None, None
+
+
+async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner, minutes_left):
     from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, ToolResultBlock,
                                   ToolUseBlock, UserMessage, query)
     model = os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL)
     options = ClaudeAgentOptions(
-        cwd=str(ROOT),
-        model=model,
-        skills=[SKILL],                        # .claude/skills/build-phone-agent
-        setting_sources=["project"],           # only this repo's settings, not the user's
-        allowed_tools=["Read", "Write", "Edit", "Glob", "Grep", "Bash"],
-        permission_mode="dontAsk",             # anything not listed above is refused
-        max_turns=150,
-        # A test run takes up to 11 minutes. Let a command run that long, in the foreground: the builder stops when
-        # Claude ends its turn, so a test left in the background is never read.
+        cwd=str(ROOT), model=model, skills=[SKILL], setting_sources=["project"],
+        allowed_tools=["Read", "Write", "Edit", "Glob", "Grep", "Bash"], permission_mode="dontAsk", max_turns=200,
         env={"BASH_DEFAULT_TIMEOUT_MS": "900000", "BASH_MAX_TIMEOUT_MS": "1200000", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"},
     )
-    prompt = ("Use the %s skill to build a phone agent. Brief file(s): %s. Tool API file: %s. Slot name: %s."
-              % (SKILL, " ".join(briefs), tool_api, slot))
+    test_line = ("No practice cases exist for this brief: test with lint, dry run, the smoke scripts and the audit only."
+                 if not cases else
+                 "Practice cases: %s%s. Test runner: %s (%s)." % (cases, (" --brief " + brief_filter) if brief_filter else "", runner,
+                 "python3 builder/sim.py <slot> --cases <file>%s --concurrency 5" % ((" --brief " + brief_filter) if brief_filter else "")
+                 if runner == "sim" else "python3 tools/run_cases.py <agent_id> --cases <file>%s" % ((" --brief " + brief_filter) if brief_filter else "")))
+    prompt = ("Use the %s skill to build a phone agent. Brief file(s): %s. Tool API file: %s. Slot name: %s. "
+              "The rule inventory is at out/%s.rules.json (and .md). %s Time budget: %d minutes from now for everything, "
+              "including your own tests; save a working agent early and improve it." % (SKILL, " ".join(briefs), tool_api, slot, slot, test_line, int(minutes_left)))
     trace.line("model call: %s | purpose: build, test and fix the phone agent from the brief | prompt: %s" % (model, prompt))
     async for message in query(prompt=prompt, options=options):
         trace.raw({"type": type(message).__name__, **dataclasses.asdict(message)})
@@ -83,8 +118,7 @@ async def run_claude(briefs, tool_api, slot, trace):
             m = getattr(message, "model", None) or model
             for block in message.content:
                 if isinstance(block, TextBlock):
-                    text = block.text.strip()
-                    first = text.splitlines()[0] if text else ""
+                    text = block.text.strip(); first = text.splitlines()[0] if text else ""
                     if first: trace.line("model call: %s | says: %s" % (m, first[:220]))
                 elif isinstance(block, ToolUseBlock):
                     arg = block.input.get("command") or block.input.get("file_path") or block.input.get("pattern") or ""
@@ -93,7 +127,7 @@ async def run_claude(briefs, tool_api, slot, trace):
             for block in message.content:
                 if isinstance(block, ToolResultBlock):
                     text = block.content if isinstance(block.content, str) else json.dumps(block.content, default=str)
-                    hits = [l.strip() for l in text.splitlines() if re.match(r"\s*(PASS|FAIL)\b", l) or " passed" in l or "workflow_id" in l]
+                    hits = [l.strip() for l in text.splitlines() if re.match(r"\s*(PASS|FAIL|RESULT:|ERROR|WARN)\b", l) or " passed" in l or "workflow_id" in l or "implemented" in l]
                     if hits: trace.line("test/tool result: " + " | ".join(h[:160] for h in hits[:24]))
         elif isinstance(message, ResultMessage):
             trace.line("agent run done: %s turns, %.0f s, $%.2f" % (message.num_turns, message.duration_ms / 1000, message.total_cost_usd or 0))
@@ -105,8 +139,7 @@ def export(slot, trace):
     f = ROOT / ".freya-agents.json"
     state = json.loads(f.read_text()) if f.exists() else {}
     if slot not in state:
-        trace.line("ERROR: no workflow saved for slot %r (not in .freya-agents.json). Nothing exported." % slot)
-        return None
+        trace.line("ERROR: no workflow saved for slot %r (not in .freya-agents.json). Nothing exported." % slot); return None
     wid, aid = state[slot]["workflow_id"], state[slot]["agent_id"]
     out = ROOT / "submission" / (slot + ".workflow.json"); out.parent.mkdir(exist_ok=True)
     freya.export_workflow(wid, str(out))
@@ -119,30 +152,46 @@ def export(slot, trace):
 
 
 async def main(argv):
-    briefs = [a for a in argv if a.lower().endswith(".md")]
-    apis = [a for a in argv if a.lower().endswith(".json")]
-    if len(apis) == 1:
-        tool_api = apis[0]
-    elif not apis and len(argv) >= 2:
-        briefs, tool_api = argv[:-1], argv[-1]
-    else:
-        sys.exit(__doc__)
-    if not briefs:
-        sys.exit(__doc__)
+    opts = {"--cases": None, "--runner": "sim", "--minutes": "29"}; flags = set()
+    args = []
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a in opts and i + 1 < len(argv): opts[a] = argv[i + 1]; i += 2; continue
+        if a in ("--no-rules", "--no-audit"): flags.add(a); i += 1; continue
+        args.append(a); i += 1
+    briefs = [a for a in args if a.lower().endswith(".md")]
+    apis = [a for a in args if a.lower().endswith(".json")]
+    if len(apis) == 1: tool_api = apis[0]
+    elif not apis and len(args) >= 2: briefs, tool_api = args[:-1], args[-1]
+    else: sys.exit(__doc__)
+    if not briefs: sys.exit(__doc__)
     for p in briefs + [tool_api]:
         if not pathlib.Path(p).exists(): sys.exit("not found: " + p)
     for k in ("FREYA_API_KEY", "FREYA_BANK_TEAM_KEY"):
         if not os.environ.get(k) or os.environ[k].endswith("your_key_here"): sys.exit(k + " is not set. source env.sh first.")
-    slot = pathlib.Path(briefs[-1]).stem
+    budget = float(opts["--minutes"]); slot = pathlib.Path(briefs[-1]).stem
+    cases, brief_filter = (opts["--cases"], None) if opts["--cases"] else detect_cases(briefs)
     trace = Trace(slot)
-    trace.line("build start %s | briefs=%s tool_api=%s slot=%s | builder model=%s"
-               % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), briefs, tool_api, slot, os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL)))
+    trace.line("build start %s | briefs=%s tool_api=%s slot=%s | cases=%s runner=%s budget=%.0f min | builder model=%s | phone agent model=%s"
+               % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), briefs, tool_api, slot, cases, opts["--runner"], budget, os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL), os.environ.get("FREYA_AGENT_MODEL", "experimental-5")))
+    (ROOT / "out").mkdir(exist_ok=True)
+    if "--no-rules" not in flags:
+        run_step(trace, "rules", [PY, "builder/rules.py", *briefs, "--api", tool_api, "--out", "out/%s.rules.json" % slot], timeout=420)
     try:
-        await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace), timeout=BUILD_TIME_LIMIT_S)
+        left = budget - trace.elapsed_min() - 3          # keep 3 minutes for verify + export
+        await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left), timeout=max(60, left * 60))
     except asyncio.TimeoutError:
-        trace.line("STOPPED: the %d-minute build limit was reached. Exporting whatever is saved on Freya." % (BUILD_TIME_LIMIT_S // 60))
+        trace.line("STOPPED: the build budget was reached. Verifying and exporting whatever is saved on Freya.")
     except Exception as e:
         trace.line("ERROR in the agent run: %r" % (e,))
+    wf_path = ROOT / "out" / ("%s.workflow.json" % slot)
+    if wf_path.exists():
+        run_step(trace, "lint", [PY, "builder/lint.py", str(wf_path), "--api", tool_api], timeout=120)
+        if "--no-audit" not in flags and (ROOT / "out" / ("%s.rules.json" % slot)).exists() and trace.elapsed_min() < budget - 1:
+            gen = ROOT / "out" / ("gen_%s.py" % slot)
+            run_step(trace, "audit", [PY, "builder/audit.py", "--rules", "out/%s.rules.json" % slot, "--workflow", str(wf_path),
+                                      "--generator", str(gen) if gen.exists() else "", "--out", "out/%s.audit.json" % slot], timeout=360)
     try:
         export(slot, trace)
     except Exception as e:
