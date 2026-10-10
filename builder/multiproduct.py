@@ -276,7 +276,7 @@ try:
                     rec.append(pid)
                 V['rec_pids'] = ','.join(rec)
                 msg = 'The promise for ' + pid + ' is recorded. '
-            elif pid:
+__DUP_BLOCK__            elif pid:
                 n = int(float(V.get('fail_' + pid) or 0)) + 1
                 V['fail_' + pid] = n
                 if n >= __MAXF__:
@@ -295,14 +295,27 @@ except Exception:
 """
 
 
+_DUP_BLOCK = r"""            elif pid and isinstance(d, dict) and 'already' in str(d.get('error') or '').lower():
+                rec = [x for x in str(V.get('rec_pids') or '').split(',') if x]
+                if pid not in rec:
+                    rec.append(pid)
+                V['rec_pids'] = ','.join(rec)
+                msg = 'The bank already holds a promise for ' + pid + ': it IS recorded. Never call __TOOL__ again for ' + pid + '. '
+"""
+
+
 def promise_post_code(max_fails=2, fail_reason="service_error", promise_tool="create_promise", note_tool="add_note",
-                      ok_field="ok", api=None, reason_field="reason"):
+                      ok_field="ok", api=None, reason_field="reason", duplicate_is_recorded=False):
     """Post hook of the promise tool. On ok true adds pending_pid to rec_pids and says it is recorded; otherwise
     counts fail_<pid>: below `max_fails` it asks for one retry with the same values, at `max_fails` it tells the
     model to inform the customer and call the note tool with `fail_reason` (one of the API's note reasons: pass
     `api` and the value is checked against the note tool's `reason_field` enum, since the default 'service_error'
     is Brief A/B's word). Every message ends with the _status sentence (recorded / noted / still open), which
-    also refreshes open_pids and all_done so the ALL_DONE transition fires in the same turn."""
+    also refreshes open_pids and all_done so the ALL_DONE transition fires in the same turn.
+    duplicate_is_recorded=True: a failure whose `error` says the product 'already' has a promise counts as recorded,
+    not as a failed try (seen when a 504 turn rolled the engine's state back after a successful create_promise and
+    the model recorded the same promise again: three 'already has a promise' answers became a service_error close).
+    Default False emits the previous code unchanged."""
     _ident(promise_tool, "promise_tool")
     _ident(note_tool, "note_tool")
     _literal(fail_reason, "fail_reason")
@@ -313,7 +326,7 @@ def promise_post_code(max_fails=2, fail_reason="service_error", promise_tool="cr
     if max_fails < 1:
         raise ValueError("max_fails must be >= 1")
     times = {1: "once", 2: "twice"}.get(max_fails, "%d times" % max_fails)
-    code = (_PROMISE_POST.replace("__MAXF__", str(max_fails)).replace("__TIMES__", times).replace("__NOTE__", note_tool)
+    code = (_PROMISE_POST.replace("__DUP_BLOCK__", _DUP_BLOCK if duplicate_is_recorded else "").replace("__MAXF__", str(max_fails)).replace("__TIMES__", times).replace("__NOTE__", note_tool)
             .replace("__REASON__", fail_reason).replace("__TOOL__", promise_tool).replace("__OK__", repr(ok_field)))
     return _no_braces(state_fn_code(promise_tool, note_tool) + code, "promise_post_code")
 

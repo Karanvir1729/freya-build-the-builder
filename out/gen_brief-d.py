@@ -272,7 +272,8 @@ NOTE_ENUM = mp.note_reasons(API)
 # R "Read-back and recording": up to three tries in total for the same promise, then a service_error note.
 PROMISE_PRE = mp.promise_pre_code(cap_to_deadline=True, cap_to_amount=True, api=API,
                                   snap_closed="before", holidays=HOLIDAYS)
-PROMISE_POST = mp.promise_post_code(max_fails=3, fail_reason="service_error", api=API)
+PROMISE_POST = mp.promise_post_code(max_fails=3, fail_reason="service_error", api=API,
+                                    duplicate_is_recorded=True)   # a 504 rollback must not turn a recorded promise into SVC
 NOTE_PRE = mp.note_pre_code(api=API)
 NOTE_POST = mp.note_post_code(api=API)
 
