@@ -537,5 +537,37 @@ def test_unchanged_change_is_not_a_loop():
     assert V["route"] == "confirm" and V["ok_date"] == "2026-10-15" and V["same_change"] == "0", (V["route"], V.get("ok_date"))
 
 
+@test
+def test_per_product_claims_in_one_turn():
+    """EXT-B-02: 'the card is not mine, I paid the loan yesterday, I will pay the car loan in full today' in answer to
+    the all-products question. Only the card is a dispute and only the loan is paid; the car loan goes to the guard and
+    the read-back. Before: topic=dispute settled every open product as dispute and the call ended."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", per_product="first=dispute;second=paid;third=pay", offer_when="today", offer_amount="")
+    assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("dispute", "paid", "agreed"), (V["state_p1"], V["state_p2"], V["state_p3"])
+    assert V["route"] == "confirm" and V["ok_pid"] == "p3" and V["ok_amount"] == "75.0" and V["ok_date"] == TODAY, (V["route"], V.get("ok_pid"), V.get("ok_amount"))
+    rb = V["readback_line"]
+    assert "credit card ending 4821" in rb and "personal loan" in rb and rb.endswith("car loan, 75, today. Do you confirm?"), rb
+    assert V["per_product"] == ""
+    ev(P, V, "confirm_yes", confirm="yes")
+    assert V["route"] == "record" and V["rec_pid"] == "p3"
+    V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    notes = []
+    while V["route"] == "note":
+        notes.append((V["note_pid"], V["note_reason"])); V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert notes == [("p1", "dispute"), ("p2", "paid")], notes
+    # claims with a refusal for the rest: the settled ones first, then one by one from the first OPEN product
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse", stance="refuse", per_product="first=paid;second=refuse;third=refuse")
+    assert V["state_p1"] == "paid" and V["cur_pid"] == "p2" and V["route"] == "negotiate", (V["state_p1"], V["cur_pid"])
+    assert V["say_next"].startswith("Thank you for letting me know.") and "personal loan" in V["say_next"], V["say_next"]
+    # no claims: the old behaviour (a dispute about everything)
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", per_product="")
+    assert V["state_p1"] == "dispute" and V["state_p2"] == "dispute"
+    # single product: no per_product extraction at all
+    assert not mk().claims_extraction() and mk(multi=True).claims_extraction()[0]["name"] == "per_product"
+
+
 if __name__ == "__main__":
     sys.exit(main())

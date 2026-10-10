@@ -101,7 +101,7 @@ DEFAULT_TEXTS = {
 CLEAR_ENUMS = {"stance": "other", "offer_kind": "none", "offer_for": "none", "topic": "none", "confirm": "other",
                "hs_answer": "none", "wrap": "other", "aside": "none",
                "offer_ref": "none"}
-CLEAR_VALUES = {"offer_date": "1900-01-01", "offer_amount": "0", "offer_when": ""}
+CLEAR_VALUES = {"offer_date": "1900-01-01", "offer_amount": "0", "offer_when": "", "per_product": ""}
 SENTINEL_YEAR = 1900
 # the customer's own words for the day, resolved in code against the call's date (the platform's date extraction uses
 # the real clock: 'tomorrow' arrived as a date before the call's today on Brief B PUB-12)
@@ -567,7 +567,75 @@ def spoken_prefix(V, pre):
         return
     key = {'confirm': 'readback_line', 'wrapup': 'wrap_line'}.get(g(V, 'route'), 'say_next')
     V[key] = join([pre, g(V, key)])
+def claims(V):
+    # per_product: 'first=dispute;second=paid;third=pay' (one extraction string, parsed here) -> {pid: claim}
+    out = {}
+    ids = pids(V)
+    order = P['ordinals']
+    for part in re.split(r'[;,]', g(V, 'per_product').lower()):
+        if '=' not in part:
+            continue
+        k, v = [x.strip() for x in part.split('=', 1)]
+        if k in order and order.index(k) < len(ids):
+            out[ids[order.index(k)]] = v
+    return out
+def settle_claims(V):
+    # one turn about several products ('the card is not mine, I paid the loan, the car loan today'): the paid and
+    # disputed products are settled one by one (the single topic would have settled every open product; extended
+    # Brief B EXT-B-02). Returns the brief's sentences for what was settled, '' when nothing was.
+    if not multi(V):
+        return ''
+    cl = claims(V)
+    pre = []
+    for kind in ('dispute', 'paid'):
+        ps = [p for p in pids(V) if cl.get(p) == kind and state(V, p) in ('open', 'agreed')]
+        if ps:
+            for p in ps:
+                pset(V, p, 'state', kind)
+            pre.append(T(kind, words=T('and').join([pg(V, p, 'words') for p in ps])))
+    return join(pre)
+def pay_claimed(V, pre):
+    # after settle_claims: the products the same turn says will be paid go through the guard (amount: the one
+    # named, by reference, else the full amount; day: the one named, else today). False when there is none.
+    cl = claims(V)
+    opn = [p for p in pids(V) if state(V, p) == 'open']
+    pay = [p for p in opn if cl.get(p) == 'pay']
+    if not pay:
+        return False
+    a = num(g(V, 'offer_amount'))
+    if a is not None and a <= 0:
+        a = None
+    d, k = offer_date_of(V)
+    t = today_of(V)
+    d0 = d or (t if isbd(t) else next_bd(t))
+    if len(pay) == 1:
+        p = pay[0]
+        V['stage'] = 'one'
+        V['cur_pid'] = p
+        a = ref_amount(V, p, a)
+        if k == 'vague':
+            check_one(V, p, a, None, 'vague')
+        else:
+            check_one(V, p, full_of(V, p) if a is None else a, d0, 'exact')
+    elif len(pay) == len(opn) and a is None:
+        all_offer(V, d0)
+    else:
+        return False
+    spoken_prefix(V, pre)
+    return True
+def claims_first(V):
+    # True when the turn's per-product claims decided the turn (settled products, then the paid ones or the next)
+    if not (multi(V) and g(V, 'stage') == 'all'):
+        return False
+    pre = settle_claims(V)
+    if not pre:
+        return False
+    if not pay_claimed(V, pre):
+        advance(V, pre)
+    return True
 def ev_offer(V):
+    if claims_first(V):
+        return
     kind = g(V, 'offer_kind')
     a = num(g(V, 'offer_amount'))
     if a is not None and a <= 0:
@@ -623,6 +691,8 @@ def ev_offer(V):
         return
     check_one(V, g(V, 'cur_pid'), a, d, kind)
 def ev_accept(V):
+    if claims_first(V):
+        return
     if multi(V) and g(V, 'stage') == 'all':
         t = today_of(V)
         for p in [x for x in pids(V) if state(V, x) == 'open']:
@@ -635,14 +705,19 @@ def ev_accept(V):
     a, d = prop_of(V, pid)
     check_one(V, pid, a, d, 'exact')
 def to_one_by_one(V):
-    p = pids(V)[0]
+    opn = [x for x in pids(V) if state(V, x) == 'open']
+    p = opn[0] if opn else pids(V)[0]
     V['stage'] = 'one'
     V['cur_pid'] = p
     return p, join([T('one_by_one'), T('next_product', words=pg(V, p, 'words'), past_due=fmt(full_of(V, p)))])
 def ev_refuse(V):
     if multi(V) and g(V, 'stage') == 'all':
+        pre0 = settle_claims(V)
+        if pre0 and not [x for x in pids(V) if state(V, x) == 'open']:
+            advance(V, pre0)
+            return
         p, pre = to_one_by_one(V)
-        refuse(V, p, pre)
+        refuse(V, p, join([pre0, pre]))
         return
     pid = g(V, 'cur_pid')
     if state(V, pid) == 'agreed':
@@ -650,8 +725,12 @@ def ev_refuse(V):
     refuse(V, pid)
 def ev_too_much(V):
     if multi(V) and g(V, 'stage') == 'all':
+        pre0 = settle_claims(V)
+        if pre0 and not [x for x in pids(V) if state(V, x) == 'open']:
+            advance(V, pre0)
+            return
         p, pre = to_one_by_one(V)
-        too_much(V, p, pre)
+        too_much(V, p, join([pre0, pre]))
         return
     too_much(V, g(V, 'cur_pid'))
 def targets_for_topic(V):
@@ -662,6 +741,12 @@ def targets_for_topic(V):
         return [p for p in pids(V) if state(V, p) in ('open', 'agreed')]
     return [g(V, 'cur_pid')]
 def ev_settle(V, kind):
+    if multi(V):
+        pre = settle_claims(V)
+        if pre:
+            if not pay_claimed(V, pre):
+                advance(V, pre)
+            return
     ts = targets_for_topic(V)
     words = [pg(V, p, 'words') for p in ts]
     for p in ts:
@@ -1130,6 +1215,21 @@ class Policy:
                 "; none = no such question. Pick it even when the message also contains an answer, an offer or a refusal.")
         return [fl.ext("aside", ["none"] + list(self.asides), desc, conf)]
 
+    def claims_extraction(self, conf=0.5):
+        """Multi-product only: `per_product`, what the customer's LATEST message says about each product when it says
+        different things about different products, as 'first=dispute;second=paid;third=pay' (parsed in code:
+        settle_claims / pay_claimed). Brief-agnostic; added to the negotiate node by negotiate_node()."""
+        if not self.multi:
+            return []
+        o = self.P["ordinals"]
+        desc = ("Only when the customer's LATEST message says DIFFERENT things about DIFFERENT products: one pair per product "
+                "it mentions, '<position>=<claim>' separated by ';', where position is the product's place in the order the "
+                "agent listed them (" + ", ".join(o) + ") and claim is one of: dispute (not theirs, never had it, closed or paid "
+                "off in the past), paid (already paid it), pay (will pay it: accepts, or names a day or an amount for it), "
+                "refuse (will not or cannot pay it). Example: '" + o[0] + "=dispute;" + o[min(1, len(o) - 1)] + "=paid;" +
+                o[min(2, len(o) - 1)] + "=pay'. Empty when the message is about all products together or about one only.")
+        return [{"name": "per_product", "type": "string", "description": desc, "min_confidence": conf}]
+
     @staticmethod
     def offer_extraction(date_desc, amount_desc, kind_desc, conf=0.5, ref_desc=None):
         """T1: offer_date (date), offer_amount (float), offer_kind (exact|vague|none), offer_when (the customer's
@@ -1180,7 +1280,7 @@ class Policy:
         state_line first in its prompt, no tools (every write happens in the record nodes)."""
         name = name or self.targets["negotiate"]
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=list(extraction) + self.aside_extraction(), transitions=transitions)
+                       extraction=list(extraction) + self.claims_extraction() + self.aside_extraction(), transitions=transitions)
 
     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
                      name=None, conf=0.5, ref_desc=None):
