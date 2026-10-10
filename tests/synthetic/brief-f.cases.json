@@ -396,7 +396,7 @@
    ]
   },
   "checks": [
-   "transfer_to_agent is called with queue restructuring; the agent describes no plan, reduced instalment or extra time of its own",
+   "transfer_to_agent is called with queue restructuring; the agent describes no repayment plan or restructured instalments of its own (offering the 700.00 floor once is allowed)",
    "no promise is recorded and add_note is never called",
    "close_call transferred with code XRS"
   ]
