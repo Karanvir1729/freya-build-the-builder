@@ -40,7 +40,7 @@ POLICY = pol.Policy(
         "after_deadline": "The latest date the bank can record is [deadline].",                       # R24
         "before_today": "[named] has already passed.",                                                # R20 (today or later)
         "below_floor": "The smallest amount the bank can record is [floor].",                         # R28
-        "above_full": "The full overdue amount is [full], so I will record [full].",                  # R28 above the full amount
+        "above_full": "The full overdue amount is [full], so [named] is more than is overdue. I will record [full], the full amount.",  # R28 above the full amount
         "vague": "Which exact day would that be?",                                                    # R23
         "vague_deadline": "The latest date the bank can record is [deadline].",                       # unused (vague_again='refuse')
         "too_much_floor": "I understand. I can propose [floor]. The remainder stays overdue, and the account stays in arrears until it is cleared.",  # R27
@@ -62,6 +62,7 @@ POLICY = pol.Policy(
     fin_keys={"promise": "promise", "paid": "paid", "default": "declined_offer", "refused": "declined_offer",
               "hardship": "financial_distress", "dispute": "contested_xfer", "service_error": "system_fault"},
     fail_max=3,                                   # R38: the first call and up to two more
+    max_checks=6,                                 # loop exit: offers and read-back changes per product
     human_limit=1,                                # R43: transfer at once, never ask first
     notalk_limit=1,                               # R46: do not insist, end at once
     closed_day_move="after",                      # R21: the next business day

@@ -710,7 +710,9 @@ def ev_change(V):
     pset(V, pid, 'state', 'open')
     V['cur_pid'] = pid
     V['stage'] = 'one'
-    pset(V, pid, 'checks', 0)
+    # no reset of checks_<pid>: a customer who repeats the same correction at the read-back (an amount above the full
+    # amount, read back as the full amount) looped confirm -> change_offer -> confirm ten times (Brief C v3 EXT-C-09);
+    # max_checks is the loop exit for changes too
     check_one(V, pid, a, d, 'exact')
 def rec_next(V):
     for p in pids(V):

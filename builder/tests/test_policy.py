@@ -548,5 +548,22 @@ def test_promise_reasons_and_ending_code():
     assert V["outcome"] == "transferred", V
 
 
+@test
+def test_repeated_change_is_bounded():
+    """The same above-full correction repeated at the read-back ends after max_checks, never loops forever."""
+    import json
+    P = pol.Policy(HOL, texts=TEXTS, above_full="agree", max_checks=4)
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="exact", offer_when="this friday", offer_amount="500")
+    routes = []
+    for _ in range(6):
+        if V["route"] != "confirm":
+            break
+        ev(P, V, "change", confirm="change", offer_when="friday", offer_amount="500")
+        routes.append(V["route"])
+    assert routes[-1] == "fin" and V["final_route"] == "refused" and len(routes) <= 4, routes
+
+
 if __name__ == "__main__":
     sys.exit(main())
