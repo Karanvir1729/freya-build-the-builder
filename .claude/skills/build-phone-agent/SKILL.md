@@ -1,6 +1,6 @@
 ---
 name: build-phone-agent
-description: Build a Freya phone agent from a bank's brief and tool API with builder/freyalib, check it (lint, dry run, smoke, rule-coverage audit, practice cases when they exist) and fix what fails. Use when asked to build or improve a phone agent from a brief.
+description: Build a Freya phone agent from a bank's brief and tool API with builder/freyalib, check it (lint, dry run, smoke, rule-coverage audit, practice cases, or generated rule-branch cases for a brief without any) and fix what fails. Use when asked to build or improve a phone agent from a brief.
 ---
 
 # Build a phone agent from a brief
@@ -33,7 +33,15 @@ Use ONLY what the given brief(s) and tool API file say. Never copy a rule, value
 7. **Smoke.** Sequentially: `python3 builder/smoke.py <slot> --script builder/smoke_scripts/opening.json`, then `third_party.json`, then `wrong_number.json` (generic checks any collections brief must pass; adapt expectations only where this brief's wording differs). Fix failures in the generator.
 8. **Audit.** `python3 builder/audit.py --rules out/<slot>.rules.json --workflow out/<slot>.workflow.json --generator out/gen_<slot>.py --out out/<slot>.audit.json`. Fix every `contradicted` and `missing` rule and the `top_fixes`; regenerate, lint, save. Audit again if time allows.
 9. **Practice cases, only when a cases file was given.** `python3 builder/sim.py <slot> --cases <file> --concurrency 5` (local, parallel, needs OPENAI_API_KEY or falls back to the Claude CLI), or `python3 tools/run_cases.py <agent_id> --cases <file>` when the prompt says to use the organisers' simulation (one at a time, 3-11 minutes, run in the foreground and wait). Read every FAIL reason and the transcript; fix the generator (never the platform by hand); regenerate, save, rerun. At most three rounds. Stay inside the time budget given in the prompt.
-10. **Finish** with one line: `workflow_id`, `agent_id`, number of nodes and tools, the last test result, and any rule you could not implement (say which and why).
+
+   **Generated cases (no organisers' cases: hidden briefs).** The prompt then names `out/<slot>.cases.json`, written from the brief by an independent case writer (`builder/cases.py`); its expectations can be wrong. Never open `out/<slot>.cases.rationale.md`, and never edit the cases file. Repair round, at most 2 rounds, each only when at least 6 minutes of the budget are left:
+   1. Save first (step 6), so a working agent exists whatever happens.
+   2. `python3 builder/sim.py <slot> --cases out/<slot>.cases.json --concurrency 2 --out results/<slot>-gen.json --transcripts results/<slot>-gen/` (one rep; the chat route gives 504s above concurrency 2).
+   3. For every FAIL read the transcript (`results/<slot>-gen/<id>.txt`: lines, tool calls in place, the ledger) and map the failure to a rule id of the inventory (the case's `rule_ids` say which rules it tests).
+   4. Fix the generator ONLY when the failure is a deterministic agent error visible in the engine events or tool calls: a wrong route (the node the agent went to contradicts the rule), a missing or wrongly filled tool call (wrong field, enum, product id, `close_call` outcome/reason the routes chose), a wrong fact in a code-built line (date, deadline, floor, weekday, callback slot computed by your code), a hook that throws, a verbatim line missing. Check the claim against the brief yourself before changing anything.
+   5. Do NOT change the agent when the case's `expected_confidence` is `low` or `medium` and the disagreement is about that expectation, when the agent's behaviour follows the brief and the expectation does not, or when the customer simulator went off script (said something the script did not say, hung up early). Write those down for the final line instead.
+   6. Regenerate, lint, save, and rerun only the cases you fixed (`--only`). Stop at 2 rounds or when the budget is short.
+10. **Finish** with one line: `workflow_id`, `agent_id`, number of nodes and tools, the last test result (for generated cases: passed, fixed, and failures left unfixed because the expectation was uncertain), and any rule you could not implement (say which and why).
 
 ## Rules
 
