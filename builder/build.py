@@ -198,6 +198,13 @@ async def main(argv):
         trace.line("ERROR exporting the workflow: %r" % (e,))
     trace.line("build end %s | total %.0f s" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), time.time() - trace.t0))
     trace.close()
+    # keep every run: traces/<slot>.log is the latest run (what the form points at); a timestamped copy keeps the earlier ones
+    import shutil
+    stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(trace.t0))
+    for ext in ("log", "jsonl"):
+        src = ROOT / "traces" / ("%s.%s" % (slot, ext))
+        if src.exists(): shutil.copy(src, ROOT / "traces" / ("%s-%s.%s" % (slot, stamp, ext)))
+    print("trace: traces/%s.log (copy traces/%s-%s.log)" % (slot, slot, stamp))
 
 
 if __name__ == "__main__":
