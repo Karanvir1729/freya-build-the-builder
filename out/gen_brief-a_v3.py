@@ -353,7 +353,7 @@ HS_ANSWER_DESC = ("From the customer's LATEST message. support_yes = they want t
                   "none = anything else, for example a question or a request for a discount.")
 HARDSHIP = ("The customer mentioned a hardship (illness, a death in the family or job loss). You said one short sentence of sympathy and offered to connect them with the customer support team.\n"
             "- Make NO persuasion attempt. Never propose an amount or a date yourself.\n"
-            "- If they ask a question or for a discount, answer in one short sentence, then ask whether they want to be connected with the customer support team.\n"
+            "- If they ask a question or for a discount, answer in one short sentence and wait for their answer: the support team is offered once (on entering), never again.\n"
             + COMMON + FACTS)
 nodes["hardship"] = POLICY.hardship_node(HARDSHIP, HS_ANSWER_DESC, KIND_DESC, DATE_DESC, AMOUNT_DESC, ref_desc=REF_DESC)
 

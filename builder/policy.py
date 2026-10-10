@@ -1194,9 +1194,17 @@ def state_line(V):
             s += ' Settled: ' + st + '.'
         out.append(s)
     if g(V, 'mode') == 'hardship':
-        out.append('The customer mentioned a hardship: make no persuasion attempt and propose nothing yourself.')
+        out.append('The customer mentioned a hardship: make no persuasion attempt and propose nothing yourself. '
+                   'The sympathy and the offer of help were already said once: never say them again.')
     elif g(V, 'offer_question'):
-        out.append('Current offer, ask exactly this: "' + g(V, 'offer_question') + '"')
+        cp = g(V, 'prop_pid')
+        if cp and state(V, cp) == 'open' and pg(V, cp, 'offered_floor') == 'yes' and abs(num(g(V, 'prop_amount'), -1.0) - floor_of(V, cp)) < 0.005:
+            # the floor is offered once (the brief's rule): a dialogue turn that re-asks it is a second offer (Freya
+            # talkative PUB-06: 'How much can you let me pay?' got the minimum again and the judge counted two)
+            out.append('Current offer, already said once: "' + g(V, 'offer_question') + '" Never repeat its amount or the question; '
+                       'to small talk or a question, reply in one short sentence and ask only whether they can do that.')
+        else:
+            out.append('Current offer, ask exactly this: "' + g(V, 'offer_question') + '"')
     rec = [p for p in ids if state(V, p) == 'recorded']
     out.append('Recorded: ' + (', '.join(rec) if rec else 'nothing yet') + '.')
     V['state_line'] = ' '.join(out)
@@ -1303,6 +1311,10 @@ EVENT_NODES = {
     "rec_next": "confirm_yes", "rec_after": "rec_after", "note_after": "note_after",
     "wrap_human": "wrap_human", "wrap_change": "wrap_change", "finalize": "finalize",
 }
+
+ONCE_RULE = ("\n- An offer the brief allows once (the lowest amount, the support team, a transfer) is said once, by the system line "
+             "you speak on entering: never repeat it yourself. To small talk, a cut-off line or a side question, reply in one short "
+             "sentence (or 'Please go on.') and wait; the system asks again when it is due.")
 
 
 class Policy:
@@ -1541,7 +1553,7 @@ class Policy:
         """The negotiation conversation node: on every entry it speaks the code-built {{say_next}} (tts),
         state_line first in its prompt, no tools (every write happens in the record nodes)."""
         name = name or self.targets["negotiate"]
-        return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
+        return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction()), transitions=transitions)
 
     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
@@ -1644,7 +1656,7 @@ class Policy:
                      fl.cond("offer_ref", "equals", "floor"), fl.cond("offer_ref", "equals", "full")),
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]
-        return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
+        return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=fl.with_cutoff(ext + self.aside_extraction(conf)), transitions=trs)
 
     def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):

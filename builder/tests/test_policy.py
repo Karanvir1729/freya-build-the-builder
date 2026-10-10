@@ -820,5 +820,24 @@ def test_cutoff_day_and_amount():
 
 
 
+@test
+def test_once_only_offers_not_repeated():
+    """The floor and the hardship offer are said once by code; the state line and the node prompts forbid the
+    dialogue model to repeat them on small talk (Freya talkative PUB-05: support offered 3 times; PUB-06: the
+    minimum offered twice)."""
+    P, V = start([LOAN])
+    ev(P, V, "too_much", stance="too_much")
+    assert "already said once" in V["state_line"] and "ask exactly this" not in V["state_line"], V["state_line"]
+    P, V = start([LOAN])
+    assert "ask exactly this" in V["state_line"], V["state_line"]
+    ev(P, V, "hardship", topic="hardship")
+    assert "never say them again" in V["state_line"], V["state_line"]
+    n = P.negotiate_node("TASK", [], [fl.always("negotiate")])
+    h = P.hardship_node("TASK", "a", "k", "d", "m")
+    for node in (n, h):
+        assert pol.ONCE_RULE.strip() in str(node), node.get("name")
+
+
+
 if __name__ == "__main__":
     sys.exit(main())
