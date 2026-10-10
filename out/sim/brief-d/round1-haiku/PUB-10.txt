@@ -1,0 +1,52 @@
+# PUB-10 The promise service fails on the first try
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call 48e16692-90f4-49ca-a755-08673485d143 | customer c_1ff11a7d-4cd | 2026-10-10 20:29:43
+# customer model claude-haiku-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/48e16692-90f4-49ca-a755-08673485d143
+# RESULT: FAIL | outcome ('not_verified', 'IDD'), expected ('promise', 'PRM') | promises [], expected [('p1', 365.0, '2026-10-16')] | conversation: The first criterion fails: the call ended at identity verification after the customer declined twice, so create_promise was never called and the ledger has no 365.00 promise for 2026-10-16. The other two criteria hold only vacuously.
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Grace Lin?
+customer: Yes, this is Grace Lin.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Ms Lin. To protect your account, I need to ask two security questions. What are the last four digits of your phone number?
+customer: I'm sorry, I can't verify that. I'd rather not give out my phone digits on this call. Could you tell me what is happening with my account?
+   [route] ask_phone -> count_decline_phone: customer declined refusal_phone == 'refused'
+   [node] ask_phone -> count_decline_phone
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_phone -> ask_phone: always always
+   [node] count_decline_phone -> ask_phone
+agent: These questions are there to protect your account, and nothing can be discussed without them. What are the last four digits of your phone number?
+customer: Thank you for your patience. I understand this is a security step, but I'd still rather not share those digits on this call. Can you tell me what the call is about?
+   [route] ask_phone -> count_decline_phone: customer declined refusal_phone == 'refused'
+   [node] ask_phone -> count_decline_phone
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_phone -> fin_declined: second decline decline_route == 'close'
+   [node] count_decline_phone -> fin_declined
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_verified'\n vars['close_code'] = 'IDD'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_declined -> end_declined: always always
+   [node] fin_declined -> end_declined
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. Without the security questions I cannot discuss anything. Thank you, goodbye."}
+   [call] ended: assistant-ended-call
+agent: I understand. Without the security questions I cannot discuss anything. Thank you, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "IDD", "outcome": "not_verified", "customer_id": "c_1ff11a7d-4cd"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## tool calls (6)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+4. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_verified'\n vars['close_code'] = 'IDD'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+5. end_call args={"message_mode": "custom", "spoken_message": "I understand. Without the security questions I cannot discuss anything. Thank you, goodbye."} -> success Call ended
+6. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "IDD", "outcome": "not_verified", "customer_id": "c_1ff11a7d-4cd"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=IDD promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (claude-sonnet-5-5): fail - The first criterion fails: the call ended at identity verification after the customer declined twice, so create_promise was never called and the ledger has no 365.00 promise for 2026-10-16. The other two criteria hold only vacuously.
