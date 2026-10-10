@@ -239,7 +239,11 @@ POLICY = pol.Policy(
     note_reasons={s: s for s in ("refused", "hardship", "dispute", "paid", "service_error") if s in NOTE_ENUM},
     fin_keys={"promise": "promise", "paid": "paid", "default": "refused", "refused": "refused",
               "hardship": "hardship", "dispute": "dispute", "service_error": "service_error"},  # B closing
-    fail_max=2, human_limit=2, notalk_limit=2, closed_day_move="after")
+    fail_max=2, human_limit=2, notalk_limit=2, closed_day_move="after",
+    asides={   # side questions answered before continuing, even on a turn that goes through code into a tts line
+        "robot": {"when": "asks whether they are talking to a robot, a machine or an AI", "say": "I am Freya Bank's digital assistant."},
+        "scam": {"when": "asks whether this call is a scam or genuine", "say": "You can verify this call by phoning Freya Bank's customer service number."},
+    })
 
 # Brief B: every product has its own band, deadline, floor and ladder (B3, B5); attempt 1 = the full amount (the
 # floor once 'too much' was said) on the attempt-1 date, attempt 2 (late band) = the floor on that product's
