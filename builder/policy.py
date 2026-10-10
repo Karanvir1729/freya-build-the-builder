@@ -143,7 +143,7 @@ def num(x, d=None):
 def pdate(x):
     s = str(x or '').strip()
     m = re.search(r'(\d{4})-(\d{1,2})-(\d{1,2})', s)
-    if not m or int(m.group(1)) <= SENTINEL_YEAR:
+    if not m or int(m.group(1)) <= 1900:   # 1900-01-01 is the 'cleared' sentinel (schema-valid date)
         return None
     try:
         return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
