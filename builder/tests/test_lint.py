@@ -579,7 +579,8 @@ def test_rules_reference_workflows():
         errs = [x for x in f if x["level"] == ERROR]
         assert len(errs) == n_err, errs
         if "v2" in wf_path:
-            assert sum(1 for x in f if x["level"] == WARN and "transfer_to_agent" in x["where"] and "check the brief" in x["message"]) == 2, f
+            # the v1 inventory named the human transfer in a `special` rule (2 WARNs); the v2 inventory says when it applies (0)
+            assert all(x["level"] == WARN for x in f if "transfer_to_agent" in x["where"] and "write tool" in x["message"]), f
         assert not any("forbidden" in x["message"] for x in f), f
 
 
