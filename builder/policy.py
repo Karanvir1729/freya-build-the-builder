@@ -60,6 +60,7 @@ REQUIRED_TEXTS_MULTI = ("question_all", "one_by_one", "next_product", "recorded_
 DEFAULT_TEXTS = {
     "today_word": "today",
     "on_date": "on [date]",
+    "tomorrow_when": "",
     "question": "Can you pay [amount] [when]?",
     "question_product": "For your [words], can you pay [amount] [when]?",
     "question_all": "Can you pay all of them today?",
@@ -178,6 +179,10 @@ def today_of(V):
 def when(V, d):
     if d == today_of(V):
         return T('today_word')
+    # optional ('' = off): 'tomorrow, Thursday 15 October' lets a customer who said 'tomorrow' recognise the day (a
+    # simulated customer that does not know the call's date said 'not correct' to the bare date, EXT-A-11)
+    if T('tomorrow_when') and d == today_of(V) + datetime.timedelta(days=1):
+        return T('tomorrow_when', date=txt_short(d))
     return T('on_date', date=txt_short(d))
 def dtext(V, d):
     return T('today_word') if d == today_of(V) else txt_short(d)

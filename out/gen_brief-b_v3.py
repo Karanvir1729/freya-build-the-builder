@@ -93,7 +93,7 @@ nodes["opening_retry"] = fl.conv(
     "opening_retry",
     "You called {{title}} {{last_name}} and asked whether you are speaking with them, but the answer did not confirm it. "
     "No tool call is allowed in this turn. Do not say why you are calling, and do not mention any account, product, debt, payment or collections.\n"
-    "If the person asked a question, answer it briefly first: who you are -> you are Freya Bank's digital assistant; a robot or AI -> you are Freya Bank's digital assistant; "
+    "If the person asked a question, answer it briefly first: who you are -> you are Freya Bank's digital assistant; a robot or AI -> 'Yes, I am Freya Bank's digital assistant.'; "
     "a scam -> they can verify this call by phoning Freya Bank's customer service number; what it is about -> you can only discuss that with {{title}} {{last_name}}. "
     "If they said they do not want to talk, say you only need a moment. "
     "Then ask exactly: \"Am I speaking with {{title}} {{last_name}}?\"",
@@ -203,6 +203,7 @@ POLICY = pol.Policy(
     HOLIDAYS,
     texts={
         "question": "Can you pay [amount] [when]?",
+        "tomorrow_when": "tomorrow, [date]",                                                                         # echo 'tomorrow' (A19 dates are checked in code)
         "question_product": "Can you pay [amount] [when] for your [words]?",                                       # B4 one by one
         "question_all": "Can you pay all of them today?",                                                           # B4
         "weekend_or_holiday": "[named] is not a business day, so I cannot record it. The next business day is [date].",   # A20
@@ -242,7 +243,7 @@ POLICY = pol.Policy(
               "hardship": "hardship", "dispute": "dispute", "service_error": "service_error"},  # B closing
     fail_max=2, human_limit=2, notalk_limit=2, closed_day_move="after",
     asides={   # side questions answered before continuing, even on a turn that goes through code into a tts line
-        "robot": {"when": "asks whether they are talking to a robot, a machine or an AI", "say": "I am Freya Bank's digital assistant."},
+        "robot": {"when": "asks whether they are talking to a robot, a machine or an AI", "say": "Yes, I am Freya Bank's digital assistant."},
         "scam": {"when": "asks whether this call is a scam or genuine", "say": "You can verify this call by phoning Freya Bank's customer service number."},
     })
 
@@ -400,7 +401,7 @@ close_call = fl.close_call_tool(
 
 SYSTEM = ("You are Freya Bank's digital assistant on an outbound phone call to {{title}} {{last_name}}. Speak English. Keep every turn to one or two short sentences. Address the customer as {{title}} {{last_name}}.\n"
           "Always:\n"
-          "- If asked whether you are a robot or an AI: say you are Freya Bank's digital assistant, then continue.\n"
+          "- If asked whether you are a robot or an AI: say \"Yes, I am Freya Bank's digital assistant.\", then continue.\n"
           "- If asked whether this is a scam: say they can verify this call by phoning Freya Bank's customer service number, then continue.\n"
           "- Never invent figures, dates or reasons. If you do not have the information, say so.\n"
           "- Never offer a discount, waiver, payment plan or any term you were not given.\n"

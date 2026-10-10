@@ -643,5 +643,19 @@ def test_change_per_product_and_recorded_guard():
         assert V["route"] in ("wrapup", "fin", "note"), (e, V["route"])
 
 
+@test
+def test_tomorrow_when_text():
+    """Optional 'tomorrow_when' text: the read-back for tomorrow names the relative day too; '' (default) keeps the date."""
+    import json
+    P = pol.Policy(HOL, texts=dict(TEXTS, tomorrow_when="tomorrow, [date]"))
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_amount="")
+    assert V["readback_line"] == "To confirm: credit card ending 4821, 420, tomorrow, Thursday 15 October. Do you confirm?", V["readback_line"]
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_amount="")
+    assert V["readback_line"].endswith("420, on Thursday 15 October. Do you confirm?"), V["readback_line"]
+
+
 if __name__ == "__main__":
     sys.exit(main())
