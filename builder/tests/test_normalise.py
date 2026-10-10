@@ -75,6 +75,13 @@ DOB_MDY = [
     ("March 14 1988", "1988-03-14"),
 ]
 
+DOB_NONE = [                          # the brief asks for the month as a word: no numbers-only order
+    ("3/7/85", UNCHANGED),               # valid both ways: left as said (rejected unread, not a wrong answer)
+    ("14/03/1988", "1988-03-14"),        # only one reading is a date
+    ("14 March 1988", "1988-03-14"),
+    ("5/5/1990", "1990-05-05"),          # same either way
+]
+
 DATE = [
     ("2026-10-20", "2026-10-20"),
     ("the twentieth of October", "2026-10-20"),
@@ -176,6 +183,7 @@ def main():
         ("dob", fl.normalise_pre({"answer": "dob"}, date_order="dmy"), "answer", DOB, v, None),
         ("answer/dob", fl.normalise_pre(["answer"]), "answer", DOB, v, {"field": "date_of_birth"}),
         ("dob mdy", fl.normalise_pre({"answer": "dob"}, date_order="mdy"), "answer", DOB_MDY, v, None),
+        ("dob none", fl.normalise_pre({"answer": "dob"}, date_order="none"), "answer", DOB_NONE, v, None),
         ("date", fl.normalise_pre(["date"]), "date", DATE, v, None),
         ("date rel", fl.normalise_pre(["date"], relative_var="relative_days"), "date", DATE_REL, rel_vars, None),
         ("amount", fl.normalise_pre(["amount"]), "amount", AMOUNT, v, None),

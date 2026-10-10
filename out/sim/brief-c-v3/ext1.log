@@ -1,0 +1,41 @@
+sim | workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 (slot brief-c-v3) | 30 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS EXT-C-02 easy   Third party    | schedule_callback > close_call
+PASS EXT-C-01 medium Opening        | close_call
+PASS EXT-C-03 easy   Third party    | close_call
+PASS EXT-C-04 medium Third party    | close_call
+PASS EXT-C-05 hard   Identity       | verify > verify > verify > verify > get_account > close_call
+PASS EXT-C-06 hard   Identity       | verify > verify > get_account > promise > close_call
+PASS EXT-C-07 medium Identity       | close_call
+PASS EXT-C-08 medium Identity       | verify > verify > close_call
+PASS EXT-C-10 hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS EXT-C-11 hard   Amounts        | verify > verify > get_account > close_call
+FAIL EXT-C-09 medium Amounts        | verify > verify > get_account > close_call
+       - promises [], expected [('p1', 310.5, '2026-10-17')]
+       - conversation: The required create_promise call for 310.50 on 2026-10-17 is missing; only close_call was made. Other criteria hold (agent records 310.50, accepts Saturday 17 October, read-back is correct, and close_call is promise with reason full).
+PASS EXT-C-12 medium Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-C-13 hard   Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-C-14 hard   Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-C-15 medium Persuasion     | verify > verify > get_account > promise > close_call
+PASS EXT-C-16 medium Persuasion     | verify > verify > get_account > close_call
+FAIL EXT-C-17 medium Hardship       | verify > verify > get_account > transfer_to_agent > close_call
+       - conversation: The agent attempted persuasion and proposed an amount/date ('The overdue amount is 310.50... Are you able to settle the full overdue amount today?'), violating the no-persuasion criterion; the other criteria are met.
+FAIL EXT-C-19 medium Dispute        | verify > verify > get_account > transfer_to_agent > close_call
+       - conversation: The agent asked for payment (“Are you able to settle the full overdue amount today?”), violating the criterion to ask for no payment/date/amount. The agent did say a colleague will look into it and called transfer_to_agent with queue general, and
+PASS EXT-C-18 hard   Hardship       | verify > verify > get_account > promise > close_call
+PASS EXT-C-20 medium Restructuring  | verify > verify > get_account > close_call
+FAIL EXT-C-21 easy   Escalation     | verify > transfer_to_agent > close_call
+       - conversation: verify_identity was called (tool call #2), violating the criterion that verify_identity and get_account are never called; other criteria (transfer_to_agent with queue general and close_call with reason agent_request) are met.
+PASS EXT-C-23 easy   Ends call      | close_call
+PASS EXT-C-22 easy   Ends call      | verify > verify > get_account > close_call
+PASS EXT-C-24 hard   Escalation     | verify > verify > get_account > promise > transfer_to_agent > close_call
+PASS EXT-C-25 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS EXT-C-26 medium Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-C-27 hard   Third party    | schedule_callback > close_call
+PASS EXT-C-28 hard   Third party    | close_call
+PASS EXT-C-29 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-C-30 hard   Calendar       | verify > verify > get_account > promise > close_call
+
+slowest agent turn per call: median 4 s, worst 14 s (chat-route timing, not a simulation's).
+
+26 / 30 passed (bank records and conversation checks). Local chat-route simulation, 1981 s.
+cost: 212 chat turns, 212 model calls (182 customer on gpt-5-mini, 30 judge on gpt-5), 221 ledger polls, 80 call fetches.

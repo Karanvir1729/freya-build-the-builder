@@ -1,0 +1,83 @@
+# EXT-C-19 Says he never had a personal loan
+# workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | call c5ec5332-bdc8-44e3-be20-8a152b53c054 | customer c_97687f28-93f | 2026-10-10 21:43:33
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/c5ec5332-bdc8-44e3-be20-8a152b53c054
+# RESULT: FAIL | conversation: The agent asked for payment (“Are you able to settle the full overdue amount today?”), violating the criterion to ask for no payment/date/amount. The agent did say a colleague will look into it and called transfer_to_agent with queue general, and close_call was sent with outcome transferred and reason contested.
+
+customer: Hello?
+agent: Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Tomas Novak?
+customer: Yes, this is Tomas Novak.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: What are the last four digits of the mobile number registered with the bank?
+customer: The last four digits are eight eight four six.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "8846", "customer_id": "c_97687f28-93f"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask the second security question: What is your date of birth?"}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: What is your date of birth?
+customer: My date of birth is nine September 1990.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1990-09-09", "customer_id": "c_97687f28-93f"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both security questions passed. Identity is verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_97687f28-93f"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 780, "days_late": 21, "instalment_amount": 260}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Novak. I am calling from the payments team of Nordvik Savings Bank about an overdue amount on your personal loan. The overdue amount is 780, and it is 21 days overdue. Are you able to settle the full overdue amount today?
+customer: I never had a personal loan with you. This is not my debt.
+   [route] negotiate -> pol_dispute: topic dispute topic == 'dispute'
+   [node] negotiate -> pol_dispute
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] pol_dispute -> fin_contested_xfer: the call ends with contested_xfer (route == 'fin' AND final_route == 'contested_xfer')
+   [node] pol_dispute -> fin_contested_xfer
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "general", "customer_id": "c_97687f28-93f"}
+agent: I understand. A colleague will look into it. I will connect you now.
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] fin_contested_xfer -> fin_contested: always always
+   [node] fin_contested_xfer -> fin_contested
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_contested -> end_contested: always always
+   [node] fin_contested -> end_contested
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time, Mr Novak. Goodbye from Nordvik Savings Bank."}
+customer: Okay, thank you.
+   [route] fin_contested_xfer -> fin_contested: always always
+   [node] fin_contested_xfer -> fin_contested
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_contested -> end_contested: always always
+   [node] fin_contested -> end_contested
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time, Mr Novak. Goodbye from Nordvik Savings Bank."}
+   [call] ended: assistant-ended-call
+agent: A colleague will take over now. Thank you for your time, Mr Novak. Goodbye from Nordvik Savings Bank.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "contested", "outcome": "transferred", "customer_id": "c_97687f28-93f"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## tool calls (12)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tu... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "8846", "customer_id": "c_97687f28-93f"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask the second security question: What is your date of birth?"}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1990-09-09", "customer_id": "c_97687f28-93f"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both security questions passed. Identity is verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_97687f28-93f"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 780, "days_late": 21, "instalment_amount": 260}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M... -> HTTP 200 data=null
+6. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4, 5])\n WDRULE = 'first_after'\n WD = ['M... -> HTTP 200 data=null
+7. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "general", "customer_id": "c_97687f28-93f"} -> HTTP 200 data={"ok": true}
+8. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+9. end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time, Mr Novak. Goodbye from Nordvik Savings Bank."} -> (no result event)
+10. code_exec args={"timeout_ms": 10000, "code": "try:\n rec = str(vars.get('recorded_pids') or '').strip()\n if True and rec and rec.lower() not in ('none', 'null'):\n vars['outcome'] = 'promise'\n vars['reason'] = str(vars.get('promise_reason') or '')\n if vars['reason'].lo... -> HTTP 200 data=null
+11. end_call args={"message_mode": "custom", "spoken_message": "A colleague will take over now. Thank you for your time, Mr Novak. Goodbye from Nordvik Savings Bank."} -> success Call ended
+12. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "contested", "outcome": "transferred", "customer_id": "c_97687f28-93f"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## ledger: outcome=transferred reason=contested promises=[] notes=[] callbacks=[] transfers=[{"queue": "general"}] calls=['verify_identity', 'verify_identity', 'get_account', 'transfer_to_agent', 'close_call']
+
+## judge (gpt-5): fail - The agent asked for payment (“Are you able to settle the full overdue amount today?”), violating the criterion to ask for no payment/date/amount. The agent did say a colleague will look into it and called transfer_to_agent with queue general, and close_call was sent with outcome transferred and reason contested.

@@ -1,0 +1,120 @@
+{
+ "runner": "sim",
+ "workflow_id": "239c5d00-d0cc-4202-83a2-71794aff95c6",
+ "agent_id": "e5343a6b-e5c3-4097-b0e5-2a9534def898",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 191,
+ "passed": 0,
+ "total": 1,
+ "runs": 1,
+ "final": [
+  {
+   "id": "EXT-C-09",
+   "family": "Amounts",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-C-09",
+   "level": "medium",
+   "family": "Amounts",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'declined_offer'), expected ('promise', 'full')",
+    "promises [], expected [('p1', 310.5, '2026-10-17')]",
+    "conversation: No create_promise was made for 310.50 on 2026-10-17, and close_call was sent as no_promise with reason declined_offer instead of promise with reason full."
+   ],
+   "call_id": "26173a6f-2512-4977-81c9-41fedae50588",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_39195634-1e3",
+   "transcript": "out/sim/brief-c-v3/ext3/EXT-C-09.txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "No create_promise was made for 310.50 on 2026-10-17, and close_call was sent as no_promise with reason declined_offer instead of promise with reason full.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/26173a6f-2512-4977-81c9-41fedae50588",
+   "slowest_turn_s": 11.8,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_from_args": {
+    "args": {
+     "reason": "declined_offer",
+     "outcome": "no_promise"
+    },
+    "mock_result": {
+     "ok": false,
+     "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+    }
+   }
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-C-09",
+    "level": "medium",
+    "family": "Amounts",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'declined_offer'), expected ('promise', 'full')",
+     "promises [], expected [('p1', 310.5, '2026-10-17')]",
+     "conversation: No create_promise was made for 310.50 on 2026-10-17, and close_call was sent as no_promise with reason declined_offer instead of promise with reason full."
+    ],
+    "call_id": "26173a6f-2512-4977-81c9-41fedae50588",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_39195634-1e3",
+    "transcript": "out/sim/brief-c-v3/ext3/EXT-C-09.txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "No create_promise was made for 310.50 on 2026-10-17, and close_call was sent as no_promise with reason declined_offer instead of promise with reason full.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/26173a6f-2512-4977-81c9-41fedae50588",
+    "slowest_turn_s": 11.8,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_from_args": {
+     "args": {
+      "reason": "declined_offer",
+      "outcome": "no_promise"
+     },
+     "mock_result": {
+      "ok": false,
+      "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"
+     }
+    }
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 11,
+  "customer_calls": 10,
+  "judge_calls": 1,
+  "judge_retries": 0,
+  "ledger_polls": 11,
+  "ledger_errors": 0,
+  "call_fetches": 2
+ }
+}

@@ -692,6 +692,14 @@ def finish(ctx, case, rep, row, chat, ledger):
     if call:
         lines, tools, var_table, slowest = transcript_from_call(call)
         row["ended"] = call.get("endedReason")
+        # The chat route sometimes resumes a turn from an OLDER message (event conversation_resumed, isBranch true): the
+        # engine then routes the customer's line from a node the call had already left (Brief C v3 PUB-07 round 2: after
+        # 504s the payment answer was routed from the date-of-birth question). Not the agent's doing: flag it.
+        for m in call.get("messages") or []:
+            if m.get("role") == "system" and '"isBranch":true' in (m.get("message") or "").replace(" ", ""):
+                row["chat_branched"] = True
+                lines.append("   [harness] the chat route resumed this call from an older message (conversation_resumed isBranch=true): a chat-route artefact")
+                break
         row["transcript_source"] = "GET /api/v2/call/" + chat.call_id
     elif chat:
         lines, tools, var_table, slowest = transcript_from_log(chat, ledger)
@@ -709,7 +717,15 @@ def finish(ctx, case, rep, row, chat, ledger):
         row["tools"] = [x.get("tool") for x in ledger["calls"]]
     elif chat:
         row["failed"].append("mock bank: no ledger for " + str(row["customer_id"]))
-    if chat and not chat.call_id:                                  # nothing was said: no judge call for a '(no reply: HTTP 500)' transcript
+    # close_call is an end_of_call lifecycle tool: it lands in the bank's ledger seconds after the call ended and is
+    # often not yet in the call log fetched above (Brief C v3 PUB-02: the judge failed a correct call for 'no close_call').
+    # Give the judge the ledger's close_call when the call log has none.
+    if ledger and not any(t.get("tool") == "close_call" for t in tools):
+        for c in [c for c in ledger.get("calls") or [] if c.get("tool") == "close_call"][-1:]:
+            tools.append({"tool": "close_call", "args": c.get("args"), "result": c.get("result")})
+            lines.append("   [tool] close_call %s (end of call; from the bank's ledger, after the last line)" % tool_args_line(c.get("args")))
+            row["close_call_from_ledger"] = True
+    if chat and not chat.call_id:                                 # nothing was said: no judge call for a '(no reply: HTTP 500)' transcript
         row["failed"].append("conversation: no call was started, nothing to judge")
     elif chat and lines:
         try:
@@ -731,6 +747,8 @@ def finish(ctx, case, rep, row, chat, ledger):
               " > ".join(x.replace("verify_identity", "verify").replace("create_promise", "promise") for x in row["tools"]) or "(no tool calls)", flush=True)
         for f in row["failed"]:
             print("       -", f[:260], flush=True)
+        if row.get("chat_branched"):
+            print("       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent", flush=True)
     return row
 
 

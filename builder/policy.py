@@ -69,6 +69,7 @@ DEFAULT_TEXTS = {
     "before_today": "[named] has already passed.",
     "below_floor": "I cannot record [named]. The lowest amount I can record is [floor].",
     "above_full": "The past-due amount is [full], so I can record at most [full].",
+    "above_full_again": "",   # optional: a repeated higher amount at the read-back (above_full='agree')
     "vague": "Which exact day would that be?",
     "vague_deadline": "The latest date I can record is [deadline].",
     "too_much_floor": "The lowest amount I can accept is [floor], the [floor_name].",
@@ -324,7 +325,7 @@ def advance(V, prefix=''):
         V['route'] = 'confirm'
         return
     note_next(V)
-def agree(V, pid, a, d, tag='', move=True):
+def agree(V, pid, a, d, tag='', move=True, prefix=''):
     pset(V, pid, 'state', 'agreed')
     pset(V, pid, 'agreed', str(float(a)) + '|' + d.isoformat() + '|' + tag)
     V['ok_pid'] = pid
@@ -333,7 +334,7 @@ def agree(V, pid, a, d, tag='', move=True):
     V['offer_verdict'] = 'ok'
     set_prop(V, pid, a, d)
     if move:
-        advance(V, '')
+        advance(V, prefix)
 def refuse(V, pid, prefix=''):
     if g(V, 'mode') == 'hardship':
         pset(V, pid, 'state', 'hardship')
@@ -389,6 +390,9 @@ def check_one(V, pid, a, d, kind):
             pset(V, pid, 'vague_asked', 'yes')
             say(V, T('vague'))
             return
+        if P.get('vague_again') == 'refuse':   # the brief: no exact day after one ask = a non-answer (one attempt)
+            refuse(V, pid)
+            return
         set_prop(V, pid, pa, dl)
         say(V, join([T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
         return
@@ -427,6 +431,16 @@ def check_one(V, pid, a, d, kind):
         na = full
     if not issues:
         agree(V, pid, na, nd)
+        return
+    if P.get('above_full') == 'agree' and [x[0] for x in issues] == ['above_full']:
+        pre = issues[0][1]
+        if pg(V, pid, 'above_full_said') == okey(na, nd) and T('above_full_again'):
+            # the customer repeats the same higher amount at the read-back: explain once more in other words (a customer
+            # who heard 'I will record 310.50' kept answering 'No, 320', Brief C v3 EXT-C-09)
+            pre = T('above_full_again', full=fmt(full), named=fmt(na if a is None else a), words=pg(V, pid, 'words'))
+        pset(V, pid, 'above_full_said', okey(na, nd))
+        agree(V, pid, na, nd, prefix=pre)   # the brief: above the full amount, record the full amount and say so
+        V['offer_verdict'] = 'above_full'
         return
     V['offer_verdict'] = issues[0][0]
     set_prop(V, pid, na, nd)
@@ -565,7 +579,10 @@ def resolve_when(V, text):
     m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
     if m:
         wd = WDN.index(m.group(2))
-        if m.group(1) == 'next':
+        if P.get('weekday_rule') == 'first_after' and m.group(1) in ('this', 'next', 'coming'):
+            delta = (wd - today.weekday()) % 7 or 7   # the first such weekday AFTER today, also when said on that weekday
+        elif m.group(1) == 'next':
+
             if P.get('weekday_rule') == 'first_after':
                 delta = (wd - today.weekday()) % 7 or 7
             else:   # that weekday in the following calendar week
@@ -963,7 +980,9 @@ def ev_change(V):
     pset(V, pid, 'state', 'open')
     V['cur_pid'] = pid
     V['stage'] = 'one'
-    pset(V, pid, 'checks', 0)
+    # no reset of checks_<pid>: a customer who repeats the same correction at the read-back (an amount above the full
+    # amount, read back as the full amount) looped confirm -> change_offer -> confirm ten times (Brief C v3 EXT-C-09);
+    # max_checks is the loop exit for changes too
     check_one(V, pid, a, d, 'exact')
 def rec_next(V):
     for p in pids(V):
@@ -1044,8 +1063,22 @@ def enter_wrapup(V):
     parts.append(T('anything_else'))
     V['wrap_line'] = join(parts)
     V[P['outcome_var']] = P['promise_outcome']
-    V[P['reason_var']] = ''
+    V['promise_reason'] = promise_reason(V)
+    V[P['reason_var']] = V['promise_reason']
     V['route'] = 'wrapup'
+def promise_reason(V):
+    # the closing reason of a promise when the brief has one: 'full' when every recorded amount equals its full
+    # amount, else 'partial' (P['promise_reasons'] maps both to the API's values); '' when the brief has none
+    pr = P.get('promise_reasons') or {}
+    if not pr:
+        return ''
+    rec = [p for p in pids(V) if state(V, p) == 'recorded']
+    full = True
+    for p in rec:
+        a = num(pg(V, p, 'agreed').split('|')[0], 0.0) or 0.0
+        if abs(a - full_of(V, p)) >= 0.005:
+            full = False
+    return str(pr.get('full' if full else 'partial') or '')
 def finalize(V):
     ids = pids(V)
     sts = [state(V, p) for p in ids]
@@ -1186,7 +1219,8 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
-           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done")
+           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
+           "promise_reason")
 
 
 def _declare():
@@ -1229,13 +1263,22 @@ class Policy:
     targets: route -> node name overrides (DEFAULT_TARGETS).
     notes_on_transfer: False when the brief adds no notes on a call that ends in a transfer: the notes are then written
         only once the wrap-up after a recorded promise has ended without one (a transfer from the wrap-up, e.g. a
-        restructuring request after the promise, adds none). True (default): notes right after the promises."""
+        restructuring request after the promise, adds none). True (default): notes right after the promises.
+    weekday_rule: the brief's reading of 'next <weekday>' ('this_week' = the following calendar week, 'first_after').
+    vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline) or
+        'refuse' (the brief counts it as a non-answer: one persuasion attempt).
+    above_full: an amount above the full amount: 'ask' (propose the full amount and ask again) or 'agree' (the brief
+        says record the full amount and say so: straight to the read-back with the brief's sentence first).
+    promise_reasons: {'full': <reason>, 'partial': <reason>} when the brief's promise ending has a reason that depends
+        on whether every recorded amount equals the full amount; written to reason_var and 'promise_reason' when the
+        promise is recorded (so a hang-up in the wrap-up closes right). Use ending_code() for the fin nodes."""
+
 
     def __init__(self, holidays, texts=None, multi=False, notes=False, note_reasons=None, fin_keys=None,
                  fail_max=2, max_checks=8, human_limit=2, notalk_limit=2, wrap_turns=2, closed_day_move="after",
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
                  outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None,
-                 weekday_rule="this_week", notes_on_transfer=True):
+                 weekday_rule="this_week", notes_on_transfer=True, vague_again="deadline", above_full="ask", promise_reasons=None):
         missing = [k for k in REQUIRED_TEXTS + (REQUIRED_TEXTS_MULTI if multi else ()) if k not in (texts or {})]
         if missing and not (texts or {}).get("_allow_defaults"):
             raise ValueError("Policy texts must come from the brief; missing: %s (pass texts={'_allow_defaults': True} only in tests)" % ", ".join(missing))
@@ -1258,6 +1301,13 @@ class Policy:
             raise ValueError("notes=True needs note_reasons {state: reason}")
         if closed_day_move not in ("after", "before"):
             raise ValueError("closed_day_move must be 'after' or 'before'")
+        if vague_again not in ("deadline", "refuse"):
+            raise ValueError("vague_again must be 'deadline' or 'refuse'")
+        if above_full not in ("ask", "agree"):
+            raise ValueError("above_full must be 'ask' or 'agree'")
+        pr = dict(promise_reasons or {})
+        if pr and set(pr) != {"full", "partial"}:
+            raise ValueError("promise_reasons must map exactly 'full' and 'partial' to the API's reasons")
         self.holidays = list(holidays or [])
         self.bwd = list(business_weekdays)
         self.multi = bool(multi)
@@ -1272,7 +1322,8 @@ class Policy:
                   "closed_day_move": closed_day_move, "ordinals": list(ordinals),
                   "clear_enums": dict(CLEAR_ENUMS), "clear_values": dict(CLEAR_VALUES),
                   "outcome_var": outcome_var, "reason_var": reason_var, "promise_outcome": promise_outcome,
-                  "now_var": now_var, "after_recorded": bool(t.get("after_recorded"))}
+                  "now_var": now_var, "after_recorded": bool(t.get("after_recorded")),
+                  "vague_again": vague_again, "above_full": above_full, "promise_reasons": pr}
 
     # ------------------------------------------------------------------ sources
     def core(self):
@@ -1301,6 +1352,26 @@ class Policy:
         fb.update(fallbacks or {})
         inner = self.core() + body.strip("\n") + "\ninit_negotiation(vars, %s)\n" % statement_expr + _declare()
         return fl.guarded(inner, state_var, fb)
+
+    def ending_code(self, outcome, reason, promise_decides=True):
+        """Code of a fin_<key> node: writes outcome/reason; with promise_decides, a promise recorded earlier in the
+        call wins ("if a transfer takes place after a promise was recorded, the promise decides"): promise_outcome
+        and the promise reason the core wrote (promise_reason). Use it for the promise ending itself too
+        (ending_code(promise_outcome, <default reason>))."""
+        ov, rv, po = self.P["outcome_var"], self.P["reason_var"], self.P["promise_outcome"]
+        return ("try:\n    rec = str(vars.get('recorded_pids') or '').strip()\n"
+                "    if %r and rec and rec.lower() not in ('none', 'null'):\n"
+                "        vars[%r] = %r\n        vars[%r] = str(vars.get('promise_reason') or %r)\n"
+                "        if vars[%r].lower() in ('none', 'null'):\n            vars[%r] = %r\n"
+                "    else:\n        vars[%r] = %r\n        vars[%r] = %r\nexcept Exception:\n    pass\n"
+                % (bool(promise_decides), ov, po, rv, reason if outcome == po else "", rv, rv,
+                   reason if outcome == po else "", ov, outcome, rv, reason))
+
+    def end_pair(self, key, outcome, reason, farewell, nodes, promise_decides=True):
+        """freyalib.end_pair whose fin_<key> runs ending_code (a recorded promise decides the ending)."""
+        fin, end = fl.end_pair(key, outcome, reason, farewell, nodes, self.P["outcome_var"], self.P["reason_var"])
+        nodes[fin] = fl.code_node(fin, self.ending_code(outcome, reason, promise_decides), [fl.always(end)])
+        return fin, end
 
     # ------------------------------------------------------------------ transitions
     def route_transitions(self):
@@ -1497,14 +1568,18 @@ class Policy:
                                                       mapping=[{"path": "data.%s" % ok_field, "variable": "note_ok"}])
         return nodes
 
-    def hardship_node(self, task, answer_desc, kind_desc, date_desc, amount_desc, name=None, conf=0.5, ref_desc=None):
+    def hardship_node(self, task, answer_desc, kind_desc, date_desc, amount_desc, name=None, conf=0.5, ref_desc=None, human=False):
         """Hardship (sympathy + support offer spoken from {{say_next}}, no persuasion by routing): hs_answer in
         {support_yes, support_no, accept_offer, none}; a named date or amount still goes through the offer guard
-        and the read-back; support_no without a named offer closes the open products as hardship."""
+        and the read-back; support_no without a named offer closes the open products as hardship.
+        human=True adds hs_answer 'human' -> pol_human (the human-request counter) for a brief whose human-request rule
+        also applies during hardship; describe the value in answer_desc."""
         name = name or self.targets["hardship"]
-        ext = [fl.ext("hs_answer", ["none", "support_yes", "support_no", "accept_offer"], answer_desc, conf)] + \
+        vals = ["none", "support_yes", "support_no", "accept_offer"] + (["human"] if human else [])
+        ext = [fl.ext("hs_answer", vals, answer_desc, conf)] + \
             self.offer_extraction(date_desc, amount_desc, kind_desc, conf, ref_desc)
-        trs = [fl.eq("hs_answer", "support_yes", self.targets["xfer_support"], "the customer accepts the support team"),
+        trs = ([fl.eq("hs_answer", "human", "pol_human", "the customer asks for a person")] if human else []) + [
+               fl.eq("hs_answer", "support_yes", self.targets["xfer_support"], "the customer accepts the support team"),
                fl.tr("check_offer", "the customer names a date or an amount", fl.cond("offer_kind", "equals", "exact"),
                      fl.cond("offer_ref", "equals", "floor"), fl.cond("offer_ref", "equals", "full")),
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),

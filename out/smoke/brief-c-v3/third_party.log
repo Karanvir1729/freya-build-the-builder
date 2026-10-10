@@ -1,0 +1,79 @@
+smoke scripted | workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 | out/smoke/brief-c-v3/third_party.json
+script: third party: a relative answers; nothing about the account, ask when the customer can be reached
+variables: {"customer_id": "c_smoke", "first_name": "Maria", "last_name": "Costa", "title": "Ms", "now": "2026-10-14T11:00"}
+--- turn 1
+customer: Hello?
+agent (7.8s): Good day, this is the virtual assistant of Nordvik Savings Bank, and this call is recorded. Am I speaking with Maria Costa?
+   [extract] who1 = 'unclear'
+   [route] stays in opening (no transition matched)
+--- turn 2
+customer: This is her husband, she is not here. What is this about?
+agent (13.5s): I am calling from Nordvik Savings Bank on a private matter that I can discuss with the customer personally. When can Maria Costa be reached?
+   [extract] who1 = 'someone_else'
+   [route] opening -> setup: always always
+   [node] opening -> setup (always always)
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> third_party: someone else answered who1 == 'someone_else'
+   [node] setup -> third_party (someone else answered who1 == 'someone_else')
+--- turn 3
+customer: She should be back tomorrow morning, around eleven.
+agent (10.2s): I am sorry, but I encountered a technical error. Could you please confirm the time and date Maria Costa can be reached?
+   [extract] tp_status = 'none'
+   [route] stays in third_party (no transition matched)
+   [tool] schedule_callback POST https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback body={"date": "2026-10-15", "time": "11:00", "customer_id": "c_smoke"}
+   [tool] schedule_callback -> ERROR API request failed: {'ok': False, 'error': 'unknown customer_id'}
+   [route] stays in third_party (no transition matched)
+--- POST /api/v2/chat/end -> {"callId": "5c75fdff-5c59-4745-be1e-9e386d341970", "ended": true, "endedReason": "customer-ended-call"}
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "scheduled", "outcome": "not_reached", "customer_id": "c_smoke"}
+   [tool] close_call -> ERROR API request failed: {'ok': False, 'error': 'unknown customer_id'}
+== tool calls (3) from GET /api/v2/call/5c75fdff-5c59-4745-be1e-9e386d341970
+ 1. turn 2  code_exec          args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-16', '2026-11-02', '2026-11-21', '2026-12-08', '2026-12-24', '2026-12-25', '2026-12-26', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4, 5])\nWDRULE = 'first_after'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday...
+    -> HTTP 200 data=null
+ 2. turn 3  schedule_callback  POST https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback body={"date": "2026-10-15", "time": "11:00", "customer_id": "c_smoke"}
+    -> ERROR API request failed: {'ok': False, 'error': 'unknown customer_id'}
+ 3. end     close_call         POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "scheduled", "outcome": "not_reached", "customer_id": "c_smoke"}
+    -> ERROR API request failed: {'ok': False, 'error': 'unknown customer_id'}
+== variables after the last routing (36): {"customer_id": "c_smoke", "first_name": "Maria", "last_name": "Costa", "title": "Ms", "now": "2026-10-14T11:00", "who1": "someone_else", "today_iso": "2026-10-14", "today_text": "Wednesday 14 October 2026", "now_time": "11:00", "weekday_table": "\"this Thursday\" = \"next Thursday\" = Thursday 15 October 2026\n\"this Friday\" = \"next Friday\" = Friday 16 October 2026\n\"this Saturday\" = \"next Saturday\" = Saturday 17 October 2026\n\"this Sunday\" = \"next Sunday\" = Sunday 18 October 2026\n\"this Monday\" = \"next Monday\" = Monday 19 October 2026\n\"this Tuesday\" = \"next Tuesday\" = Tuesday 20 October 2026\n\"this Wednesday\" = \"next Wednesday\" = Wednesday 21 October 2026", "callback_text": "The ONLY allowed callback times are:\n- Today, Wednesday 14 October 2026 (2026-10-14), from after 11:00 up to 18:00.\n- Thursday 15 October 2026 (2026-10-15), from 09:00 up to 18:00 inclu...
+== expectations (40)
+ PASS turn 1 contains_any ["Nordvik Savings Bank"] -> 'Nordvik Savings Bank'
+ PASS turn 1 not_contains 'debt'
+ PASS turn 1 not_contains 'collection'
+ PASS turn 1 not_contains 'payment'
+ PASS turn 1 not_contains 'amount'
+ PASS turn 1 not_contains 'overdue'
+ PASS turn 1 not_contains 'past due'
+ PASS turn 1 not_contains 're:\\bowes?\\b'
+ PASS turn 1 not_contains 're:\\blate\\b'
+ PASS turn 1 not_contains 'loan'
+ PASS turn 1 not_contains 'credit card'
+ PASS turn 1 not_contains 'balance'
+ PASS turn 2 contains_any ["reach", "re:\\bwhen\\b", "call back", "callback", "call her", "good time", "best time", "available"] -> 'reach'
+ PASS turn 2 not_contains 'debt'
+ PASS turn 2 not_contains 'collection'
+ PASS turn 2 not_contains 'payment'
+ PASS turn 2 not_contains 'amount'
+ PASS turn 2 not_contains 'overdue'
+ PASS turn 2 not_contains 'past due'
+ PASS turn 2 not_contains 're:\\bowes?\\b'
+ PASS turn 2 not_contains 're:\\blate\\b'
+ PASS turn 2 not_contains 'loan'
+ PASS turn 2 not_contains 'credit card'
+ PASS turn 2 not_contains 'balance'
+ PASS turn 2 not_contains 'arrears'
+ PASS turns 1-3 not_contains 'debt'
+ PASS turns 1-3 not_contains 'collection'
+ PASS turns 1-3 not_contains 'payment'
+ PASS turns 1-3 not_contains 'amount'
+ PASS turns 1-3 not_contains 'overdue'
+ PASS turns 1-3 not_contains 'past due'
+ PASS turns 1-3 not_contains 're:\\bowes?\\b'
+ PASS turns 1-3 not_contains 're:\\blate\\b'
+ PASS turns 1-3 not_contains 'loan'
+ PASS turns 1-3 not_contains 'credit card'
+ PASS turns 1-3 not_contains 'balance'
+ PASS turns 1-3 not_contains 'arrears'
+ PASS all turns tool verify_identity not called
+ PASS all turns tool get_account not called
+ PASS all turns tool create_promise not called
+RESULT: PASS | 40/40 checks passed | call 5c75fdff-5c59-4745-be1e-9e386d341970
