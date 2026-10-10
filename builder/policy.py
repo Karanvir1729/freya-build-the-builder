@@ -766,6 +766,19 @@ def main(V, ev):
         V.setdefault('state_line', '')
 '''
 
+# Every variable the core writes (besides the per-product <name>_<pid> ones). Declared with vars.setdefault at the
+# end of every policy node so that static checks (builder/lint.py) see who sets them; setdefault never overwrites.
+WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verdict", "next_offer_text", "route",
+           "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
+           "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok",
+           "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
+           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event")
+
+
+def _declare():
+    return "".join("vars.setdefault(%r, '')\n" % k for k in WRITTEN)
+
+
 # Route values the core writes, and the default node each leads to.
 ROUTES = ("negotiate", "hardship", "confirm", "record", "note", "wrapup", "xfer_general", "xfer_restructuring",
           "xfer_support")
@@ -848,8 +861,11 @@ class Policy:
         return src
 
     def event_code(self, event):
-        """The source of a policy code node: core + main(vars, event). Never raises (main catches everything)."""
-        return self.core() + "\ntry:\n    main(vars, %r)\nexcept Exception as e:\n    vars['policy_state'] = 'error ' + str(e)\n" % event
+        """The source of a policy code node: core + main(vars, event), the whole body inside one try (a failing
+        core still leaves a route and a state_line), every variable the core writes declared with setdefault."""
+        body = self.core() + "\nmain(vars, %r)\n" % event + _declare()
+        return ("try:\n%s\nexcept Exception as e:\n    vars['policy_state'] = 'error ' + str(e)\n"
+                "    vars.setdefault('route', 'negotiate')\n    vars.setdefault('state_line', '')\n" % fl._indent(body, 4))
 
     def prepare_code(self, body, statement_expr, fallbacks=None, state_var="prepare_state"):
         """The prepare node: core + a guarded brief-specific `body` that reads the products (e.g. with
@@ -861,33 +877,34 @@ class Policy:
         (a Python expression over the body's names). `today` must be a datetime.date in the body."""
         fb = {"say_next": "", "state_line": "", "offer_question": "", "route": "negotiate"}
         fb.update(fallbacks or {})
-        inner = body.strip("\n") + "\ninit_negotiation(vars, %s)\n" % statement_expr
-        return self.core() + fl.guarded(inner, state_var, fb)
+        inner = self.core() + body.strip("\n") + "\ninit_negotiation(vars, %s)\n" % statement_expr + _declare()
+        return fl.guarded(inner, state_var, fb)
 
     # ------------------------------------------------------------------ transitions
     def route_transitions(self):
         """The transitions every policy code node shares: endings first (route 'fin' + final_route), then every
         route value, then always -> negotiate."""
         trs = []
-        seen = set()
+        seen = {self.fin_keys["default"]}
         for k in [self.fin_keys["promise"], self.fin_keys["paid"]] + [v for k, v in self.fin_keys.items() if k not in ("promise", "paid", "default")]:
             if k in seen:
                 continue
             seen.add(k)
             trs.append(fl.tr("fin_" + k, "the call ends with %s" % k,
                              fl.and_group(fl.cond("route", "equals", "fin"), fl.cond("final_route", "equals", k))))
+        # the default ending last and once: the engine merges transitions with the same target into one OR
         trs.append(fl.eq("route", "fin", "fin_" + self.fin_keys["default"], "the call ends"))
         for r in ROUTES:
-            if r == "negotiate":
+            if r == "negotiate" or (r == "note" and not self.notes):
                 continue
             trs.append(fl.eq("route", r, self.targets[r], "policy route %s" % r))
         trs.append(fl.always(self.targets["negotiate"]))
         return trs
 
     def add_event_nodes(self, nodes, names=None):
-        """Adds the policy code nodes (EVENT_NODES, or the given subset) to `nodes`."""
+        """Adds the policy code nodes (EVENT_NODES, or the given subset) to `nodes` (note_after only with notes)."""
         for name, ev in EVENT_NODES.items():
-            if names is not None and name not in names:
+            if (names is not None and name not in names) or (name == "note_after" and not self.notes):
                 continue
             nodes[name] = fl.code_node(name, self.event_code(ev), self.route_transitions())
         return nodes
