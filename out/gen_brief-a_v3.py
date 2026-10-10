@@ -234,7 +234,11 @@ POLICY = pol.Policy(
               "hardship": "hardship", "dispute": "dispute", "service_error": "service_error"},
     fail_max=2,                                                 # R37: try once more, then service_error
     human_limit=2, notalk_limit=2,                              # R42 ask once, R45 twice
-    closed_day_move="after")                                    # R20 next business day
+    closed_day_move="after",                                    # R20 next business day
+    asides={   # R4 / R43: side questions answered before continuing, even on a turn that goes through code into a tts line
+        "robot": {"when": "asks whether they are talking to a robot, a machine or an AI", "say": "I am Freya Bank's digital assistant."},
+        "scam": {"when": "asks whether this call is a scam or genuine", "say": "You can verify this call by phoning Freya Bank's customer service number."},
+    })
 
 # Brief A: one product (R1); floor = minimum payment (card) or instalment (loans) (R25); early band (<= 7 days
 # late) = deadline 12 business days, 1 attempt; late = 7 business days, 2 attempts (R18); attempt 1 = the full

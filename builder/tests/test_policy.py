@@ -424,3 +424,23 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+def test_aside_prefix():
+    """A side question in a turn that goes through code is answered first, in the line the route speaks."""
+    import json
+    P = pol.Policy(HOL, texts=TEXTS, asides={"robot": {"when": "asks whether they talk to a robot", "say": "I am the bank's digital assistant."}})
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([{"product_id": "p1", "type": "credit_card", "past_due": 420.0, "days_late": 6, "minimum_payment": 126.0}])}
+    run(P.prepare_code(BODY, "statement"), V)
+    assert V.get("prepare_state") == "ok", V.get("prepare_state")
+    V["stance"] = "accept"; V["aside"] = "robot"
+    run(P.event_code("accept"), V)
+    assert V.get("policy_state") == "ok", V.get("policy_state")
+    key = {"confirm": "readback_line", "wrapup": "wrap_line"}.get(V.get("route"), "say_next")
+    assert V[key].startswith("I am the bank's digital assistant."), (V.get("route"), V[key])
+    assert V.get("aside") == "none"
+    V["stance"] = "refuse"; V["aside"] = "none"
+    run(P.event_code("refuse"), V)
+    assert not V["say_next"].startswith("I am the bank"), V["say_next"]
+    n = P.confirm_node("t", "c", "d", "a")
+    assert any(e["name"] == "aside" for e in n["extraction_schema"]), n["extraction_schema"]

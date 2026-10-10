@@ -89,7 +89,7 @@ DEFAULT_TEXTS = {
 }
 
 # Extraction variables every policy node clears at its end (enum ones to 'none', value ones to '').
-CLEAR_ENUMS = ("stance", "offer_kind", "offer_for", "topic", "confirm", "hs_answer", "wrap")
+CLEAR_ENUMS = ("stance", "offer_kind", "offer_for", "topic", "confirm", "hs_answer", "wrap", "aside")
 CLEAR_VALUES = ("offer_date", "offer_amount")
 
 
@@ -714,6 +714,16 @@ def state_line(V):
     out.append('Recorded: ' + (', '.join(rec) if rec else 'nothing yet') + '.')
     V['state_line'] = ' '.join(out)
 def finish_turn(V):
+    # an aside (a side question in the customer's turn: robot? scam?) is answered first, in the line the route speaks;
+    # a turn that goes through code into a tts line never reaches the dialogue model, so the answer must be built here
+    a = str(V.get('aside') or 'none')
+    asides = P.get('asides') or {}
+    if a != 'none' and a in asides:
+        txt = str(asides[a].get('say') or '')
+        key = {'confirm': 'readback_line', 'wrapup': 'wrap_line'}.get(str(V.get('route') or ''), 'say_next')
+        line = str(V.get(key) or '')
+        if txt and not line.startswith(txt):
+            V[key] = (txt + ' ' + line).strip()
     for k in P['clear_enums']:
         V[k] = 'none'
     for k in P['clear_values']:
@@ -820,7 +830,7 @@ class Policy:
     def __init__(self, holidays, texts=None, multi=False, notes=False, note_reasons=None, fin_keys=None,
                  fail_max=2, max_checks=8, human_limit=2, notalk_limit=2, wrap_turns=2, closed_day_move="after",
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
-                 outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now"):
+                 outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None):
         t = dict(DEFAULT_TEXTS)
         for k, v in (texts or {}).items():
             t[k] = v
@@ -847,7 +857,8 @@ class Policy:
         self.fin_keys = fk
         self.targets = dict(DEFAULT_TARGETS)
         self.targets.update(targets or {})
-        self.P = {"texts": t, "multi": self.multi, "notes": self.notes, "note_reasons": nr, "fin_keys": fk,
+        self.asides = {str(k): {"when": str(v.get("when") or ""), "say": str(v.get("say") or "")} for k, v in (asides or {}).items()}
+        self.P = {"texts": t, "multi": self.multi, "notes": self.notes, "note_reasons": nr, "fin_keys": fk, "asides": self.asides,
                   "fail_max": int(fail_max), "max_checks": int(max_checks), "human_limit": int(human_limit),
                   "notalk_limit": int(notalk_limit), "wrap_turns": int(wrap_turns),
                   "closed_day_move": closed_day_move, "ordinals": list(ordinals),
@@ -913,6 +924,18 @@ class Policy:
         return nodes
 
     # ------------------------------------------------------------------ helpers the task names
+    def aside_extraction(self, conf=0.6):
+        """The `aside` entry (only when the Policy has asides): a side question in the customer's LATEST message that
+        must be answered before continuing, e.g. robot = asks whether they are talking to a robot. The generator
+        supplies `when` (how to recognise it) and `say` (the brief's answer) per value; the core prefixes `say` to the
+        line the route speaks (say_next / readback_line / wrap_line). Brief-agnostic."""
+        if not self.asides:
+            return []
+        desc = ("A side question in the customer's LATEST message that must be answered before continuing: " +
+                "; ".join("%s = %s" % (k, v["when"]) for k, v in self.asides.items()) +
+                "; none = no such question. Pick it even when the message also contains an answer, an offer or a refusal.")
+        return [fl.ext("aside", ["none"] + list(self.asides), desc, conf)]
+
     @staticmethod
     def offer_extraction(date_desc, amount_desc, kind_desc, conf=0.6):
         """T1: offer_date (date), offer_amount (float), offer_kind (exact|vague|none)."""
@@ -958,7 +981,7 @@ class Policy:
         state_line first in its prompt, no tools (every write happens in the record nodes)."""
         name = name or self.targets["negotiate"]
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=extraction, transitions=transitions)
+                       extraction=list(extraction) + self.aside_extraction(), transitions=transitions)
 
     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
                      name=None, conf=0.6):
@@ -980,7 +1003,7 @@ class Policy:
             fl.eq("confirm", "no", "confirm_no", "the customer said no to the read-back"),
         ] + list(topic_trs or [])
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{readback_line}}"},
-                       extraction=ext, transitions=trs)
+                       extraction=ext + self.aside_extraction(conf), transitions=trs)
 
     def promise_assert_pre(self, pid_field="product_id", amount_field="amount", date_field="date"):
         """Pre hook of the record node: the body MUST equal the approved values (rec_pid, rec_amount, rec_date,
@@ -1054,7 +1077,7 @@ class Policy:
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=ext, transitions=trs)
+                       extraction=ext + self.aside_extraction(conf), transitions=trs)
 
     def wrapup_node(self, task, wrap_desc, name=None, conf=0.6, max_turns=3):
         """After a recorded promise (on_enter tts {{wrap_line}}: the recorded sentence, the brief's sentence after
@@ -1069,6 +1092,6 @@ class Policy:
                fl.eq("wrap", "new_plan", self.targets["xfer_restructuring"], "asks for a new plan"),
                fl.eq("wrap", "change", "wrap_change", "asks to change or cancel the promise")]
         n = fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{wrap_line}}"},
-                    extraction=ext, transitions=trs, max_turns=max_turns)
+                    extraction=ext + self.aside_extraction(conf), transitions=trs, max_turns=max_turns)
         n["max_turn_transition"] = "finalize"
         return n
