@@ -12,7 +12,8 @@
 reply, then reads the call's event log (`GET /api/v2/call/{callId}`) for tool calls, routing and extraction events,
 and ends the call with `POST /api/v2/chat/end`. See builder/SMOKE.md for the script format and the limits of the route.
 
-Exit codes: 0 all expectations passed (or driven mode finished), 1 an expectation failed, 2 the call could not be run.
+Exit codes: 0 all expectations passed (or driven mode finished), 1 an expectation failed, 2 the call could not be run
+(no API key, a bad script file, a 500 or no answer from the route).
 """
 import argparse, asyncio, json, os, pathlib, re, socket, subprocess, sys, time, urllib.error, urllib.request
 
@@ -23,6 +24,16 @@ import freya  # noqa: E402  (stdlib client; reads FREYA_API_KEY / FREYA_API_URL)
 DEFAULT_VARIABLES = {"customer_id": "c_smoke", "first_name": "Daniel", "last_name": "Reyes", "title": "Mr", "now": "2026-10-14T11:00"}
 DEFAULT_CUSTOMER_MODEL = "claude-haiku-5-5"
 TURN_TIMEOUT_S = 240
+# The engine's own functions: a code node runs as `code_exec`, an end_call node's terminal as `end_call`. They are
+# listed with the bank tools, but `no_tool_calls` ignores them (a workflow that enters a code node after the
+# customer's first answer, the conversation_first pattern, is not "calling a tool" in the bank's sense).
+ENGINE_FUNCTIONS = ("code_exec", "end_call")
+
+
+def die(msg, code=2):
+    """Print a clear message and exit with `code` (2 = the run could not be set up or the call could not be run)."""
+    print("smoke: " + msg, file=sys.stderr)
+    sys.exit(code)
 
 CUSTOMER_SYSTEM = """You are playing a CUSTOMER on a phone call, for a test of a bank's automated phone agent. The agent is \
 the other speaker. OUTPUT RULE: write only the words you say on the phone. One or two short sentences, then stop. No stage \
@@ -45,12 +56,17 @@ def scrub(text):
 
 
 def post(path, body, timeout=TURN_TIMEOUT_S):
-    """POST and return (http_status, result). Never raises on an HTTP status; status 0 means no answer at all (network)."""
+    """POST and return (http_status, result). Never raises: status 0 means no answer at all (network); a 2xx whose body
+    is not JSON (an empty body, a Cloudflare HTML page) comes back as (status, "non-JSON body: ...") with a str result."""
     req = urllib.request.Request(freya.URL + path, data=json.dumps(body).encode(), headers=freya.HEADERS, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
-            out = json.load(r)
-            return r.status, (out.get("data", {}).get("result", out) if isinstance(out, dict) else out)
+            status, raw = r.status, r.read().decode(errors="replace")
+        try:
+            out = json.loads(raw)
+        except ValueError:
+            return status, "non-JSON body: " + (" ".join(re.sub(r"<[^>]+>", " ", raw).split())[:300] or "(empty)")
+        return status, (out.get("data", {}).get("result", out) if isinstance(out, dict) else out)
     except urllib.error.HTTPError as e:
         text = e.read().decode(errors="replace")
         try:
@@ -113,6 +129,8 @@ class Chat:
             return "HTTP 503: %s (the agent service did not take the message: busy platform, or agent not configured)" % res
         if status == 500:
             return "HTTP 500: %s%s" % (res, "" if started else " (a bare 500 on the first turn: the workflow cannot start a call at all)")
+        if 200 <= status < 300:
+            return "HTTP %s with a body the harness cannot read: %s" % (status, compact(res, 300))
         return "HTTP %s: %s" % (status, res) if status else "no answer: %s" % res
 
     def send(self, text, retries=3, recover_s=60):
@@ -143,7 +161,9 @@ class Chat:
                     turn["ended_by_agent"] = self.ended_by_agent = True
                 break
             turn["error"] = self.describe(status, res, bool(self.call_id))
-            if self.call_id and status in (502, 504, 0, 503):
+            # transient: the engine may have handled the turn although the route did not deliver the reply
+            transient = status in (502, 503, 504, 0) or 200 <= status < 300      # 2xx here: a body that was not JSON
+            if self.call_id and transient:
                 wait, t1 = (12 if status == 503 else recover_s), time.time()
                 while True:
                     self.collect(turn)
@@ -155,7 +175,7 @@ class Chat:
                         "reply recovered" if turn["agent"] else "the call ended", time.time() - t1)
                     break
                 turn["events"].append("[harness] nothing new in the call log after %.0f s" % (time.time() - t1))
-            if status in (502, 503, 504, 0) and attempt < retries:
+            if transient and attempt < retries:
                 turn["events"].append("[harness] %s%s: sending the line again in 15 s (%d/%d)"
                                       % ("HTTP %d" % status if status else "no answer", "" if self.call_id else " before the call exists", attempt + 1, retries))
                 time.sleep(15)
@@ -316,15 +336,72 @@ def first_node_note(workflow_id, chat):
 
 
 # ----------------------------------------------------------------------------------------------------- expectations
+def find(term, text):
+    """The first match of a term in the text, or None. `re:<regex>` is a case-insensitive regex; anything else a
+    case-insensitive substring. Raises re.error for an invalid regex (validate_script catches that before the call)."""
+    pattern = term[3:] if isinstance(term, str) and term.startswith("re:") else re.escape(str(term))
+    return re.search(pattern, text, re.I)
+
+
 def matches(term, text):
-    """`re:<regex>` is a case-insensitive regex; anything else a case-insensitive substring."""
-    if term.startswith("re:"):
-        return re.search(term[3:], text, re.I) is not None
-    return term.lower() in text.lower()
+    return find(term, text) is not None
+
+
+def load_script(path):
+    """The script file as a dict; a missing file, invalid JSON or a non-object exits 2 with a clear message."""
+    try:
+        script = json.loads(pathlib.Path(path).read_text())
+    except FileNotFoundError:
+        die("script not found: %s" % path)
+    except OSError as e:
+        die("cannot read the script %s: %s" % (path, e))
+    except ValueError as e:
+        die("the script %s is not valid JSON: %s" % (path, e))
+    if not isinstance(script, dict):
+        die("the script %s must be a JSON object with turns and expect" % path)
+    return script
+
+
+def validate_script(script):
+    """Problems in a script's turns and expectations, found before any call is made (a bad script is exit 2, not a
+    failed expectation): turns that are not strings, an `after_turn` beyond the turns, an unknown key, an invalid regex."""
+    problems, turns = [], script.get("turns")
+    if not isinstance(turns, list) or not turns or not all(isinstance(t, str) and t.strip() for t in turns):
+        problems.append("turns must be a non-empty list of customer lines (strings)")
+    expect = script.get("expect") or []
+    if not isinstance(expect, list):
+        problems.append("expect must be a list")
+        expect = []
+    known = {"after_turn", "cumulative", "contains_any", "contains_all", "not_contains", "no_tool_calls", "tools_called_any", "tools_not_called", "note"}
+    for i, ex in enumerate(expect, 1):
+        if not isinstance(ex, dict):
+            problems.append("expect[%d] is not an object" % i)
+            continue
+        for k in ex:
+            if k not in known:
+                problems.append("expect[%d]: unknown key %r (known: %s)" % (i, k, ", ".join(sorted(known))))
+        n = ex.get("after_turn")
+        if n is not None and (not isinstance(n, int) or isinstance(n, bool) or n < 1 or (isinstance(turns, list) and n > len(turns))):
+            problems.append("expect[%d]: after_turn %r is not a turn number between 1 and %d" % (i, n, len(turns) if isinstance(turns, list) else 0))
+        for key in ("contains_any", "contains_all", "not_contains", "tools_called_any", "tools_not_called"):
+            terms = ex.get(key)
+            if terms is None:
+                continue
+            if not isinstance(terms, list) or not all(isinstance(t, str) for t in terms):
+                problems.append("expect[%d]: %s must be a list of strings" % (i, key))
+                continue
+            for t in terms:
+                if key.startswith("tools"):
+                    continue
+                try:
+                    find(t, "")
+                except re.error as e:
+                    problems.append("expect[%d]: %s has an invalid regex %r: %s" % (i, key, t, e))
+    return problems
 
 
 def evaluate(expect, chat):
-    """Return a list of (ok, line). One line per check."""
+    """Return a list of (ok, line). One line per check. An invalid regex gives a FAIL line, never a traceback."""
     out, turns = [], chat.turns
 
     def text_for(ex):
@@ -345,25 +422,29 @@ def evaluate(expect, chat):
         if err:
             out.append((False, "FAIL %s: %s" % (label, err)))
             continue
-        if ex.get("contains_any"):
-            hit = next((t for t in ex["contains_any"] if matches(t, text)), None)
-            out.append((hit is not None, "%s %s contains_any %s%s" % ("PASS" if hit else "FAIL", label, json.dumps(ex["contains_any"], ensure_ascii=False)[:160], " -> %r" % hit if hit else " -> none found in: %r" % compact(text, 200))))
-        for term in ex.get("contains_all") or []:
-            ok = matches(term, text)
-            out.append((ok, "%s %s contains %r" % ("PASS" if ok else "FAIL", label, term)))
-        for term in ex.get("not_contains") or []:
-            ok = not matches(term, text)
-            where = ""
-            if not ok:
-                m = re.search(term[3:] if term.startswith("re:") else re.escape(term), text, re.I)
-                lo = max(0, m.start() - 60)
-                where = " in: %r" % (" ".join(text[lo: m.end() + 60].split()))
-            out.append((ok, "%s %s not_contains %r%s" % ("PASS" if ok else "FAIL", label, term, where)))
+        try:
+            if ex.get("contains_any"):
+                hit = next((t for t in ex["contains_any"] if matches(t, text)), None)
+                out.append((hit is not None, "%s %s contains_any %s%s" % ("PASS" if hit else "FAIL", label, json.dumps(ex["contains_any"], ensure_ascii=False)[:160], " -> %r" % hit if hit else " -> none found in: %r" % compact(text, 200))))
+            for term in ex.get("contains_all") or []:
+                ok = matches(term, text)
+                out.append((ok, "%s %s contains %r" % ("PASS" if ok else "FAIL", label, term)))
+            for term in ex.get("not_contains") or []:
+                m = find(term, text)
+                where = ""
+                if m:
+                    lo = max(0, m.start() - 60)
+                    where = " in: %r" % (" ".join(text[lo: m.end() + 60].split()))
+                out.append((m is None, "%s %s not_contains %r%s" % ("PASS" if m is None else "FAIL", label, term, where)))
+        except re.error as e:
+            out.append((False, "FAIL %s: invalid regex in the script: %s" % (label, e)))
         n = ex.get("after_turn")          # with after_turn: the tools of the conversation up to that turn, not the end-of-call ones
         tools = [t["tool"] for t in chat.tool_calls if n is None or (t["turn"] <= n and not t.get("after_end"))]
-        if ex.get("no_tool_calls"):
-            ok = not tools
-            out.append((ok, "%s %s no_tool_calls%s" % ("PASS" if ok else "FAIL", label, "" if ok else " -> called " + ", ".join(tools))))
+        if ex.get("no_tool_calls"):       # the engine's own code_exec / end_call do not count: see ENGINE_FUNCTIONS
+            bank, engine = [t for t in tools if t not in ENGINE_FUNCTIONS], [t for t in tools if t in ENGINE_FUNCTIONS]
+            ok = not bank
+            out.append((ok, "%s %s no_tool_calls%s%s" % ("PASS" if ok else "FAIL", label, "" if ok else " -> called " + ", ".join(bank),
+                                                        " (engine's own %s ignored)" % ", ".join(sorted(set(engine))) if engine else "")))
         if ex.get("tools_called_any"):
             hit = next((t for t in ex["tools_called_any"] if t in tools), None)
             out.append((hit is not None, "%s %s tools_called_any %s%s" % ("PASS" if hit else "FAIL", label, ex["tools_called_any"], " -> " + hit if hit else " -> called " + (", ".join(tools) or "nothing"))))
@@ -430,7 +511,7 @@ def case_by_id(case_id):
     for c in json.load(open(ROOT / "public-test-set.json")):
         if c["id"] == case_id:
             return c
-    sys.exit("no case %s in public-test-set.json" % case_id)
+    die("no case %s in public-test-set.json" % case_id)
 
 
 def persona_from_case(case):
@@ -456,22 +537,37 @@ def main(argv=None):
     ap.add_argument("--out", help="write a JSON record of the run here")
     a = ap.parse_args(argv)
     if not os.environ.get("FREYA_API_KEY"):
-        sys.exit("FREYA_API_KEY is not set. source env.sh first.")
+        die("FREYA_API_KEY is not set. source env.sh first.")
     if not a.script and not (a.customer or a.case):
         ap.error("give --script <file> (scripted) or --customer '<persona>' / --case <id> (driven)")
 
     workflow_id = resolve_workflow(a.workflow)
-    script = json.load(open(a.script)) if a.script else {}
+    script = load_script(a.script) if a.script else {}
+    if a.script:
+        problems = validate_script(script)
+        if problems:
+            die("the script %s cannot be run:\n  - %s" % (a.script, "\n  - ".join(problems)))
     variables = dict(DEFAULT_VARIABLES)
     case = case_by_id(a.case) if a.case else None
     if case:
         variables.update(case["variables"])
     variables.update(script.get("variables") or {})
     if a.vars:
-        variables.update(json.loads(a.vars))
+        try:
+            extra = json.loads(a.vars)
+        except ValueError as e:
+            die("--vars is not valid JSON: %s" % e)
+        if not isinstance(extra, dict):
+            die("--vars must be a JSON object")
+        variables.update(extra)
     variables.setdefault("customer_id", "c_smoke")
 
     mode = "scripted" if a.script else "driven"
+    persona = None
+    if mode == "driven":
+        persona = a.customer or (persona_from_case(case) if case else None)
+        if not persona:
+            die("driven mode needs --customer '<persona text>' or --case <id>")
     print("smoke %s | workflow %s | %s" % (mode, workflow_id, a.script or "persona"))
     if script.get("name"):
         print("script: %s" % script["name"])
@@ -492,10 +588,9 @@ def main(argv=None):
                     rc = 2
                     break
         else:
-            persona = a.customer or (persona_from_case(case) if case else None)
-            if not persona:
-                sys.exit("driven mode needs --customer '<persona text>' or --case <id>")
             print("customer model: %s" % a.model)
+            if not a.customer:
+                print("persona (from case %s): %s" % (a.case, compact(persona, 400)))
             line = a.opening
             for i in range(a.max_turns):
                 t = chat.send(line)
@@ -545,7 +640,8 @@ def main(argv=None):
         print("RESULT: transcript of %d turn(s), %d tool call(s) | call %s" % (len(chat.turns), len(chat.tool_calls), chat.call_id))
     if a.out:
         pathlib.Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-        rec = {"mode": mode, "workflow_id": workflow_id, "call_id": chat.call_id, "variables": variables, "script": a.script, "persona": a.customer,
+        rec = {"mode": mode, "workflow_id": workflow_id, "call_id": chat.call_id, "variables": variables, "script": a.script, "persona": persona,
+               "case": a.case, "customer_model": a.model if mode == "driven" else None,
                "turns": chat.turns, "tool_calls": chat.tool_calls, "end": chat.end_result, "checks": [{"ok": ok, "line": l} for ok, l in checks],
                "variables_after": chat.plain_vars(), "exit_code": rc}
         open(a.out, "w").write(scrub(json.dumps(rec, indent=1, ensure_ascii=False, default=str)))

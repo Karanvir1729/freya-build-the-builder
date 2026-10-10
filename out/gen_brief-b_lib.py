@@ -52,9 +52,12 @@ SETUP = fl.SETUP_CODE(HOLIDAYS, callback_rule={"open": "10:00", "close": "19:00"
                       extra=ATTEMPT_DATES)
 
 # Brief B: one to three products, each with its own band (<= 7 days late = early, 1 persuasion attempt; later =
-# late, 2 attempts), floor (minimum payment of a credit card, instalment of a loan) and deadline.
+# late, 2 attempts), floor (minimum payment of a credit card, instalment of a loan) and deadline. The product field
+# names are the API file's get_account product fields; api=API makes multiproduct check every name, type and
+# placeholder below against that file.
 PREPARE = mp.prepare_code(
     HOLIDAYS,
+    api=API, pid_field="product_id", amount_field="past_due", days_late_field="days_late", type_field="type",
     statement_fallback="Thank you. I am calling from the collections team about a late payment. Can you make this payment today?",
     bands=[{"name": "early", "max_days_late": 7, "attempts": 1, "deadline_var": "early_deadline"},
            {"name": "late", "max_days_late": None, "attempts": 2, "deadline_var": "late_deadline"}],
@@ -148,6 +151,7 @@ nodes["third_party"] = fl.conv(
 # ---------------------------------------------------------------- identity
 HINTS = {"day_month_swapped": "Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988."}
 MAX_WRONG = "Three wrong answers. The check has ended. Say nothing about the account."
+ID_OK = "Both answers are correct. Identity verified."   # the brief has two security questions
 
 transfer_general = fl.api_tool(API, "transfer_to_agent", baked={"queue": "general"},
                                description="Transfer the call to a human colleague. CALL it only when the customer insists on a human after you asked once whether you can help.")
@@ -169,7 +173,7 @@ nodes["ask_dob"] = fl.conv(
     tools=[fl.api_tool(API, "verify_identity", baked={"field": "date_of_birth"},
                        description="Check the date of birth. CALL it every time the customer gives a full date of birth.",
                        field_descriptions={"answer": "The date of birth as YYYY-MM-DD."},
-                       post=fl.verify_post("What is your date of birth?", HINTS, MAX_WRONG)), transfer_general],
+                       post=fl.verify_post("What is your date of birth?", HINTS, MAX_WRONG, all_verified_text=ID_OK)), transfer_general],
     extraction=[fl.ext("refusal_dob", ["none", "refused"], REFUSAL_DESC)],
     transitions=[
         fl.eq("verify_identity_response.data.wrong_answers_left", "0", "fin_failed", "three wrong answers"),
@@ -185,7 +189,7 @@ nodes["ask_phone"] = fl.conv(
     tools=[fl.api_tool(API, "verify_identity", baked={"field": "phone_last4"},
                        description="Check the last four digits of the phone number. CALL it every time the customer gives four digits.",
                        field_descriptions={"answer": "Exactly four digits."},
-                       post=fl.verify_post("What are the last four digits of the phone number on file?", HINTS, MAX_WRONG)), transfer_general],
+                       post=fl.verify_post("What are the last four digits of the phone number on file?", HINTS, MAX_WRONG, all_verified_text=ID_OK)), transfer_general],
     extraction=[fl.ext("refusal_phone", ["none", "refused"], REFUSAL_DESC)],
     transitions=[
         fl.is_true("verify_identity_response.data.all_verified", "load_account", "identity verified"),
@@ -207,11 +211,12 @@ nodes["prepare"] = fl.code_node("prepare", PREPARE, [fl.always("negotiate")])
 
 # ---------------------------------------------------------------- promise + note tools (per-product state machine)
 NOTE_ENUM = fl.tool_spec(API, "add_note")["fields"]["reason"]["enum"]
-# Brief B rule 11: a promise that fails twice keeps the others and gets a service_error note.
-PROMISE_PRE = mp.promise_pre_code(cap_to_deadline=True, cap_to_amount=True)
-PROMISE_POST = mp.promise_post_code(max_fails=2, fail_reason="service_error")
-NOTE_PRE = mp.note_pre_code()
-NOTE_POST = mp.note_post_code()
+# Brief B rule 11: a promise that fails twice keeps the others and gets a service_error note (api=API checks the
+# reason against add_note's enum and the field names against the two tools' schemas).
+PROMISE_PRE = mp.promise_pre_code(cap_to_deadline=True, cap_to_amount=True, api=API)
+PROMISE_POST = mp.promise_post_code(max_fails=2, fail_reason="service_error", api=API)
+NOTE_PRE = mp.note_pre_code(api=API)
+NOTE_POST = mp.note_post_code(api=API)
 
 
 def promise_tool():
@@ -323,7 +328,7 @@ nodes["hardship_notes"] = fl.conv(
 # keys are the rows of the outcome table above.
 PRECEDENCE = [(r, r) for r in NOTE_ENUM if r != "paid"]          # hardship, dispute, service_error, refused -> fin_<r>
 nodes["finalize"] = fl.code_node(
-    "finalize", mp.finalize_code(PRECEDENCE, promise_key="promise", paid_key="paid", default_key="refused", order="product"),
+    "finalize", mp.finalize_code(PRECEDENCE, promise_key="promise", paid_key="paid", default_key="refused", order="product", api=API),
     mp.finalize_transitions(PRECEDENCE, promise_key="promise", paid_key="paid", default_key="refused"))
 
 for q, fin, line in [("restructuring", "fin_transferred_restructuring", "I cannot set up a new plan myself, but I will transfer you to the team that can help with that."),

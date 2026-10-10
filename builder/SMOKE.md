@@ -46,10 +46,10 @@ agent (9.4s): I'm sorry, I've encountered a technical issue. Could you please co
     -> ERROR API request failed: {'ok': False, 'error': 'unknown customer_id'}
 == variables after the last routing (6): {"now": "2026-10-14T11:00", ..., "who1": "someone_else"}
 NOTE: the first node 'setup' is a code node that writes attempt1_date, ..., today_iso; ... never appeared in the variable table. ...
-== expectations (39)
+== expectations (40)
  PASS turn 1 contains_any ["Freya Bank"] -> 'Freya Bank'
  ...
-RESULT: PASS | 39/39 checks passed | call <callId>
+RESULT: PASS | 40/40 checks passed | call <callId>
 ```
 
 After every turn the harness reads `GET /api/v2/call/{callId}` and prints that turn's engine events, one line each:
@@ -57,9 +57,10 @@ After every turn the harness reads `GET /api/v2/call/{callId}` and prints that t
 variable_extracted, `[tool]` function_call_start (method, url, body) and function_call_complete (HTTP status, `data`)
 or function_call_error (`ERROR ...`), `[call] ended by the engine` (call_ended), `[error]`. Code nodes appear as
 `code_exec` tool calls and the end node as `end_call`: they are the engine's own functions, listed next to the bank
-tools. The summary at the end lists every tool call with its request body and result, and the variable table after
-the last routing without the engine's own entries. `--out` writes the same as JSON (turns, events, tool calls,
-checks, variable table). API keys and the bank team key are scrubbed from everything printed.
+tools (`no_tool_calls` ignores them, see below). The summary at the end lists every tool call with its request body
+and result, and the variable table after the last routing without the engine's own entries. `--out` writes the same
+as JSON (turns, events, tool calls, checks, variable table, and in driven mode the persona and customer model used).
+API keys and the bank team key are scrubbed from everything printed.
 
 ## Script format (scripted mode)
 
@@ -84,19 +85,28 @@ checks, variable table). API keys and the bank team key are scrubbed from everyt
 | `after_turn` | 1-based: check the agent's reply to that customer line. Absent: check all replies together. |
 | `cumulative` | With `after_turn`: check all replies up to and including that turn (for "never before identity" rules). |
 | `contains_any`, `contains_all`, `not_contains` | Case-insensitive substrings. A term starting with `re:` is a case-insensitive regex, e.g. `re:\\blate\\b` so that "later" does not count. |
-| `no_tool_calls`, `tools_called_any`, `tools_not_called` | Tool names from the call's events (`verify_identity`, `close_call`, `code_exec`, ...). With `after_turn`: the calls of the conversation up to that turn, without the end-of-call ones that `POST /chat/end` triggers (listed as `end` in the summary). Without `after_turn`: every call. |
+| `no_tool_calls`, `tools_called_any`, `tools_not_called` | Tool names from the call's events (`verify_identity`, `close_call`, `code_exec`, ...). With `after_turn`: the calls of the conversation up to that turn, without the end-of-call ones that `POST /chat/end` triggers (listed as `end` in the summary). Without `after_turn`: every call. `no_tool_calls` means "no bank tool": the engine's own `code_exec` (a code node) and `end_call` (an end node) do not count, so a workflow built on freyalib's `conversation_first` pattern, which enters its `setup` code node right after the customer's first answer, passes it; `tools_called_any` / `tools_not_called` see every name, engine functions included. |
+| `note` | Free text, ignored by the harness. |
 
-Exit codes: 0 every check passed, 1 a check failed (a turn with no reply fails its checks), 2 the call could not be
-run (a 500, no answer, or 502/503/504 on the first turn after three retries).
+Exit codes: 0 every check passed, 1 a check failed (a turn with no reply fails its checks, an invalid `re:` term
+fails its block), 2 the run could not be made: no `FREYA_API_KEY`, a script file that is missing, not JSON or not
+runnable (the script is validated before any call: `turns` must be a non-empty list of strings, `after_turn` must
+name one of them, keys must be known, every `re:` term must compile), a 500, no answer, or 502/503/504 on the first
+turn after three retries.
 
-The three scripts in `builder/smoke_scripts/` are generic: any collections brief must pass them, nothing in them comes
-from a brief. All three passed against the Brief A workflow (opening 26/26, third_party 39/39, wrong_number 29/29).
+The three scripts in `builder/smoke_scripts/` are generic in what they test: the customer lines and the rules (no
+debt talk before identity, a security question after the customer confirms, nothing to a relative but "when can she
+be reached", a polite close on a wrong number) hold for any collections brief. Two details are wording, not rules,
+and come from the practice set: the opening must name "Freya Bank" and the customer (surname or first name), and the
+security-question check is a vocabulary list (date of birth, postcode, last four digits, company number, founded,
+security, identity, verify, confirm). When a brief's wording differs, adapt those two expectations (SKILL.md step 7),
+not the rules. All three passed against the Brief A workflow (opening 32/32, third_party 40/40, wrong_number 29/29; 10 October 2026, calls 94af79e2, 4007dc88, 0c08931f).
 
 | Script | Customer lines | Checks |
 |---|---|---|
-| `opening.json` | "Hello?", "Yes, this is me" | Names Freya Bank and the customer; no debt/collections/payment/amount/product words before identity; asks a security question; no tool call yet. |
-| `third_party.json` | "Hello?", "This is her husband, she is not here. What is this about?", "She should be back tomorrow morning, around eleven." (PUB-02 variables) | Nothing about the account or why it calls; asks when she can be reached; `verify_identity`, `get_account`, `create_promise` never called. The third line makes the agent call `schedule_callback`, so the tool-call path is exercised too. |
-| `wrong_number.json` | "Hello?", "I think you have the wrong number, nobody by that name here." | No debt words; closes politely; no identity, promise or callback tool. `close_call` is not asserted: see below. |
+| `opening.json` | "Hello?", "Yes, this is me" | Names Freya Bank and the customer; no debt/collections/payment/amount/product words before identity; asks a security question; no bank tool (`verify_identity`, `get_account`, `create_promise`, `schedule_callback`, `add_note`, `transfer_to_agent`, `close_call`) before the first security answer. A `code_exec` in turn 2 is fine: that is the `conversation_first` setup node. |
+| `third_party.json` | "Hello?", "This is her husband, she is not here. What is this about?", "She should be back tomorrow morning, around eleven." (PUB-02 variables) | Nothing about the debt or why it calls; asks when she can be reached; `verify_identity`, `get_account`, `create_promise` never called. The word "account" is allowed ("I can only speak with the account holder" is the compliant answer; the brief forbids telling a relative anything *about* the account, not the word). The third line makes the agent call `schedule_callback`, so the tool-call path is exercised too. |
+| `wrong_number.json` | "Hello?", "I think you have the wrong number, nobody by that name here." | No debt words; closes politely; no identity, promise or callback tool. `close_call` is not asserted because the scripts are brief-agnostic and a brief need not have that tool; `tools_called_any: ["close_call"]` works when yours does (see "close_call timing" below). |
 
 ## The mock bank and `c_smoke`
 
@@ -148,12 +158,17 @@ Cannot, or not reliably (all seen on the Brief A workflow, 10 October 2026):
   sequence), takes the reply from the log when it is there ("the engine handled the turn anyway"), and only then
   resends, three times at most. A 502/503/504 on the first turn leaves no `callId`: it is resent, then exit 2. A bare
   500 on the first turn means the workflow cannot start a call at all (`agent_config.llmConfig`; `freya.update_workflow`
-  sets it). Under load a 1.4 s turn took 35–60 s.
-- **`close_call` timing and duplicates.** In the proven generator `close_call` is a workflow-level end-of-call tool
-  (`alwaysRunsAt: end_of_call`). Over the chat route it ran with the right `customer_id`, but it was logged up to half
-  a minute after the call ended (the harness polls the log for 45 s after `/chat/end`) and, together with `end_call`
-  and the final code node, several times over in the same log (4 x `close_call` in one call). Count it as "called",
-  not as "called once", and do not assert it in a script; a simulation's ledger is the place to check "exactly once".
+  sets it). A 200 whose body is not JSON (an empty body, a Cloudflare HTML page) is treated like a 502: log read,
+  then resend. Under load a 1.4 s turn took 35–60 s.
+- **`close_call` timing.** In the proven generator `close_call` is a workflow-level end-of-call tool
+  (`alwaysRunsAt: end_of_call`). Over the chat route it ran with the right `customer_id`, but it is logged up to half
+  a minute after the call ends, so the harness polls the log for 45 s after `/chat/end` before printing the summary.
+  An earlier version of this harness resent a customer line three times after a 502 without reading the log first,
+  and `results/smoke-driven.json` (turn 5) shows the consequence: the agent had ended the call inside the 502 turn,
+  and each resend made the engine replay the end sequence (4 x `code_exec`, `end_call`, `close_call` in one log).
+  That was a harness artefact, not the platform: `send()` now reads the log before any resend and stops when the call
+  has ended, and a later wrong-number run where the agent ended the call inside a 504 turn logged `close_call` once.
+  `tools_called_any: ["close_call"]` is therefore a fair assertion; "exactly once" is still the simulation ledger's job.
 - No judge, no success criteria, no ledger: the pass/fail here is substring checks on the agent's words and tool
   names. `tools/run_cases.py` remains the score.
 - Timing is not representative: no persona model, no audio, and a busy platform multiplies a turn by 20.

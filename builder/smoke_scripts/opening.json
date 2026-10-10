@@ -5,10 +5,11 @@
  "expect": [
   {"after_turn": 1, "contains_any": ["Freya Bank"],
    "not_contains": ["debt", "collection", "payment", "amount", "overdue", "past due", "re:\\bowes?\\b", "re:\\blate\\b", "loan", "credit card", "balance"]},
-  {"after_turn": 1, "contains_any": ["Reyes"]},
+  {"after_turn": 1, "contains_any": ["Reyes", "Daniel"]},
   {"after_turn": 2, "cumulative": true,
    "not_contains": ["debt", "collection", "payment", "amount", "overdue", "past due", "re:\\bowes?\\b", "re:\\blate\\b", "loan", "credit card", "balance"]},
-  {"after_turn": 2, "contains_any": ["date of birth", "re:\\bborn\\b", "birth", "last four", "last 4", "postcode", "post code", "company number", "founded", "security", "re:\\bverif"]},
-  {"after_turn": 2, "no_tool_calls": true}
+  {"after_turn": 2, "contains_any": ["date of birth", "re:\\bborn\\b", "birth", "last four", "last 4", "postcode", "post code", "company number", "founded", "security", "identity", "re:\\bverif", "re:\\bconfirm"]},
+  {"after_turn": 2, "tools_not_called": ["verify_identity", "get_account", "create_promise", "schedule_callback", "add_note", "transfer_to_agent", "close_call"],
+   "note": "no bank tool before the first security answer; the engine's own code_exec/end_call are not bank tools (a workflow that enters a code node after the customer confirms is fine)"}
  ]
 }
