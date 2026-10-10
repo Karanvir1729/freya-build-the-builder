@@ -70,8 +70,8 @@ def ev(P, V, event, **ext):
         V[k] = v
     run(P.event_code(event), V)
     assert V.get("policy_state") == "ok", (event, V.get("policy_state"))
-    for k in pol.CLEAR_ENUMS:
-        assert V[k] == "none", (k, V[k])
+    for k, neutral in pol.CLEAR_ENUMS.items():
+        assert V[k] == neutral, (k, V[k])
     return V
 
 

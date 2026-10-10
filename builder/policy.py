@@ -94,8 +94,14 @@ DEFAULT_TEXTS = {
 }
 
 # Extraction variables every policy node clears at its end (enum ones to 'none', value ones to '').
-CLEAR_ENUMS = ("stance", "offer_kind", "offer_for", "topic", "confirm", "hs_answer", "wrap", "aside")
-CLEAR_VALUES = ("offer_date", "offer_amount", "offer_when")
+# The platform validates every variable a code node writes against the extraction schema: a value outside an enum
+# ('none' for stance/confirm/wrap) or not matching the type ('' for a date or a float) is REJECTED and the old value
+# stays (event function_call_complete.validation_errors; seen on Brief A PUB-10: stale offer_date re-fired check_offer
+# every turn). So a clear writes a VALID neutral value: the enum's own neutral member, a sentinel date / amount.
+CLEAR_ENUMS = {"stance": "other", "offer_kind": "none", "offer_for": "none", "topic": "none", "confirm": "other",
+               "hs_answer": "none", "wrap": "other", "aside": "none"}
+CLEAR_VALUES = {"offer_date": "1900-01-01", "offer_amount": "0", "offer_when": ""}
+SENTINEL_YEAR = 1900
 # the customer's own words for the day, resolved in code against the call's date (the platform's date extraction uses
 # the real clock: 'tomorrow' arrived as a date before the call's today on Brief B PUB-12)
 WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as said (for example 'tomorrow', 'next Friday', "
@@ -137,7 +143,7 @@ def num(x, d=None):
 def pdate(x):
     s = str(x or '').strip()
     m = re.search(r'(\d{4})-(\d{1,2})-(\d{1,2})', s)
-    if not m:
+    if not m or int(m.group(1)) <= SENTINEL_YEAR:
         return None
     try:
         return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
@@ -538,6 +544,8 @@ def offer_date_of(V):
 def ev_offer(V):
     kind = g(V, 'offer_kind')
     a = num(g(V, 'offer_amount'))
+    if a is not None and a <= 0:
+        a = None
     d, k2 = offer_date_of(V)
     if k2 in ('exact', 'vague'):
         kind = k2
@@ -674,6 +682,8 @@ def ev_confirm_no(V):
 def ev_change(V):
     agreed = [p for p in pids(V) if state(V, p) == 'agreed']
     a = num(g(V, 'offer_amount'))
+    if a is not None and a <= 0:
+        a = None
     d, k2 = offer_date_of(V)
     tp = offer_target(V)
     if not tp and multi(V) and len(agreed) > 1 and d is not None and a is None:
@@ -830,6 +840,12 @@ def state_line(V):
     rec = [p for p in ids if state(V, p) == 'recorded']
     out.append('Recorded: ' + (', '.join(rec) if rec else 'nothing yet') + '.')
     V['state_line'] = ' '.join(out)
+def _clear_enums(V):
+    for k, v in P['clear_enums'].items():
+        V[k] = v
+def _clear_values(V):
+    for k, v in P['clear_values'].items():
+        V[k] = v
 def finish_turn(V):
     # an aside (a side question in the customer's turn: robot? scam?) is answered first, in the line the route speaks;
     # a turn that goes through code into a tts line never reaches the dialogue model, so the answer must be built here
@@ -841,10 +857,8 @@ def finish_turn(V):
         line = str(V.get(key) or '')
         if txt and not line.startswith(txt):
             V[key] = (txt + ' ' + line).strip()
-    for k in P['clear_enums']:
-        V[k] = 'none'
-    for k in P['clear_values']:
-        V[k] = ''
+    _clear_enums(V)
+    _clear_values(V)
     state_line(V)
 def main(V, ev):
     try:
@@ -983,7 +997,7 @@ class Policy:
                   "fail_max": int(fail_max), "max_checks": int(max_checks), "human_limit": int(human_limit),
                   "notalk_limit": int(notalk_limit), "wrap_turns": int(wrap_turns),
                   "closed_day_move": closed_day_move, "ordinals": list(ordinals),
-                  "clear_enums": list(CLEAR_ENUMS), "clear_values": list(CLEAR_VALUES),
+                  "clear_enums": dict(CLEAR_ENUMS), "clear_values": dict(CLEAR_VALUES),
                   "outcome_var": outcome_var, "reason_var": reason_var, "promise_outcome": promise_outcome,
                   "now_var": now_var, "after_recorded": bool(t.get("after_recorded"))}
 
@@ -1045,7 +1059,7 @@ class Policy:
         return nodes
 
     # ------------------------------------------------------------------ helpers the task names
-    def aside_extraction(self, conf=0.6):
+    def aside_extraction(self, conf=0.5):
         """The `aside` entry (only when the Policy has asides): a side question in the customer's LATEST message that
         must be answered before continuing, e.g. robot = asks whether they are talking to a robot. The generator
         supplies `when` (how to recognise it) and `say` (the brief's answer) per value; the core prefixes `say` to the
@@ -1058,7 +1072,7 @@ class Policy:
         return [fl.ext("aside", ["none"] + list(self.asides), desc, conf)]
 
     @staticmethod
-    def offer_extraction(date_desc, amount_desc, kind_desc, conf=0.6):
+    def offer_extraction(date_desc, amount_desc, kind_desc, conf=0.5):
         """T1: offer_date (date), offer_amount (float), offer_kind (exact|vague|none)."""
         return [fl.ext("offer_kind", ["none", "exact", "vague"], kind_desc, conf),
                 {"name": "offer_date", "type": "date", "description": date_desc, "min_confidence": conf},
@@ -1074,7 +1088,7 @@ class Policy:
                 fl.eq("stance", "accept", "accept_offer", "the customer accepted the current offer")]
 
     @staticmethod
-    def stance_extraction(desc, conf=0.6, values=("other", "accept", "refuse", "too_much", "offer")):
+    def stance_extraction(desc, conf=0.5, values=("other", "accept", "refuse", "too_much", "offer")):
         """T2: stance in {refuse, too_much, offer, accept, other}, described with the brief's own definitions."""
         return fl.ext("stance", list(values), desc, conf)
 
@@ -1106,7 +1120,7 @@ class Policy:
                        extraction=list(extraction) + self.aside_extraction(), transitions=transitions)
 
     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
-                     name=None, conf=0.6):
+                     name=None, conf=0.5):
         """T22: the read-back. on_enter tts {{readback_line}} (built in code from the agreed values, so what the
         customer hears is what gets written). Extraction confirm in {yes, no, change, other} (+ the new date or
         amount for a change, + the topic entry). yes -> rec_next (record loop), change -> change_offer (offer
@@ -1188,7 +1202,7 @@ class Policy:
                                                       mapping=[{"path": "data.%s" % ok_field, "variable": "note_ok"}])
         return nodes
 
-    def hardship_node(self, task, answer_desc, kind_desc, date_desc, amount_desc, name=None, conf=0.6):
+    def hardship_node(self, task, answer_desc, kind_desc, date_desc, amount_desc, name=None, conf=0.5):
         """Hardship (sympathy + support offer spoken from {{say_next}}, no persuasion by routing): hs_answer in
         {support_yes, support_no, accept_offer, none}; a named date or amount still goes through the offer guard
         and the read-back; support_no without a named offer closes the open products as hardship."""
@@ -1202,7 +1216,7 @@ class Policy:
         return fl.conv(name, self.state_first(task), on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=ext + self.aside_extraction(conf), transitions=trs)
 
-    def wrapup_node(self, task, wrap_desc, name=None, conf=0.6, max_turns=3):
+    def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):
         """After a recorded promise (on_enter tts {{wrap_line}}: the recorded sentence, the brief's sentence after
         a promise, 'anything else?'). wrap in {done, human, new_plan, change, question, other}: done -> finalize
         (the promise ending), human -> wrap_human (ask once, then transfer), new_plan -> restructuring transfer,

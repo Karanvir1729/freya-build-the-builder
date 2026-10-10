@@ -388,8 +388,9 @@ def transferred(t, desc, tool="transfer_to_agent"):
     return count_gt("%s_success_count" % tool, 0, t, desc)
 
 
-def ext(name, values, desc, conf=0.6, type="string"):
-    """An extraction_schema entry with enum values. Always set min_confidence (the default 0.95 drops most values)."""
+def ext(name, values, desc, conf=0.5, type="string"):
+    """An extraction_schema entry with enum values. Always set min_confidence (the default 0.95 drops most values;
+    0.6 dropped a plain "Yes, I confirm." extracted at 0.59 on the platform, so 0.5)."""
     return {"name": name, "type": type, "enum_values": list(values), "description": desc, "min_confidence": conf}
 
 
@@ -1642,7 +1643,7 @@ def latest_value_note(n_digits=None, what="the digits"):
             "LAST value they gave." % (what, n))
 
 
-def digit_extraction(name, n_digits, description, conf=0.6, max_retries=2):
+def digit_extraction(name, n_digits, description, conf=0.5, max_retries=2):
     """Extraction entry for a digit answer (T8): validated by '^[0-9]{N}$', retried twice, min_confidence 0.6."""
     return {"name": name, "type": "string", "description": description,
             "validation_pattern": "^[0-9]{%d}$" % int(n_digits), "max_retries": int(max_retries),

@@ -1294,7 +1294,7 @@
       "unclear"
      ],
      "description": "Who answered, judged ONLY from the person's latest message. customer = they confirm: 'yes', 'speaking', 'that's me', or they say their own name ({{first_name}} / {{last_name}}). someone_else = another person answered (a relative, partner, flatmate, colleague), says the customer is not here or not available, or offers to take a message. wrong_number = says this number does not belong to that person / they do not know them. deceased = says the customer has died / passed away. refuses = says they do not want to talk / not interested. unclear = anything else: 'hello', 'go ahead', 'who's asking', 'what is this about?', any question, silence.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
@@ -1501,7 +1501,7 @@
       "unclear"
      ],
      "description": "Who answered, judged ONLY from the person's latest message. customer = they confirm: 'yes', 'speaking', 'that's me', or they say their own name ({{first_name}} / {{last_name}}). someone_else = another person answered (a relative, partner, flatmate, colleague), says the customer is not here or not available, or offers to take a message. wrong_number = says this number does not belong to that person / they do not know them. deceased = says the customer has died / passed away. refuses = says they do not want to talk / not interested. unclear = anything else: 'hello', 'go ahead', 'who's asking', 'what is this about?', any question, silence.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -1644,7 +1644,7 @@
       "deceased"
      ],
      "description": "From the person's latest message: wrong_number if they say this number does not belong to the customer or they do not know the customer; deceased if they say the customer has died; otherwise none.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -1876,7 +1876,7 @@
       "refused"
      ],
      "description": "From the customer's LATEST message only: refused if they decline to answer the security question, say they do not want to talk, or ask what the call is about instead of answering. none if they give an answer or say anything else.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -2089,7 +2089,7 @@
       "refused"
      ],
      "description": "From the customer's LATEST message only: refused if they decline to answer the security question, say they do not want to talk, or ask what the call is about instead of answering. none if they give an answer or say anything else.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -2615,7 +2615,7 @@
       "new_plan"
      ],
      "description": "What the customer's LATEST message says, if it is one of these. hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). none = anything else.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
@@ -2897,7 +2897,7 @@
       "offer"
      ],
      "description": "From the customer's LATEST message: offer if they name a date or an amount they will pay (this wins over decline); accept if they want to be put through to the customer care team; decline if they do not want it or say no; none otherwise.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
@@ -3272,7 +3272,7 @@
       "other"
      ],
      "description": "From the customer's LATEST message: done = nothing else, no, thanks, goodbye; new_plan = asks for a payment plan, lower or smaller instalments, or more time; human = asks for a person, a human or an agent; other = anything else (a question, a change request); none = no answer yet.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true

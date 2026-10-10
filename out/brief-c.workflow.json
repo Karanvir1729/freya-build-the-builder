@@ -1266,7 +1266,7 @@
       "unclear"
      ],
      "description": "Who answered, judged ONLY from the person's latest message. customer = ONLY 'yes', 'speaking', 'that's me', or they say the customer's own name ({{first_name}} {{last_name}}). someone_else = another person answered (a relative, partner, colleague), or says the customer is not here / not available, or offers to take a message. wrong_number = says this number does not belong to that person / they do not know them. deceased = says the customer has died / passed away. refuses = says they do not want to talk or wants to end the call. wants_agent = asks to speak to a person, a human, an agent. unclear = anything else: 'hello', 'go ahead', 'who's calling?', 'what is this about?', 'is this a robot?', 'is this a scam?', any question, silence.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
@@ -1516,7 +1516,7 @@
       "unclear"
      ],
      "description": "Who answered, judged ONLY from the person's latest message. customer = ONLY 'yes', 'speaking', 'that's me', or they say the customer's own name ({{first_name}} {{last_name}}). someone_else = another person answered (a relative, partner, colleague), or says the customer is not here / not available, or offers to take a message. wrong_number = says this number does not belong to that person / they do not know them. deceased = says the customer has died / passed away. refuses = says they do not want to talk or wants to end the call. wants_agent = asks to speak to a person, a human, an agent. unclear = anything else: 'hello', 'go ahead', 'who's calling?', 'what is this about?', 'is this a robot?', 'is this a scam?', any question, silence.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -1659,7 +1659,7 @@
       "deceased"
      ],
      "description": "From the person's latest message: wrong_number if they say this number does not belong to the customer or they do not know the customer; deceased if they say the customer has died; otherwise none.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -1891,7 +1891,7 @@
       "end_call"
      ],
      "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, or ask what the call is about (or how much they owe) instead of answering it; end_call if they say they do not want to talk or want to end the call; none if they give an answer or say anything else.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -2123,7 +2123,7 @@
       "end_call"
      ],
      "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, or ask what the call is about (or how much they owe) instead of answering it; end_call if they say they do not want to talk or want to end the call; none if they give an answer or say anything else.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -2638,7 +2638,7 @@
       "new_plan"
      ],
      "description": "What the customer's LATEST message says, if it is one of these. hardship = mentions illness, a bereavement, job loss or a similar hardship (this wins over all others). already_paid = says they have ALREADY paid this overdue amount (not 'I will pay'). dispute = says it is not their debt, they never had this product, or it was closed or settled in the past. new_plan = asks for a new payment plan, lower instalments or spreading the amount over several months (just saying the amount is too much is NOT new_plan). none = anything else.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
@@ -2883,7 +2883,7 @@
       "decline"
      ],
      "description": "Answer to the offer to connect with the care team, from the customer's LATEST message: accept if they want to be connected, decline if they say no or do not want it, none otherwise.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     },
     {
      "name": "asked_reduction",
@@ -2893,7 +2893,7 @@
       "yes"
      ],
      "description": "yes if the customer has asked, at any point in the call, for a discount, a waiver, a fee reversal, a reduction or an instalment plan; otherwise no.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
@@ -3014,7 +3014,7 @@
       "decline"
      ],
      "description": "Answer to the offer to connect with the plan review team, from the customer's LATEST message: accept if they want to be connected, decline if they say no, none otherwise.",
-     "min_confidence": 0.6
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": true
