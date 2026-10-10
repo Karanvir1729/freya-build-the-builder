@@ -1,0 +1,52 @@
+# EXT-A-13 Asks what the call is about instead of answering, twice
+# workflow f278ab9e-e94b-41c3-8b91-07bf2cca2e83 | call 59d671e4-548f-426c-9d72-8bf446b5ab7c | customer c_16196c72-6dc | 2026-10-10 20:59:00
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/59d671e4-548f-426c-9d72-8bf446b5ab7c
+# RESULT: FAIL | conversation: The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met.
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Ms Schmidt?
+customer: Yes, this is Hannah Schmidt.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_dob: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_dob
+agent: Thank you, Ms Schmidt. To start, could you please tell me your date of birth?
+customer: What is this call about?
+   [route] ask_dob -> qb_dob: asks a question back refusal_dob == 'question'
+   [node] ask_dob -> qb_dob
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('question_count_dob') or 0)) + 1\n vars['question_count_dob'] = n\n vars['refusal_dob'] = 'none'\n vars['qb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n vars['qb_route'] = 'retry'...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] qb_dob -> ask_dob: always always
+   [node] qb_dob -> ask_dob
+agent: I can explain that right after the security questions. Could you please tell me your date of birth?
+customer: What is this call about?
+   [route] ask_dob -> qb_dob: asks a question back refusal_dob == 'question'
+   [node] ask_dob -> qb_dob
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('question_count_dob') or 0)) + 1\n vars['question_count_dob'] = n\n vars['refusal_dob'] = 'none'\n vars['qb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n vars['qb_route'] = 'retry'...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] qb_dob -> fin_declined: a second question back instead of an answer qb_route == 'close'
+   [node] qb_dob -> fin_declined
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_verified'\n vars['reason'] = 'declined'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_declined -> end_declined: always always
+   [node] fin_declined -> end_declined
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. Without the security questions I cannot continue. Thank you for your time, goodbye."}
+   [call] ended: assistant-ended-call
+agent: I understand. Without the security questions I cannot continue. Thank you for your time, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "declined", "outcome": "not_verified", "customer_id": "c_16196c72-6dc"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (6)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('question_count_dob') or 0)) + 1\n vars['question_count_dob'] = n\n vars['refusal_dob'] = 'none'\n vars['qb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n vars['qb_route'] = 'retry'... -> HTTP 200 data=null
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('question_count_dob') or 0)) + 1\n vars['question_count_dob'] = n\n vars['refusal_dob'] = 'none'\n vars['qb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n vars['qb_route'] = 'retry'... -> HTTP 200 data=null
+4. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_verified'\n vars['reason'] = 'declined'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+5. end_call args={"message_mode": "custom", "spoken_message": "I understand. Without the security questions I cannot continue. Thank you for your time, goodbye."} -> success Call ended
+6. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "declined", "outcome": "not_verified", "customer_id": "c_16196c72-6dc"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=not_verified reason=declined promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): fail - The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met.

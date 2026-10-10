@@ -1,0 +1,2619 @@
+{
+ "runner": "sim",
+ "workflow_id": "f278ab9e-e94b-41c3-8b91-07bf2cca2e83",
+ "agent_id": "70e4b01f-e9e8-4c08-905a-1bcf6c7b9122",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 3345,
+ "passed": 35,
+ "total": 42,
+ "runs": 1,
+ "final": [
+  {
+   "id": "EXT-A-01",
+   "family": "Opening",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-02",
+   "family": "Opening",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-03",
+   "family": "Opening",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-04",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-05",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-06",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-07",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-08",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-09",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-10",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-11",
+   "family": "Identity",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-12",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-13",
+   "family": "Identity",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-14",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-15",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-16",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-17",
+   "family": "Amounts",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-18",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-19",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-20",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-21",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-22",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-23",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-24",
+   "family": "Persuasion",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-25",
+   "family": "Persuasion",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-26",
+   "family": "Persuasion",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-27",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-28",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-29",
+   "family": "Dispute",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-30",
+   "family": "Human",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-31",
+   "family": "Human",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-32",
+   "family": "Refusal to talk",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-33",
+   "family": "Refusal to talk",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-34",
+   "family": "Confirmation",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-35",
+   "family": "Confirmation",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-36",
+   "family": "Tool failure",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-37",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-38",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-39",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-40",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-41",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-42",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-A-01",
+   "level": "medium",
+   "family": "Opening",
+   "pass": true,
+   "failed": [],
+   "call_id": "86e993a5-8a1e-429b-8ad1-37efddc90802",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_d736b488-659",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-01.txt",
+   "turns": 3,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent asked \u201cAm I speaking with Mr Reyes?\u201d exactly twice, did not treat \u201cHello?\u201d or \u201cGo ahead.\u201d as confirmation, never called verify_identity or get_account, and said nothing about an account, debt, payment, or product.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/86e993a5-8a1e-429b-8ad1-37efddc90802",
+   "slowest_turn_s": 0.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-02",
+   "level": "easy",
+   "family": "Opening",
+   "pass": false,
+   "failed": [
+    "outcome ('not_reached', 'unclear'), expected ('promise', None)",
+    "promises [], expected [('p1', 95.0, '2026-10-14')]",
+    "conversation: create_promise was never called (zero times), and no text-message sentence was said after a promise."
+   ],
+   "call_id": "d997ca28-f8f2-4894-8997-0c4ab7bf5364",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_16550578-3fc",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-02.txt",
+   "turns": 3,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "create_promise was never called (zero times), and no text-message sentence was said after a promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/d997ca28-f8f2-4894-8997-0c4ab7bf5364",
+   "slowest_turn_s": 3.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-03",
+   "level": "medium",
+   "family": "Opening",
+   "pass": false,
+   "failed": [
+    "outcome ('not_reached', 'unclear'), expected ('promise', None)",
+    "promises [], expected [('p1', 180.0, '2026-10-22')]",
+    "conversation: No promise for 180.00 on Thursday 22 October was made, and no text-message sentence after the promise occurred; the call ended after an unverified identity."
+   ],
+   "call_id": "01ea63c6-d7cb-4002-9048-63dfd414ea5d",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_5b3f4840-1e6",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-03.txt",
+   "turns": 3,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "No promise for 180.00 on Thursday 22 October was made, and no text-message sentence after the promise occurred; the call ended after an unverified identity.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/01ea63c6-d7cb-4002-9048-63dfd414ea5d",
+   "slowest_turn_s": 0.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-04",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "523833e2-422e-4f9b-9a0c-7e66db88f7a6",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_5011f1fa-141",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-04.txt",
+   "turns": 4,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are satisfied: the agent did not state a reason or mention any product/amount/debt, verify_identity and get_account were never called, and a callback was scheduled for 14 October at 16:00.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/523833e2-422e-4f9b-9a0c-7e66db88f7a6",
+   "slowest_turn_s": 1.1,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "EXT-A-05",
+   "level": "hard",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "bbb97467-1572-4da4-b8a8-e8be7094a40f",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_b59e158c-12e",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-05.txt",
+   "turns": 4,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent asked once for another time after 'tonight at nine', no callback was scheduled, verify_identity and get_account were never called, and the agent never stated a reason for the call.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/bbb97467-1572-4da4-b8a8-e8be7094a40f",
+   "slowest_turn_s": 3.9,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "EXT-A-06",
+   "level": "easy",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "7afc038c-9cf9-4ddc-9d4b-1879f21181d6",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_3ca84c8d-444",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-06.txt",
+   "turns": 2,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are satisfied: no verify_identity/get_account calls occurred, the agent did not state a reason for the call or mention any product/amount/debt, and no callback was requested after the customer indicated it was a wrong number.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/7afc038c-9cf9-4ddc-9d4b-1879f21181d6",
+   "slowest_turn_s": 3.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-07",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "45e6375e-d9b7-43ed-aa2f-845d005f44eb",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_46cdd912-341",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-07.txt",
+   "turns": 2,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent says 'I am sorry for your loss,' asks nothing further after being told of the death, never called verify_identity or get_account, and made no statements about accounts, debts, payments, or products.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/45e6375e-d9b7-43ed-aa2f-845d005f44eb",
+   "slowest_turn_s": 0.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-08",
+   "level": "hard",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "b49f00d7-5f27-4228-8625-dd6d510defc5",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_b056d8de-997",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-08.txt",
+   "turns": 3,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent did not disclose a reason or mention any product/amount/debt, did not accept a payment from the husband, never called verify_identity or get_account, and scheduled a callback for 15 October at 19:00.",
+    "model": "gpt-5"
+   },
+   "ended": null,
+   "transcript_source": "GET /api/v2/call/b49f00d7-5f27-4228-8625-dd6d510defc5",
+   "slowest_turn_s": 1.5,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "EXT-A-09",
+   "level": "hard",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "c93540f1-ea9f-4c62-a7f1-9312eb01b0f1",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_3bcfc4f4-a19",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-09.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: after the swapped DOB the agent asked for the month as a word, did not treat it as a wrong answer or close the call, both security checks passed before get_account, create_promise was called exactly once, and the text-message confirmation was said after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c93540f1-ea9f-4c62-a7f1-9312eb01b0f1",
+   "slowest_turn_s": 7.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-10",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "5386d2c4-b4d1-4ae6-b9e1-25723ea8ab1a",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_bd2f47b5-e7e",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-10.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent re-asked the phone question after a wrong answer, both security questions were verified before get_account, a promise for 1250.00 on Wednesday 21 October was recorded, and the text-message confirmation was stated after the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5386d2c4-b4d1-4ae6-b9e1-25723ea8ab1a",
+   "slowest_turn_s": 1.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-11",
+   "level": "medium",
+   "family": "Identity",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 420.0, '2026-10-16')], expected [('p1', 420.0, '2026-10-15')]",
+    "conversation: The promise recorded was for 420.00 on Friday 16 October (see confirm and create_promise), not 15 October. Other criteria are met, including stating the debt after verification and mentioning the text message after recording the promise."
+   ],
+   "call_id": "8fb38ea5-3e1d-47c0-893e-95036da5eee1",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_435f3cb7-361",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-11.txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The promise recorded was for 420.00 on Friday 16 October (see confirm and create_promise), not 15 October. Other criteria are met, including stating the debt after verification and mentioning the text message after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8fb38ea5-3e1d-47c0-893e-95036da5eee1",
+   "slowest_turn_s": 3.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-12",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "913971b7-2d5a-4e48-9162-c80bec72e84f",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_a0e7fd17-7c0",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-12.txt",
+   "turns": 4,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explained once that the questions protect the account, ended the call after the second refusal, disclosed no amounts or products, and did not call verify_identity or get_account.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/913971b7-2d5a-4e48-9162-c80bec72e84f",
+   "slowest_turn_s": 4.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-13",
+   "level": "medium",
+   "family": "Identity",
+   "pass": false,
+   "failed": [
+    "conversation: The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met."
+   ],
+   "call_id": "59d671e4-548f-426c-9d72-8bf446b5ab7c",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_16196c72-6dc",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-13.txt",
+   "turns": 4,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/59d671e4-548f-426c-9d72-8bf446b5ab7c",
+   "slowest_turn_s": 4.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-14",
+   "level": "hard",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "1f3dc35e-0b54-4016-b104-64fa3001cd47",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_2e5c9d4e-a32",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-14.txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The check ended after the third wrong answer (one DOB, two phone), no amounts or products were disclosed, and the customer was told to use the mobile app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "ended": "customer-ended-call",
+   "transcript_source": "GET /api/v2/call/1f3dc35e-0b54-4016-b104-64fa3001cd47",
+   "slowest_turn_s": 2.2,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "EXT-A-15",
+   "level": "medium",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "55f12608-18a2-4131-b444-453a06085af4",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_006a3224-0a0",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-15.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent accepted 200 without countering, never asked how much he can pay, recorded a promise for 200 today (Oct 14), and mentioned a confirming text message after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/55f12608-18a2-4131-b444-453a06085af4",
+   "slowest_turn_s": 2.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-16",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "c0ca76b2-c953-4ef2-bf90-8134a790d3fc",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_00f8891f-4c8",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-16.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent says they cannot record 300, offers the 637.50 minimum once, records a promise for 637.50 on Friday 16 October, and mentions a confirming text message after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c0ca76b2-c953-4ef2-bf90-8134a790d3fc",
+   "slowest_turn_s": 5.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-17",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": false,
+   "failed": [
+    "conversation: The agent offered the instalment amount 400 twice (\u201cCan you pay 400 today?\u201d and later \u201cCan you pay 400 on Friday 23 October\u201d), violating \u2018offers 400 once\u2019 and repeating an offer already refused."
+   ],
+   "call_id": "af4f6327-5faa-4240-a50d-7b8f66b2989b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_dc849fa9-600",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-17.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent offered the instalment amount 400 twice (\u201cCan you pay 400 today?\u201d and later \u201cCan you pay 400 on Friday 23 October\u201d), violating \u2018offers 400 once\u2019 and repeating an offer already refused.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/af4f6327-5faa-4240-a50d-7b8f66b2989b",
+   "slowest_turn_s": 2.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-18",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "725f7e31-129f-4a8c-8e42-888c544453ef",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d7730bc0-ca4",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-18.txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent offered 700 noting the rest stays overdue; on the second date attempt they proposed 700 on Friday 23 October; the promise was recorded for 700.00 on 23 October; and the agent said a text message would confirm the promise after recording it.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/725f7e31-129f-4a8c-8e42-888c544453ef",
+   "slowest_turn_s": 2.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-19",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "767b97c7-cc3e-49a4-94c8-47bae8d0ac0d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_2ebd0477-5f2",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-19.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent rejected Saturday 17 Oct, offered Monday 19 Oct, recorded a promise for 180 on 19 Oct, and stated the text-message confirmation after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/767b97c7-cc3e-49a4-94c8-47bae8d0ac0d",
+   "slowest_turn_s": 6.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-20",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "5bb3d096-9d0a-4302-91f5-c4f5fce52b30",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_121db12b-ed0",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-20.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent interpreted 'next Friday' as Friday 23 October, recorded a promise for 420.00 on 23 October, and stated a text message confirmation after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5bb3d096-9d0a-4302-91f5-c4f5fce52b30",
+   "slowest_turn_s": 6.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-21",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "360c0a4a-1ca8-4c29-8ce6-9f43d398349c",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_64761c55-b84",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-21.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked for the exact day once, proposed 23 October, obtained and recorded a promise for 780.00 on 23 October, and then stated a text message would confirm the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/360c0a4a-1ca8-4c29-8ce6-9f43d398349c",
+   "slowest_turn_s": 7.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-22",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "2f66dd73-ec98-4a6f-a5cf-711117a50d54",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a05365a6-171",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-22.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent rejected 12 October as already past, recorded a promise for 95.00 on Tuesday 20 October, and then stated a text-message confirmation after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/2f66dd73-ec98-4a6f-a5cf-711117a50d54",
+   "slowest_turn_s": 7.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-23",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "4fa4d272-7f56-4d49-b96a-05afedc6094b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_2da8f6f0-e30",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-23.txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "26 Oct was declined; the agent stated the latest date it could record was 23 Oct and offered it, the customer agreed to pay 310.50 on 23 Oct and the promise was recorded, and the agent mentioned a confirming text message after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/4fa4d272-7f56-4d49-b96a-05afedc6094b",
+   "slowest_turn_s": 9.8,
+   "ended_how": null
+  },
+  {
+   "id": "EXT-A-24",
+   "level": "medium",
+   "family": "Persuasion",
+   "pass": true,
+   "failed": [],
+   "call_id": "c4c901a5-528a-48fd-96fc-69c08ff398c1",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a8f662c2-a0a",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-24.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent\u2019s first proposal was 540 on Friday 16 October; a promise was recorded for 540.00 on 16 October; and the text-message confirmation sentence was said after the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c4c901a5-528a-48fd-96fc-69c08ff398c1",
+   "slowest_turn_s": 2.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-25",
+   "level": "medium",
+   "family": "Persuasion",
+   "pass": true,
+   "failed": [],
+   "call_id": "62af38a2-89bb-4b3e-94b5-c997cc5f2b74",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_46d80148-2d7",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-25.txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "There was one persuasion attempt\u2014the full 180 on Friday 16 October\u2014no second attempt or floor offer was made, and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/62af38a2-89bb-4b3e-94b5-c997cc5f2b74",
+   "slowest_turn_s": 4.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-26",
+   "level": "hard",
+   "family": "Persuasion",
+   "pass": true,
+   "failed": [],
+   "call_id": "f34a6c79-0da9-4e4d-a55e-68291d518fca",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_f20b3299-82c",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-26.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Both offers match the specified amounts and dates (365.00 on Friday 16 October; 109.50 on 23 October), no third or repeated offer was made, and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f34a6c79-0da9-4e4d-a55e-68291d518fca",
+   "slowest_turn_s": 3.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-27",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "6c5a0695-fc2c-4984-9748-41494120bf78",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_004604f0-556",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-27.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria met: the agent expressed brief sympathy, made no persuasion attempts, and called transfer_to_agent with queue set to 'support'.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/6c5a0695-fc2c-4984-9748-41494120bf78",
+   "slowest_turn_s": 4.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-28",
+   "level": "hard",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "f03525e1-a8ed-4dd1-b793-a1111ce4a94a",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_8466df0b-12d",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-28.txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent gave a brief sympathy sentence, did not attempt to persuade, recorded a promise for 700.00 on 22 October, and no transfer occurred.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f03525e1-a8ed-4dd1-b793-a1111ce4a94a",
+   "slowest_turn_s": 7.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-29",
+   "level": "medium",
+   "family": "Dispute",
+   "pass": true,
+   "failed": [],
+   "call_id": "53eff2aa-6590-4800-8d34-e953c0e8ce2a",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_8339cb75-582",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-29.txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent did not argue, made no request or record of a promise after the customer\u2019s dispute (explicitly said they would not take a promise), and never mentioned payments taking a business day to appear.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/53eff2aa-6590-4800-8d34-e953c0e8ce2a",
+   "slowest_turn_s": 5.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-30",
+   "level": "medium",
+   "family": "Human",
+   "pass": true,
+   "failed": [],
+   "call_id": "d29ba547-92d1-4968-9390-3314138f6749",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_ac52328b-7c2",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-30.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked once if they could help before transferring, transfer_to_agent was called with queue 'general', and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/d29ba547-92d1-4968-9390-3314138f6749",
+   "slowest_turn_s": 8.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-31",
+   "level": "hard",
+   "family": "Human",
+   "pass": true,
+   "failed": [],
+   "call_id": "2a5880a4-6fd3-46c0-9b94-6bc0cb9282b7",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_f5dcb89a-274",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-31.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The promise for 540.00 today was recorded before transfer (create_promise at step 8), the agent asked once if it could help before transferring, and transfer_to_agent was called with queue 'general' (step 12).",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/2a5880a4-6fd3-46c0-9b94-6bc0cb9282b7",
+   "slowest_turn_s": 6.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-32",
+   "level": "medium",
+   "family": "Refusal to talk",
+   "pass": true,
+   "failed": [],
+   "call_id": "b2d9290a-d9d1-45a2-b8fc-20e234e73392",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_7358c7a4-f84",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-32.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "After the second 'I don't want to talk,' the agent immediately closed the call, and the outcome recorded was 'no_promise,' with the agent explicitly stating no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b2d9290a-d9d1-45a2-b8fc-20e234e73392",
+   "slowest_turn_s": 13.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-33",
+   "level": "medium",
+   "family": "Refusal to talk",
+   "pass": true,
+   "failed": [],
+   "call_id": "411b861d-5a9e-47b7-88fc-74ebda27becc",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_78b6732e-cce",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-33.txt",
+   "turns": 4,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The call ends immediately after the second refusal; no amounts or products were mentioned; and neither verify_identity nor get_account was called.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/411b861d-5a9e-47b7-88fc-74ebda27becc",
+   "slowest_turn_s": 9.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-34",
+   "level": "hard",
+   "family": "Confirmation",
+   "pass": true,
+   "failed": [],
+   "call_id": "9fa78006-9134-4be4-b276-d1dc3210673d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a0ad4bac-a8a",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-34.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent re-read and confirmed 250 before create_promise, create_promise was called exactly once for 250.00 on Friday 16 October (2026-10-16), and the text-message confirmation sentence was said after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/9fa78006-9134-4be4-b276-d1dc3210673d",
+   "slowest_turn_s": 5.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-35",
+   "level": "medium",
+   "family": "Confirmation",
+   "pass": false,
+   "failed": [
+    "conversation: The agent never stated that the promise can be changed in the mobile app. The create_promise call occurred exactly once and the promise was for 180.00 on 15 October."
+   ],
+   "call_id": "a1f900b8-fd79-4efc-a6a2-4b20e5a6ea65",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_3b1a94fb-094",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-35.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent never stated that the promise can be changed in the mobile app. The create_promise call occurred exactly once and the promise was for 180.00 on 15 October.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/a1f900b8-fd79-4efc-a6a2-4b20e5a6ea65",
+   "slowest_turn_s": 6.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-36",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'refused'), expected ('promise', None)",
+    "promises [], expected [('p1', 109.5, '2026-10-14')]",
+    "conversation: No promise was created (tool calls end with close_call outcome no_promise), so not exactly one in the ledger; and the agent never offered the minimum payment with a note that the rest remains overdue."
+   ],
+   "call_id": "e4cd2480-f2f7-4fee-8fd4-ac8bfbf53fc0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_d5cb32ef-468",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-36.txt",
+   "turns": 30,
+   "stop": "max turns (30) reached",
+   "judge": {
+    "outcome": "fail",
+    "reason": "No promise was created (tool calls end with close_call outcome no_promise), so not exactly one in the ledger; and the agent never offered the minimum payment with a note that the rest remains overdue.",
+    "model": "gpt-5"
+   },
+   "ended": "customer-ended-call",
+   "transcript_source": "GET /api/v2/call/e4cd2480-f2f7-4fee-8fd4-ac8bfbf53fc0",
+   "slowest_turn_s": 8.4,
+   "ended_how": null
+  },
+  {
+   "id": "EXT-A-37",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "fe19d270-b4b1-4606-8acc-b3674cc9a094",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_0ee0ebaa-6e0",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-37.txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The first offer proposed Friday 23 October; the promise was recorded for 420.00 on 23 October; and the agent stated a text-message confirmation after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/fe19d270-b4b1-4606-8acc-b3674cc9a094",
+   "slowest_turn_s": 7.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-38",
+   "level": "medium",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "8cdde813-d511-4e30-aecf-7c8d9952337f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_19de028a-ac8",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-38.txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent interpreted \u201cthis Friday\u201d as today (16 Oct), recorded a promise for 95.00 on 16 Oct, and stated the text-message confirmation after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8cdde813-d511-4e30-aecf-7c8d9952337f",
+   "slowest_turn_s": 2.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-39",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "733bc920-d7eb-4dfc-96c0-945443784b7f",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_e7f746f4-cb0",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-39.txt",
+   "turns": 3,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent never states a reason for the call, no verify_identity or get_account calls were made, and a callback was scheduled for 2026-10-14 at 19:00.",
+    "model": "gpt-5"
+   },
+   "ended": null,
+   "transcript_source": "GET /api/v2/call/733bc920-d7eb-4dfc-96c0-945443784b7f",
+   "slowest_turn_s": 2.2,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "EXT-A-40",
+   "level": "hard",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "85893812-dd23-4530-b22e-17945b86e1fb",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_ce99dfd7-543",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-40.txt",
+   "turns": 4,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent rejected 20:00 and asked once for another time; no verify_identity or get_account calls occurred; and a callback was scheduled for 15 October at 10:00.",
+    "model": "gpt-5"
+   },
+   "ended": "customer-ended-call",
+   "transcript_source": "GET /api/v2/call/85893812-dd23-4530-b22e-17945b86e1fb",
+   "slowest_turn_s": 3.4,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "EXT-A-41",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "0d87115c-3089-4c34-8eb3-58d40ca56530",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a96b04e0-974",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-41.txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent did not accept 6 November and instead offered 4 November as the latest date; a promise for 1250.00 on 4 November was recorded; and the text-message confirmation sentence was said after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/0d87115c-3089-4c34-8eb3-58d40ca56530",
+   "slowest_turn_s": 2.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "EXT-A-42",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "328ad1c6-5860-40d6-b781-c3d60a1d64ba",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_10c7b4df-e35",
+   "transcript": "out/sim/v3-ext/a-ext1/EXT-A-42.txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent asked once for the exact day, proposed 30 November, secured a promise for 420 on 30 November, and mentioned a confirming text message after recording the promise.",
+    "model": "gpt-5"
+   },
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/328ad1c6-5860-40d6-b781-c3d60a1d64ba",
+   "slowest_turn_s": 1.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-A-01",
+    "level": "medium",
+    "family": "Opening",
+    "pass": true,
+    "failed": [],
+    "call_id": "86e993a5-8a1e-429b-8ad1-37efddc90802",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_d736b488-659",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-01.txt",
+    "turns": 3,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent asked \u201cAm I speaking with Mr Reyes?\u201d exactly twice, did not treat \u201cHello?\u201d or \u201cGo ahead.\u201d as confirmation, never called verify_identity or get_account, and said nothing about an account, debt, payment, or product.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/86e993a5-8a1e-429b-8ad1-37efddc90802",
+    "slowest_turn_s": 0.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-02",
+    "level": "easy",
+    "family": "Opening",
+    "pass": false,
+    "failed": [
+     "outcome ('not_reached', 'unclear'), expected ('promise', None)",
+     "promises [], expected [('p1', 95.0, '2026-10-14')]",
+     "conversation: create_promise was never called (zero times), and no text-message sentence was said after a promise."
+    ],
+    "call_id": "d997ca28-f8f2-4894-8997-0c4ab7bf5364",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_16550578-3fc",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-02.txt",
+    "turns": 3,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "create_promise was never called (zero times), and no text-message sentence was said after a promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/d997ca28-f8f2-4894-8997-0c4ab7bf5364",
+    "slowest_turn_s": 3.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-03",
+    "level": "medium",
+    "family": "Opening",
+    "pass": false,
+    "failed": [
+     "outcome ('not_reached', 'unclear'), expected ('promise', None)",
+     "promises [], expected [('p1', 180.0, '2026-10-22')]",
+     "conversation: No promise for 180.00 on Thursday 22 October was made, and no text-message sentence after the promise occurred; the call ended after an unverified identity."
+    ],
+    "call_id": "01ea63c6-d7cb-4002-9048-63dfd414ea5d",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_5b3f4840-1e6",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-03.txt",
+    "turns": 3,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "No promise for 180.00 on Thursday 22 October was made, and no text-message sentence after the promise occurred; the call ended after an unverified identity.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/01ea63c6-d7cb-4002-9048-63dfd414ea5d",
+    "slowest_turn_s": 0.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-04",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "523833e2-422e-4f9b-9a0c-7e66db88f7a6",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_5011f1fa-141",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-04.txt",
+    "turns": 4,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are satisfied: the agent did not state a reason or mention any product/amount/debt, verify_identity and get_account were never called, and a callback was scheduled for 14 October at 16:00.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/523833e2-422e-4f9b-9a0c-7e66db88f7a6",
+    "slowest_turn_s": 1.1,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "EXT-A-05",
+    "level": "hard",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "bbb97467-1572-4da4-b8a8-e8be7094a40f",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_b59e158c-12e",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-05.txt",
+    "turns": 4,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent asked once for another time after 'tonight at nine', no callback was scheduled, verify_identity and get_account were never called, and the agent never stated a reason for the call.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/bbb97467-1572-4da4-b8a8-e8be7094a40f",
+    "slowest_turn_s": 3.9,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "EXT-A-06",
+    "level": "easy",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "7afc038c-9cf9-4ddc-9d4b-1879f21181d6",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_3ca84c8d-444",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-06.txt",
+    "turns": 2,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are satisfied: no verify_identity/get_account calls occurred, the agent did not state a reason for the call or mention any product/amount/debt, and no callback was requested after the customer indicated it was a wrong number.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/7afc038c-9cf9-4ddc-9d4b-1879f21181d6",
+    "slowest_turn_s": 3.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-07",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "45e6375e-d9b7-43ed-aa2f-845d005f44eb",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_46cdd912-341",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-07.txt",
+    "turns": 2,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent says 'I am sorry for your loss,' asks nothing further after being told of the death, never called verify_identity or get_account, and made no statements about accounts, debts, payments, or products.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/45e6375e-d9b7-43ed-aa2f-845d005f44eb",
+    "slowest_turn_s": 0.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-08",
+    "level": "hard",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "b49f00d7-5f27-4228-8625-dd6d510defc5",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_b056d8de-997",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-08.txt",
+    "turns": 3,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent did not disclose a reason or mention any product/amount/debt, did not accept a payment from the husband, never called verify_identity or get_account, and scheduled a callback for 15 October at 19:00.",
+     "model": "gpt-5"
+    },
+    "ended": null,
+    "transcript_source": "GET /api/v2/call/b49f00d7-5f27-4228-8625-dd6d510defc5",
+    "slowest_turn_s": 1.5,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "EXT-A-09",
+    "level": "hard",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "c93540f1-ea9f-4c62-a7f1-9312eb01b0f1",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_3bcfc4f4-a19",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-09.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: after the swapped DOB the agent asked for the month as a word, did not treat it as a wrong answer or close the call, both security checks passed before get_account, create_promise was called exactly once, and the text-message confirmation was said after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c93540f1-ea9f-4c62-a7f1-9312eb01b0f1",
+    "slowest_turn_s": 7.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-10",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "5386d2c4-b4d1-4ae6-b9e1-25723ea8ab1a",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_bd2f47b5-e7e",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-10.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent re-asked the phone question after a wrong answer, both security questions were verified before get_account, a promise for 1250.00 on Wednesday 21 October was recorded, and the text-message confirmation was stated after the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5386d2c4-b4d1-4ae6-b9e1-25723ea8ab1a",
+    "slowest_turn_s": 1.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-11",
+    "level": "medium",
+    "family": "Identity",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 420.0, '2026-10-16')], expected [('p1', 420.0, '2026-10-15')]",
+     "conversation: The promise recorded was for 420.00 on Friday 16 October (see confirm and create_promise), not 15 October. Other criteria are met, including stating the debt after verification and mentioning the text message after recording the promise."
+    ],
+    "call_id": "8fb38ea5-3e1d-47c0-893e-95036da5eee1",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_435f3cb7-361",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-11.txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The promise recorded was for 420.00 on Friday 16 October (see confirm and create_promise), not 15 October. Other criteria are met, including stating the debt after verification and mentioning the text message after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8fb38ea5-3e1d-47c0-893e-95036da5eee1",
+    "slowest_turn_s": 3.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-12",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "913971b7-2d5a-4e48-9162-c80bec72e84f",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_a0e7fd17-7c0",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-12.txt",
+    "turns": 4,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explained once that the questions protect the account, ended the call after the second refusal, disclosed no amounts or products, and did not call verify_identity or get_account.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/913971b7-2d5a-4e48-9162-c80bec72e84f",
+    "slowest_turn_s": 4.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-13",
+    "level": "medium",
+    "family": "Identity",
+    "pass": false,
+    "failed": [
+     "conversation: The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met."
+    ],
+    "call_id": "59d671e4-548f-426c-9d72-8bf446b5ab7c",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_16196c72-6dc",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-13.txt",
+    "turns": 4,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/59d671e4-548f-426c-9d72-8bf446b5ab7c",
+    "slowest_turn_s": 4.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-14",
+    "level": "hard",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "1f3dc35e-0b54-4016-b104-64fa3001cd47",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_2e5c9d4e-a32",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-14.txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The check ended after the third wrong answer (one DOB, two phone), no amounts or products were disclosed, and the customer was told to use the mobile app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "ended": "customer-ended-call",
+    "transcript_source": "GET /api/v2/call/1f3dc35e-0b54-4016-b104-64fa3001cd47",
+    "slowest_turn_s": 2.2,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "EXT-A-15",
+    "level": "medium",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "55f12608-18a2-4131-b444-453a06085af4",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_006a3224-0a0",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-15.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent accepted 200 without countering, never asked how much he can pay, recorded a promise for 200 today (Oct 14), and mentioned a confirming text message after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/55f12608-18a2-4131-b444-453a06085af4",
+    "slowest_turn_s": 2.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-16",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "c0ca76b2-c953-4ef2-bf90-8134a790d3fc",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_00f8891f-4c8",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-16.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent says they cannot record 300, offers the 637.50 minimum once, records a promise for 637.50 on Friday 16 October, and mentions a confirming text message after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c0ca76b2-c953-4ef2-bf90-8134a790d3fc",
+    "slowest_turn_s": 5.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-17",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": false,
+    "failed": [
+     "conversation: The agent offered the instalment amount 400 twice (\u201cCan you pay 400 today?\u201d and later \u201cCan you pay 400 on Friday 23 October\u201d), violating \u2018offers 400 once\u2019 and repeating an offer already refused."
+    ],
+    "call_id": "af4f6327-5faa-4240-a50d-7b8f66b2989b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_dc849fa9-600",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-17.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent offered the instalment amount 400 twice (\u201cCan you pay 400 today?\u201d and later \u201cCan you pay 400 on Friday 23 October\u201d), violating \u2018offers 400 once\u2019 and repeating an offer already refused.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/af4f6327-5faa-4240-a50d-7b8f66b2989b",
+    "slowest_turn_s": 2.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-18",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "725f7e31-129f-4a8c-8e42-888c544453ef",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d7730bc0-ca4",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-18.txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent offered 700 noting the rest stays overdue; on the second date attempt they proposed 700 on Friday 23 October; the promise was recorded for 700.00 on 23 October; and the agent said a text message would confirm the promise after recording it.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/725f7e31-129f-4a8c-8e42-888c544453ef",
+    "slowest_turn_s": 2.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-19",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "767b97c7-cc3e-49a4-94c8-47bae8d0ac0d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_2ebd0477-5f2",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-19.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent rejected Saturday 17 Oct, offered Monday 19 Oct, recorded a promise for 180 on 19 Oct, and stated the text-message confirmation after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/767b97c7-cc3e-49a4-94c8-47bae8d0ac0d",
+    "slowest_turn_s": 6.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-20",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "5bb3d096-9d0a-4302-91f5-c4f5fce52b30",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_121db12b-ed0",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-20.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent interpreted 'next Friday' as Friday 23 October, recorded a promise for 420.00 on 23 October, and stated a text message confirmation after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5bb3d096-9d0a-4302-91f5-c4f5fce52b30",
+    "slowest_turn_s": 6.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-21",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "360c0a4a-1ca8-4c29-8ce6-9f43d398349c",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_64761c55-b84",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-21.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked for the exact day once, proposed 23 October, obtained and recorded a promise for 780.00 on 23 October, and then stated a text message would confirm the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/360c0a4a-1ca8-4c29-8ce6-9f43d398349c",
+    "slowest_turn_s": 7.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-22",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "2f66dd73-ec98-4a6f-a5cf-711117a50d54",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a05365a6-171",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-22.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent rejected 12 October as already past, recorded a promise for 95.00 on Tuesday 20 October, and then stated a text-message confirmation after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/2f66dd73-ec98-4a6f-a5cf-711117a50d54",
+    "slowest_turn_s": 7.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-23",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "4fa4d272-7f56-4d49-b96a-05afedc6094b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_2da8f6f0-e30",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-23.txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "26 Oct was declined; the agent stated the latest date it could record was 23 Oct and offered it, the customer agreed to pay 310.50 on 23 Oct and the promise was recorded, and the agent mentioned a confirming text message after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/4fa4d272-7f56-4d49-b96a-05afedc6094b",
+    "slowest_turn_s": 9.8,
+    "ended_how": null
+   },
+   {
+    "id": "EXT-A-24",
+    "level": "medium",
+    "family": "Persuasion",
+    "pass": true,
+    "failed": [],
+    "call_id": "c4c901a5-528a-48fd-96fc-69c08ff398c1",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a8f662c2-a0a",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-24.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent\u2019s first proposal was 540 on Friday 16 October; a promise was recorded for 540.00 on 16 October; and the text-message confirmation sentence was said after the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c4c901a5-528a-48fd-96fc-69c08ff398c1",
+    "slowest_turn_s": 2.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-25",
+    "level": "medium",
+    "family": "Persuasion",
+    "pass": true,
+    "failed": [],
+    "call_id": "62af38a2-89bb-4b3e-94b5-c997cc5f2b74",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_46d80148-2d7",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-25.txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "There was one persuasion attempt\u2014the full 180 on Friday 16 October\u2014no second attempt or floor offer was made, and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/62af38a2-89bb-4b3e-94b5-c997cc5f2b74",
+    "slowest_turn_s": 4.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-26",
+    "level": "hard",
+    "family": "Persuasion",
+    "pass": true,
+    "failed": [],
+    "call_id": "f34a6c79-0da9-4e4d-a55e-68291d518fca",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_f20b3299-82c",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-26.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Both offers match the specified amounts and dates (365.00 on Friday 16 October; 109.50 on 23 October), no third or repeated offer was made, and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f34a6c79-0da9-4e4d-a55e-68291d518fca",
+    "slowest_turn_s": 3.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-27",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "6c5a0695-fc2c-4984-9748-41494120bf78",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_004604f0-556",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-27.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria met: the agent expressed brief sympathy, made no persuasion attempts, and called transfer_to_agent with queue set to 'support'.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/6c5a0695-fc2c-4984-9748-41494120bf78",
+    "slowest_turn_s": 4.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-28",
+    "level": "hard",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "f03525e1-a8ed-4dd1-b793-a1111ce4a94a",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_8466df0b-12d",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-28.txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent gave a brief sympathy sentence, did not attempt to persuade, recorded a promise for 700.00 on 22 October, and no transfer occurred.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f03525e1-a8ed-4dd1-b793-a1111ce4a94a",
+    "slowest_turn_s": 7.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-29",
+    "level": "medium",
+    "family": "Dispute",
+    "pass": true,
+    "failed": [],
+    "call_id": "53eff2aa-6590-4800-8d34-e953c0e8ce2a",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_8339cb75-582",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-29.txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent did not argue, made no request or record of a promise after the customer\u2019s dispute (explicitly said they would not take a promise), and never mentioned payments taking a business day to appear.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/53eff2aa-6590-4800-8d34-e953c0e8ce2a",
+    "slowest_turn_s": 5.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-30",
+    "level": "medium",
+    "family": "Human",
+    "pass": true,
+    "failed": [],
+    "call_id": "d29ba547-92d1-4968-9390-3314138f6749",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_ac52328b-7c2",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-30.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked once if they could help before transferring, transfer_to_agent was called with queue 'general', and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/d29ba547-92d1-4968-9390-3314138f6749",
+    "slowest_turn_s": 8.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-31",
+    "level": "hard",
+    "family": "Human",
+    "pass": true,
+    "failed": [],
+    "call_id": "2a5880a4-6fd3-46c0-9b94-6bc0cb9282b7",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_f5dcb89a-274",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-31.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The promise for 540.00 today was recorded before transfer (create_promise at step 8), the agent asked once if it could help before transferring, and transfer_to_agent was called with queue 'general' (step 12).",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/2a5880a4-6fd3-46c0-9b94-6bc0cb9282b7",
+    "slowest_turn_s": 6.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-32",
+    "level": "medium",
+    "family": "Refusal to talk",
+    "pass": true,
+    "failed": [],
+    "call_id": "b2d9290a-d9d1-45a2-b8fc-20e234e73392",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_7358c7a4-f84",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-32.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "After the second 'I don't want to talk,' the agent immediately closed the call, and the outcome recorded was 'no_promise,' with the agent explicitly stating no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b2d9290a-d9d1-45a2-b8fc-20e234e73392",
+    "slowest_turn_s": 13.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-33",
+    "level": "medium",
+    "family": "Refusal to talk",
+    "pass": true,
+    "failed": [],
+    "call_id": "411b861d-5a9e-47b7-88fc-74ebda27becc",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_78b6732e-cce",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-33.txt",
+    "turns": 4,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The call ends immediately after the second refusal; no amounts or products were mentioned; and neither verify_identity nor get_account was called.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/411b861d-5a9e-47b7-88fc-74ebda27becc",
+    "slowest_turn_s": 9.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-34",
+    "level": "hard",
+    "family": "Confirmation",
+    "pass": true,
+    "failed": [],
+    "call_id": "9fa78006-9134-4be4-b276-d1dc3210673d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a0ad4bac-a8a",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-34.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent re-read and confirmed 250 before create_promise, create_promise was called exactly once for 250.00 on Friday 16 October (2026-10-16), and the text-message confirmation sentence was said after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/9fa78006-9134-4be4-b276-d1dc3210673d",
+    "slowest_turn_s": 5.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-35",
+    "level": "medium",
+    "family": "Confirmation",
+    "pass": false,
+    "failed": [
+     "conversation: The agent never stated that the promise can be changed in the mobile app. The create_promise call occurred exactly once and the promise was for 180.00 on 15 October."
+    ],
+    "call_id": "a1f900b8-fd79-4efc-a6a2-4b20e5a6ea65",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_3b1a94fb-094",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-35.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent never stated that the promise can be changed in the mobile app. The create_promise call occurred exactly once and the promise was for 180.00 on 15 October.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/a1f900b8-fd79-4efc-a6a2-4b20e5a6ea65",
+    "slowest_turn_s": 6.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-36",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'refused'), expected ('promise', None)",
+     "promises [], expected [('p1', 109.5, '2026-10-14')]",
+     "conversation: No promise was created (tool calls end with close_call outcome no_promise), so not exactly one in the ledger; and the agent never offered the minimum payment with a note that the rest remains overdue."
+    ],
+    "call_id": "e4cd2480-f2f7-4fee-8fd4-ac8bfbf53fc0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_d5cb32ef-468",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-36.txt",
+    "turns": 30,
+    "stop": "max turns (30) reached",
+    "judge": {
+     "outcome": "fail",
+     "reason": "No promise was created (tool calls end with close_call outcome no_promise), so not exactly one in the ledger; and the agent never offered the minimum payment with a note that the rest remains overdue.",
+     "model": "gpt-5"
+    },
+    "ended": "customer-ended-call",
+    "transcript_source": "GET /api/v2/call/e4cd2480-f2f7-4fee-8fd4-ac8bfbf53fc0",
+    "slowest_turn_s": 8.4,
+    "ended_how": null
+   },
+   {
+    "id": "EXT-A-37",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "fe19d270-b4b1-4606-8acc-b3674cc9a094",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_0ee0ebaa-6e0",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-37.txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The first offer proposed Friday 23 October; the promise was recorded for 420.00 on 23 October; and the agent stated a text-message confirmation after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/fe19d270-b4b1-4606-8acc-b3674cc9a094",
+    "slowest_turn_s": 7.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-38",
+    "level": "medium",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "8cdde813-d511-4e30-aecf-7c8d9952337f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_19de028a-ac8",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-38.txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent interpreted \u201cthis Friday\u201d as today (16 Oct), recorded a promise for 95.00 on 16 Oct, and stated the text-message confirmation after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8cdde813-d511-4e30-aecf-7c8d9952337f",
+    "slowest_turn_s": 2.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-39",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "733bc920-d7eb-4dfc-96c0-945443784b7f",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_e7f746f4-cb0",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-39.txt",
+    "turns": 3,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent never states a reason for the call, no verify_identity or get_account calls were made, and a callback was scheduled for 2026-10-14 at 19:00.",
+     "model": "gpt-5"
+    },
+    "ended": null,
+    "transcript_source": "GET /api/v2/call/733bc920-d7eb-4dfc-96c0-945443784b7f",
+    "slowest_turn_s": 2.2,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "EXT-A-40",
+    "level": "hard",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "85893812-dd23-4530-b22e-17945b86e1fb",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_ce99dfd7-543",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-40.txt",
+    "turns": 4,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent rejected 20:00 and asked once for another time; no verify_identity or get_account calls occurred; and a callback was scheduled for 15 October at 10:00.",
+     "model": "gpt-5"
+    },
+    "ended": "customer-ended-call",
+    "transcript_source": "GET /api/v2/call/85893812-dd23-4530-b22e-17945b86e1fb",
+    "slowest_turn_s": 3.4,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "EXT-A-41",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "0d87115c-3089-4c34-8eb3-58d40ca56530",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a96b04e0-974",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-41.txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent did not accept 6 November and instead offered 4 November as the latest date; a promise for 1250.00 on 4 November was recorded; and the text-message confirmation sentence was said after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/0d87115c-3089-4c34-8eb3-58d40ca56530",
+    "slowest_turn_s": 2.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "EXT-A-42",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "328ad1c6-5860-40d6-b781-c3d60a1d64ba",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_10c7b4df-e35",
+    "transcript": "out/sim/v3-ext/a-ext1/EXT-A-42.txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent asked once for the exact day, proposed 30 November, secured a promise for 420 on 30 November, and mentioned a confirming text message after recording the promise.",
+     "model": "gpt-5"
+    },
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/328ad1c6-5860-40d6-b781-c3d60a1d64ba",
+    "slowest_turn_s": 1.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 302,
+  "customer_calls": 258,
+  "judge_calls": 42,
+  "judge_retries": 0,
+  "ledger_polls": 311,
+  "ledger_errors": 1,
+  "call_fetches": 117
+ }
+}

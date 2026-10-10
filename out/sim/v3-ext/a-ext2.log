@@ -1,0 +1,20 @@
+sim | workflow f278ab9e-e94b-41c3-8b91-07bf2cca2e83 (slot brief-a-v3) | 7 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+FAIL EXT-A-02 easy   Opening        | close_call
+       - outcome ('not_reached', 'unclear'), expected ('promise', None)
+       - promises [], expected [('p1', 95.0, '2026-10-14')]
+       - conversation: No security questions were passed and no get_account call occurred; create_promise was never called (not exactly once), and no text-message sentence was said after a promise.
+PASS EXT-A-03 medium Opening        | verify > verify > get_account > promise > close_call
+PASS EXT-A-13 medium Identity       | close_call
+FAIL EXT-A-11 medium Identity       | verify > verify > get_account > close_call
+       - outcome ('no_promise', 'refused'), expected ('promise', None)
+       - promises [], expected [('p1', 420.0, '2026-10-15')]
+       - conversation: No promise for 420.00 on 15 October was made—the customer repeatedly refused to confirm—so there was no text-message sentence after a promise. The agent did explain once that the questions protect the account and did not state the debt before bot
+FAIL EXT-A-17 hard   Amounts        | verify > verify > get_account > close_call
+       - conversation: The agent offered the instalment amount 400 twice (first today, then on Friday 23 October), repeating an offer already refused. While no promise was recorded and no discount/waiver/plan was offered, the 'offer 400 once' and 'do not repeat an offe
+PASS EXT-A-35 medium Confirmation   | verify > verify > get_account > promise > close_call
+PASS EXT-A-36 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+
+slowest agent turn per call: median 8 s, worst 12 s (chat-route timing, not a simulation's).
+
+4 / 7 passed (bank records and conversation checks). Local chat-route simulation, 359 s.
+cost: 49 chat turns, 49 model calls (42 customer on gpt-5-mini, 7 judge on gpt-5), 49 ledger polls, 14 call fetches.

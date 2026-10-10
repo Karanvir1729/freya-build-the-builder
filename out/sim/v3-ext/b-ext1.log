@@ -1,0 +1,34 @@
+sim | workflow b030ebb0-ab59-49d7-9352-2414bd10662b (slot brief-b-v3) | 14 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+FAIL EXT-B-02 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+       - outcome ('no_promise', 'dispute'), expected ('promise', None)
+       - promises [], expected [('p3', 140.0, '2026-10-14')]
+       - notes [('p1', 'dispute'), ('p2', 'dispute'), ('p3', 'dispute')], expected [('p1', 'dispute'), ('p2', 'paid')]
+       - conversation: The agent ended the call immediately after the dispute/payment claim, violating 'the dispute and the payment claim do not end the call'; no promise for the car loan ($140 today) was taken; and notes recorded disputes for all products instead of '
+PASS EXT-B-03 medium Multi-product  | verify > verify > get_account > add_note > add_note > close_call
+PASS EXT-B-01 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+PASS EXT-B-04 medium Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+PASS EXT-B-05 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+PASS EXT-B-07 hard   Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+FAIL EXT-B-06 hard   Multi-product  | verify > verify > get_account > promise > add_note > transfer_to_agent > close_call
+       - notes [('p2', 'refused')], expected []
+       - conversation: The agent made an add_note call (tool call #12), violating the 'no add_note at all' criterion. Other criteria were satisfied, including the 300.00 credit card promise recorded before transfer and transfer_to_agent with queue 'restructuring', and 
+PASS EXT-B-08 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+FAIL EXT-B-09 hard   Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+       - promises [('p1', 220.0, '2026-10-23'), ('p2', 640.0, '2026-10-23'), ('p3', 75.0, '2026-10-27')], expected [('p1', 220.0, '2026-10-14'), ('p2', 640.0, '2026-10-14'), ('p3', 75.0, '2026-10-27')]
+FAIL EXT-B-10 medium Notes          | verify > verify > get_account > add_note > close_call
+       - conversation: There were two persuasion attempts: asking to pay today and proposing payment on Friday 16 October, violating the 'exactly one persuasion attempt' criterion. The 'refused' note was added and no promise was recorded.
+PASS EXT-B-11 medium Notes          | verify > verify > get_account > add_note > close_call
+FAIL EXT-B-12 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > close_call
+       - outcome ('no_promise', 'dispute'), expected ('no_promise', 'refused')
+       - notes [('p1', 'dispute'), ('p2', 'dispute'), ('p3', 'dispute')], expected [('p1', 'paid'), ('p2', 'refused'), ('p3', 'dispute')]
+       - conversation: The agent did not make two attempts on the personal loan—only one general payment ask before ending due to dispute. Notes were incorrect: recorded as dispute for all products instead of 'credit card paid' and 'personal loan refused' (car loan dis
+PASS EXT-B-13 medium Hardship       | verify > verify > get_account > transfer_to_agent > close_call
+FAIL EXT-B-14 hard   Calendar       | verify > verify > get_account > promise > promise > promise > promise > promise > promise > add_note > add_note > close_call
+       - outcome ('no_promise', 'service_error'), expected ('promise', None)
+       - notes [('p1', 'service_error'), ('p2', 'service_error')], expected []
+       - conversation: The agent repeated the read-back and confirmation many times, not just once, and made multiple create_promise calls per product (p1 at 26 then again at 34/36; p2 at 28 then again at 38/40). While 26 Oct was not accepted and 27 Oct was offered for
+
+slowest agent turn per call: median 7 s, worst 18 s (chat-route timing, not a simulation's).
+
+8 / 14 passed (bank records and conversation checks). Local chat-route simulation, 1508 s.
+cost: 115 chat turns, 115 model calls (101 customer on gpt-5-mini, 14 judge on gpt-5), 115 ledger polls, 52 call fetches.

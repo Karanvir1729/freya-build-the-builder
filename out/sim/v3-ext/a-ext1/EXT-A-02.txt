@@ -1,0 +1,38 @@
+# EXT-A-02 Asks if it is a robot, then confirms and pays today
+# workflow f278ab9e-e94b-41c3-8b91-07bf2cca2e83 | call d997ca28-f8f2-4894-8997-0c4ab7bf5364 | customer c_16550578-3fc | 2026-10-10 20:48:01
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/d997ca28-f8f2-4894-8997-0c4ab7bf5364
+# RESULT: FAIL | outcome ('not_reached', 'unclear'), expected ('promise', None) | promises [], expected [('p1', 95.0, '2026-10-14')] | conversation: create_promise was never called (zero times), and no text-message sentence was said after a promise.
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Mr Park?
+customer: Wait, am I talking to a robot?
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> opening_retry: always always
+   [node] setup -> opening_retry
+agent: I am Freya Bank's digital assistant. Am I speaking with Mr Park?
+customer: Wait, am I talking to a robot?
+   [route] opening_retry -> fin_unclear: always always
+   [node] opening_retry -> fin_unclear
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_reached'\n vars['reason'] = 'unclear'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_unclear -> end_unclear: always always
+   [node] fin_unclear -> end_unclear
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am sorry, I could not confirm who I am speaking with. Thank you, goodbye."}
+   [call] ended: assistant-ended-call
+agent: I am sorry, I could not confirm who I am speaking with. Thank you, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "unclear", "outcome": "not_reached", "customer_id": "c_16550578-3fc"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_reached'\n vars['reason'] = 'unclear'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+3. end_call args={"message_mode": "custom", "spoken_message": "I am sorry, I could not confirm who I am speaking with. Thank you, goodbye."} -> success Call ended
+4. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "unclear", "outcome": "not_reached", "customer_id": "c_16550578-3fc"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=not_reached reason=unclear promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): fail - create_promise was never called (zero times), and no text-message sentence was said after a promise.

@@ -482,6 +482,10 @@ def test_offer_when_resolved_in_code():
     P2, V2 = start([CARD])
     ev(P2, V2, "offer", offer_kind="exact", offer_date="2026-10-20", offer_when="the twenty", offer_amount="")
     assert V2.get("offer_verdict") == "vague", (V2.get("offer_verdict"), V2.get("say_next"))
+    G2 = {"vars": V}
+    exec(src + "\nr = resolve_when(vars, 'monday the 26th')\nr2 = resolve_when(vars, 'on monday the twenty sixth')\n", G2)
+    assert G2["r"][0].isoformat() == "2026-10-26" and G2["r2"][0].isoformat() == "2026-10-26", (G2["r"], G2["r2"])   # EXT-B-14
+
     assert out["end of the month"] == (None, "vague"), out
     assert out[""] == (None, "none"), out
     assert out["monday the 26th"] == ("2026-10-26", "exact"), out      # the number wins over the weekday (PUB-07)
@@ -504,8 +508,183 @@ def test_change_without_change_is_a_no():
     ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_date="2026-10-15")
     assert V["route"] == "confirm", (V["route"], V.get("say_next"))
     line1 = V["readback_line"]
-    ev(P, V, "change", offer_kind="exact", offer_when="tomorrow", offer_date="2026-10-15")
+    ev(P, V, "change", offer_kind="exact", offer_when="tomorrow", offer_date="2026-10-15")   # once more is allowed
+    ev(P, V, "change", offer_kind="exact", offer_when="tomorrow", offer_date="2026-10-15")   # the second repeat is a no
     assert not (V["route"] == "confirm" and V["readback_line"] == line1), (V["route"], V["readback_line"])
+
+
+@test
+def test_too_much_with_a_date_offers_the_floor():
+    """EXT-A-36: 'the full amount is too much, but I can pay the minimum today' arrives as an exact offer with no number
+    (the extractor does not know the floor): the floor is offered once with the brief's too-much sentence, on the
+    named day, never the full amount."""
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="too_much", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_amount"] == "126.0" and V["ok_date"] == TODAY, (V["route"], V.get("ok_amount"), V.get("ok_date"))
+    assert V["readback_line"].startswith("I understand. The lowest amount I can accept is 126") and "rest stays overdue" in V["readback_line"], V["readback_line"]
+    assert V["readback_line"].endswith("credit card ending 4821, 126, today. Do you confirm?"), V["readback_line"]
+    assert V["too_much_p1"] == "yes" and V["offered_floor_p1"] == "yes"
+    # with a weekend day the guard still moves it, and the amount stays the floor
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="too_much", offer_kind="exact", offer_when="saturday", offer_amount="", offer_ref="floor")
+    assert V["offer_verdict"] == "weekend_or_holiday" and V["prop_amount"] == "126.0" and V["prop_date"] == "2026-10-19", (V["offer_verdict"], V["prop_amount"], V["prop_date"])
+    assert V["say_next"].startswith("I understand. The lowest amount I can accept is 126"), V["say_next"]
+    # as measured on Freya: stance 'offer' (not too_much), the floor by reference, today
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="offer", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="floor")
+    assert V["route"] == "confirm" and V["ok_amount"] == "126.0" and "rest stays overdue" in V["readback_line"], (V["route"], V.get("ok_amount"), V["readback_line"])
+    assert V["too_much_p1"] == "no"
+
+
+@test
+def test_amount_by_reference():
+    """'I can pay the minimum' / 'all of it': the reference is resolved in code against the product (offer_ref)."""
+    P, V = start([LOAN])
+    ev(P, V, "offer", stance="offer", offer_kind="none", offer_when="", offer_amount="", offer_ref="floor")
+    assert V["route"] == "confirm" and V["ok_amount"] == "700.0" and V["ok_date"] == TODAY, (V["route"], V.get("ok_amount"))
+    # at the read-back: 'make it the minimum instead' is a change to the floor, read back again
+    P, V = start([LOAN])
+    ev(P, V, "offer", offer_kind="exact", offer_when="friday", offer_amount="2100", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_amount"] == "2100.0"
+    ev(P, V, "change", confirm="change", offer_when="", offer_amount="", offer_ref="floor")
+    assert V["route"] == "confirm" and V["ok_amount"] == "700.0" and V["ok_date"] == "2026-10-16", (V["route"], V.get("ok_amount"), V.get("ok_date"))
+    n = P.confirm_node("t", "c", "d", "a")
+    assert any(e["name"] == "offer_ref" for e in n["extraction_schema"])
+    assert "offer_ref" in str(P.offer_guard_transitions()[0]), P.offer_guard_transitions()[0]
+
+
+@test
+def test_unchanged_change_is_not_a_loop():
+    """EXT-A-36: a 'change' at the read-back that names nothing new re-read the same line 28 times. Once it is read
+    back again; the second such answer in a row is a no to the read-back offer (the ladder's next rung)."""
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_amount"] == "420.0"
+    first = V["readback_line"]
+    ev(P, V, "change", confirm="change", offer_when="", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["readback_line"] == first, (V["route"], V["readback_line"])
+    ev(P, V, "change", confirm="change", offer_when="today", offer_amount="420", offer_ref="none")
+    assert V["route"] == "negotiate" and V["say_next"] == "Can you pay 420 on Friday 16 October?", (V["route"], V["say_next"])
+    assert V["same_change"] == "0"
+    # a real change resets the count
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_amount="", offer_ref="none")
+    ev(P, V, "change", confirm="change", offer_when="", offer_amount="", offer_ref="none")
+    ev(P, V, "change", confirm="change", offer_when="tomorrow", offer_amount="", offer_ref="none")
+    assert V["route"] == "confirm" and V["ok_date"] == "2026-10-15" and V["same_change"] == "0", (V["route"], V.get("ok_date"))
+
+
+@test
+def test_per_product_claims_in_one_turn():
+    """EXT-B-02: 'the card is not mine, I paid the loan yesterday, I will pay the car loan in full today' in answer to
+    the all-products question. Only the card is a dispute and only the loan is paid; the car loan goes to the guard and
+    the read-back. Before: topic=dispute settled every open product as dispute and the call ended."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", per_product="first=dispute;second=paid;third=pay", offer_when="today", offer_amount="")
+    assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("dispute", "paid", "agreed"), (V["state_p1"], V["state_p2"], V["state_p3"])
+    assert V["route"] == "confirm" and V["ok_pid"] == "p3" and V["ok_amount"] == "75.0" and V["ok_date"] == TODAY, (V["route"], V.get("ok_pid"), V.get("ok_amount"))
+    rb = V["readback_line"]
+    assert "credit card ending 4821" in rb and "personal loan" in rb and rb.endswith("car loan, 75, today. Do you confirm?"), rb
+    assert V["per_product"] == ""
+    ev(P, V, "confirm_yes", confirm="yes")
+    assert V["route"] == "record" and V["rec_pid"] == "p3"
+    V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    notes = []
+    while V["route"] == "note":
+        notes.append((V["note_pid"], V["note_reason"])); V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert notes == [("p1", "dispute"), ("p2", "paid")], notes
+    # claims with a refusal for the rest: the settled ones first, then one by one from the first OPEN product
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse", stance="refuse", per_product="first=paid;second=refuse;third=refuse")
+    assert V["state_p1"] == "paid" and V["cur_pid"] == "p2" and V["route"] == "negotiate", (V["state_p1"], V["cur_pid"])
+    assert V["say_next"].startswith("Thank you for letting me know.") and "personal loan" in V["say_next"], V["say_next"]
+    # no claims: the old behaviour (a dispute about everything)
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", per_product="")
+    assert V["state_p1"] == "dispute" and V["state_p2"] == "dispute"
+    # single product: no per_product extraction at all
+    assert not mk().claims_extraction() and mk(multi=True).claims_extraction()[0]["name"] == "per_product"
+
+
+@test
+def test_per_product_days_in_one_turn():
+    """EXT-B-09: 'the card and the loan today, the car loan on Monday the 26th of October' (a holiday): the one
+    extracted date was applied to every product, so the two 'today' products were capped at their deadline. Each
+    product now gets its own day words; the holiday moves to the next business day and the read-back says so."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-26", offer_when="monday the twenty-sixth of october", offer_amount="",
+       per_product="first=pay@today;second=pay@today;third=pay@monday the twenty-sixth of october")
+    assert V["route"] == "confirm", (V["route"], V.get("say_next"))
+    assert V["agreed_p1"].split("|")[:2] == ["420.0", TODAY] and V["agreed_p2"].split("|")[:2] == ["2100.0", TODAY], (V["agreed_p1"], V["agreed_p2"])
+    assert V["agreed_p3"] == "75.0|2026-10-27|bd", V["agreed_p3"]
+    assert "car loan, 75, on Tuesday 27 October" in V["readback_line"] and "today" in V["readback_line"], V["readback_line"]
+
+
+@test
+def test_no_notes_before_a_later_transfer():
+    """EXT-B-06: card promised, loan refused, then a restructuring request in the wrap-up. With
+    notes_on_transfer=False the loan's note waits for the wrap-up: the transfer adds none; 'nothing else' writes it."""
+    import json
+    def go():
+        P = pol.Policy(HOL, texts=TEXTS, multi=True, notes=True, notes_on_transfer=False,
+                       note_reasons={"refused": "refused", "hardship": "hardship", "dispute": "dispute", "paid": "paid", "service_error": "service_error"})
+        V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD, LOAN])}
+        run(P.prepare_code(BODY, "statement"), V)
+        ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_amount="", per_product="first=pay@today;second=refuse")
+        assert V["state_p1"] == "agreed" and V["cur_pid"] == "p2", (V["state_p1"], V["cur_pid"], V.get("say_next"))
+        ev(P, V, "refuse", stance="refuse"); ev(P, V, "refuse", stance="refuse")
+        assert V["state_p2"] == "refused" and V["route"] == "confirm", (V["state_p2"], V["route"])
+        ev(P, V, "confirm_yes", confirm="yes"); V["rec_ok"] = "true"; ev(P, V, "rec_after")
+        return P, V
+    P, V = go()
+    assert V["route"] == "wrapup" and V["noted_p2"] == "no", (V["route"], V["noted_p2"])     # no note yet
+    P, V = go()
+    ev(P, V, "finalize", wrap="done")
+    assert V["route"] == "note" and V["note_pid"] == "p2" and V["note_reason"] == "refused", (V["route"], V.get("note_pid"))
+    V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert V["route"] == "fin" and V["final_route"] == "promise", (V["route"], V.get("final_route"))
+    # default (notes_on_transfer=True): the note right after the promises, as before
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "accept", stance="accept")
+    ev(P, V, "confirm_yes", confirm="yes"); V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    assert V["route"] == "wrapup", V["route"]
+
+
+@test
+def test_change_per_product_and_recorded_guard():
+    """EXT-B-14: (1) a holiday moved for one product is explained, not only tagged ', the next business day';
+    (2) a change at the read-back naming each product's day is applied per product (it had put the loan's amount on
+    the card: 'that is the most I can record', in a loop); (3) a recorded product is never reopened or recorded again."""
+    P, V = start([CARD, CAR], multi=True, notes=True)
+    ev(P, V, "offer", offer_kind="exact", offer_when="", offer_amount="", per_product="first=pay@today;second=pay@monday the 26th of october")
+    assert V["route"] == "confirm" and V["agreed_p2"] == "75.0|2026-10-27|bd", (V["route"], V.get("agreed_p2"))
+    assert V["readback_line"].startswith("Monday 26 October is not a business day. The next business day is Tuesday 27 October."), V["readback_line"]
+    ev(P, V, "change", confirm="change", offer_amount="75", offer_when="monday the 26th", per_product="first=pay@today;second=pay@monday the 26th")
+    assert V["route"] == "confirm" and V["agreed_p1"].startswith("420.0|" + TODAY) and V["agreed_p2"] == "75.0|2026-10-27|bd", (V["route"], V["agreed_p1"], V["agreed_p2"])
+    assert "Monday 26 October is not a business day" in V["readback_line"], V["readback_line"]
+    ev(P, V, "confirm_yes", confirm="yes"); V["rec_ok"] = "true"; ev(P, V, "rec_after"); V["rec_ok"] = "true"; ev(P, V, "rec_after")
+    assert V["state_p1"] == "recorded" and V["state_p2"] == "recorded"
+    for e, kw in (("change", dict(confirm="change", offer_when="friday", offer_amount="")), ("confirm_no", dict(confirm="no")),
+                  ("accept", dict(stance="accept")), ("offer", dict(offer_kind="exact", offer_when="friday"))):
+        ev(P, V, e, **kw)
+        assert V["state_p1"] == "recorded" and V["state_p2"] == "recorded", (e, V["state_p1"], V["state_p2"])
+        assert V["route"] in ("wrapup", "fin", "note"), (e, V["route"])
+
+
+@test
+def test_tomorrow_when_text():
+    """Optional 'tomorrow_when' text: the read-back for tomorrow names the relative day too; '' (default) keeps the date."""
+    import json
+    P = pol.Policy(HOL, texts=dict(TEXTS, tomorrow_when="tomorrow, [date]"))
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_amount="")
+    assert V["readback_line"] == "To confirm: credit card ending 4821, 420, tomorrow, Thursday 15 October. Do you confirm?", V["readback_line"]
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_amount="")
+    assert V["readback_line"].endswith("420, on Thursday 15 October. Do you confirm?"), V["readback_line"]
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,62 @@
+sim | workflow f278ab9e-e94b-41c3-8b91-07bf2cca2e83 (slot brief-a-v3) | 42 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS EXT-A-01 medium Opening        | close_call
+FAIL EXT-A-02 easy   Opening        | close_call
+       - outcome ('not_reached', 'unclear'), expected ('promise', None)
+       - promises [], expected [('p1', 95.0, '2026-10-14')]
+       - conversation: create_promise was never called (zero times), and no text-message sentence was said after a promise.
+PASS EXT-A-04 medium Third party    | schedule_callback > close_call
+FAIL EXT-A-03 medium Opening        | close_call
+       - outcome ('not_reached', 'unclear'), expected ('promise', None)
+       - promises [], expected [('p1', 180.0, '2026-10-22')]
+       - conversation: No promise for 180.00 on Thursday 22 October was made, and no text-message sentence after the promise occurred; the call ended after an unverified identity.
+PASS EXT-A-05 hard   Third party    | close_call
+PASS EXT-A-06 easy   Third party    | close_call
+PASS EXT-A-07 medium Third party    | close_call
+PASS EXT-A-08 hard   Third party    | schedule_callback > close_call
+PASS EXT-A-09 hard   Identity       | verify > verify > verify > get_account > promise > close_call
+PASS EXT-A-10 medium Identity       | verify > verify > verify > get_account > promise > close_call
+PASS EXT-A-12 medium Identity       | close_call
+FAIL EXT-A-13 medium Identity       | close_call
+       - conversation: The agent never explains that the security questions protect her account; it only says it can explain the reason after verification. All other criteria are met.
+PASS EXT-A-14 hard   Identity       | verify > verify > verify > verify > close_call
+FAIL EXT-A-11 medium Identity       | verify > verify > get_account > promise > close_call
+       - promises [('p1', 420.0, '2026-10-16')], expected [('p1', 420.0, '2026-10-15')]
+       - conversation: The promise recorded was for 420.00 on Friday 16 October (see confirm and create_promise), not 15 October. Other criteria are met, including stating the debt after verification and mentioning the text message after recording the promise.
+PASS EXT-A-16 hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS EXT-A-15 medium Amounts        | verify > verify > get_account > promise > close_call
+PASS EXT-A-18 hard   Amounts        | verify > verify > get_account > promise > close_call
+FAIL EXT-A-17 hard   Amounts        | verify > verify > get_account > close_call
+       - conversation: The agent offered the instalment amount 400 twice (“Can you pay 400 today?” and later “Can you pay 400 on Friday 23 October”), violating ‘offers 400 once’ and repeating an offer already refused.
+PASS EXT-A-20 hard   Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-A-19 medium Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-A-21 hard   Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-A-22 medium Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-A-24 medium Persuasion     | verify > verify > get_account > promise > close_call
+PASS EXT-A-23 hard   Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-A-25 medium Persuasion     | verify > verify > get_account > close_call
+PASS EXT-A-26 hard   Persuasion     | verify > verify > get_account > close_call
+PASS EXT-A-27 medium Hardship       | verify > verify > get_account > transfer_to_agent > close_call
+PASS EXT-A-29 medium Dispute        | verify > verify > get_account > close_call
+PASS EXT-A-28 hard   Hardship       | verify > verify > get_account > promise > close_call
+PASS EXT-A-30 medium Human          | verify > verify > get_account > transfer_to_agent > close_call
+PASS EXT-A-31 hard   Human          | verify > verify > get_account > promise > transfer_to_agent > close_call
+PASS EXT-A-32 medium Refusal to talk | verify > verify > verify > get_account > close_call
+PASS EXT-A-33 medium Refusal to talk | close_call
+PASS EXT-A-34 hard   Confirmation   | verify > verify > get_account > promise > close_call
+FAIL EXT-A-35 medium Confirmation   | verify > verify > get_account > promise > close_call
+       - conversation: The agent never stated that the promise can be changed in the mobile app. The create_promise call occurred exactly once and the promise was for 180.00 on 15 October.
+PASS EXT-A-37 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-A-38 medium Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-A-39 medium Third party    | schedule_callback > close_call
+PASS EXT-A-40 hard   Third party    | schedule_callback > close_call
+FAIL EXT-A-36 hard   Tool failure   | verify > verify > get_account > close_call
+       - outcome ('no_promise', 'refused'), expected ('promise', None)
+       - promises [], expected [('p1', 109.5, '2026-10-14')]
+       - conversation: No promise was created (tool calls end with close_call outcome no_promise), so not exactly one in the ledger; and the agent never offered the minimum payment with a note that the rest remains overdue.
+PASS EXT-A-41 hard   Calendar       | verify > verify > get_account > promise > close_call
+PASS EXT-A-42 hard   Calendar       | verify > verify > get_account > promise > close_call
+
+slowest agent turn per call: median 4 s, worst 14 s (chat-route timing, not a simulation's).
+
+35 / 42 passed (bank records and conversation checks). Local chat-route simulation, 3345 s.
+cost: 302 chat turns, 300 model calls (258 customer on gpt-5-mini, 42 judge on gpt-5), 311 ledger polls, 117 call fetches, 1 ledger errors.

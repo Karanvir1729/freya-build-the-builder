@@ -93,7 +93,7 @@ nodes["opening_retry"] = fl.conv(
     "opening_retry",
     "You called {{title}} {{last_name}} and asked whether you are speaking with them, but the answer did not confirm it. "
     "No tool call is allowed in this turn. Do not say why you are calling, and do not mention any account, product, debt, payment or collections.\n"
-    "If the person asked a question, answer it briefly first: who you are -> you are Freya Bank's digital assistant; a robot or AI -> you are Freya Bank's digital assistant; "
+    "If the person asked a question, answer it briefly first: who you are -> you are Freya Bank's digital assistant; a robot or AI -> 'Yes, I am Freya Bank's digital assistant.'; "
     "a scam -> they can verify this call by phoning Freya Bank's customer service number; what it is about -> you can only discuss that with {{title}} {{last_name}}. "
     "If they said they do not want to talk, say you only need a moment. "
     "Then ask exactly: \"Am I speaking with {{title}} {{last_name}}?\"",
@@ -148,7 +148,7 @@ transfer_general = fl.api_tool(API, "transfer_to_agent", baked={"queue": "genera
 
 ID_COMMON = ("Rules for this step:\n"
              "- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.\n"
-             "- If the customer asks a question back (why you need it, what this is about, who is calling): answer in one short sentence without naming the reason for the call, then ask the same question again. If they refuse to answer: explain that these questions protect their account, and ask the question again.\n"
+             "- If the customer asks a question back (why you need it, what this is about, who is calling): answer in one short sentence without naming the reason for the call, then say that these questions protect their account (a question instead of an answer counts as declining), then ask the same question again. If they refuse to answer: explain that these questions protect their account, and ask the question again.\n"
              "- If the customer asks for a human: the first time, ask whether you can help them yourself. If they insist, call transfer_to_agent.\n"
              "- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.")
 
@@ -203,6 +203,7 @@ POLICY = pol.Policy(
     HOLIDAYS,
     texts={
         "question": "Can you pay [amount] [when]?",
+        "tomorrow_when": "tomorrow, [date]",                                                                         # echo 'tomorrow' (A19 dates are checked in code)
         "question_product": "Can you pay [amount] [when] for your [words]?",                                       # B4 one by one
         "question_all": "Can you pay all of them today?",                                                           # B4
         "weekend_or_holiday": "[named] is not a business day, so I cannot record it. The next business day is [date].",   # A20
@@ -237,11 +238,12 @@ POLICY = pol.Policy(
     multi=True,                                                 # B1: one to three products
     notes=True,                                                 # B8: a note per product without a promise
     note_reasons={s: s for s in ("refused", "hardship", "dispute", "paid", "service_error") if s in NOTE_ENUM},
+    notes_on_transfer=False,                                    # B10: on any transfer no notes at all, before or after it
     fin_keys={"promise": "promise", "paid": "paid", "default": "refused", "refused": "refused",
               "hardship": "hardship", "dispute": "dispute", "service_error": "service_error"},  # B closing
     fail_max=2, human_limit=2, notalk_limit=2, closed_day_move="after",
     asides={   # side questions answered before continuing, even on a turn that goes through code into a tts line
-        "robot": {"when": "asks whether they are talking to a robot, a machine or an AI", "say": "I am Freya Bank's digital assistant."},
+        "robot": {"when": "asks whether they are talking to a robot, a machine or an AI", "say": "Yes, I am Freya Bank's digital assistant."},
         "scam": {"when": "asks whether this call is a scam or genuine", "say": "You can verify this call by phoning Freya Bank's customer service number."},
     })
 
@@ -329,6 +331,9 @@ DATE_DESC = ("The payment date the customer names in their LATEST message. 'this
              "'next <weekday>' is that weekday in the FOLLOWING calendar week. Leave it empty when the latest message names no specific day.")
 AMOUNT_DESC = ("The amount of money the customer offers to pay in their LATEST message, as a number ('six forty' = 640). "
                "Leave it empty when the latest message names no amount. A day of the month is not an amount.")
+REF_DESC = ("Whether the customer's LATEST message names the payment amount BY REFERENCE instead of as a number. "   # A25/A26: the floor by name
+            "floor = the lowest amount the agent can accept: 'the minimum', 'the minimum payment', 'the instalment', 'the monthly instalment', 'the lowest amount'. "
+            "full = the whole past-due amount ('all of it', 'the full amount', 'everything'). none = no such reference (also when they say a number).")
 CONFIRM_DESC = ("The customer's answer to the read-back question 'Do you confirm?', from their latest message only. "
                 "yes = a clear yes ('yes', 'correct', 'I confirm', 'that's right'). "
                 "change = they give a different amount or a different date for a promise ('make it 250 instead', 'actually Monday'). "
@@ -348,14 +353,14 @@ NEGOTIATE = ("You are talking with {{title}} {{last_name}}, who is verified, abo
              "- Never propose, compute or change an amount or a date yourself, and never ask how much they can pay. The only offer you may make is the current offer in STATE, word for word.\n"
              "- If the customer asks a question or says something else, answer it in one short sentence, then ask the current offer again.\n"
              + COMMON + FACTS)
-neg_ext = [topic, POLICY.stance_extraction(STANCE_DESC), offer_for] + POLICY.offer_extraction(DATE_DESC, AMOUNT_DESC, KIND_DESC)
+neg_ext = [topic, POLICY.stance_extraction(STANCE_DESC), offer_for] + POLICY.offer_extraction(DATE_DESC, AMOUNT_DESC, KIND_DESC, ref_desc=REF_DESC)
 neg_trs = TOPIC_TRS + POLICY.offer_guard_transitions() + POLICY.stance_transitions()
 nodes["negotiate"] = POLICY.negotiate_node(NEGOTIATE, neg_ext, neg_trs)
 
 CONFIRM = ("You read back the promises and asked \"Do you confirm?\". They are recorded only after a clear yes.\n"
            "- If the customer asks something, answer it in one short sentence, then ask again: \"Do you confirm?\".\n"
            + COMMON + FACTS)
-nodes["confirm"] = POLICY.confirm_node(CONFIRM, CONFIRM_DESC, DATE_DESC, AMOUNT_DESC, topic_entry=topic, topic_trs=TOPIC_TRS)
+nodes["confirm"] = POLICY.confirm_node(CONFIRM, CONFIRM_DESC, DATE_DESC, AMOUNT_DESC, topic_entry=topic, topic_trs=TOPIC_TRS, ref_desc=REF_DESC)
 
 HS_ANSWER_DESC = ("From the customer's LATEST message. support_yes = they want to be connected with the customer support team. "
                   "support_no = they do not want to be connected, say no to that offer, or say they cannot pay and want nothing more. "
@@ -365,7 +370,7 @@ HARDSHIP = ("The customer mentioned a hardship (illness, a death in the family o
             "- Make NO persuasion attempt. Never propose an amount or a date yourself.\n"
             "- If they ask a question or for a discount, answer in one short sentence, then ask whether they want to be connected with the customer support team.\n"
             + COMMON + FACTS)
-nodes["hardship"] = POLICY.hardship_node(HARDSHIP, HS_ANSWER_DESC, KIND_DESC, DATE_DESC, AMOUNT_DESC)
+nodes["hardship"] = POLICY.hardship_node(HARDSHIP, HS_ANSWER_DESC, KIND_DESC, DATE_DESC, AMOUNT_DESC, ref_desc=REF_DESC)
 
 WRAP_DESC = ("From the customer's LATEST message, after the agent said the promises are recorded and asked whether there is anything else. "
              "done = nothing else ('no', 'that's all', 'thanks', 'goodbye'). "
@@ -398,7 +403,7 @@ close_call = fl.close_call_tool(
 
 SYSTEM = ("You are Freya Bank's digital assistant on an outbound phone call to {{title}} {{last_name}}. Speak English. Keep every turn to one or two short sentences. Address the customer as {{title}} {{last_name}}.\n"
           "Always:\n"
-          "- If asked whether you are a robot or an AI: say you are Freya Bank's digital assistant, then continue.\n"
+          "- If asked whether you are a robot or an AI: say \"Yes, I am Freya Bank's digital assistant.\", then continue.\n"
           "- If asked whether this is a scam: say they can verify this call by phoning Freya Bank's customer service number, then continue.\n"
           "- Never invent figures, dates or reasons. If you do not have the information, say so.\n"
           "- Never offer a discount, waiver, payment plan or any term you were not given.\n"
