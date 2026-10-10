@@ -885,3 +885,579 @@ def write_workflow(wf, path):
     with open(p, "w") as f:
         json.dump(wf, f, indent=1)
     return str(p)
+
+
+# ----------------------------------------------------------------------------------------------- speech normalisation
+# T21 (docs/research/sota-techniques.md): customers say numbers in parts ("463..." then "51"), correct themselves,
+# say dates, amounts and times in words. The model often passes the words through to the tool. A pre hook turns
+# the spoken form into what the API expects, in code (rule-based, like production inverse text normalisation).
+# The hook is idempotent (normal values pass through unchanged) and never raises; on any doubt it leaves the
+# value as it is. Everything bank-specific (fields, date order, relative-day table) is a parameter.
+
+NORMALISE_KINDS = ("digits", "date", "dob", "amount", "time", "answer")
+
+_NORM_SRC = r'''def _nz_main(config, vars):
+    import re, json, datetime
+    FIELDS = __FIELDS__
+    ORDER = __ORDER__
+    NOW_VAR = __NOW_VAR__
+    REL_VAR = __REL_VAR__
+    PM_HOURS = __PM_HOURS__
+    UNITS = dict(zero=0, oh=0, o=0, nought=0, nil=0, one=1, two=2, three=3, four=4, five=5, six=6, seven=7,
+                 eight=8, nine=9)
+    TEENS = dict(ten=10, eleven=11, twelve=12, thirteen=13, fourteen=14, fifteen=15, sixteen=16, seventeen=17,
+                 eighteen=18, nineteen=19)
+    TENS = dict(twenty=20, thirty=30, forty=40, fourty=40, fifty=50, sixty=60, seventy=70, eighty=80, ninety=90)
+    ORD = dict(first=1, second=2, third=3, fourth=4, fifth=5, sixth=6, seventh=7, eighth=8, ninth=9, tenth=10,
+               eleventh=11, twelfth=12, thirteenth=13, fourteenth=14, fifteenth=15, sixteenth=16,
+               seventeenth=17, eighteenth=18, nineteenth=19, twentieth=20, thirtieth=30)
+    SCALES = dict(hundred=100, thousand=1000, million=1000000)
+    MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september',
+              'october', 'november', 'december']
+    WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    CURRENCY = set(['dollar', 'dollars', 'pound', 'pounds', 'euro', 'euros', 'bucks', 'usd', 'eur', 'gbp',
+                    'quid', 'rupees', 'francs'])
+    FILLER = set(['um', 'umm', 'uh', 'uhh', 'er', 'erm', 'hmm', 'ah', 'well', 'so', 'ok', 'okay', 'yes', 'yeah',
+                  'yep', 'sure', 'right', 'it', 'its', 'is', 'thats', 'that', 'my', 'the', 'are', 'was', 'were',
+                  'then', 'and', 'i', 'think', 'believe', 'let', 'me', 'see', 'like', 'number', 'numbers',
+                  'digit', 'digits', 'ends', 'ending', 'in', 'with', 'of', 'on', 'at', 'about', 'around',
+                  'just', 'please', 'be', 'would', 'will', 'can', 'pay', 'say', 'lets', 'date', 'born', 'year',
+                  'amount', 'time', 'by', 'for', 'a', 'an', 'exactly', 'only', 'now', 'here', 'there'])
+    MARKERS = set(['no', 'sorry', 'actually', 'wait', 'correction', 'rather', 'nope', 'oops'])
+
+    def clean(s, keep):
+        s = str(s).lower().replace('’', "'")
+        s = re.sub(r'\b([ap])\.\s?m\.?', r'\1m', s)
+        s = s.replace("o'clock", ' oclock').replace("'", '')
+        s = re.sub(r'(?<=[a-z])-(?=[a-z])', ' ', s)
+        s = re.sub(r'(\d)(st|nd|rd|th)\b', r'\1', s)
+        out = []
+        for i, ch in enumerate(s):
+            if ch.isalnum() or ch == ' ':
+                out.append(ch)
+            elif ch in keep and 0 < i < len(s) - 1 and s[i - 1].isdigit() and s[i + 1].isdigit():
+                out.append(ch)
+            else:
+                out.append(' ')
+        s = ''.join(out)
+        s = re.sub(r'\bi mean\b|\bmake that\b|\bscratch that\b|\bor rather\b', ' sorry ', s)
+        return s.split()
+
+    def latest(toks):
+        idx = -1
+        for i, t in enumerate(toks):
+            if t in MARKERS:
+                idx = i
+        if idx < 0:
+            return toks
+        after = [t for t in toks[idx + 1:] if t not in MARKERS]
+        if [t for t in after if t not in FILLER]:
+            return after
+        return [t for t in toks[:idx] if t not in MARKERS]
+
+    def expand(toks):
+        out = []
+        i = 0
+        while i < len(toks):
+            t = toks[i]
+            if t in ('double', 'triple') and i + 1 < len(toks) and (toks[i + 1] in UNITS or re.fullmatch(r'\d', toks[i + 1])):
+                out += [toks[i + 1]] * (2 if t == 'double' else 3)
+                i += 2
+                continue
+            out.append(t)
+            i += 1
+        return out
+
+    def is_num_word(t):
+        return t in UNITS or t in TEENS or t in TENS or t in ORD or t in SCALES or bool(re.fullmatch(r'\d+', t))
+
+    def segments(toks, amount=False):
+        # A run of number words split into the groups a speaker says: "forty four seventy one" -> 44 | 71,
+        # "four hundred and twenty" -> 420. Returns a list of [string, value, scaled] or None when a word is
+        # neither a number nor a filler.
+        segs = []
+        cur = None
+        n = len(toks)
+        for i in range(n):
+            t = toks[i]
+            prev = toks[i - 1] if i else ''
+            nxt = toks[i + 1] if i + 1 < n else ''
+            if t in ('oh', 'o') and not (is_num_word(prev) or is_num_word(nxt)):
+                continue
+            if t == 'a' and nxt in SCALES:
+                cur = dict(total=0, group=1, small=1, last='unit', scaled=False, lit=None)
+                segs.append(cur)
+                continue
+            if re.fullmatch(r'\d+', t):
+                v = int(t)
+                cur = dict(total=0, group=v, small=v if v < 100 else 0, last='lit' if v >= 100 or not amount else 'unit',
+                           scaled=False, lit=t)
+                segs.append(cur)
+                continue
+            if t in UNITS or (t in ORD and ORD[t] < 10):
+                u = UNITS[t] if t in UNITS else ORD[t]
+                if u > 0 and cur is not None and cur['last'] in ('tens', 'scale'):
+                    cur['group'] += u
+                    cur['small'] += u
+                    cur['last'] = 'unit'
+                    cur['lit'] = None
+                else:
+                    cur = dict(total=0, group=u, small=u, last='unit', scaled=False, lit=None)
+                    segs.append(cur)
+                continue
+            if t in TEENS or t in TENS or t in ORD:
+                v = TEENS.get(t) or TENS.get(t) or ORD.get(t)
+                kind = 'tens' if (t in TENS or v in (20, 30)) else 'teen'
+                if cur is not None and cur['last'] == 'scale':
+                    cur['group'] += v
+                    cur['small'] += v
+                    cur['last'] = kind
+                    cur['lit'] = None
+                else:
+                    cur = dict(total=0, group=v, small=v, last=kind, scaled=False, lit=None)
+                    segs.append(cur)
+                continue
+            if t in SCALES:
+                m = SCALES[t]
+                if cur is None or cur['last'] == 'scale':
+                    return None
+                if m == 100:
+                    if cur['group'] != cur['small'] or cur['small'] == 0:
+                        return None
+                    cur['group'] = cur['small'] * 100
+                else:
+                    if cur['group'] == 0:
+                        return None
+                    cur['total'] += cur['group'] * m
+                    cur['group'] = 0
+                cur['small'] = 0
+                cur['last'] = 'scale'
+                cur['scaled'] = True
+                cur['lit'] = None
+                continue
+            if t in FILLER or t in CURRENCY:
+                continue
+            return None
+        out = []
+        for c in segs:
+            v = c['total'] + c['group']
+            out.append([c['lit'] if c['lit'] is not None else str(v), v, c['scaled']])
+        return out
+
+    def to_digits(v):
+        s = str(v).strip()
+        if re.fullmatch(r'\d+', s):
+            return s
+        s = re.sub(r'\blast\s+(?:\w+\s+)?(?:digits?|numbers?)\b', ' ', s.lower())
+        s = re.sub(r'\blast\s+(?:two|three|four|five|six|2|3|4|5|6)\b', ' ', s)
+        toks = clean(s, '')
+        toks = expand(latest(toks))
+        segs = segments(toks)
+        if not segs:
+            return None
+        r = ''.join(x[0] for x in segs)
+        return r if re.fullmatch(r'\d+', r) else None
+
+    def now_date():
+        try:
+            raw = str(vars.get(NOW_VAR) or '').strip()
+            return datetime.date.fromisoformat(raw[:10]) if raw else None
+        except Exception:
+            return None
+
+    def mkdate(y, m, d):
+        try:
+            return datetime.date(int(y), int(m), int(d))
+        except Exception:
+            return None
+
+    def year_of(ys, past):
+        if re.fullmatch(r'\d{4}', ys):
+            return int(ys)
+        if not re.fullmatch(r'\d{2}', ys):
+            return None
+        today = now_date()
+        if today is None:
+            return None
+        yy = int(ys)
+        if past:
+            y = 2000 + yy
+            return y if y <= today.year else 1900 + yy
+        cands = [1900 + yy, 2000 + yy, 2100 + yy]
+        cands.sort(key=lambda c: abs(c - today.year))
+        return cands[0]
+
+    def relative(toks):
+        if not REL_VAR:
+            return None
+        table = vars.get(REL_VAR)
+        if isinstance(table, str):
+            try:
+                table = json.loads(table)
+            except Exception:
+                return None
+        if not isinstance(table, dict):
+            return None
+        words = [t for t in toks if t not in ('on', 'the', 'um', 'uh', 'er', 'erm', 'please', 'by', 'lets', 'say')]
+        key = ' '.join(words)
+        r = table.get(key)
+        if isinstance(r, str) and re.fullmatch(r'\d{4}-\d{2}-\d{2}', r):
+            return r
+        return None
+
+    def to_date(v, past):
+        s = str(v).strip()
+        m = re.fullmatch(r'(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[t ].*)?', s.lower())
+        if m:
+            d = mkdate(m.group(1), m.group(2), m.group(3))
+            return d.isoformat() if d else None
+        toks = latest(clean(s, '/.-'))
+        if not toks:
+            return None
+        r = relative(toks)
+        if r:
+            return r
+        toks = [t for t in toks if t not in WEEKDAYS]
+        mon = []
+        for i, t in enumerate(toks):
+            for k, name in enumerate(MONTHS):
+                if t == name or t == name[:3] or (t == 'sept' and k == 8):
+                    mon.append((i, k + 1))
+                    break
+        if len(mon) > 1:
+            return None
+        if mon:
+            i, month = mon[0]
+            before = segments(toks[:i])
+            after = segments(toks[i + 1:])
+            if before is None or after is None:
+                return None
+            if before:
+                if len(before) != 1:
+                    return None
+                day = before[0][1]
+                yparts = after
+            else:
+                if not after:
+                    return None
+                day = after[0][1]
+                yparts = after[1:]
+            if yparts:
+                y = year_of(''.join(x[0] for x in yparts), past)
+                if y is None:
+                    return None
+                d = mkdate(y, month, day)
+                return d.isoformat() if d else None
+            if past:
+                return None
+            today = now_date()
+            if today is None:
+                return None
+            d = mkdate(today.year, month, day)
+            if d is not None and d < today:
+                d = mkdate(today.year + 1, month, day)
+            return d.isoformat() if d else None
+        joined = ' '.join(toks)
+        m = re.fullmatch(r'(\d{1,2})[/.\- ](\d{1,2})[/.\- ](\d{2}|\d{4})', joined)
+        if m:
+            a, b, ys = int(m.group(1)), int(m.group(2)), m.group(3)
+        else:
+            m8 = re.fullmatch(r'\d{8}', joined)
+            if m8:
+                if joined[:2] in ('19', '20'):
+                    d = mkdate(joined[:4], joined[4:6], joined[6:])
+                    if d:
+                        return d.isoformat()
+                a, b, ys = int(joined[:2]), int(joined[2:4]), joined[4:]
+            else:
+                segs = segments(toks)
+                if not segs or len(segs) < 3 or segs[0][2] or segs[1][2] or segs[0][1] == 0 or segs[1][1] == 0:
+                    return None
+                a, b = segs[0][1], segs[1][1]
+                ys = ''.join(x[0] for x in segs[2:])
+        y = year_of(ys, past)
+        if y is None:
+            return None
+        day, month = (a, b) if ORDER == 'dmy' else (b, a)
+        d = mkdate(y, month, day)
+        if d is None:
+            d = mkdate(y, day, month)
+        return d.isoformat() if d else None
+
+    def to_amount(v):
+        if isinstance(v, bool):
+            return None
+        if isinstance(v, (int, float)):
+            return float(v)
+        s = str(v).strip().lower()
+        cents = 0.0
+        m = re.fullmatch(r'(.*?)\s*(?:dollars?|pounds?|euros?|bucks)\s*(?:and\s+)?(.+?)\s*(?:cents?|pence)', s)
+        if m:
+            c = to_amount(m.group(2))
+            if c is None or c >= 100:
+                return None
+            cents = c / 100.0
+            s = m.group(1)
+        s = re.sub(r'[$£€]', ' ', s)
+        toks = latest(clean(s, ',.'))
+        toks = [t for t in toks if t not in CURRENCY]
+        mult = 1.0
+        if toks and re.fullmatch(r'[\d.,]+k', toks[-1]):
+            toks[-1] = toks[-1][:-1]
+            mult = 1000.0
+        elif len(toks) >= 2 and toks[-1] == 'k':
+            toks = toks[:-1]
+            mult = 1000.0
+        if len(toks) == 1 and re.fullmatch(r'\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?|\.\d+', toks[0]):
+            return round(float(toks[0].replace(',', '')) * mult + cents, 2)
+        dec = ''
+        if 'point' in toks:
+            k = toks.index('point')
+            dd = to_digits(' '.join(toks[k + 1:]))
+            if not dd:
+                return None
+            dec = '.' + dd
+            toks = toks[:k]
+        segs = segments(toks, amount=True)
+        if segs == [] and dec:
+            segs = [['0', 0, False]]
+        if not segs:
+            return None
+        if len(segs) == 1:
+            whole = segs[0][1]
+        elif len(segs) == 2 and not segs[0][2] and not segs[1][2] and segs[0][1] < 100 and 10 <= segs[1][1] < 100 and segs[0][0].isdigit() and len(segs[0][0]) <= 2:
+            whole = segs[0][1] * 100 + segs[1][1]
+        elif len(segs) == 3 and not any(x[2] for x in segs) and 0 < segs[0][1] < 100 and segs[1][1] == 0 and segs[1][0] == '0' and segs[2][1] < 10:
+            whole = segs[0][1] * 100 + segs[2][1]
+        else:
+            return None
+        return round(float(str(whole) + dec) * mult + cents, 2)
+
+    def to_time(v):
+        s = str(v).strip().lower()
+        if re.fullmatch(r'\d{2}:\d{2}', s):
+            return s if int(s[:2]) < 24 and int(s[3:]) < 60 else None
+        s = re.sub(r'(\d)\s*([ap])\.?\s?m\b\.?', r'\1 \2m', s)
+        toks = latest(clean(s, ':.'))
+        txt = ' ' + ' '.join(toks) + ' '
+        mer = ''
+        if re.search(r' (am|in the morning|morning) ', txt):
+            mer = 'am'
+        if re.search(r' (pm|in the afternoon|afternoon|in the evening|evening|at night|tonight) ', txt):
+            mer = 'pm' if not mer else 'x'
+        if mer == 'x':
+            return None
+        txt = re.sub(r' (am|pm|in the morning|in the afternoon|in the evening|at night|morning|afternoon|evening|tonight|oclock|minutes|mins|hours|hrs|sharp) ', ' ', txt)
+        txt = re.sub(r' (am|pm|in the morning|in the afternoon|in the evening|at night|morning|afternoon|evening|tonight|oclock|minutes|mins|hours|hrs|sharp) ', ' ', txt)
+        toks = [t for t in txt.split() if t not in ('at', 'about', 'around', 'say', 'lets', 'the', 'by', 'um', 'uh', 'er', 'erm', 'please', 'maybe')]
+        if toks in (['noon'], ['midday']):
+            return '12:00'
+        if toks == ['midnight']:
+            return '00:00'
+        h = mi = None
+
+        def num(ws):
+            if len(ws) == 1 and re.fullmatch(r'\d{1,2}', ws[0]):
+                return int(ws[0])
+            if ws == ['half']:
+                return 30
+            if ws in (['quarter'], ['a', 'quarter']):
+                return 15
+            sg = segments(ws)
+            if sg and len(sg) == 1 and not sg[0][2]:
+                return sg[0][1]
+            if sg and len(sg) == 2 and sg[0][1] == 0 and sg[1][1] < 10:
+                return sg[1][1]
+            return None
+        for rel in ('past', 'after', 'to', 'before', 'till', 'til'):
+            if rel in toks:
+                k = toks.index(rel)
+                a, b = num(toks[:k]), num(toks[k + 1:])
+                if a is None or b is None or a >= 60:
+                    return None
+                if rel in ('past', 'after'):
+                    h, mi = b, a
+                else:
+                    h, mi = b - 1, 60 - a
+                    if h < 0:
+                        h = 23
+                break
+        if h is None:
+            if len(toks) == 1 and re.fullmatch(r'\d{1,2}[:.]\d{2}', toks[0]):
+                h, mi = int(toks[0][:-3]), int(toks[0][-2:])
+            elif len(toks) == 1 and re.fullmatch(r'\d{1,2}', toks[0]):
+                h, mi = int(toks[0]), 0
+            elif len(toks) == 2 and all(re.fullmatch(r'\d{1,2}', t) for t in toks):
+                h, mi = int(toks[0]), int(toks[1])
+            else:
+                sg = segments(toks)
+                if not sg or any(x[2] for x in sg):
+                    return None
+                if len(sg) == 1:
+                    h, mi = sg[0][1], 0
+                elif len(sg) == 2:
+                    h, mi = sg[0][1], sg[1][1]
+                elif len(sg) == 3 and sg[1][1] == 0 and sg[2][1] < 10:
+                    h, mi = sg[0][1], sg[2][1]
+                else:
+                    return None
+        if h is None or mi is None or not (0 <= mi < 60) or not (0 <= h < 24):
+            return None
+        if mer == 'pm' and h < 12:
+            h += 12
+        elif mer == 'am' and h == 12:
+            h = 0
+        elif mer == 'am' and h > 12:
+            return None
+        elif not mer and h in PM_HOURS:
+            h += 12
+        return '%02d:%02d' % (h, mi)
+
+    def kind_for(name, kind, body):
+        if kind != 'answer':
+            return kind
+        f = str(body.get('field') or body.get('question') or '').lower()
+        if re.search(r'date|birth|dob', f):
+            return 'dob'
+        if f:
+            return 'digits'
+        return 'answer'
+
+    body = config.get('body') if isinstance(config, dict) else None
+    if not isinstance(body, dict):
+        return
+    for name in FIELDS:
+        try:
+            if name not in body:
+                continue
+            val = body.get(name)
+            if val is None or (isinstance(val, str) and not val.strip()):
+                continue
+            kind = kind_for(name, FIELDS[name], body)
+            new = None
+            if kind == 'amount':
+                new = to_amount(val)
+            elif isinstance(val, (int, float)) and not isinstance(val, bool):
+                continue
+            elif kind == 'digits':
+                new = to_digits(val)
+            elif kind in ('date', 'dob'):
+                new = to_date(val, kind == 'dob')
+            elif kind == 'time':
+                new = to_time(val)
+            else:
+                new = to_date(val, True)
+                if new is None:
+                    new = to_digits(val)
+            if new is not None:
+                body[name] = new
+        except Exception:
+            pass
+
+
+try:
+    _nz_main(config, vars)
+except Exception:
+    pass
+'''
+
+
+def _guess_kind(field):
+    f = field.lower()
+    if "birth" in f or "dob" in f:
+        return "dob"
+    if "date" in f or f.endswith("_day") or f == "day":
+        return "date"
+    if "amount" in f or "sum" in f or "payment" in f:
+        return "amount"
+    if "time" in f or "hour" in f:
+        return "time"
+    if "answer" in f:
+        return "answer"
+    return "digits"
+
+
+def normalise_pre(fields, date_order="dmy", now_var="now", relative_var=None, pm_hours=(1, 2, 3, 4, 5, 6, 7)):
+    """pre_process_code for an api_call tool: normalises the spoken form of the listed body fields in
+    config['body'] before the request (T21). Rule-based, idempotent, never raises, leaves a value as is on doubt.
+
+    `fields`: {field: kind} or a list of names (kind guessed from the name). Kinds:
+      digits  "four four seven one", "forty-four seventy-one", "463 ... 51", "double four", "oh" -> "4471"-style
+              digit string (spaces, dashes, currency words dropped);
+      date    a date in the future or near now: "14 March", "the fourteenth of March 2027", "14/03/27", ISO;
+              a month-name date without a year takes the next occurrence on or after `now`;
+      dob     a past date ("fourteenth of March 1988", "14 March 88", "March fourteen nineteen eighty-eight");
+              two-digit years take the latest century not after `now`;
+      amount  "four hundred and twenty point five" -> 420.5, "twelve fifty" -> 1250.0, "1,250.00" -> 1250.0,
+              "$300 and fifty cents" -> 300.5; numbers -> float;
+      time    "eleven in the morning" -> "11:00", "half past two" -> "14:30", "11am", "9:05" -> "09:05";
+              a bare hour in `pm_hours` (call-centre hours) is read as pm;
+      answer  identity answer: dob when the body's `field` names a date/birth, digits when it names anything
+              else, otherwise a date if it reads as one, else digits.
+    `date_order` ('dmy' or 'mdy') reads numbers-only dates ("14/03/1988"); it must come from the brief. A reading
+    that is impossible in that order but valid swapped (month > 12) is swapped.
+    `now_var`: the call variable holding today's date (ISO), for two-digit years and year-less dates.
+    `relative_var`: name of a variable holding a {phrase: 'YYYY-MM-DD'} table (dict or JSON string) the
+    generator computed in code (see relative_days_code); "tomorrow", "next friday" are resolved ONLY through it.
+    Corrections: the value after the last "no", "sorry", "I mean", "actually", "wait" wins.
+    Combine with other pre hooks by concatenating the strings (each is self-contained)."""
+    if isinstance(fields, dict):
+        fm = {str(k): str(v) for k, v in fields.items()}
+    else:
+        fm = {str(f): _guess_kind(str(f)) for f in fields}
+    for f, k in fm.items():
+        if k not in NORMALISE_KINDS:
+            raise ValueError("normalise_pre: field %r has unknown kind %r (use one of %s)" % (f, k, ", ".join(NORMALISE_KINDS)))
+    if date_order not in ("dmy", "mdy"):
+        raise ValueError("normalise_pre: date_order must be 'dmy' or 'mdy'")
+    code = (_NORM_SRC.replace("__FIELDS__", repr(fm)).replace("__ORDER__", repr(date_order))
+            .replace("__NOW_VAR__", repr(now_var)).replace("__REL_VAR__", repr(relative_var or ""))
+            .replace("__PM_HOURS__", repr(tuple(int(h) for h in pm_hours))))
+    assert "{{" not in code and "}}" not in code
+    return code
+
+
+_RELATIVE_SRC = r'''import datetime, json
+try:
+    _raw = str(vars.get(__NOW__) or '').strip()
+    _today = datetime.date.fromisoformat(_raw[:10])
+    _wd = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    _t = dict()
+    _t['today'] = _today.isoformat()
+    _t['tomorrow'] = (_today + datetime.timedelta(days=1)).isoformat()
+    _t['day after tomorrow'] = (_today + datetime.timedelta(days=2)).isoformat()
+    for _i in range(7):
+        _d = _today + datetime.timedelta(days=(_i - _today.weekday()) % 7 or 7)
+        _n = _d + datetime.timedelta(days=7) if __NEXT_WEEK__ else _d
+        _w = _wd[_i]
+        for _p in ('', 'this ', 'coming ', 'this coming '):
+            _t[_p + _w] = _d.isoformat()
+        _t['next ' + _w] = _n.isoformat()
+    vars[__OUT__] = json.dumps(_t)
+except Exception:
+    vars[__OUT__] = ''
+'''
+
+
+def relative_days_code(now_var="now", out_var="relative_days", next_means_week_after=False):
+    """Code-node snippet (e.g. in SETUP_CODE extra or its own code node) that writes vars[out_var] as a JSON
+    table phrase -> ISO date for normalise_pre(relative_var=out_var): today, tomorrow, day after tomorrow,
+    '<weekday>' / 'this <weekday>' / 'coming <weekday>' = the first such day after today, 'next <weekday>' = the
+    same day, or one week later when the brief says so (next_means_week_after=True). Take the reading from the
+    brief; when the brief is silent keep the default."""
+    return (_RELATIVE_SRC.replace("__NOW__", repr(now_var)).replace("__OUT__", repr(out_var))
+            .replace("__NEXT_WEEK__", "True" if next_means_week_after else "False"))
+
+
+def latest_value_note(n_digits=None, what="the digits"):
+    """Prompt sentence for identity/promise nodes (T21): parts are joined, the last correction wins."""
+    n = ("all %d digits" % n_digits) if n_digits else ("all of %s" % what)
+    return ("If the customer gives %s in parts, wait for %s and join them; if they correct themselves, use the "
+            "LAST value they gave." % (what, n))
+
+
+def digit_extraction(name, n_digits, description, conf=0.6, max_retries=2):
+    """Extraction entry for a digit answer (T8): validated by '^[0-9]{N}$', retried twice, min_confidence 0.6."""
+    return {"name": name, "type": "string", "description": description,
+            "validation_pattern": "^[0-9]{%d}$" % int(n_digits), "max_retries": int(max_retries),
+            "min_confidence": conf}
