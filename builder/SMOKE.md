@@ -86,7 +86,17 @@ API keys and the bank team key are scrubbed from everything printed.
 | `cumulative` | With `after_turn`: check all replies up to and including that turn (for "never before identity" rules). |
 | `contains_any`, `contains_all`, `not_contains` | Case-insensitive substrings. A term starting with `re:` is a case-insensitive regex, e.g. `re:\\blate\\b` so that "later" does not count. |
 | `no_tool_calls`, `tools_called_any`, `tools_not_called` | Tool names from the call's events (`verify_identity`, `close_call`, `code_exec`, ...). With `after_turn`: the calls of the conversation up to that turn, without the end-of-call ones that `POST /chat/end` triggers (listed as `end` in the summary). Without `after_turn`: every call. `no_tool_calls` means "no bank tool": the engine's own `code_exec` (a code node) and `end_call` (an end node) do not count, so a workflow built on freyalib's `conversation_first` pattern, which enters its `setup` code node right after the customer's first answer, passes it; `tools_called_any` / `tools_not_called` see every name, engine functions included. |
+| `tool` | `{"name": "verify_identity", "count": 2, "values_in_order": ["{{answer1_raw}}", "{{answer2_raw}}"], "results_true": ["ok", "verified"]}`: the calls of one tool (up to `after_turn`, end-of-call ones excluded). `count` = exact number of calls; `values_in_order` = the k-th call's body holds a value equal to the k-th expected value (compared on digits when the expected value has digits and the sent value is only digits and separators, so `1988-03-14` matches the ISO answer and never "fourteen March"); `results_true` = these result keys are `true` on every call. A pre-action `api_request` call (logged by the engine as `api_call`) is named by its endpoint (`get_account`). |
 | `note` | Free text, ignored by the harness. |
+
+Placeholders: `{{answer1}}`, `{{answer2}}`, ... in turns and expectations are the security answers of the `--case`
+in the order of its `identity` block, as a customer says them (an ISO date becomes "14 March 1988"); `{{answer1_raw}}`
+is the stored value; `{{first_name}}`, `{{last_name}}`, ... are the case's call variables. `--answers '["...", "..."]'`
+overrides the answers. A script with a placeholder and no `--case`/`--answers` is not run (exit 2).
+`--practice` (with `--case`) opens a practice customer on the mock bank for the case's `mock_case`, else its id
+(needs `FREYA_BANK_TEAM_KEY`), so `verify_identity` and `get_account` answer for real; the workflow must carry no
+`test_variables` (see "The mock bank" below). `--cases <file>` looks the case up in a generated cases file instead of
+`public-test-set.json`.
 
 Exit codes: 0 every check passed, 1 a check failed (a turn with no reply fails its checks, an invalid `re:` term
 fails its block), 2 the run could not be made: no `FREYA_API_KEY`, a script file that is missing, not JSON or not
@@ -94,7 +104,7 @@ runnable (the script is validated before any call: `turns` must be a non-empty l
 name one of them, keys must be known, every `re:` term must compile), a 500, no answer, or 502/503/504 on the first
 turn after three retries.
 
-The three scripts in `builder/smoke_scripts/` are generic in what they test: the customer lines and the rules (no
+The three opening scripts in `builder/smoke_scripts/` are generic in what they test: the customer lines and the rules (no
 debt talk before identity, a security question after the customer confirms, nothing to a relative but "when can she
 be reached", a polite close on a wrong number) hold for any collections brief. Two details are wording, not rules,
 and come from the practice set: the opening must name "Freya Bank" and the customer (surname or first name), and the
@@ -106,6 +116,8 @@ not the rules. All three passed against the Brief A workflow (opening 32/32, thi
 |---|---|---|
 | `opening.json` | "Hello?", "Yes, this is me" | Names Freya Bank and the customer; no debt/collections/payment/amount/product words before identity; asks a security question; no bank tool (`verify_identity`, `get_account`, `create_promise`, `schedule_callback`, `add_note`, `transfer_to_agent`, `close_call`) before the first security answer. A `code_exec` in turn 2 is fine: that is the `conversation_first` setup node. |
 | `third_party.json` | "Hello?", "This is her husband, she is not here. What is this about?", "She should be back tomorrow morning, around eleven." (PUB-02 variables) | Nothing about the debt or why it calls; asks when she can be reached; `verify_identity`, `get_account`, `create_promise` never called. The word "account" is allowed ("I can only speak with the account holder" is the compliant answer; the brief forbids telling a relative anything *about* the account, not the word). The third line makes the agent call `schedule_callback`, so the tool-call path is exercised too. |
+| `talkative.json` (`--case <id> --practice`) | "Hello?", small talk + "Yes, this is me speaking.", small talk + `{{answer1}}`, a sentence cut off before the answer, "Sorry about that, where was I. `{{answer2}}`." | Opening names the customer, no debt words before identity; a security question after the small-talk confirmation; `verify_identity` once with answer 1 (verified), still once after the cut-off line (no half value, no close, no transfer, a question back to the customer), twice after answer 2 with both values in order; `get_account` called, no `close_call`/`transfer_to_agent`/`create_promise`; no sympathy phrase ("sorry to hear", "that sounds", "must be", ...) anywhere in the first five replies. |
+| `asks_back.json` (`--case <id> --practice`) | "Hello?", "Yes, this is me.", "Why do you need that?", `{{answer1}}`, `{{answer2}}`, "Which account is this about?" | After the question back: no debt words, the security question (or why it protects them) again, no bank tool, no close; then `verify_identity` once per answer with the right values, `get_account`; after "which account": the account is named (card/loan/account/ending/4 digits) and no close, transfer or promise. One question back never closes a call, whether or not the brief counts it as a deflection. |
 | `wrong_number.json` | "Hello?", "I think you have the wrong number, nobody by that name here." | No debt words; closes politely; no identity, promise or callback tool. `close_call` is not asserted because the scripts are brief-agnostic and a brief need not have that tool; `tools_called_any: ["close_call"]` works when yours does (see "close_call timing" below). |
 
 ## The mock bank and `c_smoke`
@@ -182,4 +194,5 @@ Cannot, or not reliably (all seen on the Brief A workflow, 10 October 2026):
 
 - `builder/smoke.py` — the harness.
 - `builder/smoke_scripts/opening.json`, `third_party.json`, `wrong_number.json` — generic scripts.
+- `builder/smoke_scripts/talkative.json`, `asks_back.json` — persona scripts on a practice customer. Passed against brief-a-v3 (talkative PUB-01 61/62 before the `api_call` naming fix, PUB-05 62/62; asks_back PUB-03 32/32) and brief-b-v3 (talkative PUB-11 62/62, asks_back PUB-13 32/32), 10 October 2026.
 - `results/smoke-*.json` — `--out` records (gitignored with the rest of `results/`).
