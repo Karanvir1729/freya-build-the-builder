@@ -501,17 +501,6 @@ def resolve_when(V, text):
             return d, 'exact'
         except Exception:
             return None, 'vague'
-    m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
-    if m:
-        wd = WDN.index(m.group(2))
-        if m.group(1) == 'next':
-            if P.get('weekday_rule') == 'first_after':
-                delta = (wd - today.weekday()) % 7 or 7
-            else:   # that weekday in the following calendar week
-                delta = (7 - today.weekday()) + wd
-        else:
-            delta = (wd - today.weekday()) % 7
-        return today + D(delta), 'exact'
     m = re.search(r' (?:the )?(\d{1,2})(?:st|nd|rd|th) ', t)
     if m:
         n = int(m.group(1))
@@ -524,6 +513,18 @@ def resolve_when(V, text):
             return datetime.date(y, mo, n), 'exact'
         except Exception:
             return None, 'vague'
+    # weekdays LAST: 'Monday the 26th' is the 26th (the number wins; PUB-07 looped on 'Monday 19 October' when the weekday matched first)
+    m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
+    if m:
+        wd = WDN.index(m.group(2))
+        if m.group(1) == 'next':
+            if P.get('weekday_rule') == 'first_after':
+                delta = (wd - today.weekday()) % 7 or 7
+            else:   # that weekday in the following calendar week
+                delta = (7 - today.weekday()) + wd
+        else:
+            delta = (wd - today.weekday()) % 7
+        return today + D(delta), 'exact'
     if re.search(r'(next week|week after next|end of (the )?month|end of month|this month|next month|when (my |the )?(salary|pay|wages|money)|'
                  r'after (my |the )?(pay|salary)|a few (days|weeks)|couple of (days|weeks)|soon|later|some ?time|not sure|maybe|'
                  r'next (few|couple)|beginning of|middle of|start of|mid )', t):

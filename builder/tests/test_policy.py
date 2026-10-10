@@ -458,7 +458,7 @@ def test_offer_when_resolved_in_code():
     P, V = start([CARD])
     src = P.core()
     G = {"vars": V}
-    exec(src + "\nout = {}\nfor w in ['tomorrow', 'next friday', 'this saturday', 'friday', 'the 23rd', 'the sixth of november', 'end of the month', 'day after tomorrow', 'in two weeks', 'November 6th', '']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G)
+    exec(src + "\nout = {}\nfor w in ['tomorrow', 'next friday', 'this saturday', 'friday', 'the 23rd', 'the sixth of november', 'end of the month', 'day after tomorrow', 'in two weeks', 'November 6th', '', 'monday the 26th', 'Monday the twenty-sixth', 'friday the 16th']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G)
     out = G["out"]
     assert out["tomorrow"] == ("2026-10-15", "exact"), out
     assert out["day after tomorrow"] == ("2026-10-16", "exact"), out
@@ -471,6 +471,9 @@ def test_offer_when_resolved_in_code():
     assert out["in two weeks"] == ("2026-10-28", "exact"), out
     assert out["end of the month"] == (None, "vague"), out
     assert out[""] == (None, "none"), out
+    assert out["monday the 26th"] == ("2026-10-26", "exact"), out      # the number wins over the weekday (PUB-07)
+    assert out["Monday the twenty-sixth"] == ("2026-10-26", "exact"), out
+    assert out["friday the 16th"] == ("2026-10-16", "exact"), out
     # the offer event: the extraction said 2026-10-11 (real clock) but the words say tomorrow -> 15 Oct is checked
     ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-11", offer_when="tomorrow", offer_amount="420")
     assert V.get("offer_verdict") == "ok", (V.get("offer_verdict"), V.get("say_next"))
