@@ -1,0 +1,83 @@
+# EXT-D-19 Three products, off work sick, declines care -> HSHP
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call a30368ed-0849-494b-8004-dac913a22429 | customer c_673e07e4-09a | 2026-10-10 20:50:05
+# customer model claude-sonnet-5-5 | judge model claude-sonnet-5-5 (claude) | stop: ended by the agent (endedByAgent in the response) | transcript from: GET /api/v2/call/a30368ed-0849-494b-8004-dac913a22429
+# RESULT: PASS
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Marcus Bell?
+customer: Yes, this is Marcus Bell.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Mr Bell. For security, could you please tell me the last four digits of your phone number?
+customer: The last four digits are 4410.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "4410", "customer_id": "c_673e07e4-09a"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: Thank you. Could you also please tell me your date of birth?
+customer: My date of birth is 19 October 1983.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1983-10-19", "customer_id": "c_673e07e4-09a"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_673e07e4-09a"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "9015", "past_due": 510, "days_late": 16, "minimum_payment": 153}, {"product_id": "p2", "type": "personal_loan", "past_due": 1320, "days_late": 16, "instalment_amount": 440}...
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Bell. I am calling from the arrears team about overdue payments on 3 of your products. Your credit card ending 9015 has an overdue amount of 510, 16 days overdue. Your personal loan has an overdue amount of 1320, 16 days overdue. Your car loan has an overdue amount of 140, 7 days overdue. Are you able to clear all of these today?
+customer: I've been off work sick for two months, so I can't pay anything right now.
+   [route] negotiate -> hardship: hardship disclosed topic == 'hardship'
+   [node] negotiate -> hardship
+agent: I am sorry to hear that. I can put you through to our customer care team, who can help. Would you like me to do that?
+customer: No thank you.
+   [route] hardship -> hardship_notes: declines customer care support_choice == 'decline'
+   [node] hardship -> hardship_notes
+agent: I understand.
+   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"text": "I've been off work sick for two months, so I can't pay anything right now.", "reason": "hardship", "product_id": "p1", "customer_id": "c_673e07e4-09a"}
+   [tool] add_note -> HTTP 200 data={"ok": true, "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:hardship. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right re...
+   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"text": "I've been off work sick for two months, so I can't pay anything right now.", "reason": "hardship", "product_id": "p2", "customer_id": "c_673e07e4-09a"}
+   [tool] add_note -> HTTP 200 data={"ok": true, "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:hardship, p2:hardship. Still open: p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the...
+   [tool] add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"text": "I've been off work sick for two months, so I can't pay anything right now.", "reason": "hardship", "product_id": "p3", "customer_id": "c_673e07e4-09a"}
+   [tool] add_note -> HTTP 200 data={"ok": true, "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:hardship, p2:hardship, p3:hardship. "}
+   [route] hardship_notes -> finalize: every product has a recorded promise or a note all_done == 'yes'
+   [node] hardship_notes -> finalize
+   [tool] code_exec args={"timeout_ms": 10000, "code": "\ntry:\n rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\n notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\n pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\n nd = di...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] finalize -> fin_hardship: hardship final_route == 'hardship'
+   [node] finalize -> fin_hardship
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'no_promise'\n vars['close_code'] = 'HSHP'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_hardship -> end_hardship: always always
+   [node] fin_hardship -> end_hardship
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. Take care. Thank you for your time, Mr Bell. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: I understand. Take care. Thank you for your time, Mr Bell. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "HSHP", "outcome": "no_promise", "customer_id": "c_673e07e4-09a"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"}
+
+## tool calls (12)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "4410", "customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1983-10-19", "customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "9015", "past_due": 510, "days_late": 16, "minimum_payment": 153}, {"product_id": "p2", "type": "personal_loan", "past_due": 1320, "days_late": 16, "instalment_amount": 440}...
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '... -> HTTP 200 data=null
+6. add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"text": "I've been off work sick for two months, so I can't pay anything right now.", "reason": "hardship", "product_id": "p1", "customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": true, "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:hardship. Still open: p2, p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the right re...
+7. add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"text": "I've been off work sick for two months, so I can't pay anything right now.", "reason": "hardship", "product_id": "p2", "customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": true, "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:hardship, p2:hardship. Still open: p3. For each open product: if the customer confirmed a promise for it, call create_promise for it now; otherwise call add_note for it with the...
+8. add_note POST https://freya-bank-mock.freyavoice.workers.dev/v1/add_note body={"text": "I've been off work sick for two months, so I can't pay anything right now.", "reason": "hardship", "product_id": "p3", "customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": true, "what_to_do_next": "Note saved. Recorded promises: none. Notes: p1:hardship, p2:hardship, p3:hardship. "}
+9. code_exec args={"timeout_ms": 10000, "code": "\ntry:\n rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\n notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\n pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\n nd = di... -> HTTP 200 data=null
+10. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'no_promise'\n vars['close_code'] = 'HSHP'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+11. end_call args={"message_mode": "custom", "spoken_message": "I understand. Take care. Thank you for your time, Mr Bell. Goodbye."} -> success Call ended
+12. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "HSHP", "outcome": "no_promise", "customer_id": "c_673e07e4-09a"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: refused, hardship, dispute, service_error"}
+
+## ledger: outcome=no_promise reason=HSHP promises=[] notes=[{"product_id": "p1", "reason": "hardship", "text": "I've been off work sick for two months, so I can't pay anything right now."}, {"product_id": "p2", "reason": "hardship", "text": "I've been off ... callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'get_account', 'add_note', 'add_note', 'add_note', 'close_call']
+
+## judge (claude-sonnet-5-5): pass - The agent said 'I am sorry to hear that.' with no persuasion, offered customer care once (declined), and added hardship notes on p1, p2 and p3 that each quote 'off work sick for two months', which names the illness. close_call was sent as no_promise with code HSHP, which is the required code; the test bank's ok:false reply is a bank limit, not an agent fault.

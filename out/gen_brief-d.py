@@ -117,7 +117,7 @@ PREPARE = mp.prepare_code(
 WHO_VALUES = ["customer", "someone_else", "wrong_number", "deceased", "refuses", "unclear"]
 WHO_DESC = ("Who answered, judged ONLY from the person's latest message. "
             "customer = they confirm: 'yes', 'speaking', 'that's me', or they say their own name ({{first_name}} / {{last_name}}). "
-            "someone_else = another person answered (a relative, partner, flatmate, colleague), says the customer is not here or not available, or offers to take a message. "
+            "someone_else = another person answered: they say they are not {{first_name}} {{last_name}}, or they are a relative, partner, flatmate or colleague, or the customer is not here or not available, or they offer to take a message (this wins over unclear, even when they also ask who is calling or what it is about). "
             "wrong_number = says this number does not belong to that person / they do not know them. "
             "deceased = says the customer has died / passed away. "
             "refuses = says they do not want to talk / not interested. "
@@ -143,7 +143,7 @@ nodes["opening_retry"] = fl.conv(
     "No tool call is allowed in this turn. " + NEVER_SAY + "\n"
     "If the person asked a question, answer it first in one sentence: who is this -> you are the digital assistant of Kestrel Bank; "
     "a robot or an AI -> say exactly \"I am Kestrel Bank's digital assistant.\"; a scam -> they are welcome to hang up and call the number on the back of their card or on their statement; "
-    "what it is about -> you can only discuss that with {{first_name}} {{last_name}}. "
+    "what it is about -> it is a personal banking matter that you can only discuss with {{title}} {{last_name}}. "
     "If they said they do not want to talk, say this will only take a moment. "
     "Then ask exactly: \"" + ASK_NAME + "\"",
     extraction=[fl.ext("who2", WHO_VALUES, WHO_DESC)],
@@ -167,7 +167,7 @@ cb_tool = fl.api_tool(
 nodes["third_party"] = fl.conv(
     "third_party",
     "You called for {{title}} {{last_name}} ({{first_name}}) but someone else is on the line.\n"
-    "Say that this is a personal banking matter that you can only discuss with {{title}} {{last_name}}, and ask when they can be reached. Nothing more.\n"
+    "In your first reply ALWAYS say that this is a personal banking matter that you can only discuss with {{title}} {{last_name}} (also when they already said when the customer can be reached), and ask when they can be reached. Nothing more.\n"
     "STRICT: " + NEVER_SAY + " Never mention any account, amount or the reason for the call. Ask no security question. "
     "If they offer to pay, to answer questions, or to help, decline politely (you can only discuss it with {{title}} {{last_name}}) and ask again when they can be reached.\n"
     "Now: {{today_text}}, {{now_time}}.\n{{callback_text}}\n"
@@ -272,7 +272,18 @@ NOTE_ENUM = mp.note_reasons(API)
 # R "Read-back and recording": up to three tries in total for the same promise, then a service_error note.
 PROMISE_PRE = mp.promise_pre_code(cap_to_deadline=True, cap_to_amount=True, api=API,
                                   snap_closed="before", holidays=HOLIDAYS)
-PROMISE_POST = mp.promise_post_code(max_fails=3, fail_reason="service_error", api=API)
+PROMISE_POST = mp.promise_post_code(max_fails=3, fail_reason="service_error", api=API,
+                                    duplicate_is_recorded=True)   # a 504 rollback must not turn a recorded promise into SVC
+# R code list row 1 (audit R75): once a promise is recorded the close is promise/PRM, also when the customer hangs up
+# before finalize; a later transfer or the finalize/fin_* code overwrites it.
+PROMISE_POST += """
+try:
+    if str(vars.get('rec_pids') or '').strip(','):
+        vars['close_outcome'] = 'promise'
+        vars['close_code'] = 'PRM'
+except Exception:
+    pass
+"""
 NOTE_PRE = mp.note_pre_code(api=API)
 NOTE_POST = mp.note_post_code(api=API)
 
@@ -325,18 +336,20 @@ NEGOTIATE = (
     "   - Date allowed for that product in the CALENDAR -> accept it exactly as named.\n"
     "   - Weekend or closure day not after the latest date -> say the bank is closed that day and offer the business day BEFORE it shown in the CALENDAR.\n"
     "   - After the product's latest date -> say the latest date is the last day that can be recorded and offer it. If they refuse it, that is a flat refusal.\n"
-    "   - A day before today -> it cannot be recorded; ask for a day from today onwards.\n"
+    "   - A day before today (also 'I could have paid on ...') -> NOT a refusal, no attempt used, and do NOT propose a date yourself: say that day has passed and cannot be recorded, and ask which day from today onwards they can pay.\n"
     "   - Vague period ('next week', 'the week after next', 'end of the month', 'when I get paid') -> ask ONCE for the exact day. If none is given, propose the date in DATES.\n"
     "   - Weekday words: use WEEKDAY WORDS.\n"
     "   - Amount from the floor up to the full amount, both included -> accept as proposed. More than the full amount -> record the full amount. "
     "Below the floor -> say it cannot be recorded and offer the floor once; floor declined = flat refusal.\n"
-    "3. Full amount too much -> offer that product's floor ONCE and say: the remainder stays overdue and we will be in touch about it. Floor declined = flat refusal.\n"
+    "3. Full amount too much, cannot pay it all, or 'is there a smaller amount' -> offer that product's floor ONCE and say: the remainder stays overdue and we will be in touch about it. Floor declined = flat refusal.\n"
     "4. A flat refusal, a non-answer, or a no to paying today with no date and no amount uses ONE persuasion attempt of that product. Propose exactly what PRODUCTS says for the next attempt. "
     "When that product's attempts are used up, stop: never repeat an offer already turned down; that product is refused.\n"
     "5. 'I already paid' (a product) -> say exactly \"Payments made today show on our side on the next business day.\", take no promise for it, ask how and on which day they paid if they did not say, then it is noted paid. "
     "'That is not mine' / 'I never had this' -> do not argue, no promise for it, noted dispute. Then carry on with the other products.\n\n"
     "READ-BACK AND RECORDING (when every product is settled)\n"
-    "6. If at least one product is agreed: ONE read-back of all agreed promises together (product in words, amount, date as weekday day month; say when a product is on its own latest date or moved because of a closure day), "
+    "6. If at least one product is agreed: ONE read-back of all agreed promises together: for EACH product its words, its amount as a number and its date as weekday day month, "
+    "e.g. 'your credit card ending 4821, 220 on Friday 16 October, and your personal loan, 640 on Friday 16 October'. Never say 'the full amount(s)' instead of the number. "
+    "Say when a product is on its own latest date or moved because of a closure day. "
     "ending with exactly \"Shall I record that?\". If they change a date or an amount, check it again and read back again. After a clear yes, call create_promise once per agreed product, in PRODUCTS order, one per message.\n"
     "7. Never say a promise is recorded before create_promise returned ok. If it fails, call it again with the same values (up to three tries in total). "
     "If the third try fails, tell the customer you could not record it, then call add_note with reason service_error for that product. Do NOT say the email confirmation sentence yourself: it is said when the call closes.\n"
@@ -352,7 +365,7 @@ NEGOTIATE = (
 
 TOPIC_DESC = ("What the customer's LATEST message says, if it is one of these. "
               "hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). "
-              "new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). "
+              "new_plan = asks in so many words for a payment plan, for lower or smaller INSTALMENTS, to spread the payments over several months, or for more time in general with no particular day. NOT new_plan: saying the full amount is too much or that they cannot pay it all, asking for a smaller or reduced amount or 'is there a smaller amount I could pay', asking how much they should pay, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' (the agent answers all of these by proposing an amount and a date). "
               "none = anything else.")
 
 nodes["negotiate"] = fl.conv(
@@ -448,6 +461,18 @@ close_call = fl.close_call_tool(
     outcome_desc="promise | paid | transferred | no_promise | not_verified | not_reached, from the dialler code list.",
     reason_desc="The dialler code: PRM, AP, TRS, TRH, TSP, RF, HSHP, DSP, SVC, IDF, IDD, CBK, NCB, WN, DEC, UNC. Never empty.",
     no_reason_outcomes=(), outcome_var="close_outcome", reason_var="close_code")
+# R code list intro (audit R68): every close carries a code. A hang-up before `setup` ran leaves close_code unset, so
+# the close would go out without one (or with model-filled values): that is row 17, not_reached / UNC.
+close_call["pre_process_code"] = """try:
+    b = config.get('body')
+    if isinstance(b, dict):
+        r = str(b.get('reason') or '').strip()
+        if not r or r.startswith('{'):
+            b['reason'] = 'UNC'
+            b['outcome'] = 'not_reached'
+except Exception:
+    pass
+"""
 
 SYSTEM = ("You are the digital assistant of Kestrel Bank on an outbound phone call to {{first_name}} {{last_name}}. Speak English. Keep every turn to one or two short sentences. "
           "Once identity is confirmed, address the customer as {{title}} {{last_name}}.\n"

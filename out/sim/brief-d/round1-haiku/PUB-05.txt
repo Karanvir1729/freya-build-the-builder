@@ -1,0 +1,86 @@
+# PUB-05 Lost his job, declines customer care
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call 73f8f531-96eb-4ab2-b218-e1dad6ed7375 | customer c_54a655e7-a2b | 2026-10-10 20:28:06
+# customer model claude-haiku-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/73f8f531-96eb-4ab2-b218-e1dad6ed7375
+# RESULT: FAIL | outcome ('transferred', 'TSP'), expected ('no_promise', 'HSHP') | notes [], expected [('p1', 'hardship')] | transfers [{'queue': 'support'}], expected [] | conversation: No add_note call was made on p1 with reason hardship naming the job loss. close_call was made with reason TSP and outcome transferred, not no_promise with code HSHP, and it returned an error.
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Tomas Novak?
+customer: Yes, that's me.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Mr Novak. For security, could you please tell me the last four digits of your phone number?
+customer: I'm sorry, I'm not sure what you're asking. Could you repeat that?
+agent: Of course. Could you please tell me the last four digits of your phone number?
+customer: I'm sorry, I didn't catch that. Could you say the last four digits of my phone number again?
+agent: I am asking you to provide the last four digits of your phone number for security purposes. Could you please tell me those four digits?
+customer: Sorry, I didn't mean to be unclear. The last four digits of my phone number are 8846.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "8846", "customer_id": "c_54a655e7-a2b"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: Thank you. Could you also please tell me your date of birth?
+customer: I'm sorry, I didn't catch that. Could you say the date again? Oh, you asked my date of birth. It's 9 September 1990.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1990-09-09", "customer_id": "c_54a655e7-a2b"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_54a655e7-a2b"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 780, "days_late": 21, "instalment_amount": 260}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Novak. I am calling from the arrears team about an overdue payment. Your personal loan has an overdue amount of 780, and it is 21 days overdue. Are you able to clear the overdue amount today?
+customer: I'm sorry, I can't pay the full overdue amount today. I lost my job last month, so I'm not able to pay anything at the moment. Is there any kind of discount or hardship option you can offer?
+   [route] negotiate -> hardship: hardship disclosed topic == 'hardship'
+   [node] negotiate -> hardship
+agent: I am sorry to hear that. I can put you through to our customer care team, who can help. Would you like me to do that?
+customer: I understand, and I'm sorry you're going through this. Yes, I'd like to be connected to customer care, please.
+   [route] hardship -> xfer_support: accepts customer care support_choice == 'accept'
+   [node] hardship -> xfer_support
+agent: I will put you through to our customer care team now.
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "support", "customer_id": "c_54a655e7-a2b"}
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] xfer_support -> fin_transferred_support: always always
+   [node] xfer_support -> fin_transferred_support
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TSP'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_support -> end_transferred_support: always always
+   [node] fin_transferred_support -> end_transferred_support
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our customer care team now. Thank you, Mr Novak. Goodbye."}
+customer: I'm sorry, I'm not sure what you mean by that. Could you say it again?
+   [route] xfer_support -> fin_transferred_support: always always
+   [node] xfer_support -> fin_transferred_support
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TSP'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_support -> end_transferred_support: always always
+   [node] fin_transferred_support -> end_transferred_support
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our customer care team now. Thank you, Mr Novak. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: I am transferring you to our customer care team now. Thank you, Mr Novak. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "TSP", "outcome": "transferred", "customer_id": "c_54a655e7-a2b"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## tool calls (11)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "8846", "customer_id": "c_54a655e7-a2b"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1990-09-09", "customer_id": "c_54a655e7-a2b"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_54a655e7-a2b"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 780, "days_late": 21, "instalment_amount": 260}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '... -> HTTP 200 data=null
+6. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "support", "customer_id": "c_54a655e7-a2b"} -> HTTP 200 data={"ok": true}
+7. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TSP'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+8. end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our customer care team now. Thank you, Mr Novak. Goodbye."} -> (no result event)
+9. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TSP'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+10. end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our customer care team now. Thank you, Mr Novak. Goodbye."} -> success Call ended
+11. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "TSP", "outcome": "transferred", "customer_id": "c_54a655e7-a2b"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## ledger: outcome=transferred reason=TSP promises=[] notes=[] callbacks=[] transfers=[{"queue": "support"}] calls=['verify_identity', 'verify_identity', 'get_account', 'transfer_to_agent', 'close_call']
+
+## judge (claude-sonnet-5-5): fail - No add_note call was made on p1 with reason hardship naming the job loss. close_call was made with reason TSP and outcome transferred, not no_promise with code HSHP, and it returned an error.

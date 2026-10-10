@@ -16,7 +16,7 @@ otherwise the Claude CLI (`claude -p`, defaults claude-haiku-5-5 / claude-sonnet
 the repo's CLAUDE.md, settings and skills never reach the customer or the judge). Standard library only.
 See builder/SIM.md for how this differs from the organisers' simulation and for the chat route's caveats.
 """
-import argparse, json, os, pathlib, re, socket, subprocess, sys, tempfile, threading, time, urllib.error, urllib.request
+import argparse, json, os, pathlib, re, shutil, socket, subprocess, sys, tempfile, threading, time, urllib.error, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -296,13 +296,19 @@ def clean_line(s):
     return s or "Hello?"
 
 
-def judge(provider, model, checks, transcript_lines, tool_calls, opening="Hello?"):
+CLOSE_ARGS_NOTE = ("NOTE ON close_call: the test bank behind this call only knows another brief's close codes, so it answers close_call "
+                   "with ok:false for this brief's codes. That reply is a limit of the test bank, not the agent's fault: judge close_call "
+                   "on the outcome and reason the agent SENT. end_call is the platform hanging up; the call's close_call runs right after "
+                   "it as part of ending the call, so close_call after end_call is the normal order.\n\n")
+
+
+def judge(provider, model, checks, transcript_lines, tool_calls, opening="Hello?", note=""):
     """The organisers' wording ('All of these are true:' + checks) over the transcript and the tool list -> (outcome, reason).
     `opening` is the customer's first line (--opening), which the judge is told to read as picking up the phone."""
     criteria = "All of these are true:\n- " + "\n- ".join(checks)
     tools = "\n".join("%d. %s %s -> %s" % (i, t["tool"], tool_args_line(t.get("args")), tool_result_line(t.get("result")))
                       for i, t in enumerate(tool_calls, 1)) or "(no tool calls)"
-    prompt = ("SUCCESS CRITERIA:\n%s\n\nTRANSCRIPT (the customer's first line %s is them picking up the phone; the agent then opens the call; "
+    prompt = note + ("SUCCESS CRITERIA:\n%s\n\nTRANSCRIPT (the customer's first line %s is them picking up the phone; the agent then opens the call; "
               "tool calls are shown where they happened):\n%s\n\nTOOL CALLS IN ORDER:\n%s\n\n"
               'Is every criterion true? Answer with JSON only: {"outcome": "pass" or "fail", "reason": "..."}'
               % (criteria, json.dumps(opening, ensure_ascii=False), "\n".join(transcript_lines), tools))
@@ -707,7 +713,8 @@ def finish(ctx, case, rep, row, chat, ledger):
         row["failed"].append("conversation: no call was started, nothing to judge")
     elif chat and lines:
         try:
-            outcome, reason = judge(ctx.provider, ctx.judge_model, case["checks"], lines, tools, ctx.opening)
+            outcome, reason = judge(ctx.provider, ctx.judge_model, case["checks"], lines, tools, ctx.opening,
+                                    CLOSE_ARGS_NOTE if getattr(ctx, "close_from_args", False) else "")
         except Exception as e:
             outcome, reason = "fail", "judge model failed: " + compact(str(e), 200)
         row["judge"] = {"outcome": outcome, "reason": reason, "model": ctx.judge_model}

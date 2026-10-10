@@ -1,0 +1,52 @@
+# PUB-07 A vague period, then Monday the 26th
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call 971bcefa-a2b7-4c1a-99cf-af4091c9514c | customer c_97b76268-4e8 | 2026-10-10 20:28:52
+# customer model claude-haiku-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/971bcefa-a2b7-4c1a-99cf-af4091c9514c
+# RESULT: FAIL | outcome ('not_verified', 'IDD'), expected ('promise', 'PRM') | promises [], expected [('p1', 540.0, '2026-10-26')] | conversation: The call ended after the customer refused security questions. The agent never asked for the exact day after 'the week after next', never accepted 26 October, and never recorded a promise of 540.00 on 2026-10-26.
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Samuel Ortiz?
+customer: Yes, this is Samuel Ortiz.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Mr Ortiz. To protect your account, I need to ask a couple of security questions. What are the last four digits of your phone number?
+customer: I'm sorry, I can't help with that. Hold on, I'm not going to answer as Samuel Ortiz, so I can't give those digits. Is there something else I can do for you?
+   [route] ask_phone -> count_decline_phone: customer declined refusal_phone == 'refused'
+   [node] ask_phone -> count_decline_phone
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_phone -> ask_phone: always always
+   [node] count_decline_phone -> ask_phone
+agent: These questions are there to protect your account and nothing can be discussed without them. What are the last four digits of your phone number?
+customer: I understand, but I'm not going to give those digits. Can you tell me what this call is about?
+   [route] ask_phone -> count_decline_phone: customer declined refusal_phone == 'refused'
+   [node] ask_phone -> count_decline_phone
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_decline_phone -> fin_declined: second decline decline_route == 'close'
+   [node] count_decline_phone -> fin_declined
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_verified'\n vars['close_code'] = 'IDD'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_declined -> end_declined: always always
+   [node] fin_declined -> end_declined
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. Without the security questions I cannot discuss anything. Thank you, goodbye."}
+   [call] ended: assistant-ended-call
+agent: I understand. Without the security questions I cannot discuss anything. Thank you, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "IDD", "outcome": "not_verified", "customer_id": "c_97b76268-4e8"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## tool calls (6)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n n = int(float(vars.get('decline_count') or 0)) + 1\n vars['decline_count'] = n\n vars['refusal_phone'] = 'none'\n vars['refusal_dob'] = 'none'\n vars['decline_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\... -> HTTP 200 data=null
+4. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_verified'\n vars['close_code'] = 'IDD'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+5. end_call args={"message_mode": "custom", "spoken_message": "I understand. Without the security questions I cannot discuss anything. Thank you, goodbye."} -> success Call ended
+6. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "IDD", "outcome": "not_verified", "customer_id": "c_97b76268-4e8"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: failed, declined"}
+
+## ledger: outcome=not_verified reason=IDD promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (claude-sonnet-5-5): fail - The call ended after the customer refused security questions. The agent never asked for the exact day after 'the week after next', never accepted 26 October, and never recorded a promise of 540.00 on 2026-10-26.

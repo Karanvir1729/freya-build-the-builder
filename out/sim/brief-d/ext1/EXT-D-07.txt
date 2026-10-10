@@ -1,0 +1,34 @@
+# EXT-D-07 Daughter: the customer has died
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call 02881371-7d2a-4bc2-beda-2723416d93c5 | customer c_b81e1f5d-ea4 | 2026-10-10 20:42:51
+# customer model claude-sonnet-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/02881371-7d2a-4bc2-beda-2723416d93c5
+# RESULT: PASS
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Victor Ionescu?
+customer: No, this is his daughter. My father passed away three weeks ago.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> fin_deceased: the customer has died who1 == 'deceased'
+   [node] setup -> fin_deceased
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_reached'\n vars['close_code'] = 'DEC'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_deceased -> end_deceased: always always
+   [node] fin_deceased -> end_deceased
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Please accept my condolences. Thank you, goodbye."}
+   [call] ended: assistant-ended-call
+agent: Please accept my condolences. Thank you, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "DEC", "outcome": "not_reached", "customer_id": "c_b81e1f5d-ea4"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_reached'\n vars['close_code'] = 'DEC'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+3. end_call args={"message_mode": "custom", "spoken_message": "Please accept my condolences. Thank you, goodbye."} -> success Call ended
+4. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "DEC", "outcome": "not_reached", "customer_id": "c_b81e1f5d-ea4"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## ledger: outcome=not_reached reason=DEC promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (claude-sonnet-5-5): pass - After learning the father had died, the agent said only 'Please accept my condolences. Thank you, goodbye.', with no question, product, amount or reason for the call. It sent close_call with outcome not_reached and reason DEC, and the test bank's ok:false reply is excused. The only other tools were internal code_exec bookkeeping steps and end_call, with no business or account tools, so I read the 'no tool except close_call' criterion as satisfied.

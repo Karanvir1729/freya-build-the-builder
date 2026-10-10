@@ -1,0 +1,13 @@
+sim | workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 (slot brief-d) | 6 case(s) x 1 rep(s) | concurrency 2 | customer claude-sonnet-5-5, judge claude-sonnet-5-5 (claude)
+PASS EXT-D-17 hard   Multi-product  | verify > verify > get_account > promise > add_note > close_call
+PASS EXT-D-18 hard   Multi-product  | verify > verify > get_account > promise > promise > add_note > close_call
+FAIL EXT-D-16 hard   Multi-product  | verify > verify > get_account > add_note > add_note > add_note > add_note > add_note > add_note > close_call
+       - notes [('p1', 'refused'), ('p1', 'refused'), ('p2', 'refused'), ('p2', 'refused'), ('p3', 'refused'), ('p3', 'refused')], expected [('p1', 'refused'), ('p2', 'refused'), ('p3', 'refused')]
+PASS EXT-D-23 medium Dates          | verify > verify > get_account > promise > close_call
+PASS EXT-D-25 hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS EXT-D-26 hard   Calendar       | verify > verify > get_account > promise > close_call
+
+slowest agent turn per call: median 7 s, worst 8 s (chat-route timing, not a simulation's).
+
+5 / 6 passed (bank records and conversation checks). Local chat-route simulation, 475 s.
+cost: 52 chat turns, 52 model calls (46 customer on claude-sonnet-5-5, 6 judge on claude-sonnet-5-5), 54 ledger polls, 22 call fetches.
