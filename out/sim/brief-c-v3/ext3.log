@@ -1,0 +1,10 @@
+sim | workflow 239c5d00-d0cc-4202-83a2-71794aff95c6 (slot brief-c-v3) | 1 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+FAIL EXT-C-09 medium Amounts        | verify > verify > get_account > close_call
+       - outcome ('no_promise', 'declined_offer'), expected ('promise', 'full')
+       - promises [], expected [('p1', 310.5, '2026-10-17')]
+       - conversation: No create_promise was made for 310.50 on 2026-10-17, and close_call was sent as no_promise with reason declined_offer instead of promise with reason full.
+
+slowest agent turn per call: median 12 s, worst 12 s (chat-route timing, not a simulation's).
+
+0 / 1 passed (bank records and conversation checks). Local chat-route simulation, 191 s.
+cost: 11 chat turns, 11 model calls (10 customer on gpt-5-mini, 1 judge on gpt-5), 11 ledger polls, 2 call fetches.
