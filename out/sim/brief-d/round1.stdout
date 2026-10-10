@@ -15,3 +15,13 @@ FAIL PUB-03 medium Identity       | verify > verify > verify > get_account > add
        - outcome ('no_promise', 'RF'), expected ('not_verified', 'IDF')
        - notes [('p1', 'refused')], expected []
        - conversation: The agent kept going after the first wrong date of birth, and the second date was accepted, so the check never stopped after a second wrong answer. It also disclosed the overdue amount (95), the product and the reason for the call when he asked h
+FAIL PUB-06 hard   Amounts        | verify > verify > get_account > transfer_to_agent > close_call
+       - outcome ('transferred', 'TRS'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 1275.0, '2026-10-16')]
+       - transfers [{'queue': 'restructuring'}], expected []
+       - conversation: The agent never offered the 1275.00 floor with the sentence that the remainder stays overdue, and never recorded a promise for 1275.00 on Friday 16 October with a read-back and 'Shall I record that?'. It transferred the customer to restructuring 
+FAIL PUB-05 medium Hardship       | verify > verify > get_account > transfer_to_agent > close_call
+       - outcome ('transferred', 'TSP'), expected ('no_promise', 'HSHP')
+       - notes [], expected [('p1', 'hardship')]
+       - transfers [{'queue': 'support'}], expected []
+       - conversation: No add_note call was made on p1 with reason hardship naming the job loss. close_call was made with reason TSP and outcome transferred, not no_promise with code HSHP, and it returned an error.

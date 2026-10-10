@@ -330,7 +330,7 @@ NEGOTIATE = (
     "   - Weekday words: use WEEKDAY WORDS.\n"
     "   - Amount from the floor up to the full amount, both included -> accept as proposed. More than the full amount -> record the full amount. "
     "Below the floor -> say it cannot be recorded and offer the floor once; floor declined = flat refusal.\n"
-    "3. Full amount too much -> offer that product's floor ONCE and say: the remainder stays overdue and we will be in touch about it. Floor declined = flat refusal.\n"
+    "3. Full amount too much, cannot pay it all, or 'is there a smaller amount' -> offer that product's floor ONCE and say: the remainder stays overdue and we will be in touch about it. Floor declined = flat refusal.\n"
     "4. A flat refusal, a non-answer, or a no to paying today with no date and no amount uses ONE persuasion attempt of that product. Propose exactly what PRODUCTS says for the next attempt. "
     "When that product's attempts are used up, stop: never repeat an offer already turned down; that product is refused.\n"
     "5. 'I already paid' (a product) -> say exactly \"Payments made today show on our side on the next business day.\", take no promise for it, ask how and on which day they paid if they did not say, then it is noted paid. "
@@ -352,7 +352,7 @@ NEGOTIATE = (
 
 TOPIC_DESC = ("What the customer's LATEST message says, if it is one of these. "
               "hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). "
-              "new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). "
+              "new_plan = asks in so many words for a payment plan, for lower or smaller INSTALMENTS, to spread the payments over several months, or for more time in general with no particular day. NOT new_plan: saying the full amount is too much or that they cannot pay it all, asking for a smaller or reduced amount or 'is there a smaller amount I could pay', asking how much they should pay, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' (the agent answers all of these by proposing an amount and a date). "
               "none = anything else.")
 
 nodes["negotiate"] = fl.conv(
