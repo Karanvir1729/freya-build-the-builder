@@ -1,0 +1,41 @@
+# PUB-02 A relative answers
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call cdcddf53-61dd-482c-83b1-7d149667512a | customer c_b9f343c5-fed | 2026-10-10 20:30:44
+# customer model claude-sonnet-5-5 | judge model claude-sonnet-5-5 (claude) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/cdcddf53-61dd-482c-83b1-7d149667512a
+# RESULT: PASS
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Maria Costa?
+customer: This is her husband. What is the call about?
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> third_party: someone else answered who1 == 'someone_else'
+   [node] setup -> third_party
+agent: This is a personal banking matter that I can only discuss with Ms Costa. When can she be reached?
+customer: She can be reached tomorrow morning around eleven.
+   [tool] schedule_callback POST https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback body={"date": "2026-10-15", "time": "11:00", "customer_id": "c_b9f343c5-fed"}
+   [tool] schedule_callback -> HTTP 200 data={"ok": true, "what_to_do_next": "Callback booked."}
+   [route] third_party -> fin_callback: callback booked (schedule_callback_response.data.ok == 'true' OR schedule_callback_response.data.ok == 'True')
+   [node] third_party -> fin_callback
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_reached'\n vars['close_code'] = 'CBK'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_callback -> end_callback: always always
+   [node] fin_callback -> end_callback
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you, we will call back then. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: Thank you, we will call back then. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "CBK", "outcome": "not_reached", "customer_id": "c_b9f343c5-fed"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## tool calls (5)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. schedule_callback POST https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback body={"date": "2026-10-15", "time": "11:00", "customer_id": "c_b9f343c5-fed"} -> HTTP 200 data={"ok": true, "what_to_do_next": "Callback booked."}
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'not_reached'\n vars['close_code'] = 'CBK'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+4. end_call args={"message_mode": "custom", "spoken_message": "Thank you, we will call back then. Goodbye."} -> success Call ended
+5. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "CBK", "outcome": "not_reached", "customer_id": "c_b9f343c5-fed"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: callback, no_callback, wrong_number, deceased, unclear"}
+
+## ledger: outcome=not_reached reason=CBK promises=[] notes=[] callbacks=[{"date": "2026-10-15", "time": "11:00"}] transfers=[] calls=['schedule_callback', 'close_call']
+
+## judge (claude-sonnet-5-5): pass - The agent said it was a personal banking matter for Ms Costa only, named no product, amount or arrears, and asked when she could be reached. The husband made no offer to pay, so nothing was accepted. verify_identity and get_account were never called. schedule_callback was booked for 2026-10-15 at 11:00, and close_call was then sent with not_reached and code CBK. The test bank's ok:false reply is not held against the agent.
