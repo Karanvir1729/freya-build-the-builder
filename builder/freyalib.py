@@ -260,6 +260,17 @@ def end_node(name, ended_reason, farewell):
                              "spoken_message": {"type": "string", "default": farewell}}}}})
 
 
+def opening_conv(name, opening_line, task, extraction, max_turns=60):
+    """The initial conversation node that speaks `opening_line` word for word. On a phone call the on_enter tts says it;
+    on the chat route (smoke, sim.py) the engine answers the customer's first line with the dialogue model instead of
+    the tts (seen on Briefs C and D), so the task repeats the line as the model's first message. `task` is what to do
+    after the line has been said. Pass the node to conversation_first() as usual."""
+    lead = ("If you have not spoken yet in this call, your message is exactly: \"%s\" (word for word, nothing before or "
+            "after it). Otherwise: " % opening_line)
+    return conv(name, lead + task, on_enter={"type": "tts", "text": opening_line}, extraction=extraction,
+                first_only=True, max_turns=max_turns)
+
+
 def conversation_first(opening_node_name, setup_code, route_var, routes, default_target, nodes, setup_name="setup"):
     """The 'Initial node' pattern: the call starts in a conversation node and the setup code runs right after the
     customer's first turn. The chat route (smoke tests, the local simulator) SKIPS a first code node, so a code node

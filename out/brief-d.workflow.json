@@ -69,7 +69,7 @@
        },
        "spoken_message": {
         "type": "string",
-        "default": "We will email you a confirmation of this arrangement. Thank you for your time, {{title}} {{last_name}}. Goodbye."
+        "default": "Thank you for your time, {{title}} {{last_name}}. Goodbye."
        }
       }
      }
@@ -1275,7 +1275,7 @@
    "max_node_turns": 60,
    "truncation_strategy": "keep_all",
    "disable_inactivity_monitor": false,
-   "task_message": "You have just introduced yourself and asked: \"Am I speaking with {{first_name}} {{last_name}}?\" Do not call any tool in this turn. Do not say why you are calling.",
+   "task_message": "If you have not spoken yet in this call, your message is exactly: \"This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with {{first_name}} {{last_name}}?\" (word for word, nothing before or after it). Otherwise: you have just introduced yourself and asked: \"Am I speaking with {{first_name}} {{last_name}}?\" Do not call any tool in this turn. Do not say why you are calling.",
    "on_enter": {
     "type": "tts",
     "text": "This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with {{first_name}} {{last_name}}?"
@@ -2614,7 +2614,7 @@
       "hardship",
       "new_plan"
      ],
-     "description": "What the customer's LATEST message says, if it is one of these. hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). none = anything else.",
+     "description": "What the customer's LATEST message says, if it is one of these. hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). none = anything else.",
      "min_confidence": 0.6
     }
    ],
@@ -2693,9 +2693,10 @@
    "max_node_turns": 60,
    "truncation_strategy": "keep_all",
    "disable_inactivity_monitor": false,
-   "task_message": "The customer disclosed a hardship (illness, bereavement, job loss or similar). Make NO persuasion attempt and propose no payment.\nOn your first turn here say exactly \"I am sorry to hear that.\" and then offer, once, to put them through to our customer care team.\nNever offer a discount, waiver, payment holiday, plan or any other term; if they ask for one, say you cannot offer that.\nIf they ask for a person: call transfer_to_agent straight away.\nOnly if the customer themselves names a date or an amount for a product: check it against PRODUCTS and the CALENDAR, read it back ending with \"Shall I record that?\", and after a clear yes record it with create_promise. If create_promise fails, call it again with the same values (up to three tries in total); if the third try fails, tell the customer you could not record it and call add_note with reason service_error for that product.\nFollow what_to_do_next in every tool result. After every tool result, speak to the customer or call the next tool.\n\nPRODUCTS (in get_account order)\n{{products_text}}\nDATES\n- Today: {{today_text}} ({{today_iso}}).\n- A promise date must be today or later, a business day (Monday to Friday, not a closure day), and not after THAT product's latest date.\n- Vague period with no exact day after you asked once: propose {{vague_text}} ({{vague_iso}}), or the product's latest date if that is earlier.\nWEEKDAY WORDS\n{{weekday_table}}\nCALENDAR (look every date up here)\n{{calendar_text}}\n",
+   "task_message": "The customer disclosed a hardship (illness, bereavement, job loss or similar). You have just said: \"I am sorry to hear that. I can put you through to our customer care team, who can help. Would you like me to do that?\" Make NO persuasion attempt and propose no payment. Do not repeat the offer.\nNever offer a discount, waiver, payment holiday, plan or any other term; if they ask for one, say you cannot offer that.\nIf they ask for a person: call transfer_to_agent straight away.\nOnly if the customer themselves names a date or an amount for a product: check it against PRODUCTS and the CALENDAR, read it back ending with \"Shall I record that?\", and after a clear yes record it with create_promise. If create_promise fails, call it again with the same values (up to three tries in total); if the third try fails, tell the customer you could not record it and call add_note with reason service_error for that product.\nFollow what_to_do_next in every tool result. After every tool result, speak to the customer or call the next tool.\n\nPRODUCTS (in get_account order)\n{{products_text}}\nDATES\n- Today: {{today_text}} ({{today_iso}}).\n- A promise date must be today or later, a business day (Monday to Friday, not a closure day), and not after THAT product's latest date.\n- Vague period with no exact day after you asked once: propose {{vague_text}} ({{vague_iso}}), or the product's latest date if that is earlier.\nWEEKDAY WORDS\n{{weekday_table}}\nCALENDAR (look every date up here)\n{{calendar_text}}\n",
    "on_enter": {
-    "type": "llm"
+    "type": "tts",
+    "text": "I am sorry to hear that. I can put you through to our customer care team, who can help. Would you like me to do that?"
    },
    "tools": [
     {
@@ -2892,13 +2893,14 @@
      "enum_values": [
       "none",
       "accept",
-      "decline"
+      "decline",
+      "offer"
      ],
-     "description": "Answer to the offer to put them through to the customer care team, from the customer's LATEST message: accept if they want it, decline if they do not want it or say no, none otherwise or if the offer has not been made yet.",
+     "description": "From the customer's LATEST message: offer if they name a date or an amount they will pay (this wins over decline); accept if they want to be put through to the customer care team; decline if they do not want it or say no; none otherwise.",
      "min_confidence": 0.6
     }
    ],
-   "on_enter_first_entry_only": false
+   "on_enter_first_entry_only": true
   },
   "hardship_notes": {
    "name": "hardship_notes",
@@ -3080,7 +3082,7 @@
    "node_type": "code",
    "transitions": [
     {
-     "target_node": "fin_promise",
+     "target_node": "wrapup",
      "description": "promise",
      "condition": {
       "logic": "or",
@@ -3177,6 +3179,150 @@
         "code": {
          "type": "string",
          "default": "\ntry:\n    rec = [x for x in str(vars.get('rec_pids') or '').split(',') if x]\n    notes = [x for x in str(vars.get('note_log') or '').split(',') if x]\n    pids = [x for x in str(vars.get('pids_csv') or '').split(',') if x]\n    nd = dict()\n    for x in notes:\n        if ':' in x:\n            nd[x.split(':')[0]] = x.split(':', 1)[1]\n    keys = dict([('service_error', 'service_error'), ('hardship', 'hardship'), ('dispute', 'dispute'), ('refused', 'refused')])\n    if rec:\n        r = 'promise'\n    elif nd and all(nd.get(p) == 'paid' for p in pids if p in nd) and len(nd) >= len(pids):\n        r = 'paid'\n    else:\n        r = 'refused'\n        for reason, key in [('service_error', 'service_error'), ('hardship', 'hardship'), ('dispute', 'dispute'), ('refused', 'refused')]:\n            if any(nd.get(p) == reason for p in pids):\n                r = key\n                break\n        if not rec and not nd:\n            try:\n                if int(float(vars.get('create_promise_success_count') or 0)) > 0 and str(vars.get('create_promise_response.data.ok')).lower() == 'true':\n                    r = 'promise'\n            except Exception:\n                pass\n    vars['final_route'] = r\nexcept Exception:\n    vars['final_route'] = 'refused'\n"
+        },
+        "timeout_ms": {
+         "type": "number",
+         "default": 10000
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "wrapup": {
+   "name": "wrapup",
+   "node_type": "conversation",
+   "transitions": [
+    {
+     "target_node": "xfer_restructuring",
+     "description": "wants a plan / lower instalments",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "wrap",
+        "operator": "equals",
+        "operand": "new_plan"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "xfer_general",
+     "description": "wants a person",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "wrap",
+        "operator": "equals",
+        "operand": "human"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "fin_promise",
+     "description": "nothing else",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "wrap",
+        "operator": "equals",
+        "operand": "done"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "wrap_count",
+     "description": "something else",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "wrap",
+        "operator": "equals",
+        "operand": "other"
+       }
+      ]
+     }
+    }
+   ],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": false,
+   "task_message": "Every product is settled and at least one promise is recorded. You have just said: \"We will email you a confirmation of this arrangement. Is there anything else I can help you with?\"\n- They want to change or cancel a recorded promise -> say it cannot be changed or cancelled in this call, then ask if there is anything else.\n- A question the facts do not answer -> \"I don't have that information.\"\n- No tool call is allowed in this turn. Do not say goodbye: the call is closed for you.",
+   "on_enter": {
+    "type": "tts",
+    "text": "We will email you a confirmation of this arrangement. Is there anything else I can help you with?"
+   },
+   "tools": [],
+   "extraction_schema": [
+    {
+     "name": "wrap",
+     "type": "string",
+     "enum_values": [
+      "none",
+      "done",
+      "new_plan",
+      "human",
+      "other"
+     ],
+     "description": "From the customer's LATEST message: done = nothing else, no, thanks, goodbye; new_plan = asks for a payment plan, lower or smaller instalments, or more time; human = asks for a person, a human or an agent; other = anything else (a question, a change request); none = no answer yet.",
+     "min_confidence": 0.6
+    }
+   ],
+   "on_enter_first_entry_only": true
+  },
+  "wrap_count": {
+   "name": "wrap_count",
+   "node_type": "code",
+   "transitions": [
+    {
+     "target_node": "fin_promise",
+     "description": "second other turn: close",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "wrap_route",
+        "operator": "equals",
+        "operand": "close"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "wrapup",
+     "description": "always",
+     "condition": {
+      "operator": "always"
+     }
+    }
+   ],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": true,
+   "passthrough": true,
+   "passthrough_default_transition": "wrapup",
+   "on_enter": {
+    "type": "silent"
+   },
+   "pre_actions": [
+    {
+     "type": "function",
+     "function": {
+      "name": "code_exec",
+      "handler": "__function__:code_exec",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "code": {
+         "type": "string",
+         "default": "try:\n    n = int(float(vars.get('wrap_turns') or 0)) + 1\n    vars['wrap_turns'] = n\n    vars['wrap'] = 'none'\n    vars['wrap_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n    vars['wrap_route'] = 'retry'\n"
         },
         "timeout_ms": {
          "type": "number",
@@ -3324,6 +3470,79 @@
           "queue": {
            "type": "string",
            "default": "support"
+          }
+         }
+        }
+       }
+      }
+     },
+     "post_process_code": "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\nexcept Exception:\n    pass\n"
+    }
+   ]
+  },
+  "xfer_general": {
+   "name": "xfer_general",
+   "node_type": "api_request",
+   "transitions": [
+    {
+     "target_node": "fin_transferred_human",
+     "description": "always",
+     "condition": {
+      "operator": "always"
+     }
+    }
+   ],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": true,
+   "passthrough": true,
+   "passthrough_default_transition": "fin_transferred_human",
+   "on_enter": {
+    "type": "tts",
+    "text": "I will put you through to a colleague now."
+   },
+   "pre_actions": [
+    {
+     "type": "function",
+     "config": {
+      "timeoutMs": 12000,
+      "maxRetries": 1
+     },
+     "function": {
+      "name": "transfer_to_agent",
+      "handler": "__function__:api_call",
+      "description": "Transfer.",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "url": {
+         "type": "string",
+         "default": "https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent"
+        },
+        "method": {
+         "type": "string",
+         "default": "POST"
+        },
+        "headers": {
+         "type": "object",
+         "properties": {
+          "Content-Type": {
+           "type": "string",
+           "default": "application/json"
+          }
+         }
+        },
+        "body": {
+         "type": "object",
+         "required": [],
+         "properties": {
+          "customer_id": {
+           "type": "string",
+           "default": "{{customer_id}}"
+          },
+          "queue": {
+           "type": "string",
+           "default": "general"
           }
          }
         }

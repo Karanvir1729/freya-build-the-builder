@@ -24,7 +24,7 @@ nodes = {}
 # key: (outcome, reason code, farewell). Every close carries a code, promise and paid included (email "Closing").
 BYE = "Thank you for your time, {{title}} {{last_name}}. Goodbye."
 FINS = {
-    "promise": ("promise", "PRM", "We will email you a confirmation of this arrangement. " + BYE),          # 1 + verbatim sentence
+    "promise": ("promise", "PRM", BYE),          # 1; the verbatim email sentence is said once by `wrapup`
     "paid": ("paid", "AP", "Payments made today show on our side on the next business day. " + BYE),       # 2 + verbatim sentence
     "transferred_restructuring": ("transferred", "TRS", "I am transferring you to our restructuring team now. Thank you, {{title}} {{last_name}}. Goodbye."),
     "transferred_human": ("transferred", "TRH", "I am transferring you to a colleague now. Thank you, {{title}} {{last_name}}. Goodbye."),
@@ -129,11 +129,10 @@ OPENING_ROUTES = [
     ("wrong_number", "fin_wrong_number", "wrong number"),
     ("someone_else", "third_party", "someone else answered"),
 ]
-nodes["opening"] = fl.conv(
-    "opening",
-    "You have just introduced yourself and asked: \"" + ASK_NAME + "\" Do not call any tool in this turn. Do not say why you are calling.",
-    on_enter={"type": "tts", "text": "This is the digital assistant of Kestrel Bank. Please note that this call is recorded. " + ASK_NAME},
-    extraction=[fl.ext("who1", WHO_VALUES, WHO_DESC)], first_only=True)
+nodes["opening"] = fl.opening_conv(   # chat route: the dialogue model speaks the first line, so the task repeats it
+    "opening", "This is the digital assistant of Kestrel Bank. Please note that this call is recorded. " + ASK_NAME,
+    "you have just introduced yourself and asked: \"" + ASK_NAME + "\" Do not call any tool in this turn. Do not say why you are calling.",
+    [fl.ext("who1", WHO_VALUES, WHO_DESC)])
 INITIAL = fl.conversation_first("opening", SETUP, "who1", OPENING_ROUTES, "opening_retry", nodes)
 
 NEVER_SAY = ("NEVER say, before identity is confirmed: arrears, overdue, late, collections, debt, payment, instalment, or the name of any product "
@@ -353,7 +352,7 @@ NEGOTIATE = (
 
 TOPIC_DESC = ("What the customer's LATEST message says, if it is one of these. "
               "hardship = mentions illness, a bereavement, losing their job, or a similar hardship (this wins over all others). "
-              "new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). "
+              "new_plan = asks for a payment plan, lower or smaller instalments, or more time in general with no particular day (just saying the amount is too much, naming a date or an amount, changing the date or amount at the read-back, or a period such as 'next week', 'the week after next', 'end of the month' or 'when I get paid' is NOT new_plan). "
               "none = anything else.")
 
 nodes["negotiate"] = fl.conv(
@@ -372,18 +371,21 @@ nodes["negotiate"] = fl.conv(
     ])
 
 # R email "Hardship": "I am sorry to hear that.", no persuasion at all, offer the support queue once.
+HARDSHIP_LINE = "I am sorry to hear that. I can put you through to our customer care team, who can help. Would you like me to do that?"
 nodes["hardship"] = fl.conv(
     "hardship",
-    "The customer disclosed a hardship (illness, bereavement, job loss or similar). Make NO persuasion attempt and propose no payment.\n"
-    "On your first turn here say exactly \"I am sorry to hear that.\" and then offer, once, to put them through to our customer care team.\n"
+    "The customer disclosed a hardship (illness, bereavement, job loss or similar). You have just said: \"" + HARDSHIP_LINE + "\" "
+    "Make NO persuasion attempt and propose no payment. Do not repeat the offer.\n"
     "Never offer a discount, waiver, payment holiday, plan or any other term; if they ask for one, say you cannot offer that.\n"
     "If they ask for a person: call transfer_to_agent straight away.\n"
     "Only if the customer themselves names a date or an amount for a product: check it against PRODUCTS and the CALENDAR, read it back ending with \"Shall I record that?\", and after a clear yes record it with create_promise. "
     "If create_promise fails, call it again with the same values (up to three tries in total); if the third try fails, tell the customer you could not record it and call add_note with reason service_error for that product.\n"
     "Follow what_to_do_next in every tool result. After every tool result, speak to the customer or call the next tool.\n\n" + FACTS,
+    on_enter={"type": "tts", "text": HARDSHIP_LINE}, first_only=True,   # R38 verbatim line as fixed text
     tools=[promise_tool(), note_tool(), transfer_general],
-    extraction=[fl.ext("support_choice", ["none", "accept", "decline"],
-                       "Answer to the offer to put them through to the customer care team, from the customer's LATEST message: accept if they want it, decline if they do not want it or say no, none otherwise or if the offer has not been made yet.")],
+    extraction=[fl.ext("support_choice", ["none", "accept", "decline", "offer"],
+                       "From the customer's LATEST message: offer if they name a date or an amount they will pay (this wins over decline); "
+                       "accept if they want to be put through to the customer care team; decline if they do not want it or say no; none otherwise.")],
     transitions=[
         ALL_DONE,
         TRANSFERRED,
@@ -406,10 +408,36 @@ PRECEDENCE = [("service_error", "service_error"), ("hardship", "hardship"), ("di
 nodes["finalize"] = fl.code_node(
     "finalize", mp.finalize_code(PRECEDENCE, promise_key="promise", paid_key="paid", default_key="refused", paid_reason="paid",
                                  order="precedence", api=API),
-    mp.finalize_transitions(PRECEDENCE, promise_key="promise", paid_key="paid", default_key="refused"))
+    [dict(t, target_node="wrapup") if t["target_node"] == "fin_promise" else t
+     for t in mp.finalize_transitions(PRECEDENCE, promise_key="promise", paid_key="paid", default_key="refused")])
+
+# R "Read-back and recording": the email sentence once per call, after the last promise; a recorded promise cannot be
+# changed in the same call; a transfer after a promise closes with the transfer's code (code list). One more customer
+# turn after the promises, so a plan request or a person request after recording is still served.
+WRAP_LINE = "We will email you a confirmation of this arrangement. Is there anything else I can help you with?"
+nodes["wrapup"] = fl.conv(
+    "wrapup",
+    "Every product is settled and at least one promise is recorded. You have just said: \"" + WRAP_LINE + "\"\n"
+    "- They want to change or cancel a recorded promise -> say it cannot be changed or cancelled in this call, then ask if there is anything else.\n"
+    "- A question the facts do not answer -> \"I don't have that information.\"\n"
+    "- No tool call is allowed in this turn. Do not say goodbye: the call is closed for you.",
+    on_enter={"type": "tts", "text": WRAP_LINE}, first_only=True,
+    extraction=[fl.ext("wrap", ["none", "done", "new_plan", "human", "other"],
+                       "From the customer's LATEST message: done = nothing else, no, thanks, goodbye; "
+                       "new_plan = asks for a payment plan, lower or smaller instalments, or more time; "
+                       "human = asks for a person, a human or an agent; other = anything else (a question, a change request); none = no answer yet.")],
+    transitions=[
+        fl.eq("wrap", "new_plan", "xfer_restructuring", "wants a plan / lower instalments"),
+        fl.eq("wrap", "human", "xfer_general", "wants a person"),
+        fl.eq("wrap", "done", "fin_promise", "nothing else"),
+        fl.eq("wrap", "other", "wrap_count", "something else"),
+    ])
+nodes["wrap_count"] = fl.code_node("wrap_count", fl.counter_code("wrap_turns", 2, "wrap_route", reset={"wrap": "none"}), [
+    fl.eq("wrap_route", "close", "fin_promise", "second other turn: close"), fl.always("wrapup")])
 
 for q, fin, line in [("restructuring", "fin_transferred_restructuring", "I will put you through to our restructuring team, who can talk to you about that."),
-                     ("support", "fin_transferred_support", "I will put you through to our customer care team now.")]:
+                     ("support", "fin_transferred_support", "I will put you through to our customer care team now."),
+                     ("general", "fin_transferred_human", "I will put you through to a colleague now.")]:
     nodes[f"xfer_{q}"] = fl.api_node(
         f"xfer_{q}", fl.api_tool(API, "transfer_to_agent", baked={"queue": q}, description="Transfer.", retries=1),
         [fl.always(fin)], on_enter={"type": "tts", "text": line})
