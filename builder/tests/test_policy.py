@@ -470,6 +470,11 @@ def test_offer_when_resolved_in_code():
     assert out["November 6th"] == ("2026-11-06", "exact"), out
     assert out["in two weeks"] == ("2026-10-28", "exact"), out
     assert out["end of the month"] == (None, "vague"), out
+    G2 = {"vars": V}
+    exec(src + "\nout = {}\nfor w in ['Monday the 26th', 'Sunday the 25th', 'this Saturday, the 17th', 'on Friday the 23rd']:\n    d, k = resolve_when(vars, w)\n    out[w] = (d.isoformat() if d else None, k)\n", G2)
+    o2 = G2["out"]
+    assert o2 == {'Monday the 26th': ('2026-10-26', 'exact'), 'Sunday the 25th': ('2026-10-25', 'exact'),
+                  'this Saturday, the 17th': ('2026-10-17', 'exact'), 'on Friday the 23rd': ('2026-10-23', 'exact')}, o2
     assert out[""] == (None, "none"), out
     # the offer event: the extraction said 2026-10-11 (real clock) but the words say tomorrow -> 15 Oct is checked
     ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-11", offer_when="tomorrow", offer_amount="420")
@@ -479,6 +484,62 @@ def test_offer_when_resolved_in_code():
     P, V = start([CARD])
     ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-11", offer_when="", offer_amount="420")
     assert V.get("offer_verdict") == "vague", (V.get("offer_verdict"), V.get("say_next"))
+
+
+@test
+def test_vague_again_refuse():
+    """vague_again='refuse': no exact day after the one ask is a non-answer (one persuasion attempt), not the deadline."""
+    import json
+    P = pol.Policy(HOL, texts=TEXTS, vague_again="refuse")
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([LOAN])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="vague", offer_when="next week")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+    ev(P, V, "offer", offer_kind="vague", offer_when="I can't say")
+    assert V["attempts_used_p1"] == "1" and V["prop_date"] == "2026-10-16", (V["attempts_used_p1"], V["prop_date"])
+    assert V["say_next"] == "Can you pay 2,100 on Friday 16 October?" or "16 October" in V["say_next"], V["say_next"]
+
+
+@test
+def test_above_full_agree():
+    """above_full='agree': an amount above the full amount goes straight to the read-back of the full amount."""
+    import json
+    P = pol.Policy(HOL, texts=TEXTS, above_full="agree", promise_reasons={"full": "full", "partial": "partial"})
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="exact", offer_when="this friday", offer_amount="500")
+    assert V["route"] == "confirm" and V["agreed_p1"].startswith("420.0|2026-10-16"), (V["route"], V.get("agreed_p1"))
+    assert V["readback_line"].startswith("The past-due amount is 420"), V["readback_line"]
+    # a date problem as well: ask again (the corrected offer), never agree silently
+    P2 = pol.Policy(HOL, texts=TEXTS, above_full="agree")
+    V2 = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(P2.prepare_code(BODY, "statement"), V2)
+    ev(P2, V2, "offer", offer_kind="exact", offer_when="sunday", offer_amount="500")
+    assert V2["route"] == "negotiate" and V2["offer_verdict"] == "weekend_or_holiday", (V2["route"], V2["offer_verdict"])
+
+
+@test
+def test_promise_reasons_and_ending_code():
+    """promise_reasons: reason full/partial written when the promise is recorded; ending_code lets it decide a later transfer."""
+    import json
+    for amount, want in (("420", "full"), ("200", "partial")):
+        P = pol.Policy(HOL, texts=TEXTS, promise_reasons={"full": "full", "partial": "partial"})
+        V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+        run(P.prepare_code(BODY, "statement"), V)
+        ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_amount=amount)
+        assert V["route"] == "confirm", V["route"]
+        ev(P, V, "confirm_yes", confirm="yes")
+        V["rec_ok"] = "True"
+        ev(P, V, "rec_after")
+        assert V["route"] == "wrapup" and V["outcome"] == "promise" and V["reason"] == want, (V["route"], V["outcome"], V["reason"])
+        run(P.ending_code("transferred", "agent_request"), V)
+        assert (V["outcome"], V["reason"]) == ("promise", want), (V["outcome"], V["reason"])
+    V = {}
+    run(P.ending_code("transferred", "agent_request"), V)
+    assert (V["outcome"], V["reason"]) == ("transferred", "agent_request"), V
+    V = {"recorded_pids": "p1"}
+    run(P.ending_code("transferred", "agent_request", promise_decides=False), V)
+    assert V["outcome"] == "transferred", V
 
 
 if __name__ == "__main__":

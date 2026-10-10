@@ -1,0 +1,25 @@
+WARN nodes.setup.pre_actions[code_exec].code: code has statements outside try/except (Assign, If); wrap the whole body
+WARN nodes.ask_phone.transitions[0].condition.conditions[0]: variable 'id_route' is not set by anything in the workflow (test_variables, extraction, mapping, code, tool results)
+WARN nodes.ask_phone.transitions[1].condition.conditions[0].conditions[1]: variable 'hint_day_month_swapped' is not set by anything in the workflow (test_variables, extraction, mapping, code, tool results)
+WARN nodes.ask_dob.transitions[1].condition.conditions[0]: variable 'id_route' is not set by anything in the workflow (test_variables, extraction, mapping, code, tool results)
+WARN nodes.ask_dob.transitions[2].condition.conditions[0].conditions[1]: variable 'hint_day_month_swapped' is not set by anything in the workflow (test_variables, extraction, mapping, code, tool results)
+WARN $.system_prompt: system prompt (in force before verification) mentions forbidden word 'collections' outside a 'never say' clause: 'bt, and never name a product, to anyone. The word collections is never used. - If asked whe'
+WARN $.system_prompt: system prompt (in force before verification) mentions forbidden word 'payment' outside a 'never say' clause: 'can, should or have to pay is not a request for a payment plan: propose the amount the'
+WARN nodes.negotiate.extraction_schema: 7 extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate
+WARN nodes.confirm.extraction_schema: 6 extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate
+WARN nodes.hardship.extraction_schema: 6 extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate
+INFO nodes.opening.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.opening_retry.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.third_party.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.third_party.tools[schedule_callback].parameters.body.customer_id: field customer_id is baked by test_variables (call variable) ({{customer_id}}): the model never fills it
+INFO nodes.ask_phone.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.ask_phone.transitions[1]: second transition to 'fin_exhausted': the engine merges them with OR at load time
+INFO nodes.ask_phone.tools[verify_identity].parameters.body.customer_id: field customer_id is baked by test_variables (call variable) ({{customer_id}}): the model never fills it
+INFO nodes.ask_dob.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.ask_dob.transitions[2]: second transition to 'fin_exhausted': the engine merges them with OR at load time
+INFO nodes.ask_dob.tools[verify_identity].parameters.body.customer_id: field customer_id is baked by test_variables (call variable) ({{customer_id}}): the model never fills it
+INFO nodes.negotiate.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.confirm.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.hardship.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+INFO nodes.plan_offer.max_node_turns: max_node_turns=60 without max_turn_transition: the cap changes nothing (engine records the overrun and keeps routing)
+-- 0 error(s), 10 warning(s), 14 info

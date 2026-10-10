@@ -307,7 +307,7 @@ def advance(V, prefix=''):
         V['route'] = 'confirm'
         return
     note_next(V)
-def agree(V, pid, a, d, tag='', move=True):
+def agree(V, pid, a, d, tag='', move=True, prefix=''):
     pset(V, pid, 'state', 'agreed')
     pset(V, pid, 'agreed', str(float(a)) + '|' + d.isoformat() + '|' + tag)
     V['ok_pid'] = pid
@@ -316,7 +316,7 @@ def agree(V, pid, a, d, tag='', move=True):
     V['offer_verdict'] = 'ok'
     set_prop(V, pid, a, d)
     if move:
-        advance(V, '')
+        advance(V, prefix)
 def refuse(V, pid, prefix=''):
     if g(V, 'mode') == 'hardship':
         pset(V, pid, 'state', 'hardship')
@@ -370,6 +370,9 @@ def check_one(V, pid, a, d, kind):
             pset(V, pid, 'vague_asked', 'yes')
             say(V, T('vague'))
             return
+        if P.get('vague_again') == 'refuse':   # the brief: no exact day after one ask = a non-answer (one attempt)
+            refuse(V, pid)
+            return
         set_prop(V, pid, pa, dl)
         say(V, join([T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
         return
@@ -408,6 +411,10 @@ def check_one(V, pid, a, d, kind):
         na = full
     if not issues:
         agree(V, pid, na, nd)
+        return
+    if P.get('above_full') == 'agree' and [x[0] for x in issues] == ['above_full']:
+        agree(V, pid, na, nd, prefix=issues[0][1])   # the brief: above the full amount, record the full amount and say so
+        V['offer_verdict'] = 'above_full'
         return
     V['offer_verdict'] = issues[0][0]
     set_prop(V, pid, na, nd)
@@ -501,17 +508,7 @@ def resolve_when(V, text):
             return d, 'exact'
         except Exception:
             return None, 'vague'
-    m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
-    if m:
-        wd = WDN.index(m.group(2))
-        if m.group(1) == 'next':
-            if P.get('weekday_rule') == 'first_after':
-                delta = (wd - today.weekday()) % 7 or 7
-            else:   # that weekday in the following calendar week
-                delta = (7 - today.weekday()) + wd
-        else:
-            delta = (wd - today.weekday()) % 7
-        return today + D(delta), 'exact'
+    # a day of the month wins over a weekday said with it ('Monday the 26th' is the 26th, not the coming Monday)
     m = re.search(r' (?:the )?(\d{1,2})(?:st|nd|rd|th) ', t)
     if m:
         n = int(m.group(1))
@@ -524,6 +521,17 @@ def resolve_when(V, text):
             return datetime.date(y, mo, n), 'exact'
         except Exception:
             return None, 'vague'
+    m = re.search(r' (?:(this|next|coming|on|by) )?(monday|tuesday|wednesday|thursday|friday|saturday|sunday) ', t)
+    if m:
+        wd = WDN.index(m.group(2))
+        if m.group(1) == 'next':
+            if P.get('weekday_rule') == 'first_after':
+                delta = (wd - today.weekday()) % 7 or 7
+            else:   # that weekday in the following calendar week
+                delta = (7 - today.weekday()) + wd
+        else:
+            delta = (wd - today.weekday()) % 7
+        return today + D(delta), 'exact'
     if re.search(r'(next week|week after next|end of (the )?month|end of month|this month|next month|when (my |the )?(salary|pay|wages|money)|'
                  r'after (my |the )?(pay|salary)|a few (days|weeks)|couple of (days|weeks)|soon|later|some ?time|not sure|maybe|'
                  r'next (few|couple)|beginning of|middle of|start of|mid )', t):
@@ -776,8 +784,22 @@ def enter_wrapup(V):
     parts.append(T('anything_else'))
     V['wrap_line'] = join(parts)
     V[P['outcome_var']] = P['promise_outcome']
-    V[P['reason_var']] = ''
+    V['promise_reason'] = promise_reason(V)
+    V[P['reason_var']] = V['promise_reason']
     V['route'] = 'wrapup'
+def promise_reason(V):
+    # the closing reason of a promise when the brief has one: 'full' when every recorded amount equals its full
+    # amount, else 'partial' (P['promise_reasons'] maps both to the API's values); '' when the brief has none
+    pr = P.get('promise_reasons') or {}
+    if not pr:
+        return ''
+    rec = [p for p in pids(V) if state(V, p) == 'recorded']
+    full = True
+    for p in rec:
+        a = num(pg(V, p, 'agreed').split('|')[0], 0.0) or 0.0
+        if abs(a - full_of(V, p)) >= 0.005:
+            full = False
+    return str(pr.get('full' if full else 'partial') or '')
 def finalize(V):
     ids = pids(V)
     sts = [state(V, p) for p in ids]
@@ -916,7 +938,8 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
-           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event")
+           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event",
+           "promise_reason")
 
 
 def _declare():
@@ -956,13 +979,21 @@ class Policy:
     wrap_turns: how many change requests the wrap-up node answers before it closes.
     closed_day_move: 'after' (offer the next business day) or 'before'.
     ordinals: offer_for enum values naming products in get_account order.
-    targets: route -> node name overrides (DEFAULT_TARGETS)."""
+    targets: route -> node name overrides (DEFAULT_TARGETS).
+    weekday_rule: the brief's reading of 'next <weekday>' ('this_week' = the following calendar week, 'first_after').
+    vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline) or
+        'refuse' (the brief counts it as a non-answer: one persuasion attempt).
+    above_full: an amount above the full amount: 'ask' (propose the full amount and ask again) or 'agree' (the brief
+        says record the full amount and say so: straight to the read-back with the brief's sentence first).
+    promise_reasons: {'full': <reason>, 'partial': <reason>} when the brief's promise ending has a reason that depends
+        on whether every recorded amount equals the full amount; written to reason_var and 'promise_reason' when the
+        promise is recorded (so a hang-up in the wrap-up closes right). Use ending_code() for the fin nodes."""
 
     def __init__(self, holidays, texts=None, multi=False, notes=False, note_reasons=None, fin_keys=None,
                  fail_max=2, max_checks=8, human_limit=2, notalk_limit=2, wrap_turns=2, closed_day_move="after",
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
                  outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None,
-                 weekday_rule="this_week"):
+                 weekday_rule="this_week", vague_again="deadline", above_full="ask", promise_reasons=None):
         missing = [k for k in REQUIRED_TEXTS + (REQUIRED_TEXTS_MULTI if multi else ()) if k not in (texts or {})]
         if missing and not (texts or {}).get("_allow_defaults"):
             raise ValueError("Policy texts must come from the brief; missing: %s (pass texts={'_allow_defaults': True} only in tests)" % ", ".join(missing))
@@ -985,6 +1016,13 @@ class Policy:
             raise ValueError("notes=True needs note_reasons {state: reason}")
         if closed_day_move not in ("after", "before"):
             raise ValueError("closed_day_move must be 'after' or 'before'")
+        if vague_again not in ("deadline", "refuse"):
+            raise ValueError("vague_again must be 'deadline' or 'refuse'")
+        if above_full not in ("ask", "agree"):
+            raise ValueError("above_full must be 'ask' or 'agree'")
+        pr = dict(promise_reasons or {})
+        if pr and set(pr) != {"full", "partial"}:
+            raise ValueError("promise_reasons must map exactly 'full' and 'partial' to the API's reasons")
         self.holidays = list(holidays or [])
         self.bwd = list(business_weekdays)
         self.multi = bool(multi)
@@ -999,7 +1037,8 @@ class Policy:
                   "closed_day_move": closed_day_move, "ordinals": list(ordinals),
                   "clear_enums": dict(CLEAR_ENUMS), "clear_values": dict(CLEAR_VALUES),
                   "outcome_var": outcome_var, "reason_var": reason_var, "promise_outcome": promise_outcome,
-                  "now_var": now_var, "after_recorded": bool(t.get("after_recorded"))}
+                  "now_var": now_var, "after_recorded": bool(t.get("after_recorded")),
+                  "vague_again": vague_again, "above_full": above_full, "promise_reasons": pr}
 
     # ------------------------------------------------------------------ sources
     def core(self):
@@ -1028,6 +1067,26 @@ class Policy:
         fb.update(fallbacks or {})
         inner = self.core() + body.strip("\n") + "\ninit_negotiation(vars, %s)\n" % statement_expr + _declare()
         return fl.guarded(inner, state_var, fb)
+
+    def ending_code(self, outcome, reason, promise_decides=True):
+        """Code of a fin_<key> node: writes outcome/reason; with promise_decides, a promise recorded earlier in the
+        call wins ("if a transfer takes place after a promise was recorded, the promise decides"): promise_outcome
+        and the promise reason the core wrote (promise_reason). Use it for the promise ending itself too
+        (ending_code(promise_outcome, <default reason>))."""
+        ov, rv, po = self.P["outcome_var"], self.P["reason_var"], self.P["promise_outcome"]
+        return ("try:\n    rec = str(vars.get('recorded_pids') or '').strip()\n"
+                "    if %r and rec and rec.lower() not in ('none', 'null'):\n"
+                "        vars[%r] = %r\n        vars[%r] = str(vars.get('promise_reason') or %r)\n"
+                "        if vars[%r].lower() in ('none', 'null'):\n            vars[%r] = %r\n"
+                "    else:\n        vars[%r] = %r\n        vars[%r] = %r\nexcept Exception:\n    pass\n"
+                % (bool(promise_decides), ov, po, rv, reason if outcome == po else "", rv, rv,
+                   reason if outcome == po else "", ov, outcome, rv, reason))
+
+    def end_pair(self, key, outcome, reason, farewell, nodes, promise_decides=True):
+        """freyalib.end_pair whose fin_<key> runs ending_code (a recorded promise decides the ending)."""
+        fin, end = fl.end_pair(key, outcome, reason, farewell, nodes, self.P["outcome_var"], self.P["reason_var"])
+        nodes[fin] = fl.code_node(fin, self.ending_code(outcome, reason, promise_decides), [fl.always(end)])
+        return fin, end
 
     # ------------------------------------------------------------------ transitions
     def route_transitions(self):

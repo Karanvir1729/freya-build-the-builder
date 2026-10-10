@@ -1365,7 +1365,9 @@ _NORM_SRC = r'''def _nz_main(config, vars):
         y = year_of(ys, past)
         if y is None:
             return None
-        day, month = (a, b) if ORDER == 'dmy' else (b, a)
+        if ORDER == 'none' and a != b and mkdate(y, b, a) and mkdate(y, a, b):
+            return None   # the brief asks for the month as a word: an ambiguous numbers-only date is left as said
+        day, month = (a, b) if ORDER != 'mdy' else (b, a)
         d = mkdate(y, month, day)
         if d is None:
             d = mkdate(y, day, month)
@@ -1582,7 +1584,9 @@ def normalise_pre(fields, date_order="dmy", now_var="now", relative_var=None, pm
       answer  identity answer: dob when the body's `field` names a date/birth, digits when it names anything
               else, otherwise a date if it reads as one, else digits.
     `date_order` ('dmy' or 'mdy') reads numbers-only dates ("14/03/1988"); it must come from the brief. A reading
-    that is impossible in that order but valid swapped (month > 12) is swapped.
+    that is impossible in that order but valid swapped (month > 12) is swapped. 'none' = the brief fixes no order
+    (e.g. it says to ask for the month as a word): a numbers-only date valid in both orders is left as said (the
+    service rejects it unread, which does not count as a wrong answer); an unambiguous one is still converted.
     `now_var`: the call variable holding today's date (ISO), for two-digit years and year-less dates.
     `relative_var`: name of a variable holding a {phrase: 'YYYY-MM-DD'} table (dict or JSON string) the
     generator computed in code (see relative_days_code); "tomorrow", "next friday" are resolved ONLY through it.
@@ -1595,8 +1599,8 @@ def normalise_pre(fields, date_order="dmy", now_var="now", relative_var=None, pm
     for f, k in fm.items():
         if k not in NORMALISE_KINDS:
             raise ValueError("normalise_pre: field %r has unknown kind %r (use one of %s)" % (f, k, ", ".join(NORMALISE_KINDS)))
-    if date_order not in ("dmy", "mdy"):
-        raise ValueError("normalise_pre: date_order must be 'dmy' or 'mdy'")
+    if date_order not in ("dmy", "mdy", "none"):
+        raise ValueError("normalise_pre: date_order must be 'dmy', 'mdy' or 'none'")
     code = (_NORM_SRC.replace("__FIELDS__", repr(fm)).replace("__ORDER__", repr(date_order))
             .replace("__NOW_VAR__", repr(now_var)).replace("__REL_VAR__", repr(relative_var or ""))
             .replace("__PM_HOURS__", repr(tuple(int(h) for h in pm_hours))))
