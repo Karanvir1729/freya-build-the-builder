@@ -13,3 +13,9 @@ __pycache__/
 *.pyc
 
 .DS_Store
+
+# editor swap files and any env variants
+*.swp
+*.swo
+.env*
+env.*.sh

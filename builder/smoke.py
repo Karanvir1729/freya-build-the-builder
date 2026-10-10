@@ -77,9 +77,11 @@ def fn_name(ev):
 
 
 def tool_result_line(result):
-    """One line for a function_call_complete result: HTTP status + data, or the message."""
+    """One line for a function_call_complete result: HTTP status + data, or the message; ERROR for a function_call_error."""
     if not isinstance(result, dict):
         return compact(result)
+    if "error" in result and len(result) == 1:
+        return "ERROR " + compact(result["error"], 300)
     parts = []
     if result.get("status_code") is not None:
         parts.append("HTTP %s" % result["status_code"])
@@ -99,9 +101,24 @@ class Chat:
     def __init__(self, workflow_id, variables):
         self.workflow_id, self.variables = workflow_id, variables
         self.call_id, self.seen, self.turns, self.tool_calls, self.last_vars = None, 0, [], [], None
-        self.ended_by_agent, self.end_result = False, None
+        self.ended_by_agent, self.end_result, self.in_tail, self.tail_events = False, None, False, []
 
-    def send(self, text, first_turn_retries=3, recover_s=60):
+    @staticmethod
+    def describe(status, res, started):
+        if status == 504:
+            return "HTTP 504: the agent service timed out (the gateway waits about 60 s; the platform may be busy)"
+        if status == 502:
+            return "HTTP 502: the agent service returned no response (seen when the agent ends the call during the turn, or on a busy platform)"
+        if status == 503:
+            return "HTTP 503: %s (the agent service did not take the message: busy platform, or agent not configured)" % res
+        if status == 500:
+            return "HTTP 500: %s%s" % (res, "" if started else " (a bare 500 on the first turn: the workflow cannot start a call at all)")
+        return "HTTP %s: %s" % (status, res) if status else "no answer: %s" % res
+
+    def send(self, text, retries=3, recover_s=60):
+        """Send one customer line. On 502/503/504 the engine may still have handled the turn (seen: a 502 when the agent
+        ended the call in that turn; a 504 when a turn ran past the gateway limit), so the call log is read before the
+        line is sent again. Without a callId there is nothing to read: the first turn is simply sent again."""
         n = len(self.turns) + 1
         body = {"message": text}
         if self.call_id:
@@ -109,42 +126,45 @@ class Chat:
         else:
             body["workflowId"] = self.workflow_id
             body["customerVariables"] = self.variables
-        notes, t0 = [], time.time()
-        for attempt in range(first_turn_retries + 1):
+        turn = {"n": n, "customer": text, "agent": "", "status": None, "seconds": 0, "events": [], "error": None}
+        self.turns.append(turn)
+        t0 = time.time()
+        for attempt in range(retries + 1):
             status, res = post("/api/v2/chat/message", body)
-            # 502/503: the agent service did not take the message (busy platform). A 504 before the call exists leaves
-            # nothing to resume either. Both: send the same line again after a pause. A 504 mid-call is handled below.
-            retry = status in (502, 503) or (status in (504, 0) and not self.call_id)
-            if retry and attempt < first_turn_retries:
-                notes.append("[harness] %s%s: sending the line again in 15 s (%d/%d)"
-                             % ("HTTP %d" % status if status else "no answer", "" if self.call_id else " before the call exists", attempt + 1, first_turn_retries))
+            turn["status"] = status
+            if status == 200 and isinstance(res, dict):
+                self.call_id = res.get("callId") or self.call_id
+                turn["agent"] = (res.get("response") or "").strip()
+                turn["message_id"] = res.get("messageId")
+                turn["error"] = None
+                if res.get("warning"):
+                    turn["warning"] = res["warning"]
+                if res.get("endedByAgent"):
+                    turn["ended_by_agent"] = self.ended_by_agent = True
+                break
+            turn["error"] = self.describe(status, res, bool(self.call_id))
+            if self.call_id and status in (502, 504, 0, 503):
+                wait, t1 = (12 if status == 503 else recover_s), time.time()
+                while True:
+                    self.collect(turn)
+                    if turn["agent"] or self.ended_by_agent or time.time() - t1 >= wait:
+                        break
+                    time.sleep(6)
+                if turn["agent"] or self.ended_by_agent:
+                    turn["error"] += " | the engine handled the turn anyway (%s, from the call log after %.0f s)" % (
+                        "reply recovered" if turn["agent"] else "the call ended", time.time() - t1)
+                    break
+                turn["events"].append("[harness] nothing new in the call log after %.0f s" % (time.time() - t1))
+            if status in (502, 503, 504, 0) and attempt < retries:
+                turn["events"].append("[harness] %s%s: sending the line again in 15 s (%d/%d)"
+                                      % ("HTTP %d" % status if status else "no answer", "" if self.call_id else " before the call exists", attempt + 1, retries))
                 time.sleep(15)
                 continue
             break
-        turn = {"n": n, "customer": text, "agent": "", "status": status, "seconds": round(time.time() - t0, 1), "events": notes, "error": None}
-        if status == 200 and isinstance(res, dict):
-            self.call_id = res.get("callId") or self.call_id
-            turn["agent"] = (res.get("response") or "").strip()
-            turn["message_id"] = res.get("messageId")
-            if res.get("warning"):
-                turn["warning"] = res["warning"]
-            if res.get("endedByAgent"):
-                turn["ended_by_agent"] = self.ended_by_agent = True
-        elif status == 504:
-            turn["error"] = "HTTP 504: the agent service timed out (the gateway waits about 60 s; the platform may be busy)"
-        elif status == 500:
-            turn["error"] = "HTTP 500: %s%s" % (res, "" if self.call_id else " (a bare 500 on the first turn: the workflow cannot start a call at all)")
-        else:
-            turn["error"] = "HTTP %s: %s" % (status, res) if status else "no answer: %s" % res
-        self.turns.append(turn)
+        turn["seconds"] = round(time.time() - t0, 1)
         self.collect(turn)
-        if status == 504 and self.call_id and not turn["agent"]:
-            # The gateway gave up before the engine finished. The reply usually still lands in the call log: poll for it.
-            t1 = time.time()
-            while time.time() - t1 < recover_s and not turn["agent"]:
-                time.sleep(6)
-                self.collect(turn)
-            turn["error"] += " | reply %s the call log after %.0f s" % ("recovered from" if turn["agent"] else "NOT found in", time.time() - t1)
+        if turn.get("ended_by_agent") is None and self.ended_by_agent:
+            turn["ended_by_agent"] = True
         return turn
 
     def collect(self, turn):
@@ -184,20 +204,26 @@ class Chat:
             lines.append("[extract] %s = %r" % (ev.get("name"), ev.get("value")))
         elif e == "function_call_start":
             name, args = fn_name(ev), ev.get("args")
-            rec = {"turn": turn["n"], "tool": name, "args": args, "result": None}
+            rec = {"turn": turn["n"], "tool": name, "args": args, "result": None, "after_end": self.in_tail}
             self.tool_calls.append(rec)
             if isinstance(args, dict) and "url" in args:
                 lines.append("[tool] %s %s %s body=%s" % (name, args.get("method", ""), args.get("url", ""), compact(args.get("body"), 240)))
             else:
                 lines.append("[tool] %s args=%s" % (name, compact(args, 240)))
-        elif e == "function_call_complete":
-            name, result = fn_name(ev), ev.get("result")
+        elif e in ("function_call_complete", "function_call_error"):
+            name = fn_name(ev)
+            result = ev.get("result")
+            if e == "function_call_error":       # {"event", "function", "error": "API request failed: {...}"}
+                result = {"error": ev.get("error") or ev.get("message") or "error"}
             rec = next((r for r in reversed(self.tool_calls) if r["tool"] == name and r["result"] is None), None)
             if rec is None:
-                rec = {"turn": turn["n"], "tool": name, "args": None, "result": None}
+                rec = {"turn": turn["n"], "tool": name, "args": None, "result": None, "after_end": self.in_tail}
                 self.tool_calls.append(rec)
             rec["result"] = result
             lines.append("[tool] %s -> %s" % (name, tool_result_line(result)))
+        elif e == "call_ended":
+            self.ended_by_agent = True
+            lines.append("[call] ended by the engine")
         elif e == "error":
             lines.append("[error] %s %s" % (compact(ev.get("message") or "", 200), compact(ev.get("details") or "", 200)))
 
@@ -206,10 +232,15 @@ class Chat:
             return None
         status, res = post("/api/v2/chat/end", {"callId": self.call_id}, timeout=60)
         self.end_result = res if status == 200 else "HTTP %s: %s" % (status, res)
-        tail = {"n": len(self.turns), "customer": "", "agent": "", "events": []}
-        self.collect(tail)                       # tool calls made after the last reply (close_call, end_call)
-        if tail["events"] and self.turns:
-            self.turns[-1]["events"] += tail["events"]
+        # End-of-call tools (close_call runs at end_of_call) are logged up to half a minute after the call ends: poll until quiet.
+        # They are the consequence of ending the call, not of a customer line: kept apart from the turns ("end").
+        self.in_tail = True
+        tail, quiet, t0 = {"n": len(self.turns), "customer": "", "agent": "", "events": self.tail_events}, 0, time.time()
+        while time.time() - t0 < 45 and quiet < 3:
+            before = self.seen
+            self.collect(tail)
+            quiet = quiet + 1 if self.seen == before else 0
+            time.sleep(4)
         return self.end_result
 
     def plain_vars(self):
@@ -246,7 +277,7 @@ def print_summary(chat):
     for i, t in enumerate(chat.tool_calls, 1):
         a = t["args"] if isinstance(t["args"], dict) else {}
         req = "%s %s body=%s" % (a.get("method", ""), a.get("url", ""), compact(a.get("body"), 300)) if "url" in a else "args=" + compact(t["args"], 300)
-        print(" %d. turn %d  %-18s %s" % (i, t["turn"], t["tool"], req))
+        print(" %d. %-7s %-18s %s" % (i, "end" if t.get("after_end") else "turn %d" % t["turn"], t["tool"], req))
         print("    -> %s" % (tool_result_line(t["result"]) if t["result"] is not None else "(no result event)"))
     if not chat.tool_calls:
         print(" (none)")
@@ -328,8 +359,8 @@ def evaluate(expect, chat):
                 lo = max(0, m.start() - 60)
                 where = " in: %r" % (" ".join(text[lo: m.end() + 60].split()))
             out.append((ok, "%s %s not_contains %r%s" % ("PASS" if ok else "FAIL", label, term, where)))
-        n = ex.get("after_turn")
-        tools = [t["tool"] for t in chat.tool_calls if n is None or t["turn"] <= n]
+        n = ex.get("after_turn")          # with after_turn: the tools of the conversation up to that turn, not the end-of-call ones
+        tools = [t["tool"] for t in chat.tool_calls if n is None or (t["turn"] <= n and not t.get("after_end"))]
         if ex.get("no_tool_calls"):
             ok = not tools
             out.append((ok, "%s %s no_tool_calls%s" % ("PASS" if ok else "FAIL", label, "" if ok else " -> called " + ", ".join(tools))))
@@ -495,6 +526,8 @@ def main(argv=None):
     finally:
         end = chat.end()
         print("--- POST /api/v2/chat/end -> %s" % compact(end if end is not None else "(no call was started)", 200))
+        for line in chat.tail_events:
+            print("   " + line)
 
     if chat.call_id:
         print_summary(chat)
