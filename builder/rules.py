@@ -466,7 +466,7 @@ def self_check(rules, briefs):
 # ----------------------------------------------------------------------------------------------- normalise
 _EXTRA = ("topic", "doc", "doc_date", "author_role", "status", "status_words", "confidence", "samples", "alternatives",
           "value_difference", "deciding_quote", "deciding_quote_found", "effective_from", "effective_until", "not_policy",
-          "verification", "origin", "members", "value_difference_resolved")
+          "verification", "origin", "members", "value_difference_resolved", "stale_values")
 
 
 def normalise(rules, keep_flags=False):
@@ -984,6 +984,37 @@ def apply_decisions(rules, blocks, ans, brief_norm):
         notes.append(entry)
     return rng, notes
 
+def stale_values(rules):
+    """A value that a superseded rule had, that the rule replacing it names in its text but no longer has in its values,
+    is replaced. Where another rule in force still carries it, that rule is stale: flag it (confidence low,
+    stale_values) and leave it to the builder; outcome rows with a stale reason are left out of the spec."""
+    by_id = {r["id"]: r for r in rules}
+    found = []
+    for old in rules:
+        new = by_id.get(old.get("superseded_by") or "")
+        if old["in_force"] or not new:
+            continue
+        on, od, os_ = value_atoms(old.get("values") or {})
+        nn, nd, ns = value_atoms(new.get("values") or {})
+        ntext = " ".join([new.get("text", ""), new.get("deciding_quote", ""), old.get("deciding_quote", "")])
+        tn, td = text_atoms(ntext)
+        tl = " %s " % re.sub(r"[^a-z0-9_]+", " ", ntext.lower())
+        replaced = {a for a in on - nn if a in tn} | {a for a in od - nd if a in td} | \
+                   {a for a in os_ - ns if " %s " % re.sub(r"[^a-z0-9_]+", " ", a) in tl}
+        if not replaced:
+            continue
+        for r in rules:
+            if not r["in_force"] or r is new or r.get("effective_until"):
+                continue
+            rn, rd, rs = value_atoms(r.get("values") or {})
+            hit = replaced & (rn | rd | rs)
+            if hit and not any(x["rule"] == r["id"] and set(x["values"]) >= hit for x in found):
+                r["confidence"] = "low"
+                r["stale_values"] = sorted(set(r.get("stale_values", [])) | hit)
+                found.append({"rule": r["id"], "values": sorted(hit), "old": old["id"], "new": new["id"]})
+    return found
+
+
 # ----------------------------------------------------------------------------------------------- T15 chain-of-verification
 VERIFY_SCHEMA = {
     "type": "object",
@@ -1069,11 +1100,10 @@ def apply_verification(rules, qs, answers, brief_norm):
             continue
         quotes = [x for x in a.get("quotes") or [] if str(x.get("quote") or "").strip()]
         found = [quote_found(x["quote"], brief_norm) for x in quotes]
+        # compared with the verifier's own statement of the value only: a quote can still carry a value a later
+        # document replaced ("the hardship code from the list (X in v3)")
         older = bool(r.get("effective_until"))
-        if older:
-            pool = " ".join([a.get("earlier_value") or "", a.get("value_in_force") or ""] + [x["quote"] for x in quotes])
-        else:
-            pool = " ".join([a.get("value_in_force") or ""] + [x["quote"] for x in quotes if x.get("in_force", True)])
+        pool = " ".join([a.get("earlier_value") or "", a.get("value_in_force") or ""]) if older else (a.get("value_in_force") or "")
         pn, pd = text_atoms(pool)
         pl = _norm_text(pool)
         rn, rd, rs = value_atoms(r.get("values") or {})
@@ -1185,6 +1215,8 @@ def compile_spec(rules, api_name, at=None):
             setf(spec, "max_wrong_answers", v["max_wrong_answers"], "spec", rid, owners)
             src("max_wrong_answers", rid)
         for o in v.get("outcomes") or []:
+            if str(o.get("reason") or "").lower() in [x.lower() for x in r.get("stale_values", [])]:
+                continue
             k = (o.get("outcome", ""), o.get("reason", "") or "")
             if k not in outs:
                 outs[k] = {"outcome": k[0], "reason": k[1], "when": o.get("when", "")}
@@ -1251,6 +1283,8 @@ def _flags(r):
         f.append("[from %s]" % r["effective_from"])
     if r.get("effective_until"):
         f.append("**[in force until %s, then %s]**" % (r["effective_until"], r.get("superseded_by") or "?"))
+    if r.get("stale_values"):
+        f.append("**[stale value(s) %s]**" % r["stale_values"])
     if r.get("confidence") and r["confidence"] != "high":
         f.append("[confidence %s%s]" % (r["confidence"], (", samples " + r["samples"]) if r.get("samples") else ""))
     ver = (r.get("verification") or {}).get("status")
@@ -1293,14 +1327,22 @@ def render_md(rules, briefs, api_path, meta=None):
     return "\n".join(L)
 
 
-def render_conflicts(rules, briefs, merge_info, decisions, verifs, verbatim_missing, spec_doc, spec_problems):
+def render_conflicts(rules, briefs, merge_info, decisions, verifs, verbatim_missing, spec_doc, spec_problems, stale=()):
     by_id = {r["id"]: r for r in rules}
     L = ["# Rule inventory: conflicts and doubts (%s)" % ", ".join(pathlib.Path(b).name for b in briefs), "",
          "Resolve these FIRST, before writing the generator: re-read the quoted source sentence in the brief, decide, and "
          "use the value the brief sets (never a value from another brief). Anything not listed here was found by every "
          "extraction sample and, where it carries a value, verified against a quote of the brief.", ""]
     n = 0
-    low = [r for r in rules if r.get("confidence") == "low" and r["in_force"] and not r.get("verification")]
+    if stale:
+        L += ["## Values a later rule replaced that another rule in force still carries", "",
+              "The rule named \"new\" replaced the value; the rule below still has it. Use the new value (outcome rows with a "
+              "stale reason are left out of spec.json).", ""]
+        for x in stale:
+            r = by_id[x["rule"]]
+            L.append("- **%s** (_%s_) still has %s, replaced by %s (old rule %s): %s" % (x["rule"], r["source"], x["values"], x["new"], x["old"], r["text"]))
+        L.append(""); n += len(stale)
+    low = [r for r in rules if r.get("confidence") == "low" and r["in_force"] and not r.get("verification") and not r.get("stale_values")]
     if low:
         L += ["## Rules found by only one extraction sample (confidence low)", ""]
         for r in low:
@@ -1524,6 +1566,10 @@ async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, 
             log("verification: %d checked, %d ok, %s" % (len(verifs), sum(v["status"] == "ok" for _, v in verifs), ", ".join(
                 "%s %s" % (rid, v["status"]) for rid, v in verifs if v["status"] != "ok") or "no mismatch"))
         stages.setdefault("verify+decide", {})["seconds"] = time.time() - t1
+    stale = stale_values(rules)
+    if stale:
+        log("stale values (replaced by a later rule, still in another rule in force): %s" % "; ".join(
+            "%s %s (replaced %s -> %s)" % (x["rule"], x["values"], x["old"], x["new"]) for x in stale))
     verbatim_missing = [(r["id"], s) for r in rules if r["in_force"] for s in r["verbatim"] if not quote_found(s, brief_norm)]
 
     # 4. T28 spec, conflicts, outputs
@@ -1533,7 +1579,7 @@ async def extract_rules_async(briefs, api_path, out_path, model=None, log=None, 
     spec_doc = build_spec_doc(rules, api_path, call_range)
     spec_problems = spec_check.check(spec_doc, json.load(open(api_path)))
     spec_path.write_text(json.dumps(spec_doc, indent=1, ensure_ascii=False) + "\n")
-    conf_md, n_conf = render_conflicts(rules, briefs, merge_note, decisions, verifs, verbatim_missing, spec_doc, spec_problems)
+    conf_md, n_conf = render_conflicts(rules, briefs, merge_note, decisions, verifs, verbatim_missing, spec_doc, spec_problems, stale)
     conf_path.write_text(conf_md + "\n")
     meta = {"model": model, "sample_models": {k: v or model for k, v in sample_model.items() if k in got}, "seconds": time.time() - t0, "cost_usd": cost, "calls": calls, "self_check": chk,
             "samples": merge_note["samples"], "stages": stages, "briefs": [str(b) for b in briefs], "api": str(api_path),
