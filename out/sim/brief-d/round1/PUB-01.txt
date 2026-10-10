@@ -1,0 +1,78 @@
+# PUB-01 Confirms identity and pays the full amount today
+# workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 | call ccf70be4-8915-49c9-93ad-27dd6a240c0e | customer c_94c34748-054 | 2026-10-10 20:25:06
+# customer model claude-haiku-5-5 | judge model claude-sonnet-5-5 (claude) | stop: close_call in the ledger | transcript from: GET /api/v2/call/ccf70be4-8915-49c9-93ad-27dd6a240c0e
+# RESULT: FAIL | outcome ('transferred', 'TRS'), expected ('promise', 'PRM') | promises [], expected [('p1', 420.0, '2026-10-14')] | transfers [{'queue': 'restructuring'}], expected [] | conversation: The call was transferred to restructuring before any promise was negotiated. There was no read-back ending with 'Shall I record that?', create_promise was never called, and the confirmation sentence 'We will email you a confirmation of this arrangement.' was never said.
+
+customer: Hello?
+agent: This is the digital assistant of Kestrel Bank. Please note that this call is recorded. Am I speaking with Daniel Reyes?
+customer: Yes, this is Daniel Reyes.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_phone: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_phone
+agent: Thank you, Mr Reyes. To protect your account, I need to ask two security questions. Could you please tell me the last four digits of your phone number?
+customer: Last four digits: 4471.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "4471", "customer_id": "c_94c34748-054"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+   [route] ask_phone -> ask_dob: phone digits correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_phone -> ask_dob
+agent: Thank you. For the second question, could you please tell me your date of birth?
+customer: 14 March 1988.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1988-03-14", "customer_id": "c_94c34748-054"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_dob -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_dob -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_94c34748-054"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "4821", "past_due": 420, "days_late": 6, "minimum_payment": 126}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Reyes. I am calling from the arrears team about an overdue payment. Your credit card ending 4821 has an overdue amount of 420, and it is 6 days overdue. Are you able to clear the overdue amount today?
+customer: Thank you. I can't pay the full amount today, so I'd like to ask about setting up a payment plan.
+   [route] negotiate -> xfer_restructuring: wants a plan / lower instalments / more time topic == 'new_plan'
+   [node] negotiate -> xfer_restructuring
+agent: I will put you through to our restructuring team, who can talk to you about that.
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "restructuring", "customer_id": "c_94c34748-054"}
+   [tool] api_call -> HTTP 200 data={"ok": true}
+   [route] xfer_restructuring -> fin_transferred_restructuring: always always
+   [node] xfer_restructuring -> fin_transferred_restructuring
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TRS'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_restructuring -> end_transferred_restructuring: always always
+   [node] fin_transferred_restructuring -> end_transferred_restructuring
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our restructuring team now. Thank you, Mr Reyes. Goodbye."}
+customer: Thank you. I'll hold while you transfer me.
+   [route] xfer_restructuring -> fin_transferred_restructuring: always always
+   [node] xfer_restructuring -> fin_transferred_restructuring
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TRS'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_transferred_restructuring -> end_transferred_restructuring: always always
+   [node] fin_transferred_restructuring -> end_transferred_restructuring
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our restructuring team now. Thank you, Mr Reyes. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: I am transferring you to our restructuring team now. Thank you, Mr Reyes. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "TRS", "outcome": "transferred", "customer_id": "c_94c34748-054"}
+   [tool] close_call -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## tool calls (11)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', ... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "4471", "customer_id": "c_94c34748-054"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Now ask for the date of birth."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1988-03-14", "customer_id": "c_94c34748-054"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_94c34748-054"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "4821", "past_due": 420, "days_late": 6, "minimum_payment": 126}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-30', '2026-11-20', '2026-12-24', '2026-12-25', '2026-12-28', '2026-12-31'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', '... -> HTTP 200 data=null
+6. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent body={"queue": "restructuring", "customer_id": "c_94c34748-054"} -> HTTP 200 data={"ok": true}
+7. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TRS'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+8. end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our restructuring team now. Thank you, Mr Reyes. Goodbye."} -> (no result event)
+9. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['close_outcome'] = 'transferred'\n vars['close_code'] = 'TRS'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+10. end_call args={"message_mode": "custom", "spoken_message": "I am transferring you to our restructuring team now. Thank you, Mr Reyes. Goodbye."} -> success Call ended
+11. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "TRS", "outcome": "transferred", "customer_id": "c_94c34748-054"} -> HTTP 200 data={"ok": false, "error": "this outcome needs one of these reasons: restructuring, human, support"}
+
+## ledger: outcome=transferred reason=TRS promises=[] notes=[] callbacks=[] transfers=[{"queue": "restructuring"}] calls=['verify_identity', 'verify_identity', 'get_account', 'transfer_to_agent', 'close_call']
+
+## judge (claude-sonnet-5-5): fail - The call was transferred to restructuring before any promise was negotiated. There was no read-back ending with 'Shall I record that?', create_promise was never called, and the confirmation sentence 'We will email you a confirmation of this arrangement.' was never said.

@@ -1,0 +1,17 @@
+sim | workflow de5f944a-d43d-4a7e-80fc-405ee4c53649 (slot brief-d) | 13 case(s) x 1 rep(s) | concurrency 2 | customer claude-haiku-5-5, judge claude-sonnet-5-5 (claude)
+FAIL PUB-02 medium Third party    | schedule_callback > close_call
+       - conversation: The first criterion fails: the agent never said this is a personal banking matter, and it did not decline a husband's offer to pay or ask when Maria could be reached (the customer volunteered a time). The final criterion also fails: close_call wi
+FAIL PUB-01 easy   Happy path     | verify > verify > get_account > transfer_to_agent > close_call
+       - outcome ('transferred', 'TRS'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 420.0, '2026-10-14')]
+       - transfers [{'queue': 'restructuring'}], expected []
+       - conversation: The call was transferred to restructuring before any promise was negotiated. There was no read-back ending with 'Shall I record that?', create_promise was never called, and the confirmation sentence 'We will email you a confirmation of this arran
+FAIL PUB-04 medium Dates          | verify > verify > get_account > add_note > close_call
+       - outcome ('no_promise', 'RF'), expected ('promise', 'PRM')
+       - promises [], expected [('p1', 1250.0, '2026-10-21')]
+       - notes [('p1', 'refused')], expected []
+       - conversation: No promise of 1250.00 on 2026-10-21 was recorded, since the customer never agreed to it and the call ended with a refused note. The agent also kept pushing after her 6 November date by offering a 400 floor amount, and then marked the product refu
+FAIL PUB-03 medium Identity       | verify > verify > verify > get_account > add_note > close_call
+       - outcome ('no_promise', 'RF'), expected ('not_verified', 'IDF')
+       - notes [('p1', 'refused')], expected []
+       - conversation: The agent kept going after the first wrong date of birth, and the second date was accepted, so the check never stopped after a second wrong answer. It also disclosed the overdue amount (95), the product and the reason for the call when he asked h
