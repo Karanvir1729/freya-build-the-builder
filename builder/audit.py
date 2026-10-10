@@ -99,6 +99,13 @@ HOW A FREYA WORKFLOW WORKS (what to look for):
   pre_process_code may rewrite the request body (`config['body']`), post_process_code may rewrite `result` (for example add a
   what_to_do_next line). Global `tools` with config.alwaysRunsAt ["end_of_call"] run automatically when the call ends, with
   the variables as they are then (e.g. close_call reads vars outcome/reason set by the fin_* code nodes).
+- LIFECYCLE TOOLS: a tool whose config.alwaysRunsAt is a non-empty list (e.g. ["end_of_call"]) is run by the engine at that
+  moment, exactly once, and is NEVER shown to the dialogue model: the model cannot call it, early or twice. Do not flag
+  "nothing forbids the model from calling close_call" (or "close_call might be called twice / not last") when close_call is
+  such a lifecycle tool; judge only the values it sends (the outcome/reason variables the fin_* nodes write).
+- on_enter {"type": "llm"} means the model writes the entry line from task_message; an on_enter prompt (shown as
+  "on_enter llm prompt") overrides that entry instruction. A terminal with message_mode llm has the model write the
+  farewell from llm_prompt; custom speaks spoken_message verbatim; none hangs up silently.
 - Booleans from tools arrive as strings ("true"/"True"); routes test both. Nodes named fin_<x> set outcome/reason and lead
   to end_<x> terminals; the terminal's spoken_message is the farewell.
 
@@ -150,6 +157,8 @@ def _tool_text(t):
     cfg_bits = {k: v for k, v in cfg.items() if k in ("alwaysRunsAt", "maxRetries")}
     if cfg_bits:
         L.append("config: " + json.dumps(cfg_bits))
+    if isinstance(cfg.get("alwaysRunsAt"), list) and cfg["alwaysRunsAt"]:
+        L.append("LIFECYCLE TOOL: run by the engine at %s, never offered to the dialogue model" % ", ".join(map(str, cfg["alwaysRunsAt"])))
     params = (f.get("parameters") or {}).get("properties") or {}
     if "url" in params:
         L.append("url: %s %s" % ((params.get("method") or {}).get("default", ""), (params.get("url") or {}).get("default", "")))
@@ -209,6 +218,8 @@ def workflow_digest(wf):
         oe = n.get("on_enter") or {}
         if oe.get("type") == "tts":
             body.append("  on_enter tts: \"%s\"" % oe.get("text", ""))
+        elif oe.get("type") == "llm" and oe.get("prompt"):
+            body.append("  on_enter llm prompt:\n" + _indent(str(oe["prompt"]), 4))
         elif oe.get("type"):
             body.append("  on_enter: " + oe["type"])
         if n.get("task_message"):
@@ -226,8 +237,8 @@ def workflow_digest(wf):
         if n.get("response_mapping"):
             body.append("  response_mapping: " + json.dumps(n["response_mapping"]))
         for e in n.get("extraction_schema") or []:
-            body.append("  extract %s: enum %s (min_confidence %s)\n%s" % (
-                e.get("name"), json.dumps(e.get("enum_values")), e.get("min_confidence", ""), _indent(" ".join(str(e.get("description", "")).split()), 6)))
+            body.append("  extract %s (type %s): enum %s (min_confidence %s)\n%s" % (
+                e.get("name"), e.get("type", "string"), json.dumps(e.get("enum_values")), e.get("min_confidence", ""), _indent(" ".join(str(e.get("description", "")).split()), 6)))
         if n.get("transitions"):
             body.append("  transitions (in order):")
             for i, t in enumerate(n["transitions"], 1):
@@ -238,7 +249,14 @@ def workflow_digest(wf):
         if term:
             f = term.get("function") or {}
             props = ((f.get("parameters") or {}).get("properties") or {})
-            body.append("  terminal: endedReason=%s, spoken_message=\"%s\"" % (f.get("name"), (props.get("spoken_message") or {}).get("default", "")))
+            mode = (props.get("message_mode") or {}).get("default", "custom")
+            if mode == "llm":
+                body.append("  terminal: endedReason=%s, message_mode=llm, llm_prompt=\"%s\"" % (
+                    f.get("name"), (props.get("llm_prompt") or {}).get("default", "")))
+            elif mode == "none":
+                body.append("  terminal: endedReason=%s, message_mode=none (hangs up without a farewell)" % f.get("name"))
+            else:
+                body.append("  terminal: endedReason=%s, spoken_message=\"%s\"" % (f.get("name"), (props.get("spoken_message") or {}).get("default", "")))
         body.append("")
     glob = [register(t) for t in wf.get("tools") or []]
     out = ["INITIAL NODE: %s" % wf.get("initial_node"), "", "SYSTEM PROMPT:", _indent(wf.get("system_prompt", ""), 2), ""]
