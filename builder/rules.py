@@ -58,7 +58,7 @@ FAST_EFFORT = os.environ.get("RULES_EFFORT", "low") or None
 # rules (the samples agree less), so all three use the main model by default.
 SAMPLE_MODELS = os.environ.get("RULES_SAMPLE_MODELS", "")
 MAX_BUDGET_USD_PER_CALL = 15.0     # a stop for a runaway call (claude-fable-5-1 costs 2.5x claude-opus-5-5 per token)
-FALLBACK_MODEL = "claude-opus-5-5"  # when the main model is overloaded (the Claude CLI's --fallback-model)
+FALLBACK_MODEL = os.environ.get("FALLBACK_MODEL") or "claude-opus-5-5"  # when the main model is overloaded (the Claude CLI's --fallback-model)
 
 CATEGORIES = ["opening", "third_party", "identity", "disclosure", "dates", "amounts", "persuasion", "hardship",
               "confirmation", "recording", "special", "multi_product", "closing", "wording", "other"]

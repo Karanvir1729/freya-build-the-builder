@@ -51,7 +51,7 @@ import buildguard  # noqa: E402
 
 SKILL = "build-phone-agent"
 DEFAULT_BUILDER_MODEL = "claude-fable-5-1"
-FALLBACK_MODEL = "claude-opus-5-5"      # when the builder model is overloaded (the Claude CLI's --fallback-model)
+FALLBACK_MODEL = os.environ.get("FALLBACK_MODEL") or "claude-opus-5-5"      # when the builder model is overloaded (the Claude CLI's --fallback-model)
 # the building agent's effort; the Claude CLI's default for claude-fable-5-1 is high (claude-opus-5-5: medium)
 BUILDER_EFFORT = os.environ.get("BUILDER_EFFORT") or "high"
 # rules and cases run in parallel before the agent: measured on Fable (Brief F, a mailbox) 309 s and 365 s at the default
