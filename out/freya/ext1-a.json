@@ -1,0 +1,2007 @@
+{
+ "agent_id": "7d100f1a-7799-42ef-9d12-ff74aa69ff13",
+ "cases": "tests/cases/brief-a-extended.cases.json",
+ "style": null,
+ "passed": 39,
+ "total": 42,
+ "runs": 1,
+ "seconds": 439,
+ "final": [
+  {
+   "id": "EXT-A-01",
+   "family": "Opening",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-02",
+   "family": "Opening",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-03",
+   "family": "Opening",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-04",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-05",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-06",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-07",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-08",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-09",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-10",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-11",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-12",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-13",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-14",
+   "family": "Identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-15",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-16",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-17",
+   "family": "Amounts",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-18",
+   "family": "Amounts",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-19",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-20",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-21",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-22",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-23",
+   "family": "Dates",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-24",
+   "family": "Persuasion",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-25",
+   "family": "Persuasion",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-26",
+   "family": "Persuasion",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-27",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-28",
+   "family": "Hardship",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-29",
+   "family": "Dispute",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-30",
+   "family": "Human",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-31",
+   "family": "Human",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-32",
+   "family": "Refusal to talk",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-33",
+   "family": "Refusal to talk",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-34",
+   "family": "Confirmation",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-35",
+   "family": "Confirmation",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-36",
+   "family": "Tool failure",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-37",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-38",
+   "family": "Calendar",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-39",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-40",
+   "family": "Third party",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-41",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "EXT-A-42",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-A-01",
+   "mock_case": "PUB-01",
+   "level": "medium",
+   "family": "Opening",
+   "pass": true,
+   "failed": [],
+   "call_id": "0dea97ee-fb60-4067-afe9-43325ee81e10",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_0f4704ee-b5b",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 0.8,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-02",
+   "mock_case": "PUB-03",
+   "level": "easy",
+   "family": "Opening",
+   "pass": true,
+   "failed": [],
+   "call_id": "9ca013d8-4329-4fa8-9b5a-5438be66a284",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_906fde9b-516",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 4.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-03",
+   "mock_case": "PUB-08",
+   "level": "medium",
+   "family": "Opening",
+   "pass": true,
+   "failed": [],
+   "call_id": "1b6a0c0c-48af-47d1-9e4c-c8a182db8dbf",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_729b4a8b-23d",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 3.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-04",
+   "mock_case": "PUB-02",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "8cc14cfa-dc86-40c9-804e-360e55600bf7",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_1a56551a-9d2",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 1.8,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-05",
+   "mock_case": "PUB-02",
+   "level": "hard",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "9b2a951d-c96e-4fe0-b72c-0d092d442b7b",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_9c49b8f0-390",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 1.1,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-06",
+   "mock_case": "PUB-02",
+   "level": "easy",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "d9ea0f28-791b-41ac-bb12-4cf339ae2007",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_bbfcb6e2-315",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 1.8,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-07",
+   "mock_case": "PUB-05",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "8989bf64-4fb0-4eab-8320-dc958a1a48b7",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_ba97cc70-a33",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 0.6,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-08",
+   "mock_case": "PUB-06",
+   "level": "hard",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "37ea6bbc-2f4c-4e5d-89a3-da0c7be6a649",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_8d440b96-bb9",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 1.2,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-09",
+   "mock_case": "PUB-07",
+   "level": "hard",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "71059005-17b8-4744-b57b-be6e62a19359",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_f6f2a7d8-21c",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 2.5,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-10",
+   "mock_case": "PUB-04",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "be131986-eafa-413a-9181-057e619712f3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_2e16bf90-592",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 2.6,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-11",
+   "mock_case": "PUB-01",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "ecb90eb5-c0a8-457c-9ef1-8ed2fc9497f6",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_52717afb-78d",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 2.3,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-12",
+   "mock_case": "PUB-03",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "bcd4af7f-ad34-4bfa-bc57-79b23dd00d28",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_adf7a4de-ac6",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 0.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-13",
+   "mock_case": "PUB-08",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "bd232138-ad71-448b-b0c0-7b8bde4e547d",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_239de8b9-733",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 0.5,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-14",
+   "mock_case": "PUB-06",
+   "level": "hard",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "54d50b33-3960-4fff-affc-3ce5d30e9731",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_fa61f346-e5f",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+   "slowest_turn_s": 3.1,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-15",
+   "mock_case": "PUB-01",
+   "level": "medium",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "3a133561-4968-4ba3-97a0-c5e3b69e24ea",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_0275a8f3-8e3",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 2.4,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-16",
+   "mock_case": "PUB-06",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "00221607-34bc-43bc-8ec9-68645068e881",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_dfa5a374-02c",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 4.6,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-17",
+   "mock_case": "PUB-04",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": false,
+   "failed": [
+    "conversation: - The agent offered the instalment amount of 400 twice (Message 8 and Message 12), failing the criterion that it should only be offered once. - All other criteria were met: 100 was rejected, no promise was recorded, and no discounts or plans were offered."
+   ],
+   "call_id": "d53961c7-8c5c-4768-80c5-753568fdab64",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_6a1d3537-a14",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 5.9,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-18",
+   "mock_case": "PUB-09",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "f50f8e8f-62b9-446b-9e36-3a8b7c4ae3f9",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_99ba12da-a1a",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 5.4,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-19",
+   "mock_case": "PUB-08",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "4d92dd48-6796-4394-a6bc-7d79aeb36303",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_3ab2fd55-7fa",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 1.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-20",
+   "mock_case": "PUB-01",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "3c6e6cb7-bcbd-45ed-ab01-ba17c6e8ed13",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d7b1cec3-a70",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 3.9,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-21",
+   "mock_case": "PUB-05",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "503e385c-fc5c-492c-a5dd-9048f18ea079",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_73d5edb8-eb5",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 11.2,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-22",
+   "mock_case": "PUB-03",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "025053ee-e522-445e-b46d-f380deec6888",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_e04c699a-fe1",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 1.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-23",
+   "mock_case": "PUB-02",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "5036d5b2-0e5f-44cd-a6a9-c7512191ac7e",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_8180a322-000",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 4.5,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-24",
+   "mock_case": "PUB-07",
+   "level": "medium",
+   "family": "Persuasion",
+   "pass": true,
+   "failed": [],
+   "call_id": "6545cf60-8b93-42a0-a971-2112267ca883",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_cee2decc-07b",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 11.0,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-25",
+   "mock_case": "PUB-08",
+   "level": "medium",
+   "family": "Persuasion",
+   "pass": true,
+   "failed": [],
+   "call_id": "69ec4b45-50b5-418d-9448-5f882f9f93d0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_fe4d4d6e-4a2",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 2.8,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-26",
+   "mock_case": "PUB-10",
+   "level": "hard",
+   "family": "Persuasion",
+   "pass": false,
+   "failed": [
+    "conversation: The agent failed several success criteria. First, the agent made three distinct payment offers: payment today (Message 6), payment on 16 October (Message 8), and payment on 23 October (Message 10). This violates the 'no third offer' constraint. Second, 'attempt 1' was defined as the full amount on 16 October, but the agent's first offer was for payment today (Message 6), making the 16 October offe"
+   ],
+   "call_id": "8d8e19c6-4b83-4ed9-87d8-6a62b76a07c8",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_206bb43f-bd2",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 2.9,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-27",
+   "mock_case": "PUB-06",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "043ed6fc-53a5-4d6e-b34c-3bd28fd6f674",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_7d6f823b-2cf",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 2.2,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-28",
+   "mock_case": "PUB-09",
+   "level": "hard",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "022600eb-6e31-4294-bf6a-c251e6a0eee7",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_96f99ec3-f8a",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+   "slowest_turn_s": 3.2,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-29",
+   "mock_case": "PUB-03",
+   "level": "medium",
+   "family": "Dispute",
+   "pass": true,
+   "failed": [],
+   "call_id": "c049104e-5793-4186-8c55-df4706d72ba1",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_bef0d348-eaa",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.3,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-30",
+   "mock_case": "PUB-01",
+   "level": "medium",
+   "family": "Human",
+   "pass": true,
+   "failed": [],
+   "call_id": "456ab684-0842-4915-bcff-185a58dd4973",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_201d38aa-657",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 1.9,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-31",
+   "mock_case": "PUB-07",
+   "level": "hard",
+   "family": "Human",
+   "pass": true,
+   "failed": [],
+   "call_id": "ee0a34f9-53b7-4092-a20d-69665a0ac061",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_b984db60-40e",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-32",
+   "mock_case": "PUB-04",
+   "level": "medium",
+   "family": "Refusal to talk",
+   "pass": true,
+   "failed": [],
+   "call_id": "41245868-b916-4708-9122-8390e0b32317",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_8a10eb1d-6c2",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-33",
+   "mock_case": "PUB-05",
+   "level": "medium",
+   "family": "Refusal to talk",
+   "pass": true,
+   "failed": [],
+   "call_id": "358c17a2-544f-49c0-9543-41c250ede2ac",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_3a4b851a-724",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 0.8,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-34",
+   "mock_case": "PUB-01",
+   "level": "hard",
+   "family": "Confirmation",
+   "pass": true,
+   "failed": [],
+   "call_id": "0fa84fb0-e23e-4082-a943-81eb12e3a771",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_1b59a60c-71f",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 1.7,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-35",
+   "mock_case": "PUB-08",
+   "level": "medium",
+   "family": "Confirmation",
+   "pass": true,
+   "failed": [],
+   "call_id": "40299285-45e8-494c-9321-b38b09e325c3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_49e92065-0de",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.2,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-36",
+   "mock_case": "PUB-10",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "324f7e4a-c9c7-4b36-bc82-5b0229d65f2b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_9a7162da-525",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.4,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-37",
+   "mock_case": "PUB-01",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "861e6fb6-7671-4328-a367-b24acb3919fa",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_57fe1867-aac",
+   "now": "2026-10-16T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 3.1,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-38",
+   "mock_case": "PUB-03",
+   "level": "medium",
+   "family": "Calendar",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 95.0, '2026-10-23')], expected [('p1', 95.0, '2026-10-16')]",
+    "conversation: - The success criteria required 'this Friday' to be interpreted as 16 October, but the assistant interpreted it as 23 October in messages 12 and 14. - Consequently, the promise for 95.00 was recorded for 23 October instead of the required date of 16 October."
+   ],
+   "call_id": "4be9ae98-faff-4aa4-9171-9d8ec574975c",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_e9b76b75-a34",
+   "now": "2026-10-16T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.9,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-39",
+   "mock_case": "PUB-02",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "caac7a7f-f660-4cac-908f-4017ba1d2acb",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_edb967bc-427",
+   "now": "2026-10-14T18:30",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 2.1,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-40",
+   "mock_case": "PUB-02",
+   "level": "hard",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "379972f2-e97b-494f-9d98-9a23d1d46110",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_f47150d9-5e0",
+   "now": "2026-10-14T18:30",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 3.2,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-41",
+   "mock_case": "PUB-04",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "4ed05709-565b-4889-96a3-919bc6f570e2",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_e8b053e8-ec2",
+   "now": "2026-10-23T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 3.1,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-42",
+   "mock_case": "PUB-01",
+   "level": "hard",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "7d233a3c-58d2-42bd-a568-fda7ae394dab",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_89b47ffd-c66",
+   "now": "2026-11-10T11:00",
+   "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+   "slowest_turn_s": 3.0,
+   "ended": "assistant-ended-call"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-A-01",
+    "mock_case": "PUB-01",
+    "level": "medium",
+    "family": "Opening",
+    "pass": true,
+    "failed": [],
+    "call_id": "0dea97ee-fb60-4067-afe9-43325ee81e10",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_0f4704ee-b5b",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 0.8,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-02",
+    "mock_case": "PUB-03",
+    "level": "easy",
+    "family": "Opening",
+    "pass": true,
+    "failed": [],
+    "call_id": "9ca013d8-4329-4fa8-9b5a-5438be66a284",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_906fde9b-516",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 4.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-03",
+    "mock_case": "PUB-08",
+    "level": "medium",
+    "family": "Opening",
+    "pass": true,
+    "failed": [],
+    "call_id": "1b6a0c0c-48af-47d1-9e4c-c8a182db8dbf",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_729b4a8b-23d",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 3.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-04",
+    "mock_case": "PUB-02",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "8cc14cfa-dc86-40c9-804e-360e55600bf7",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_1a56551a-9d2",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 1.8,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-05",
+    "mock_case": "PUB-02",
+    "level": "hard",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "9b2a951d-c96e-4fe0-b72c-0d092d442b7b",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_9c49b8f0-390",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 1.1,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-06",
+    "mock_case": "PUB-02",
+    "level": "easy",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "d9ea0f28-791b-41ac-bb12-4cf339ae2007",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_bbfcb6e2-315",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 1.8,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-07",
+    "mock_case": "PUB-05",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "8989bf64-4fb0-4eab-8320-dc958a1a48b7",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_ba97cc70-a33",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 0.6,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-08",
+    "mock_case": "PUB-06",
+    "level": "hard",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "37ea6bbc-2f4c-4e5d-89a3-da0c7be6a649",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_8d440b96-bb9",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 1.2,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-09",
+    "mock_case": "PUB-07",
+    "level": "hard",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "71059005-17b8-4744-b57b-be6e62a19359",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_f6f2a7d8-21c",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 2.5,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-10",
+    "mock_case": "PUB-04",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "be131986-eafa-413a-9181-057e619712f3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_2e16bf90-592",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 2.6,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-11",
+    "mock_case": "PUB-01",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "ecb90eb5-c0a8-457c-9ef1-8ed2fc9497f6",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_52717afb-78d",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 2.3,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-12",
+    "mock_case": "PUB-03",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "bcd4af7f-ad34-4bfa-bc57-79b23dd00d28",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_adf7a4de-ac6",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 0.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-13",
+    "mock_case": "PUB-08",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "bd232138-ad71-448b-b0c0-7b8bde4e547d",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_239de8b9-733",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 0.5,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-14",
+    "mock_case": "PUB-06",
+    "level": "hard",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "54d50b33-3960-4fff-affc-3ce5d30e9731",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_fa61f346-e5f",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "ef54ff7e-a2b7-4ec4-b83a-6f76d122701b",
+    "slowest_turn_s": 3.1,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-15",
+    "mock_case": "PUB-01",
+    "level": "medium",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "3a133561-4968-4ba3-97a0-c5e3b69e24ea",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_0275a8f3-8e3",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 2.4,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-16",
+    "mock_case": "PUB-06",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "00221607-34bc-43bc-8ec9-68645068e881",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_dfa5a374-02c",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 4.6,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-17",
+    "mock_case": "PUB-04",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": false,
+    "failed": [
+     "conversation: - The agent offered the instalment amount of 400 twice (Message 8 and Message 12), failing the criterion that it should only be offered once. - All other criteria were met: 100 was rejected, no promise was recorded, and no discounts or plans were offered."
+    ],
+    "call_id": "d53961c7-8c5c-4768-80c5-753568fdab64",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_6a1d3537-a14",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 5.9,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-18",
+    "mock_case": "PUB-09",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "f50f8e8f-62b9-446b-9e36-3a8b7c4ae3f9",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_99ba12da-a1a",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 5.4,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-19",
+    "mock_case": "PUB-08",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "4d92dd48-6796-4394-a6bc-7d79aeb36303",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_3ab2fd55-7fa",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 1.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-20",
+    "mock_case": "PUB-01",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "3c6e6cb7-bcbd-45ed-ab01-ba17c6e8ed13",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d7b1cec3-a70",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 3.9,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-21",
+    "mock_case": "PUB-05",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "503e385c-fc5c-492c-a5dd-9048f18ea079",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_73d5edb8-eb5",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 11.2,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-22",
+    "mock_case": "PUB-03",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "025053ee-e522-445e-b46d-f380deec6888",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_e04c699a-fe1",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 1.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-23",
+    "mock_case": "PUB-02",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "5036d5b2-0e5f-44cd-a6a9-c7512191ac7e",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_8180a322-000",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 4.5,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-24",
+    "mock_case": "PUB-07",
+    "level": "medium",
+    "family": "Persuasion",
+    "pass": true,
+    "failed": [],
+    "call_id": "6545cf60-8b93-42a0-a971-2112267ca883",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_cee2decc-07b",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 11.0,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-25",
+    "mock_case": "PUB-08",
+    "level": "medium",
+    "family": "Persuasion",
+    "pass": true,
+    "failed": [],
+    "call_id": "69ec4b45-50b5-418d-9448-5f882f9f93d0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_fe4d4d6e-4a2",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 2.8,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-26",
+    "mock_case": "PUB-10",
+    "level": "hard",
+    "family": "Persuasion",
+    "pass": false,
+    "failed": [
+     "conversation: The agent failed several success criteria. First, the agent made three distinct payment offers: payment today (Message 6), payment on 16 October (Message 8), and payment on 23 October (Message 10). This violates the 'no third offer' constraint. Second, 'attempt 1' was defined as the full amount on 16 October, but the agent's first offer was for payment today (Message 6), making the 16 October offe"
+    ],
+    "call_id": "8d8e19c6-4b83-4ed9-87d8-6a62b76a07c8",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_206bb43f-bd2",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 2.9,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-27",
+    "mock_case": "PUB-06",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "043ed6fc-53a5-4d6e-b34c-3bd28fd6f674",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_7d6f823b-2cf",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 2.2,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-28",
+    "mock_case": "PUB-09",
+    "level": "hard",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "022600eb-6e31-4294-bf6a-c251e6a0eee7",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_96f99ec3-f8a",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3f1b04d3-16d9-4407-b5df-971f95dac02b",
+    "slowest_turn_s": 3.2,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-29",
+    "mock_case": "PUB-03",
+    "level": "medium",
+    "family": "Dispute",
+    "pass": true,
+    "failed": [],
+    "call_id": "c049104e-5793-4186-8c55-df4706d72ba1",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_bef0d348-eaa",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.3,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-30",
+    "mock_case": "PUB-01",
+    "level": "medium",
+    "family": "Human",
+    "pass": true,
+    "failed": [],
+    "call_id": "456ab684-0842-4915-bcff-185a58dd4973",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_201d38aa-657",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 1.9,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-31",
+    "mock_case": "PUB-07",
+    "level": "hard",
+    "family": "Human",
+    "pass": true,
+    "failed": [],
+    "call_id": "ee0a34f9-53b7-4092-a20d-69665a0ac061",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_b984db60-40e",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-32",
+    "mock_case": "PUB-04",
+    "level": "medium",
+    "family": "Refusal to talk",
+    "pass": true,
+    "failed": [],
+    "call_id": "41245868-b916-4708-9122-8390e0b32317",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_8a10eb1d-6c2",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-33",
+    "mock_case": "PUB-05",
+    "level": "medium",
+    "family": "Refusal to talk",
+    "pass": true,
+    "failed": [],
+    "call_id": "358c17a2-544f-49c0-9543-41c250ede2ac",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_3a4b851a-724",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 0.8,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-34",
+    "mock_case": "PUB-01",
+    "level": "hard",
+    "family": "Confirmation",
+    "pass": true,
+    "failed": [],
+    "call_id": "0fa84fb0-e23e-4082-a943-81eb12e3a771",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_1b59a60c-71f",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 1.7,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-35",
+    "mock_case": "PUB-08",
+    "level": "medium",
+    "family": "Confirmation",
+    "pass": true,
+    "failed": [],
+    "call_id": "40299285-45e8-494c-9321-b38b09e325c3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_49e92065-0de",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.2,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-36",
+    "mock_case": "PUB-10",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "324f7e4a-c9c7-4b36-bc82-5b0229d65f2b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_9a7162da-525",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.4,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-37",
+    "mock_case": "PUB-01",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "861e6fb6-7671-4328-a367-b24acb3919fa",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_57fe1867-aac",
+    "now": "2026-10-16T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 3.1,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-38",
+    "mock_case": "PUB-03",
+    "level": "medium",
+    "family": "Calendar",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 95.0, '2026-10-23')], expected [('p1', 95.0, '2026-10-16')]",
+     "conversation: - The success criteria required 'this Friday' to be interpreted as 16 October, but the assistant interpreted it as 23 October in messages 12 and 14. - Consequently, the promise for 95.00 was recorded for 23 October instead of the required date of 16 October."
+    ],
+    "call_id": "4be9ae98-faff-4aa4-9171-9d8ec574975c",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_e9b76b75-a34",
+    "now": "2026-10-16T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.9,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-39",
+    "mock_case": "PUB-02",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "caac7a7f-f660-4cac-908f-4017ba1d2acb",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_edb967bc-427",
+    "now": "2026-10-14T18:30",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 2.1,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-40",
+    "mock_case": "PUB-02",
+    "level": "hard",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "379972f2-e97b-494f-9d98-9a23d1d46110",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_f47150d9-5e0",
+    "now": "2026-10-14T18:30",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 3.2,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-41",
+    "mock_case": "PUB-04",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "4ed05709-565b-4889-96a3-919bc6f570e2",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_e8b053e8-ec2",
+    "now": "2026-10-23T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 3.1,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-42",
+    "mock_case": "PUB-01",
+    "level": "hard",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "7d233a3c-58d2-42bd-a568-fda7ae394dab",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_89b47ffd-c66",
+    "now": "2026-11-10T11:00",
+    "simulation_id": "fad408a2-5a78-4038-a1ae-39ac68eb7554",
+    "slowest_turn_s": 3.0,
+    "ended": "assistant-ended-call"
+   }
+  ]
+ ]
+}
