@@ -880,6 +880,13 @@ CB_OFFER_DESC = ("The person's LATEST message against the allowed callback windo
                  "else (no day or time yet, a day without a time, a question, small talk).")
 
 
+# A relative offered to pay in the middle of the call ('I can pay for her if you like.'): the model said its previous line
+# again word for word and the person hung up without a callback time (Brief A PUB-02, run 3 of 3, on Freya)
+TP_NO_REPEAT = ("\nIf they offer to pay or to help, or say anything else that is not a time: thank them in a few words, say you "
+                "can only discuss it with the person you are calling, and ask when that person can be reached, in different "
+                "words from your last message. Never repeat your last message word for word.")
+
+
 def third_party_callback(nodes, task, tools, extraction, transitions, reask_text, no_callback_target, name="third_party",
                          on_enter=None, reask_limit=1, offer_desc=None):
     """The third-party node with the callback re-ask as code: cb_offer (none|inside|outside|cannot_say) is extracted
@@ -891,7 +898,7 @@ def third_party_callback(nodes, task, tools, extraction, transitions, reask_text
     The task also gets reask_text as the dialogue model's own line for a time outside the window: when the extraction
     misreads the time as inside (Ashvale PUB-02: '18:30' against a 17:00 close), the model still says the hours."""
     task = (task.rstrip() + "\nIf the day or time they name is outside the allowed window, do not book it; say exactly: \""
-            + reask_text + "\"")
+            + reask_text + "\"" + TP_NO_REPEAT)
     ext_ = list(extraction or []) + [ext("cb_offer", ["none", "inside", "outside", "cannot_say"], offer_desc or CB_OFFER_DESC)]
     trs = list(transitions or []) + [
         eq("cb_offer", "outside", name + "_count", "a day or time outside the allowed callback window"),
