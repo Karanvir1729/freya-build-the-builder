@@ -240,8 +240,16 @@ def compact_code(src):
     lines = src.split("\n")
     in_string = set()                     # lines that lie inside a multi-line string (never touched)
     comments = {}
+    fstart = []
     for t in toks:
-        if t.type == tokenize.STRING and t.end[0] > t.start[0]:
+        name = tokenize.tok_name.get(t.type, "")
+        if name == "FSTRING_START":       # Python 3.12+: an f-string is START ... END, not one STRING token
+            fstart.append(t.start[0])
+        elif name == "FSTRING_END" and fstart:
+            a = fstart.pop()
+            if t.end[0] > a:
+                in_string.update(range(a + 1, t.end[0] + 1))
+        elif t.type == tokenize.STRING and t.end[0] > t.start[0]:
             in_string.update(range(t.start[0] + 1, t.end[0] + 1))
         elif t.type == tokenize.COMMENT:
             comments[t.start[0]] = t.start[1]
@@ -944,9 +952,9 @@ _CB_CHECK = r'''try:
     if _m:
         _d, _t = _m.group(1), '%02d:%s' % (int(_m.group(2)), _m.group(3))
         _ws = json.loads(str(vars.get('cb_window') or '[]'))
-        if _ws and _d not in [_w[0] for _w in _ws]:
-            # the extractor guessed the year or month ('2025-05-14' on 14 October 2026, EXT-A-39): the window day with
-            # that day of the month
+        if _ws and _d not in [_w[0] for _w in _ws] and _d[:4] not in [_w[0][:4] for _w in _ws]:
+            # the extractor guessed the year ('2025-05-14' on 14 October 2026, EXT-A-39): the window day with that day
+            # of the month (a date in the right year is the customer's, never moved)
             _same = [_w[0] for _w in _ws if _w[0][8:] == _d[8:]]
             if len(_same) == 1:
                 _d = _same[0]
@@ -955,6 +963,7 @@ _CB_CHECK = r'''try:
                 vars['cb_route'] = 'inside'
                 vars['cb_offer'] = 'none'
                 vars['cb_slot_text'] = _d + ' ' + _t
+    vars['cb_at'] = ''                  # used once: a later turn that extracts no slot never books this one
 except Exception:
     vars['cb_route'] = ''
 '''

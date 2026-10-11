@@ -1540,5 +1540,39 @@ def test_compacted_code_behaves_the_same():
     exec(src, G1); exec(out, G2)
     assert G1["x"] == G2["x"] and G2["y"] == "#keep", out
 
+@test
+def test_review_fixes_names_latest_fstrings_callbacks():
+    """Fixes from the review of 11 Oct: 'the last day of the month' is vague; an incidental 'by card' names no product;
+    a claim naming a refused product goes to it; multi-line f-strings survive compaction; a callback date in the right
+    year is never moved; the slot is used once."""
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="vague", offer_when="the last day of the month")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse", stance="refuse")                       # all-products question refused: one by one, card first
+    assert V["cur_pid"] == "p1"
+    ev(P, V, "refuse", stance="refuse")                       # card refused (1 attempt): the loan is on the table
+    assert V["cur_pid"] == "p2", V["cur_pid"]
+    ev(P, V, "paid", topic="already_paid", customer_said="I already paid it last week by card")
+    assert (V["state_p1"], V["state_p2"]) == ("refused", "paid"), (V["state_p1"], V["state_p2"])
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse", stance="refuse"); ev(P, V, "refuse", stance="refuse")
+    ev(P, V, "paid", topic="already_paid", customer_said="actually the credit card I already paid")
+    assert (V["state_p1"], V["state_p2"]) == ("paid", "open"), (V["state_p1"], V["state_p2"])
+    src = 'x = 1\ns = f"""\n    # not a comment\n\n    a {x}\n"""\n'
+    G1, G2 = {}, {}
+    exec(src, G1); exec(fl.compact_code(src), G2)
+    assert G1["s"] == G2["s"], (G1["s"], G2["s"])
+    nodes = {}
+    fl.third_party_callback(nodes, "task", [], [], [], "Another time?", "fin_no_callback")
+    code = nodes["third_party_count"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
+    win = json.dumps([["2026-10-14", "18:30", "19:00", 1], ["2026-10-15", "10:00", "19:00", 0]])
+    V = {"cb_offer": "outside", "cb_at": "2026-11-15 12:00", "cb_window": win}
+    run(code, V)
+    assert V["cb_route"] == "retry" and V["cb_at"] == "", V
+    V = {"cb_offer": "outside", "cb_at": "", "cb_window": win, "cb_outside_count": 1}
+    run(code, V)
+    assert V["cb_route"] == "close", V
+
 if __name__ == "__main__":
     sys.exit(main())

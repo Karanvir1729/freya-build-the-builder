@@ -741,7 +741,8 @@ def resolve_when(V, text):
 # 'what's the latest day I can pay?' / 'the last possible date' / 'as late as possible': the product's latest date, not a
 # vague period (Ashvale PUB-06 on the strict judge: 'I accept 1062.55. I can't pay before my salary; what's the latest day
 # I can have to pay?' was read back for today, twice). Read by check_one through when_latest.
-LATEST_RX = re.compile(r"\b(latest|last)( possible)? (day|date)\b|\bas late as (possible|i can|you can)\b")
+LATEST_RX = re.compile(r"\b(latest|last)( possible)? (day|date)\b(?! of)|\bas late as (possible|i can|you can)\b")
+# ('the last day of the month' is a vague period, never the latest date: the brief's exact-day question applies)
 def offer_date_of(V):
     # the customer's words first (offer_when, resolved in code); the extraction's offer_date only as a fallback and
     # never a date before the call's today
@@ -817,19 +818,23 @@ def product_by_name(V, text):
     best = max(sc.values()) if sc else 0
     top = [p for p, v in sc.items() if v == best]
     return top[0] if best > 0 and len(top) == 1 else ''
-def only_product_named(V, text):
-    # the product a sentence names when it names exactly one by a word of its own ('I never had a car loan'); ''
-    # otherwise ('I paid the card and never had a car loan' names two)
+def names_product(V, p, text):
+    # the words name product p: a word of its own AND at least two of its words (or all of a one-word name: 'mortgage');
+    # an incidental word is not a name ('I paid it by card' while the loan is on the table)
     _, own = name_scores(V, text)
-    hit = [p for p, v in own.items() if v]
+    toks = set(_toks(pg(V, p, 'words')))
+    return bool(own.get(p)) and len(toks & set(_toks(text))) >= min(2, len(toks))
+def only_product_named(V, text):
+    # the product a sentence names when it names exactly one ('I never had a car loan'); '' otherwise ('I paid the card
+    # and never had a car loan' names two)
+    hit = [p for p in pids(V) if names_product(V, p, text)]
     return hit[0] if len(hit) == 1 else ''
 def named_in_order(V, text):
     # the products a sentence names by a word of their own, in the order it names them
-    _, own = name_scores(V, text)
     toks = _toks(text)
     ids = pids(V)
     pos = {}
-    for p in [x for x in ids if own.get(x)]:
+    for p in [x for x in ids if names_product(V, x, text)]:
         mine = set(_toks(pg(V, p, 'words'))) - set().union(*[set(_toks(pg(V, q, 'words'))) for q in ids if q != p])
         pos[p] = min(i for i, t in enumerate(toks) if t in mine)
     return sorted(pos, key=lambda p: pos[p])
@@ -1153,6 +1158,10 @@ def targets_for_topic(V, kind=''):
     # it' ... 'sorry, I mean I already paid it'). kind '' (the hardship words, keep_said) keeps the old rule throughout.
     tp = offer_target(V)
     cur = g(V, 'cur_pid')
+    named = only_product_named(V, g(V, 'customer_said')) if multi(V) and kind else ''
+    if named:
+        # the customer named the product ('actually the credit card I already paid', after the card was refused)
+        return [] if state(V, named) == kind else [named]
     if tp and (live(V, tp) or not kind):
         return [tp]
     if multi(V) and g(V, 'stage') == 'all':

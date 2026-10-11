@@ -79,7 +79,7 @@ def run_simulation(agent_id, name, variables):
         try:                           # temporarily unavailable', 503) is retried for up to 20 minutes
             return freya.run_simulation(agent_id, name, variables)
         except RuntimeError as e:
-            m = re.search(r"/api/v2/simulations/([0-9a-f-]{36}) -> 5\d\d", str(e))
+            m = re.search(r"/api/v2/simulations/([0-9a-f-]{36})(?:/iterations)? -> 5\d\d", str(e))
             if m:
                 sim_id = m.group(1)
                 print("Freya answered %s while polling simulation %s; polling again" % (str(e)[:60], sim_id), flush=True)
