@@ -1607,6 +1607,10 @@ def test_empty_account_is_read_again_then_technical_problem():
     assert V["prepare_route"] == "ok" and V["prepare_state"] == "ok", (V.get("prepare_route"), V.get("prepare_state"))
     trs = [(t["target_node"], (t["condition"].get("conditions") or [{}])[0].get("operand")) for t in P.prepare_transitions()]
     assert trs == [("load_account", "retry"), ("fin_service_error", "no_account"), ("negotiate", None)], trs
+    nodes = P.prepare_nodes({}, code)
+    t1 = [(t["target_node"], (t["condition"].get("conditions") or [{}])[0].get("operator")) for t in nodes["prepare"]["transitions"]]
+    t2 = [(t["target_node"], (t["condition"].get("conditions") or [{}])[0].get("operator")) for t in nodes["prepare_again"]["transitions"]]
+    assert ("prepare_again", "is_not_set") in t1 and ("fin_service_error", "is_not_set") in t2 and t2[-1][0] == "negotiate", (t1, t2)
 
 if __name__ == "__main__":
     sys.exit(main())

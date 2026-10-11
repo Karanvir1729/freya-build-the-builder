@@ -303,7 +303,7 @@ PREPARE = POLICY.prepare_code(PREPARE_BODY, "statement", fallbacks={
 nodes["load_account"] = fl.api_node(
     "load_account", fl.api_tool(API, "get_account", description="Get the late products.", retries=2),
     [fl.always("prepare")], mapping=[{"path": "data.products", "variable": "products"}])
-nodes["prepare"] = fl.code_node("prepare", PREPARE, POLICY.prepare_transitions("load_account", "fin_service_error"))   # an empty account: read again once, then the technical-problem ending
+POLICY.prepare_nodes(nodes, PREPARE, "load_account", "fin_service_error")   # an empty account or a code run that failed: once more, then the technical-problem ending
 
 # ---- extraction, in the brief's own terms
 TOPIC_DESC = ("What the customer's LATEST message says, if it is one of these. "

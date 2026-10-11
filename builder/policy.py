@@ -1873,13 +1873,29 @@ class Policy:
         return fl.guarded(inner, state_var, fb) + ACCOUNT_CHECK
 
     @staticmethod
-    def prepare_transitions(reload_target="load_account", fail_target="fin_service_error", next_target="negotiate"):
+    def prepare_transitions(reload_target="load_account", fail_target="fin_service_error", next_target="negotiate",
+                            again_target=None):
         """prepare's routes with the account check (ACCOUNT_CHECK): no product with an amount owed -> the account is read
         again once (reload_target, the get_account node), then fail_target (the brief's technical-problem ending);
-        otherwise next_target."""
-        return [fl.eq("prepare_route", "retry", reload_target, "the account came back empty: read it again"),
-                fl.eq("prepare_route", "no_account", fail_target, "the account is still empty: technical problem"),
-                fl.always(next_target)]
+        otherwise next_target. With again_target (a copy of the prepare node, see prepare_nodes): a prepare whose code did
+        not run at all (prepare_route never set: the platform's sandbox failed, extended Brief A EXT-A-25 on Freya spoke
+        '{{say_next}}' and improvised a Saturday) runs once more."""
+        trs = [fl.eq("prepare_route", "retry", reload_target, "the account came back empty: read it again"),
+               fl.eq("prepare_route", "no_account", fail_target, "the account is still empty: technical problem")]
+        if again_target:
+            trs.append(fl.tr(again_target, "the prepare code did not run", fl.cond("prepare_route", "is_not_set")))
+        return trs + [fl.always(next_target)]
+
+    def prepare_nodes(self, nodes, code, reload_target="load_account", fail_target="fin_service_error",
+                      next_target="negotiate", name="prepare"):
+        """nodes[name] and nodes[name + '_again'] (the same code): an empty account is read again once, then fail_target;
+        a code run that did not happen at all is tried once more, then fail_target. Returns nodes."""
+        again = name + "_again"
+        nodes[name] = fl.code_node(name, code, self.prepare_transitions(reload_target, fail_target, next_target, again))
+        trs = self.prepare_transitions(reload_target, fail_target, next_target)
+        trs.insert(2, fl.tr(fail_target, "the prepare code did not run twice", fl.cond("prepare_route", "is_not_set")))
+        nodes[again] = fl.code_node(again, code, trs)
+        return nodes
 
     def ending_code(self, outcome, reason, promise_decides=True):
         """Code of a fin_<key> node: writes outcome/reason; with promise_decides, a promise recorded earlier in the
