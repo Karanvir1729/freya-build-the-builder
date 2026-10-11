@@ -170,6 +170,8 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
               "turn before step 10's finish line or the deadline." % (SKILL, " ".join(briefs), tool_api, slot, inventory, test_line, gen_line, int(minutes_left), deadline))
     if os.environ.get("BUILD_CASE_NOTE"):
         prompt += " " + os.environ["BUILD_CASE_NOTE"]
+    if os.environ.get("BUILD_RESUME_NOTE"):
+        prompt += " " + os.environ["BUILD_RESUME_NOTE"]
     t_start = time.time()
     t_end = t_start + minutes_left * 60
 
@@ -389,7 +391,7 @@ async def main(argv):
     while i < len(argv):
         a = argv[i]
         if a in opts and i + 1 < len(argv): opts[a] = argv[i + 1]; i += 2; continue
-        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases", "--keep-builder-edits", "--allow-parallel"): flags.add(a); i += 1; continue
+        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases", "--keep-builder-edits", "--allow-parallel", "--fresh"): flags.add(a); i += 1; continue
         args.append(a); i += 1
     # a case folder and a mock URL (the final's run_command: build.py {case_folder} {mock_url}): the folder becomes one
     # combined brief (builder/casefolder.py), the tool API is the mock's own /openapi.json with the mock as the server
@@ -439,7 +441,32 @@ async def main(argv):
     if others and "--allow-parallel" not in flags:
         sys.exit("another build is running from this checkout (%s): run the briefs one after another, or each from its own "
                  "worktree (git worktree add ../bb-%s HEAD; link env.sh and .venv there), or pass --allow-parallel" % (", ".join(others), slot))
+    # an earlier run's trace of this slot is kept under its own time stamp (a rerun used to overwrite it)
+    for ext in (".log", ".jsonl"):
+        old = ROOT / "traces" / (slot + ext)
+        if old.exists() and old.stat().st_size:
+            old.rename(old.with_name("%s-run-%s%s" % (slot, time.strftime("%Y%m%d-%H%M%S", time.localtime(old.stat().st_mtime)), ext)))
+    # resume: an earlier run of this slot left its generator; the agent improves it instead of starting over
+    resume_note = None
+    gen_prev = ROOT / "out" / ("gen_%s.py" % slot)
+    if gen_prev.exists() and "--fresh" not in flags:
+        keep = gen_prev.with_name("gen_%s.prev.py" % slot)
+        keep.write_bytes(gen_prev.read_bytes())
+        newer = []
+        if folders:
+            base = pathlib.Path(folders[0]).resolve()
+            newer = sorted(str(p.relative_to(base)) for p in base.rglob("*") if p.is_file() and p.stat().st_mtime > gen_prev.stat().st_mtime)
+        resume_note = ("An earlier run of this builder on this slot wrote out/gen_%s.py (%d bytes, %s; a copy is out/gen_%s.prev.py) "
+                       "and saved its workflow. START FROM IT: read it and its DECISIONS block, check every decision against the "
+                       "documents (newest first), keep what is right, fix what is wrong or missing, then regenerate, lint, save and "
+                       "test as the skill says. %s" % (
+                           slot, gen_prev.stat().st_size, time.strftime("%H:%M", time.localtime(gen_prev.stat().st_mtime)), slot,
+                           ("Documents that arrived AFTER that generator was written (read them first, they may change decisions): "
+                            + ", ".join(newer) + ".") if newer else "No document is newer than that generator."))
+        os.environ["BUILD_RESUME_NOTE"] = resume_note
     trace = Trace(slot)
+    if resume_note:
+        trace.line("resume: " + resume_note)
     if case_note:
         trace.line("input: " + case_note + " Brief: %s; tool API: %s" % (" ".join(briefs), tool_api))
     guard = {"snapshot": buildguard.snapshot_builder(), "head": buildguard.git_head(),   # before any step can edit the builder
