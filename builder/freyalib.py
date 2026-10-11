@@ -1039,7 +1039,11 @@ PERSONA_CONDUCT = (
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
     "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
-    "the rules give you.")
+    "the rules give you.\n"
+    "- A tool call that returns an error instead of a result: call it once more with the same values. Never ask a question "
+    "these instructions do not give you.")
+# the last line: on Freya a transient sandbox error turned a correct verify_identity into function_call_error, and the
+# dialogue model made up a security question of its own and repeated it for 160 turns (Brief A EXT-A-16, 11 Oct)
 # appended by builder/policy.py to every enum on the payment nodes (topic, stance, offer_kind, confirm, hs_answer, wrap,
 # aside): a persona's cut-off line ("I've been so stressed because my cousin's") was labelled hardship on Freya, and a
 # string of cut-off small-talk lines became refusals (talkative style, 10 Oct)
