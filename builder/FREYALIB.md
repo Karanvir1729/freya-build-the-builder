@@ -258,3 +258,27 @@ are copied onto all three ask nodes after the gate), and a real answer equal to 
 `ok: false`, not counted). Tests: `python3 builder/tests/test_gated_identity.py` (route code exec'd as a code node,
 transitions walked for verified / all verified / wrong / exhausted / unreadable / stricter-brief paths, an 8-digit
 field from the transfer-test API, `check()` on an assembled workflow).
+
+## Language packs (`LANG_PACKS`, `lang_code(lang)`)
+
+`LANG_PACKS['tr']` holds a call language's words as data: number words (units, tens, hundred/thousand/million/billion),
+ordinals and ordinal suffixes, month and weekday names, relative day words (today, tomorrow, the day after, yesterday),
+next-week / this-week words, currencies with subunits (TRY/TL, USD, EUR, GBP plus aliases and symbols), yes/no words.
+`fl.lang_code('tr')` returns Python source (like `CAL_HELPERS`) to paste into a code node; every function is pure,
+reads no clock and never raises (None / [] on bad input). Words are compared casefolded with Turkish İ->i, I->ı and
+diacritics folded ('dort' = 'dört'), joined number words are split ('ikibinyüzkırk').
+
+| function | example |
+|---|---|
+| `words_to_int(text)` | 'iki bin yüz kırk' -> 2140, 'on iki bin' -> 12000, 'bin' -> 1000, '12.000 TL' -> 12000 |
+| `spoken_digits(text)` | 'dört iki beş üç' / 'kırk iki elli üç' / '4 2 5 3' -> '4253', 'sıfır beş otuz iki' -> '0532' |
+| `ordinal_in(text, max_n)` | 'üçüncü hafta' / '3. hafta' -> 3, 'ilk' -> 1, 'ikinciyi' -> 2, 'sonuncu' -> max_n, out of range -> None |
+| `say_number(n)` | 2140 -> 'iki bin yüz kırk', 1000 -> 'bin' |
+| `say_amount(x, code)` | (85.2, 'EUR') -> 'seksen beş euro yirmi sent', (12000, 'TL') -> 'on iki bin Türk Lirası' (subunit only when not 0) |
+| `say_date(d, weekday=False)` | '2026-11-05' / '05.11.2026' -> '5 Kasım 2026' (weekday=True appends 'Perşembe') |
+| `resolve_day(text, now_iso, future=True)` | ISO date for bugün/yarın/öbür gün/dün, a weekday (bare = the first after today; 'haftaya salı' = next week's), 'bu hafta cuma', 'üç gün sonra', 'iki hafta sonra', 'ayın 20si', '15 Ekim', '15.10', against now's own local date |
+| `yes_no(text)` | 'evet' -> 'yes', 'tamam değil' -> 'no' (no-words win), else None |
+| `match_items(text, items, name_key, digits_key)` | indices of items whose digits match the spoken digits (the text's digits end with the item's, or a 4+ digit tail of the item's), else the items sharing the most name words (suffix-tolerant stems); [] if none |
+
+Add a language by adding a pack with the same keys; the code reads only the pack. `builder/tests/test_lang_pack.py`
+runs 90+ cases on the source exec'd as one dict and as separate globals/locals.
