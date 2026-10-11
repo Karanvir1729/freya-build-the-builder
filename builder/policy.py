@@ -121,6 +121,9 @@ WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as
 # an amount named by reference instead of a number ('the minimum', 'the whole amount'): the extractor does not know the
 # floor's value, so 'too much, but I can pay the minimum today' arrived with no amount and the guard read back the FULL
 # amount (extended Brief A EXT-A-36). The reference is resolved in code against the product's floor / full amount.
+VAGUE_STANCE_CLAUSE = (" 'I don't know the exact day (yet)', 'not sure which day' or 'sometime next week' is NOT a refusal, "
+                       "also right after a question for the exact day: it is a vague offer (offer_kind vague).")
+VAGUE_KIND_CLAUSE = (" After a question for the exact day, 'I don't know the exact day (yet)' or 'not sure which day' is vague.")
 SAID_DESC = ("When the customer gives a reason in their LATEST message (a hardship such as illness, a bereavement or "
              "losing their job; why they dispute the debt; that they already paid, when or how; why they will not pay), "
              "that reason in a few of their own words, e.g. 'lost my job last month' or 'paid on Monday by bank transfer'. "
@@ -398,15 +401,35 @@ def check_one(V, pid, a, d, kind):
     dl = deadline_of(V, pid)
     if kind == 'vague' or (a is None and d is None):
         V['offer_verdict'] = 'vague'
+        # an amount named with the vague period ('500 next week') is still checked: below the floor -> the brief's line
+        # and the floor, above the full amount -> the full amount (generated Brief A GEN-P-04: '500 next week' got
+        # only 'which exact day?', and the deadline was then proposed for the full amount)
+        pre, amt = '', num(pg(V, pid, 'vague_amount')) or pa
+        if a is not None and a > 0:
+            fl_, full = floor_of(V, pid), full_of(V, pid)
+            if a < fl_ - 0.005:
+                if pg(V, pid, 'offered_floor') == 'yes' and g(V, 'mode') != 'hardship':
+                    V['offer_verdict'] = 'below_floor'
+                    refuse(V, pid)
+                    return
+                pre = T('below_floor', named=fmt(a), floor=fmt(fl_), floor_name=pg(V, pid, 'floor_name'), words=pg(V, pid, 'words'))
+                pset(V, pid, 'offered_floor', 'yes')
+                amt = fl_
+            elif a > full + 0.005:
+                pre = T('above_full', full=fmt(full), named=fmt(a), words=pg(V, pid, 'words'))
+                amt = full
+            else:
+                amt = a
+            pset(V, pid, 'vague_amount', str(float(amt)))
         if pg(V, pid, 'vague_asked') != 'yes':
             pset(V, pid, 'vague_asked', 'yes')
-            say(V, T('vague'))
+            say(V, join([pre, T('vague')]))
             return
         if P.get('vague_again') == 'refuse':   # the brief: no exact day after one ask = a non-answer (one attempt)
             refuse(V, pid)
             return
-        set_prop(V, pid, pa, dl)
-        say(V, join([T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
+        set_prop(V, pid, amt, dl)
+        say(V, join([pre, T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
         return
     amt = pa if a is None or a <= 0 else a
     day = pd if d is None else d
@@ -1627,7 +1650,8 @@ class Policy:
         """T1: offer_date (date), offer_amount (float), offer_kind (exact|vague|none), offer_when (the customer's
         words for the day, resolved in code) and offer_ref (none|floor|full: an amount named by reference, resolved in
         code against the product; pass the brief's own names for its floor in ref_desc)."""
-        return [fl.ext("offer_kind", ["none", "exact", "vague"], kind_desc, conf),
+        kd = kind_desc if VAGUE_KIND_CLAUSE in str(kind_desc) else str(kind_desc) + VAGUE_KIND_CLAUSE
+        return [fl.ext("offer_kind", ["none", "exact", "vague"], kd, conf),
                 {"name": "offer_date", "type": "date", "description": date_desc, "min_confidence": conf},
                 {"name": "offer_when", "type": "string", "description": WHEN_DESC, "min_confidence": conf},
                 {"name": "offer_amount", "type": "float", "description": amount_desc, "min_confidence": conf},
@@ -1671,6 +1695,11 @@ class Policy:
         """The negotiation conversation node: on every entry it speaks the code-built {{say_next}} (tts),
         state_line first in its prompt, no tools (every write happens in the record nodes)."""
         name = name or self.targets["negotiate"]
+        extraction = [dict(e, description=str(e.get("description") or "") + VAGUE_STANCE_CLAUSE)
+                      if e.get("name") == "stance" and VAGUE_STANCE_CLAUSE not in str(e.get("description") or "") else
+                      dict(e, description=str(e.get("description") or "") + VAGUE_KIND_CLAUSE)
+                      if e.get("name") == "offer_kind" and VAGUE_KIND_CLAUSE not in str(e.get("description") or "") else e
+                      for e in extraction]
         return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction() + self.said_extraction()),
                        transitions=transitions)

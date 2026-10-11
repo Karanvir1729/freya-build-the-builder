@@ -454,6 +454,23 @@ def one_day_for_all_moves_a_closed_day_by_the_brief():     # Kestrel PUB-13: clo
 
 
 @test
+def vague_period_with_an_amount_below_the_floor():         # generated Brief A GEN-P-04: '500 next week'
+    P, V = start([LOAN])                                   # late band: floor 700, full 2100, deadline Friday 23 October
+    ev(P, V, "offer", offer_kind="vague", offer_amount="500", offer_when="next week")
+    assert "lowest amount" in V["say_next"].lower() and V["say_next"].endswith("Which exact day would that be?"), V["say_next"]
+    ev(P, V, "offer", offer_kind="vague", offer_when="")   # still no exact day: the deadline, for the floor amount
+    assert "700" in V["say_next"] and "Friday 23 October" in V["say_next"] and "2100" not in V["say_next"], V["say_next"]
+    P, V = start([LOAN])                                   # an amount inside the range is kept for the deadline
+    ev(P, V, "offer", offer_kind="vague", offer_amount="900", offer_when="next week")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+    ev(P, V, "offer", offer_kind="vague")
+    assert "900" in V["say_next"] and "Friday 23 October" in V["say_next"], V["say_next"]
+    names = {e["name"]: e["description"] for e in P.negotiate_node("t", [fl.ext("stance", ["none", "refuse"], "a refusal"),
+                                                                     fl.ext("offer_kind", ["none", "exact", "vague"], "kind")], [])["extraction_schema"]}
+    assert "NOT a refusal" in names["stance"] and "is vague" in names["offer_kind"], names
+
+
+@test
 def every_event_survives_empty_vars():
     P = mk(True, True)
     for name, e in pol.EVENT_NODES.items():
