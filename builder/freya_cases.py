@@ -75,14 +75,19 @@ def _retry(fn, tries=12, wait=15):
 def run_simulation(agent_id, name, variables):
     """freya.run_simulation, but a 502/503/504 while it polls no longer loses the run (two runs lost on 11 Oct): the
     simulation id comes from the error, and polling and the iteration lookup go on with retries."""
-    try:
-        return freya.run_simulation(agent_id, name, variables)
-    except RuntimeError as e:
-        m = re.search(r"/api/v2/simulations/([0-9a-f-]{36}) -> 50[234]", str(e))
-        if not m:
-            raise
-        sim_id = m.group(1)
-        print("Freya answered %s while polling simulation %s; polling again" % (str(e)[:60], sim_id), flush=True)
+    for attempt in range(40):          # the start itself: a gateway error or an API outage ('API key validation is
+        try:                           # temporarily unavailable', 503) is retried for up to 20 minutes
+            return freya.run_simulation(agent_id, name, variables)
+        except RuntimeError as e:
+            m = re.search(r"/api/v2/simulations/([0-9a-f-]{36}) -> 50[234]", str(e))
+            if m:
+                sim_id = m.group(1)
+                print("Freya answered %s while polling simulation %s; polling again" % (str(e)[:60], sim_id), flush=True)
+                break
+            if not re.search(r"POST /api/v2/simulations -> 50[234]", str(e)) or attempt == 39:
+                raise
+            print("Freya answered %s when starting; retrying in 30 s" % str(e)[:80], flush=True)
+            time.sleep(30)
     while True:
         time.sleep(10)
         s = _retry(lambda: freya.api("GET", f"/api/v2/simulations/{sim_id}"))
