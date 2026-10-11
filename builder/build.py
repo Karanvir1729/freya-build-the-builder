@@ -12,7 +12,8 @@ Options: --cases <file> (practice cases to test against; auto-detected for the k
 hidden briefs), --runner sim|freya (local simulator or the organisers' simulation; default sim), --minutes N (budget,
 default 29), --no-rules / --no-audit / --no-gen-cases to skip those steps, --gen-cases to generate rule-branch cases
 even when a cases file exists (they are then an extra set; the given file stays the practice set), --keep-builder-edits
-to leave the agent's edits to the builder's own files in place (development only).
+to leave the agent's edits to the builder's own files in place (development only), --allow-parallel to run beside another
+build from the same checkout (each agent then sees the other's library edits; otherwise refused).
 
 One run, with no manual step:
   1. rules:    builder/rules.py extracts the rule inventory of the brief(s) -> out/<slot>.rules.json, .spec.json, .rules.conflicts.md
@@ -130,7 +131,7 @@ def detect_cases(briefs):
     return None, None
 
 
-async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner, minutes_left, generated=None):
+async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner, minutes_left, generated=None, no_rules=False):
     from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, ToolResultBlock,
                                   ToolUseBlock, UserMessage, query)
     model = os.environ.get("BUILDER_MODEL") or DEFAULT_BUILDER_MODEL
@@ -156,12 +157,15 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
                  "python3 builder/sim.py <slot> --cases <file>%s --concurrency 3 (the chat route answers 504 above that)" % ((" --brief " + brief_filter) if brief_filter else "")
                  if runner == "sim" else "python3 tools/run_cases.py <agent_id> --cases <file>%s" % ((" --brief " + brief_filter) if brief_filter else "")))
     deadline = time.strftime("%H:%M:%S", time.localtime(time.time() + minutes_left * 60))
+    inventory = ("The rule inventory is at out/%s.rules.json (and .md); resolve out/%s.rules.conflicts.md first; the structured values "
+                 "are in out/%s.spec.json." % (slot, slot, slot) if not no_rules else
+                 "The rules step did not finish: there is no out/%s.rules.json or .spec.json. Do NOT run builder/rules.py (it takes "
+                 "5-9 minutes): read the brief(s) and the tool API in full, build from them, and run lint without --rules." % slot)
     prompt = ("Use the %s skill to build a phone agent. Brief file(s): %s. Tool API file: %s. Slot name: %s. "
-              "The rule inventory is at out/%s.rules.json (and .md); resolve out/%s.rules.conflicts.md first; the structured values "
-              "are in out/%s.spec.json. %s%s Time budget: %d minutes from now (stop by %s local "
+              "%s %s%s Time budget: %d minutes from now (stop by %s local "
               "time; check `date` before starting a test round) for everything, including your own tests; save a working "
               "agent early and improve it. A step you decide on is something to run now, not to announce: do not end your "
-              "turn before step 10's finish line or the deadline." % (SKILL, " ".join(briefs), tool_api, slot, slot, slot, slot, test_line, gen_line, int(minutes_left), deadline))
+              "turn before step 10's finish line or the deadline." % (SKILL, " ".join(briefs), tool_api, slot, inventory, test_line, gen_line, int(minutes_left), deadline))
     t_end = time.time() + minutes_left * 60
 
     async def consume(p, opts, purpose):
@@ -278,18 +282,29 @@ def guard_builder_edits(slot, trace, guard):
         if not mine:
             return
         others = buildguard.other_builds(guard["lock_dir"], os.getpid())
-        head = buildguard.git_head()
-        why = ("--keep-builder-edits" if guard["keep"] else "another build runs from this checkout: " + ", ".join(others) if others
-               else "git HEAD moved during the build (%s -> %s)" % (guard["head"], head) if head != guard["head"] else None)
+        why = "--keep-builder-edits" if guard["keep"] else ("another build runs from this checkout: " + ", ".join(others)) if others else None
         if why:
             trace.line("WARNING: the building agent's edits stay in the working tree (%s). Never commit builder/ edits made "
                        "for a hidden brief." % why)
             return
+        head = buildguard.git_head()
+        if head != guard["head"]:            # a commit during the build: leave only the files it touched (it may hold them)
+            committed = buildguard.git_changed_since(guard["head"], sorted(mine)) if guard["head"] and head else None
+            held = set(mine) if committed is None else (set(mine) & committed)
+            if held:
+                trace.line("WARNING: git HEAD moved during the build (%s -> %s) and the commit touched %s: those stay as they are; "
+                           "check that commit for builder/ edits made for a hidden brief" % (guard["head"], head, sorted(held)))
+            mine = set(mine) - held
+            if not mine:
+                return
         keep_dir = ROOT / "out" / ("%s-%s.builder-edits" % (slot, stamp))
-        buildguard.restore_builder(snapshot, [k for k in changed if k in mine], [k for k in added if k in mine],
-                                   [k for k in deleted if k in mine], keep_dir)
-        trace.line("builder files the agent changed are back as they were at the start (the exported agent is unchanged; "
-                   "files it added moved to %s; to keep a generic improvement: git apply %s)" % (keep_dir.relative_to(ROOT), patch.relative_to(ROOT)))
+        left = buildguard.restore_builder(snapshot, [k for k in changed if k in mine], [k for k in added if k in mine],
+                                          [k for k in deleted if k in mine], keep_dir, tool_uses=AGENT_TOOL_USES)
+        trace.line("builder files the agent changed are back as they were at the start (its own edits reversed, other changes "
+                   "kept; the exported agent is unchanged; files it added moved to %s; to keep a generic improvement: git apply %s)"
+                   % (keep_dir.relative_to(ROOT), patch.relative_to(ROOT)))
+        if left:
+            trace.line("WARNING: %s changed again after the agent's edit, so its edit could not be reversed exactly: left as is" % left)
     except Exception as e:
         trace.line("builder edit check failed: %r" % (e,))
 
@@ -301,7 +316,7 @@ async def main(argv):
     while i < len(argv):
         a = argv[i]
         if a in opts and i + 1 < len(argv): opts[a] = argv[i + 1]; i += 2; continue
-        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases", "--keep-builder-edits"): flags.add(a); i += 1; continue
+        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases", "--keep-builder-edits", "--allow-parallel"): flags.add(a); i += 1; continue
         args.append(a); i += 1
     briefs = [a for a in args if a.lower().endswith(".md")]
     apis = [a for a in args if a.lower().endswith(".json")]
@@ -315,6 +330,11 @@ async def main(argv):
         if not os.environ.get(k) or os.environ[k].endswith("your_key_here"): sys.exit(k + " is not set. source env.sh first.")
     budget = float(opts["--minutes"]); slot = pathlib.Path(briefs[-1]).stem
     cases, brief_filter = (opts["--cases"], None) if opts["--cases"] else detect_cases(briefs)
+    # one build per checkout: two agents would load each other's library edits while they run (rehearsal, 10 Oct)
+    others = buildguard.other_builds(ROOT / "results" / "builds", os.getpid())
+    if others and "--allow-parallel" not in flags:
+        sys.exit("another build is running from this checkout (%s): run the briefs one after another, or each from its own "
+                 "worktree (git worktree add ../bb-%s HEAD; link env.sh and .venv there), or pass --allow-parallel" % (", ".join(others), slot))
     trace = Trace(slot)
     guard = {"snapshot": buildguard.snapshot_builder(), "head": buildguard.git_head(),   # before any step can edit the builder
              "keep": "--keep-builder-edits" in flags, "lock_dir": ROOT / "results" / "builds"}
@@ -348,7 +368,7 @@ async def build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags,
     # this file, merged into the trace after the agent run (the trace lists every model call)
     model_log = ROOT / "results" / ("%s.model-calls.log" % slot)
     model_log.parent.mkdir(exist_ok=True); model_log.write_text("")
-    os.environ["BUILD_MODEL_LOG"] = str(model_log)
+    os.environ.pop("BUILD_MODEL_LOG", None)    # set for the agent run only: build.py's own steps are traced from their stderr
     builder_model = os.environ.get("BUILDER_MODEL") or DEFAULT_BUILDER_MODEL
     os.environ["BUILDER_MODEL"] = builder_model        # the same model for rules, cases and audit (their subprocesses read it)
     trace.line("build start %s | briefs=%s tool_api=%s slot=%s | cases=%s runner=%s budget=%.0f min | builder model=%s (effort %s, fallback %s) | phone agent model=%s"
@@ -388,11 +408,16 @@ async def build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags,
         trace.line("cases: no generated cases file; the build runs without practice cases")
     if NO_CREDENTIAL:
         return 2
+    no_rules = "--no-rules" not in flags and not (ROOT / rules_out).exists()
+    if no_rules:
+        trace.line("WARNING: the rules step left no inventory: the agent builds from the brief itself (no rules.py rerun)")
+    os.environ["BUILD_MODEL_LOG"] = str(model_log)    # the simulator, smoke tests, rules/cases/audit runs the agent starts
     try:
         # keep 3 minutes for lint + export and 4 for the final audit (about 2 min: 8 batches, 3 in parallel); the
         # harrow rehearsal gave the agent all but 3 and the audit was skipped with 6 minutes left
         left = budget - trace.elapsed_min() - 3 - (0 if "--no-audit" in flags else 4)
-        await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left, generated=gen_cases), timeout=max(60, left * 60))
+        await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left, generated=gen_cases,
+                                          no_rules=no_rules), timeout=max(60, left * 60))
     except asyncio.TimeoutError:
         trace.line("STOPPED: the build budget was reached. Verifying and exporting whatever is saved on Freya.")
     except Exception as e:
@@ -401,6 +426,7 @@ async def build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags,
         restored = check_version(slot, trace, trace.t0)
     except Exception as e:
         trace.line("version check failed, the final version stays: %r" % (e,)); restored = False
+    os.environ.pop("BUILD_MODEL_LOG", None)
     try:
         calls = [x for x in model_log.read_text().splitlines() if x.strip()]
         trace.line("simulator/smoke model calls during the agent run: %d (one line each below; time | provider model | purpose)" % len(calls))

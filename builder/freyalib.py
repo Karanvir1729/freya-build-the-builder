@@ -693,8 +693,9 @@ def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS, weekday_rule="thi
     week or None; weekday_table(today) the '"this Monday" = ...; "next Monday" = ...' table; calendar_text(today,
     deadline, extra_days=10) one tagged line per day (allowed / weekend / bank holiday / after the deadline, with the
     next business day); fmt(x) '420.5' / '420' / '420.25'. Also imports datetime, json, re. No '{{' or '}}'.
-    `weekday_rule`: "this_week" ("this X" = X of the current week, "next X" = a week later) or "first_after"
-    (both "this X" and "next X" = the first X after today), as the brief defines the words."""
+    `weekday_rule`: "this_week" ("this X" = X of the current week, "next X" = a week later), "first_after"
+    (both "this X" and "next X" = the first X after today) or "first_after_plus7" (a bare "X" or "this X" = the first X
+    after today, "next X" = seven days after that), as the brief defines the words."""
     if weekday_rule not in ("this_week", "first_after", "first_after_plus7"):
         raise ValueError("weekday_rule must be 'this_week', 'first_after' or 'first_after_plus7', got %r" % weekday_rule)
     hol = sorted(set(str(h)[:10] for h in holidays or []))

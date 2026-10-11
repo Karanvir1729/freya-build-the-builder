@@ -414,6 +414,27 @@ def note_text_carries_the_customers_reason():               # Brief F PUB-05: th
     P, V = start([CARD], notes=True)                        # no reason given: the note still says what happened
     ev(P, V, "dispute", topic="dispute")
     assert V["route"] == "note" and "disputes" in V["note_text"], V.get("note_text")
+    # multi-product: one product's reason never reaches another product's note (stale words are cleared each turn)
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "paid", topic="already_paid", offer_for="first", customer_said="paid the card last Friday by bank transfer")
+    ev(P, V, "refuse")
+    ev(P, V, "refuse")
+    notes = {}
+    while V.get("route") == "note":
+        notes[V["note_pid"]] = V["note_text"]
+        V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert "bank transfer" in notes.get("p1", "") and "bank transfer" not in notes.get("p2", "x"), notes
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", offer_for="first", customer_said="I never opened that card")
+    ev(P, V, "hardship", topic="hardship")
+    ev(P, V, "hs_decline", hs_answer="support_no")
+    notes = [V["note_text"]]
+    while V.get("route") == "note":
+        V["note_ok"] = "true"; ev(P, V, "note_after")
+        if V.get("route") == "note":
+            notes.append(V["note_text"])
+    assert any("I never opened that card" in n and "disputes" in n for n in notes), notes
+    assert not any("I never opened that card" in n and "hardship" in n for n in notes), notes
     # the extraction exists only when the brief keeps notes
     names = lambda pol_: [e["name"] for e in pol_.negotiate_node("t", [], [])["extraction_schema"]]
     assert "customer_said" in names(mk(True, True)) and "customer_said" not in names(mk(False, False))

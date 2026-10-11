@@ -112,10 +112,48 @@ def agent_touched(tool_uses, paths, root=ROOT):
             for rel in paths:
                 folder, base = os.path.split(rel)
                 # the path as written in the command: relative, absolute, or the file name after a cd into its folder
-                forms = [rel, os.path.join(root_s, rel)] + ([base] if re.search(r"\bcd\s+\S*" + re.escape(folder) + r"\b", cmd) else [])
+                cd_in = folder and re.search(r"\bcd\s+['\"]?(?:\S*/)?" + re.escape(folder) + r"/?['\"]?(?=$|[\s;&|)])", cmd)
+                forms = [rel, os.path.join(root_s, rel)] + ([base] if cd_in else [])
                 if any(_writes(cmd, f) for f in forms):
                     hit.add(rel)
     return hit
+
+
+def agent_edit_hunks(tool_uses, rel, root=ROOT):
+    """(hunks, other) for one file: the (old_string, new_string) pairs of the agent's Edit/MultiEdit calls on it, in
+    order, and whether it also wrote the file another way (Write, a shell command), which leaves no hunks to undo."""
+    root_s = str(pathlib.Path(root).resolve())
+    hunks, other = [], False
+    for name, inp in tool_uses:
+        inp = inp or {}
+        fp = inp.get("file_path") or inp.get("notebook_path")
+        if fp and name in WRITE_TOOLS:
+            p = pathlib.Path(fp)
+            p = p if p.is_absolute() else pathlib.Path(root) / p
+            try:
+                if str(p.resolve().relative_to(root_s)) != rel:
+                    continue
+            except ValueError:
+                continue
+            if name == "Edit" and isinstance(inp.get("old_string"), str) and isinstance(inp.get("new_string"), str) and not inp.get("replace_all"):
+                hunks.append((inp["old_string"], inp["new_string"]))
+            elif name == "MultiEdit" and isinstance(inp.get("edits"), list) and all(isinstance(e, dict) and not e.get("replace_all") for e in inp["edits"]):
+                hunks += [(e.get("old_string", ""), e.get("new_string", "")) for e in inp["edits"]]
+            else:
+                other = True
+        elif name not in WRITE_TOOLS and agent_touched([(name, inp)], {rel}, root):
+            other = True
+    return hunks, other
+
+
+def undo_hunks(text, hunks):
+    """The text with the hunks reversed, newest first (new_string -> old_string, each only where it occurs exactly
+    once), or None when one of them cannot be found exactly once (someone changed that part since)."""
+    for old, new in reversed(hunks):
+        if not new or text.count(new) != 1:
+            return None
+        text = text.replace(new, old, 1)
+    return text
 
 
 def _text(b):
@@ -148,12 +186,26 @@ def edits_patch(snapshot, changed, added, deleted, root=ROOT):
     return "".join(out)
 
 
-def restore_builder(snapshot, changed, added, deleted, keep_dir, root=ROOT):
-    """Put the given changed/deleted files back as they were in the snapshot; move the given added files to keep_dir
-    (never deleted: the patch has text only)."""
+def restore_builder(snapshot, changed, added, deleted, keep_dir, root=ROOT, tool_uses=None):
+    """Put the agent's changes back: a file it changed only with Edit/MultiEdit gets those hunks reversed, so a change
+    someone else made to the same file meanwhile stays (whole snapshot when nothing else changed); a file it rewrote
+    (Write, a shell command) gets the snapshot; deleted files come back; added files move to keep_dir (never deleted).
+    Returns the files it left as they are because a hunk could not be reversed exactly."""
+    left = []
     for k in changed + deleted:
         p = root / k
         p.parent.mkdir(parents=True, exist_ok=True)
+        if tool_uses is not None and k in changed:
+            hunks, other = agent_edit_hunks(tool_uses, k, root)
+            if hunks and not other:
+                cur = _text(p.read_bytes())
+                undone = undo_hunks(cur, hunks) if cur is not None else None
+                if undone is None:
+                    left.append(k)
+                    continue
+                if undone.encode("utf-8") != snapshot[k]:
+                    p.write_text(undone)           # someone else's change in the same file stays
+                    continue
         p.write_bytes(snapshot[k])
     for k in added:
         src = root / k
@@ -161,6 +213,7 @@ def restore_builder(snapshot, changed, added, deleted, keep_dir, root=ROOT):
             dst = pathlib.Path(keep_dir) / k
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(src), str(dst))
+    return left
 
 
 def git_head(root=ROOT):
@@ -197,8 +250,23 @@ def other_builds(lock_dir, me):
             continue                    # a stale lock of a build that died
         except PermissionError:
             pass                        # alive, another user's process
+        try:                            # a killed build leaves its lock; its pid can be reused by anything else
+            cmd = subprocess.run(["ps", "-p", str(pid), "-o", "command="], capture_output=True, text=True, timeout=10).stdout
+            if cmd.strip() and "build.py" not in cmd:
+                continue
+        except Exception:
+            pass
         found.append("%s (pid %d)" % (d.get("slot"), pid))
     return found
+
+
+def git_changed_since(start, paths, root=ROOT):
+    """The paths a commit made after `start` touched (`git diff --name-only start..HEAD`), None when git cannot tell."""
+    try:
+        r = subprocess.run(["git", "diff", "--name-only", "%s..HEAD" % start, "--", *paths], cwd=root, capture_output=True, text=True, timeout=20)
+        return set(l.strip() for l in r.stdout.splitlines() if l.strip()) if r.returncode == 0 else None
+    except Exception:
+        return None
 
 
 # ------------------------------------------------------------------------------------------- 2. published check

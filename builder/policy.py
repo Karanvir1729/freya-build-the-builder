@@ -107,7 +107,7 @@ DEFAULT_TEXTS = {
 CLEAR_ENUMS = {"stance": "other", "offer_kind": "none", "offer_for": "none", "topic": "none", "confirm": "other",
                "hs_answer": "none", "wrap": "other", "aside": "none",
                "offer_ref": "none"}
-CLEAR_VALUES = {"offer_date": "1900-01-01", "offer_amount": "0", "offer_when": "", "per_product": ""}
+CLEAR_VALUES = {"offer_date": "1900-01-01", "offer_amount": "0", "offer_when": "", "per_product": "", "customer_said": ""}
 SENTINEL_YEAR = 1900
 # the customer's own words for the day, resolved in code against the call's date (the platform's date extraction uses
 # the real clock: 'tomorrow' arrived as a date before the call's today on Brief B PUB-12)
@@ -1136,11 +1136,8 @@ def note_text(V, p, st):
     # the note's free text (when the API's note tool has one): what a reviewer needs per reason
     try:
         w = pg(V, p, 'words')
-        said = ''
-        for k in ('said_' + st, 'said_last', 'customer_said'):
-            said = str(g(V, k) or '').strip()
-            if said.lower() not in ('', 'none', 'null'):
-                break
+        said = str(pg(V, p, 'said_' + st) or '').strip()   # this product's own words only
+        if said.lower() in ('none', 'null'):
             said = ''
         if st == 'refused':
             a, d = prop_of(V, p)
@@ -1313,14 +1310,22 @@ def keep_said(V, ev):
         return
     V['said_last'] = s
     kind = {'hardship': 'hardship', 'hs_decline': 'hardship', 'paid': 'paid', 'dispute': 'dispute', 'refuse': 'refused'}.get(ev)
-    if kind:
-        # the first reason stays (the turn that disclosed it: 'lost my job'); a later, different one is added
-        # ('no money'), so a follow-up turn never replaces the reason the note must name
-        old = str(g(V, 'said_' + kind) or '').strip()
+    if not kind:
+        return
+    # per product: only the products this event is about get the words (another product's reason never reaches their
+    # note); the first reason stays ('lost my job') and a later, different one is added ('no money')
+    if kind == 'refused':
+        ps = [g(V, 'cur_pid')]
+    elif kind in ('paid', 'dispute') and multi(V) and [p for p, c in claims(V).items() if c == kind]:
+        ps = [p for p, c in claims(V).items() if c == kind]
+    else:
+        ps = targets_for_topic(V)
+    for p in [x for x in ps if x]:
+        old = str(pg(V, p, 'said_' + kind) or '').strip()
         if not old or old.lower() in ('none', 'null'):
-            V['said_' + kind] = s
+            pset(V, p, 'said_' + kind, s)
         elif s.lower() not in old.lower():
-            V['said_' + kind] = (old + '; ' + s)[:240]
+            pset(V, p, 'said_' + kind, (old + '; ' + s)[:240])
 def main(V, ev):
     try:
         keep_said(V, ev)
@@ -1382,7 +1387,7 @@ def main(V, ev):
 WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verdict", "next_offer_text", "route",
            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok", "note_text",
-           "said_last", "said_hardship", "said_paid", "said_dispute", "said_refused",
+           "said_last",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
            "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
            "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev")
@@ -1433,7 +1438,9 @@ class Policy:
     notes_on_transfer: False when the brief adds no notes on a call that ends in a transfer: the notes are then written
         only once the wrap-up after a recorded promise has ended without one (a transfer from the wrap-up, e.g. a
         restructuring request after the promise, adds none). True (default): notes right after the promises.
-    weekday_rule: the brief's reading of 'next <weekday>' ('this_week' = the following calendar week, 'first_after').
+    weekday_rule: the brief's reading of the weekday words: 'this_week' ('this X' = X of the current calendar week, 'next X' =
+        X of the following week), 'first_after' ('this X' and 'next X' both = the first X after today) or 'first_after_plus7'
+        (a bare 'X' or 'this X' = the first X after today, also when said on that weekday; 'next X' = that day + 7 days).
     vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline) or
         'refuse' (the brief counts it as a non-answer: one persuasion attempt).
     above_full: an amount above the full amount: 'ask' (propose the full amount and ask again) or 'agree' (the brief

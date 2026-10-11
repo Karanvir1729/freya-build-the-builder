@@ -116,6 +116,42 @@ def test_agent_touched():
     shutil.rmtree(d)
 
 
+def test_hunk_undo_keeps_other_changes():
+    d = tree()
+    (d / "builder" / "policy.py").write_text("A = 1\nB = 2\nC = 3\n")
+    snap = bg.snapshot_builder(d)
+    # the agent edits one line, someone else adds a function to the same file meanwhile
+    (d / "builder" / "policy.py").write_text("A = 1\nB = 20   # agent\nC = 3\ndef fix():\n    pass\n")
+    uses = [("Edit", {"file_path": str(d / "builder" / "policy.py"), "old_string": "B = 2\n", "new_string": "B = 20   # agent\n"})]
+    ch, ad, de = bg.builder_edits(snap, d)
+    left = bg.restore_builder(snap, ch, ad, de, d / "out" / "kept", d, tool_uses=uses)
+    assert left == [] and (d / "builder" / "policy.py").read_text() == "A = 1\nB = 2\nC = 3\ndef fix():\n    pass\n"
+    # nothing else changed: back to the snapshot exactly
+    (d / "builder" / "policy.py").write_text("A = 1\nB = 20   # agent\nC = 3\n")
+    bg.restore_builder(snap, ["builder/policy.py"], [], [], d / "out" / "kept", d, tool_uses=uses)
+    assert (d / "builder" / "policy.py").read_bytes() == snap["builder/policy.py"]
+    # the agent's line was changed again by someone: left as is, reported
+    (d / "builder" / "policy.py").write_text("A = 1\nB = 21   # someone\nC = 3\n")
+    assert bg.restore_builder(snap, ["builder/policy.py"], [], [], d / "out" / "kept", d, tool_uses=uses) == ["builder/policy.py"]
+    assert (d / "builder" / "policy.py").read_text() == "A = 1\nB = 21   # someone\nC = 3\n"
+    # a file the agent rewrote with Write gets the snapshot
+    (d / "builder" / "lint.py").write_text("rewritten\n")
+    bg.restore_builder(snap, ["builder/lint.py"], [], [], d / "out" / "kept", d, tool_uses=[("Write", {"file_path": "builder/lint.py", "content": "rewritten\n"})])
+    assert (d / "builder" / "lint.py").read_bytes() == snap["builder/lint.py"]
+    assert bg.undo_hunks("x y x", [("a", "x")]) is None             # not exactly once: no guess
+    shutil.rmtree(d)
+
+
+def test_cd_into_the_repo_folder_is_not_a_cd_into_builder():
+    d = tree()
+    paths = {"builder/policy.py"}
+    c = "cd /Users/me/freya-build-the-builder && python3 builder/tests/test_policy.py | tail -3; python3 - <<'EOF'\nopen('out/n.json','w').write('{}')\nEOF"
+    assert bg.agent_touched([("Bash", {"command": c})], paths, d) == set()
+    assert bg.agent_touched([("Bash", {"command": "cd builder && sed -i 's/1/2/' policy.py"})], paths, d) == {"builder/policy.py"}
+    assert bg.agent_touched([("Bash", {"command": "cd /x/repo/builder && rm -f policy.py"})], paths, d) == {"builder/policy.py"}
+    shutil.rmtree(d)
+
+
 def test_git_helpers():
     if not shutil.which("git"):
         return
@@ -128,6 +164,12 @@ def test_git_helpers():
     assert len(bg.git_head(d) or "") == 40 and bg.git_dirty(d) == []
     (d / "builder" / "policy.py").write_text("changed\n"); (d / "out" / "gen_y.py").write_text("y\n")
     assert [l[-17:] for l in bg.git_dirty(d)] == ["builder/policy.py"], bg.git_dirty(d)
+    start = bg.git_head(d)
+    (d / "tools" / "score.py").write_text("S = 3\n")
+    subprocess.run(["git", "add", "tools/score.py"], cwd=d, check=True)
+    subprocess.run(["git", "commit", "-qm", "y"], cwd=d, check=True, env=env)
+    assert bg.git_changed_since(start, ["builder/policy.py", "tools/score.py"], d) == {"tools/score.py"}
+    assert bg.git_changed_since("nosuchref", ["tools/score.py"], d) is None
     shutil.rmtree(d)
 
 
@@ -147,8 +189,14 @@ def test_other_builds():
     (d / "dead.json").write_text(json.dumps({"pid": 2 ** 22 + 12345, "slot": "gone"}))    # no such process
     (d / "junk.json").write_text("not json")
     assert bg.other_builds(d, os.getpid()) == []
-    (d / "live.json").write_text(json.dumps({"pid": os.getppid(), "slot": "other"}))
-    assert bg.other_builds(d, os.getpid()) == ["other (pid %d)" % os.getppid()]
+    sleeper = subprocess.Popen(["sleep", "30"])                         # alive, but not a build: its lock is stale
+    (d / "reused.json").write_text(json.dumps({"pid": sleeper.pid, "slot": "reused"}))
+    assert bg.other_builds(d, os.getpid()) == [], bg.other_builds(d, os.getpid())
+    sleeper.kill()
+    fake = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)", "builder/build.py"])   # 'build.py' in its command
+    (d / "live.json").write_text(json.dumps({"pid": fake.pid, "slot": "other"}))
+    assert bg.other_builds(d, os.getpid()) == ["other (pid %d)" % fake.pid], bg.other_builds(d, os.getpid())
+    fake.kill()
     shutil.rmtree(d)
 
 

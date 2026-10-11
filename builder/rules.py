@@ -227,6 +227,18 @@ def _system_prompt_arg(system_prompt):
     return {"type": "file", "path": str(f)}
 
 
+def log_build_model_call(model, purpose):
+    """One line per call in $BUILD_MODEL_LOG when set (build.py sets it only for the building agent's shell, so a rules,
+    cases or audit run the agent starts itself reaches the trace; build.py's own steps are traced from stderr)."""
+    path = os.environ.get("BUILD_MODEL_LOG")
+    if path:
+        try:
+            with open(path, "a") as f:
+                f.write("%s | claude %s | %s\n" % (time.strftime("%H:%M:%S"), model, " ".join(str(purpose).split())[:160]))
+        except Exception:
+            pass
+
+
 async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max_budget_usd=MAX_BUDGET_USD_PER_CALL,
                          log=None, effort=None):
     """One Claude call, no tools, structured JSON out. Returns (obj, info). Retries once on invalid JSON.
@@ -248,6 +260,7 @@ async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max
         info["attempts"] = attempt + 1
         t0 = time.time()
         log("model call: %s | purpose: %s%s" % (model, purpose, " (retry after invalid JSON)" if attempt else ""))
+        log_build_model_call(model, purpose + (" (retry after invalid JSON)" if attempt else ""))
         options = ClaudeAgentOptions(
             cwd=str(ROOT), model=model, fallback_model=FALLBACK_MODEL if model != FALLBACK_MODEL else None,
             tools=[], allowed_tools=[], permission_mode="dontAsk", max_turns=4,
@@ -271,6 +284,7 @@ async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max
                 if served and served != [model]:          # the fallback model answered (the trace names who did)
                     info["served_by"] = served
                     log("model call: served by %s (requested %s) | purpose: %s" % (", ".join(served), model, purpose))
+                    log_build_model_call(", ".join(served), "served instead of %s: %s" % (model, purpose))
         info["seconds"] += time.time() - t0
         if result is not None and result.is_error:
             last_err = "result error: %s %s" % (result.subtype, (result.errors or [result.result])[:1])
