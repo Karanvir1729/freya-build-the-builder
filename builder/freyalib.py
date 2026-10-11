@@ -822,7 +822,10 @@ def counter_code(counter, limit, route_var, reset=None, over="close", under="ret
 # third party: the brief's 'ask once for another time' counted in code (generated Brief B GEN-C-03 on Freya: the prompt
 # said 'ask once', the model asked twice and only then took its own exit to no_callback)
 CB_OFFER_DESC = ("The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. "
-                 "{{callback_text}} inside = they name a day AND a time inside that window; outside = they name a day or a "
+                 "{{callback_text}} First write the time they name as 24-hour HH:MM ('half past six in the evening' = "
+                 "18:30, 'around eleven' in the morning = 11:00), then compare it with the opening and closing time of that "
+                 "day: a time after the closing time or before the opening time is outside (18:30 is outside a window that "
+                 "ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a "
                  "time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too "
                  "far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything "
                  "else (no day or time yet, a day without a time, a question, small talk).")
@@ -835,7 +838,11 @@ def third_party_callback(nodes, task, tools, extraction, transitions, reask_text
     <name>_reask, a copy of the node whose entry line is the brief's fixed re-ask sentence (reask_text), so the model
     never decides how often it asked; cannot_say -> no_callback_target. `transitions` keeps the generator's own exits
     (schedule_callback ok_true -> the callback ending, deceased, wrong number); do not add a model-chosen exit for 'a
-    second time outside the window'. Brief-agnostic: the window comes from SETUP_CODE's callback_text."""
+    second time outside the window'. Brief-agnostic: the window comes from SETUP_CODE's callback_text.
+    The task also gets reask_text as the dialogue model's own line for a time outside the window: when the extraction
+    misreads the time as inside (Ashvale PUB-02: '18:30' against a 17:00 close), the model still says the hours."""
+    task = (task.rstrip() + "\nIf the day or time they name is outside the allowed window, do not book it; say exactly: \""
+            + reask_text + "\"")
     ext_ = list(extraction or []) + [ext("cb_offer", ["none", "inside", "outside", "cannot_say"], offer_desc or CB_OFFER_DESC)]
     trs = list(transitions or []) + [
         eq("cb_offer", "outside", name + "_count", "a day or time outside the allowed callback window"),
@@ -847,6 +854,58 @@ def third_party_callback(nodes, task, tools, extraction, transitions, reask_text
                                         always(name + "_reask")])
     nodes[name + "_reask"] = conv(name + "_reask", task, on_enter={"type": "tts", "text": reask_text}, tools=tools,
                                   extraction=ext_, transitions=trs)
+    return nodes
+
+
+TP_OFFER_DESC = ("Whether the person who answered, in their LATEST message, offers to pay, to settle it, to take care of it "
+                 "or to act for the customer ('I can pay it myself', 'I'll sort it out for her', 'can I help with it?'). "
+                 "yes = such an offer, also when the message asks a question or names a time as well; no = anything else.")
+
+
+def third_party_offer(nodes, offer_line, name="third_party", var="tp_offered"):
+    """Someone else answers AND offers to pay or help in the same message: the fixed entry line of `name` cannot react
+    to it (Ashvale/Kestrel PUB-02: the offer was never declined). Adds nodes[<name>_offer], a copy of nodes[name]
+    whose entry line is offer_line (the brief's thanks-and-no, e.g. "Thank you, but no.") followed by the usual
+    entry line, the extraction `var` (no|yes) on the conversation nodes that lead to `name` (directly, or through a
+    code node such as setup), and before every condition-based transition to `name` a copy that also needs
+    var == 'yes' and goes to <name>_offer. Call it after third_party_callback and conversation_first; nodes[name]
+    needs a fixed (tts) entry line. Brief-agnostic: offer_line comes from the brief."""
+    base = nodes.get(name)
+    ent = (base or {}).get("on_enter") or {}
+    if ent.get("type") != "tts" or not ent.get("text"):
+        raise ValueError("third_party_offer: nodes[%r] needs a fixed tts entry line" % name)
+    off = name + "_offer"
+    copy_ = json.loads(json.dumps(base))
+    copy_["name"] = off
+    copy_["on_enter"] = {"type": "tts", "text": offer_line.strip() + " " + ent["text"]}
+    nodes[off] = copy_
+    yes = cond(var, "equals", "yes")
+    sources = []
+    for nname, n in list(nodes.items()):
+        if nname in (name, off) or nname.startswith(name + "_"):
+            continue
+        out = []
+        for t in n.get("transitions") or []:
+            c = t.get("condition") or {}
+            if t.get("target_node") == name and c.get("logic") == "or" and not t.get("is_tool_call"):
+                leaves = [dict(x, conditions=list(x["conditions"]) + [yes]) if x.get("logic") == "and" else and_group(x, yes)
+                          for x in c.get("conditions") or []]
+                out.append(tr(off, (t.get("description") or "") + "; they offered to pay or help", *leaves))
+                if nname not in sources:
+                    sources.append(nname)
+            out.append(t)
+        n["transitions"] = out
+    talk = set()
+    for s in sources:
+        if nodes[s].get("node_type") == "conversation":
+            talk.add(s)
+        else:                                       # a code node (setup): the conversation nodes that lead into it
+            talk.update(k for k, n in nodes.items() if n.get("node_type") == "conversation"
+                        and any(t.get("target_node") == s for t in n.get("transitions") or []))
+    for k in talk:
+        sch = nodes[k].setdefault("extraction_schema", [])
+        if not any(e.get("name") == var for e in sch):
+            sch.append(ext(var, ["no", "yes"], TP_OFFER_DESC))
     return nodes
 
 

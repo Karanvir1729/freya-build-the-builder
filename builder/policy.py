@@ -222,6 +222,12 @@ def set_prop(V, pid, a, d):
     V['prop_amount'] = str(float(a))
     V['prop_date'] = d.isoformat()
     V['offer_question'] = question(V, pid, a, d)
+    # the product's own last offer: prop_* moves on to the next product, a note written later reads this (Kestrel PUB-12)
+    pset(V, pid, 'last_amount', float(a))
+    pset(V, pid, 'last_date', d.isoformat())
+def last_offer_of(V, pid):
+    a, d = num(pg(V, pid, 'last_amount')), pdate(pg(V, pid, 'last_date'))
+    return (a, d) if a is not None and d is not None else prop_of(V, pid)
 def prop_of(V, pid):
     if g(V, 'prop_pid') == pid:
         a = num(g(V, 'prop_amount'))
@@ -430,8 +436,18 @@ def check_one(V, pid, a, d, kind):
         if P.get('vague_again') == 'refuse':   # the brief: no exact day after one ask = a non-answer (one attempt)
             refuse(V, pid)
             return
-        set_prop(V, pid, amt, dl)
-        say(V, join([pre, T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
+        prop = dl
+        if P.get('vague_again') == 'week_end':   # the brief: propose the last business day of the current week (the next business day after it when the call is on that day), the deadline when that is later
+            try:
+                today = today_of(V)
+                wk = lastbd_of_week(today - datetime.timedelta(days=today.weekday()))
+                if wk is None or wk <= today:
+                    wk = bd_after(today)
+                prop = wk if wk <= dl else dl
+            except Exception:
+                prop = dl
+        set_prop(V, pid, amt, prop)
+        say(V, join([pre, T('vague_deadline', deadline=txt_short(prop), words=pg(V, pid, 'words')), V['offer_question']]))
         return
     amt = pa if a is None or a <= 0 else a
     day = pd if d is None else d
@@ -1187,16 +1203,18 @@ def note_text(V, p, st):
         said = str(pg(V, p, 'said_' + st) or '').strip()   # this product's own words only
         if said.lower() in ('none', 'null'):
             said = ''
+        # the call date in words, so 'this morning' or 'today' in the customer's words names a day (Kestrel PUB-08)
+        on = ' Call date: today, %s.' % txt(today_of(V))
         if st == 'refused':
-            a, d = prop_of(V, p)
+            a, d = last_offer_of(V, p)
             n = int(num(pg(V, p, 'attempts_used'), 0) or 0)
             return ('%s: turned down. Attempts made: %d. Last offer: %s on %s.' % (w, max(n, 1), fmt(a), d.isoformat() if d else '')
-                    + ((' Customer said: ' + said) if said else ''))
+                    + ((' Customer said: ' + said) if said else '') + on)
         if st == 'service_error':
             n = int(num(pg(V, p, 'fails'), 0) or 0)
-            return '%s: create_promise failed, number of tries: %d.' % (w, max(n, 2))
+            return '%s: create_promise failed, number of tries: %d.' % (w, max(n, 2)) + on
         lab = {'paid': 'says already paid', 'dispute': 'disputes', 'hardship': 'hardship'}.get(st, st)
-        return '%s: customer %s. In their words: %s' % (w, lab, said or '(not stated)')
+        return '%s: customer %s. In their words: %s.' % (w, lab, (said or '(not stated)').rstrip('.')) + on
     except Exception:
         return str(st)
 def note_next(V):
@@ -1491,7 +1509,7 @@ class Policy:
     weekday_rule: the brief's reading of the weekday words: 'this_week' ('this X' = X of the current calendar week, 'next X' =
         X of the following week), 'first_after' ('this X' and 'next X' both = the first X after today) or 'first_after_plus7'
         (a bare 'X' or 'this X' = the first X after today, also when said on that weekday; 'next X' = that day + 7 days).
-    vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline) or
+    vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline), 'week_end' (propose the last business day of the current week, the next business day after it when the call is on that day, the deadline when that is later) or
         'refuse' (the brief counts it as a non-answer: one persuasion attempt).
     above_full: an amount above the full amount: 'ask' (propose the full amount and ask again) or 'agree' (the brief
         says record the full amount and say so: straight to the read-back with the brief's sentence first).
@@ -1527,8 +1545,8 @@ class Policy:
             raise ValueError("notes=True needs note_reasons {state: reason}")
         if closed_day_move not in ("after", "before"):
             raise ValueError("closed_day_move must be 'after' or 'before'")
-        if vague_again not in ("deadline", "refuse"):
-            raise ValueError("vague_again must be 'deadline' or 'refuse'")
+        if vague_again not in ("deadline", "refuse", "week_end"):
+            raise ValueError("vague_again must be 'deadline', 'refuse' or 'week_end'")
         if above_full not in ("ask", "agree"):
             raise ValueError("above_full must be 'ask' or 'agree'")
         pr = dict(promise_reasons or {})
