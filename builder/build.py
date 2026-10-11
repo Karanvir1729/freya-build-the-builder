@@ -166,7 +166,8 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
               "time; check `date` before starting a test round) for everything, including your own tests; save a working "
               "agent early and improve it. A step you decide on is something to run now, not to announce: do not end your "
               "turn before step 10's finish line or the deadline." % (SKILL, " ".join(briefs), tool_api, slot, inventory, test_line, gen_line, int(minutes_left), deadline))
-    t_end = time.time() + minutes_left * 60
+    t_start = time.time()
+    t_end = t_start + minutes_left * 60
 
     async def consume(p, opts, purpose):
         trace.line("model call: %s | purpose: %s | prompt: %s" % (model, purpose, p))
@@ -202,9 +203,34 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
     done = any(k in last_text.lower() for k in ("workflow_id", "agent_id", "workflow id"))
     if result is not None and not result.is_error and not done and time.time() < t_end - 240:
         left = int((t_end - time.time()) / 60)
-        await consume("Continue the build: run the step you announced and the rest of the procedure, then finish with step 10's "
-                      "line. %d minutes are left (stop by %s local time)." % (left, deadline),
-                      dataclasses.replace(options, resume=result.session_id), "continue the build after a turn that ended early")
+        last_text, r2 = await consume("Continue the build: run the step you announced and the rest of the procedure, then finish with step 10's "
+                                      "line. %d minutes are left (stop by %s local time)." % (left, deadline),
+                                      dataclasses.replace(options, resume=result.session_id), "continue the build after a turn that ended early")
+        result = r2 or result
+    # time left unused (the ttau-bench lesson): a run that ends with practice cases still failing on the newest tested
+    # version and 8+ minutes left gets one more round in the same session (Brief E on Sonnet stopped at 12 of 29 minutes
+    # with 2 of 5 cases failing)
+    failing = latest_failures(slot, t_start)
+    if result is not None and not result.is_error and failing and time.time() < t_end - 480:
+        left = int((t_end - time.time()) / 60)
+        await consume("%d minutes are left (stop by %s local time). On the newest tested version these practice cases still fail: %s. "
+                      "Under the skill's rules for repair rounds: read each failure, fix the deterministic agent errors (never "
+                      "weaken a check or follow a low/medium-confidence expectation against the brief), save, re-run only those "
+                      "cases, then finish with step 10's line." % (left, deadline, ", ".join(failing[:12])),
+                      dataclasses.replace(options, resume=result.session_id), "use the time left: repair the cases still failing")
+
+
+def latest_failures(slot, since):
+    """Case ids whose last run failed on the newest version tested since `since` (the per-case version ledger)."""
+    try:
+        st = load_state().get(slot) or {}
+        res = buildguard.results_by_version(ROOT / "results" / "versions" / ("%s.jsonl" % st.get("workflow_id")), since=since)
+        if not res:
+            return []
+        v = max(res)
+        return sorted(c for c, runs in res[v].items() if runs and not runs[-1])
+    except Exception:
+        return []
 
 
 def load_state():
