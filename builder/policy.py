@@ -233,6 +233,12 @@ def set_prop(V, pid, a, d):
     V['prop_amount'] = str(float(a))
     V['prop_date'] = d.isoformat()
     V['offer_question'] = question(V, pid, a, d)
+    # the product's own last offer: prop_* moves on to the next product, a note written later reads this (Kestrel PUB-12)
+    pset(V, pid, 'last_amount', float(a))
+    pset(V, pid, 'last_date', d.isoformat())
+def last_offer_of(V, pid):
+    a, d = num(pg(V, pid, 'last_amount')), pdate(pg(V, pid, 'last_date'))
+    return (a, d) if a is not None and d is not None else prop_of(V, pid)
 def prop_of(V, pid):
     if g(V, 'prop_pid') == pid:
         a = num(g(V, 'prop_amount'))
@@ -1283,16 +1289,18 @@ def note_text(V, p, st):
         said = str(pg(V, p, 'said_' + st) or '').strip()   # this product's own words only
         if said.lower() in ('none', 'null'):
             said = ''
+        # the call date in words, so 'this morning' or 'today' in the customer's words names a day (Kestrel PUB-08)
+        on = ' Call date: today, %s.' % txt(today_of(V))
         if st == 'refused':
-            a, d = prop_of(V, p)
+            a, d = last_offer_of(V, p)
             n = int(num(pg(V, p, 'attempts_used'), 0) or 0)
             return ('%s: turned down. Attempts made: %d. Last offer: %s on %s.' % (w, max(n, 1), fmt(a), d.isoformat() if d else '')
-                    + ((' Customer said: ' + said) if said else ''))
+                    + ((' Customer said: ' + said) if said else '') + on)
         if st == 'service_error':
             n = int(num(pg(V, p, 'fails'), 0) or 0)
-            return '%s: create_promise failed, number of tries: %d.' % (w, max(n, 2))
+            return '%s: create_promise failed, number of tries: %d.' % (w, max(n, 2)) + on
         lab = {'paid': 'says already paid', 'dispute': 'disputes', 'hardship': 'hardship'}.get(st, st)
-        return '%s: customer %s. In their words: %s' % (w, lab, said or '(not stated)')
+        return '%s: customer %s. In their words: %s.' % (w, lab, (said or '(not stated)').rstrip('.')) + on
     except Exception:
         return str(st)
 def note_next(V):

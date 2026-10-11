@@ -316,6 +316,14 @@ CLOSE_ARGS_NOTE = ("NOTE ON close_call: the test bank behind this call only know
                    "it as part of ending the call, so close_call after end_call is the normal order.\n\n")
 
 
+STRICT_NOTE = ("STRICT JUDGING: read every criterion literally and check each of its parts on its own. A sentence the criterion "
+               "quotes must appear word for word (case and punctuation aside). A number, amount, date or time must be stated "
+               "the way the criterion writes it. A required action (decline, state the hours, name a fact in a note) must be "
+               "explicit in the transcript or the tool arguments, not implied. When a part is doubtful, it fails. Only a part "
+               "whose trigger never happened (the customer never asked or offered what the criterion presupposes) is not "
+               "held against the agent.\n\n")
+
+
 def judge(provider, model, checks, transcript_lines, tool_calls, opening="Hello?", note=""):
     """The organisers' wording ('All of these are true:' + checks) over the transcript and the tool list -> (outcome, reason).
     `opening` is the customer's first line (--opening), which the judge is told to read as picking up the phone."""
@@ -745,8 +753,7 @@ def finish(ctx, case, rep, row, chat, ledger):
         row["failed"].append("conversation: no call was started, nothing to judge")
     elif chat and lines:
         try:
-            outcome, reason = judge(ctx.provider, ctx.judge_model, case["checks"], lines, tools, ctx.opening,
-                                    CLOSE_ARGS_NOTE if getattr(ctx, "close_from_args", False) else "")
+            outcome, reason = judge(ctx.provider, ctx.judge_model, case["checks"], lines, tools, ctx.opening, judge_note(ctx))
         except Exception as e:
             outcome, reason = "fail", "judge model failed: " + compact(str(e), 200)
         row["judge"] = {"outcome": outcome, "reason": reason, "model": ctx.judge_model}
@@ -801,6 +808,46 @@ def write_transcript(ctx, case, rep, row, chat, ledger, lines, tools):
     return str(path)
 
 
+def judge_note(ctx):
+    return (CLOSE_ARGS_NOTE if getattr(ctx, "close_from_args", False) else "") + (STRICT_NOTE if getattr(ctx, "strict_judge", False) else "")
+
+
+def rejudge(a):
+    """--rejudge DIR: the conversation judge again over saved transcripts, no calls and no ledger reads. A run passes when
+    its saved ledger checks passed and the new verdict is pass; a case counts when every saved run of it passes."""
+    provider = Provider.pick(a.provider)
+    model = a.judge_model or DEFAULTS[provider.kind]["judge"]
+    ctx = Ctx()
+    ctx.close_from_args, ctx.strict_judge = a.close_from_args, a.strict_judge
+    cases = {c["id"]: c for c in json.load(open(a.cases))}
+    jobs = []
+    for f in sorted(pathlib.Path(a.rejudge).glob("*-r*.json")):
+        d = json.load(open(f))
+        if d.get("case") in cases and d.get("transcript"):
+            jobs.append((f.stem, d))
+
+    def one(job):
+        stem, d = job
+        try:
+            out, why = judge(provider, model, cases[d["case"]]["checks"], d["transcript"], d.get("tool_calls") or [], a.opening, judge_note(ctx))
+        except Exception as e:
+            out, why = "fail", "judge model failed: " + compact(str(e), 200)
+        ledger_failed = [x for x in d.get("failed") or [] if not str(x).startswith("conversation:")]
+        failed = ledger_failed + ([] if out == "pass" else ["conversation: " + " ".join(str(why).split())[:400]])
+        return stem, d["case"], failed
+
+    with ThreadPoolExecutor(max_workers=a.concurrency) as ex:
+        res = sorted(ex.map(one, jobs))
+    runs = {}
+    for stem, cid, failed in res:
+        runs.setdefault(cid, []).append(not failed)
+        print(("PASS " if not failed else "FAIL ") + stem + "".join("\n       - " + x for x in failed))
+    passed = sum(1 for v in runs.values() if all(v))
+    print("%d / %d passed on re-judging (%s judge%s, %d transcripts); a case counts when every saved run passes."
+          % (passed, len(runs), model, ", strict" if a.strict_judge else "", len(res)))
+    return 0
+
+
 # ----------------------------------------------------------------------------------------------------- main
 class Ctx:
     pass
@@ -824,7 +871,13 @@ def main():
     ap.add_argument("--verbose", action="store_true", help="print every turn as it happens")
     ap.add_argument("--close-from-args", action="store_true",
                     help="score the outcome/reason sent in close_call when the mock rejected it (synthetic briefs whose reason names the kit's mock does not know)")
+    ap.add_argument("--strict-judge", action="store_true",
+                    help="tell the judge to read every criterion literally (quoted sentences word for word, numbers as written, explicit actions)")
+    ap.add_argument("--rejudge", metavar="DIR",
+                    help="no calls: judge the transcripts saved in DIR (<case>-r<rep>.json) again against --cases; the ledger verdict is kept")
     a = ap.parse_args()
+    if a.rejudge:
+        sys.exit(rejudge(a))
     if not os.environ.get("FREYA_API_KEY") or not os.environ.get("FREYA_BANK_TEAM_KEY"):
         sys.exit("FREYA_API_KEY and FREYA_BANK_TEAM_KEY must be set: source env.sh first.")
     ctx = Ctx()
@@ -834,6 +887,7 @@ def main():
     ctx.judge_model = a.judge_model or DEFAULTS[ctx.provider.kind]["judge"]
     ctx.style, ctx.max_turns, ctx.opening, ctx.verbose, ctx.reps = a.style, a.max_turns, a.opening, a.verbose, a.reps
     ctx.close_from_args = a.close_from_args
+    ctx.strict_judge = a.strict_judge
     ctx.cases_file = a.cases
     ctx.transcripts = pathlib.Path(a.transcripts) if a.transcripts else None
     cases = [c for c in json.load(open(a.cases)) if (not a.brief or c["brief"] == a.brief) and (not a.only or c["id"] in a.only.split(","))]

@@ -442,6 +442,40 @@ def note_text_carries_the_customers_reason():               # Brief F PUB-05: th
 
 
 @test
+def refused_note_names_each_products_own_last_offer():     # Kestrel PUB-12: the loan's note named the card's/today's offer
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    offers = {}
+    for _ in range(8):
+        if V.get("route") != "negotiate":
+            break
+        if V.get("prop_pid"):
+            offers[V["prop_pid"]] = (V["prop_amount"], V["prop_date"])
+        ev(P, V, "refuse")
+    notes = {}
+    while V.get("route") == "note":
+        notes[V["note_pid"]] = V["note_text"]
+        V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert set(notes) == {"p1", "p2", "p3"}, notes
+    for pid, (a, d) in offers.items():
+        amount = pol_fmt(a)
+        assert ("Last offer: %s on %s" % (amount, d)) in notes[pid], (pid, offers[pid], notes[pid])
+    assert "Last offer: 700 on" in notes["p2"], notes["p2"]               # the loan's floor rung, not 2100 today
+
+
+@test
+def notes_name_the_call_date():                             # Kestrel PUB-08: 'the channel and the day they say they paid'
+    P, V = start([CARD], notes=True)
+    ev(P, V, "paid", topic="already_paid", customer_said="in the app this morning")
+    assert V["route"] == "note", V.get("route")
+    assert "in the app this morning" in V["note_text"] and "today" in V["note_text"] and "14 October 2026" in V["note_text"], V["note_text"]
+
+
+def pol_fmt(a):
+    s = "%.2f" % float(a)
+    return s[:-3] if s.endswith(".00") else s
+
+
+@test
 def one_day_for_all_moves_a_closed_day_by_the_brief():     # Kestrel PUB-13: closed_day_move='before' for several products
     P, V = start([CARD, LOAN], multi=True, notes=True)
     ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-26", offer_for="all")   # a holiday (Monday)
