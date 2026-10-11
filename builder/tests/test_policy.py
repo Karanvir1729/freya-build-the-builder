@@ -1011,6 +1011,255 @@ def test_once_only_offers_not_repeated():
         assert pol.ONCE_RULE.strip() in str(node), node.get("name")
 
 
+# ------------------------------------------------------------------ talkative fixes (extended B-01, B-12, B-14, A-08/A-40)
+def start_on(products, today, multi=False, notes=False):
+    P = mk(multi, notes)
+    V = {"today_iso": today, "now": today + "T11:00", "test_products": json.dumps(products)}
+    run(P.prepare_code(BODY, "statement"), V)
+    assert V.get("prepare_state") == "ok", V.get("prepare_state")
+    return P, V
+
+
+@test
+def test_refused_rung_is_already_said_once():
+    """EXT-B-01: after a refusal the ladder's attempt is spoken by code; the state line must never tell the model to ask
+    it again ('ask exactly this' made the model repeat attempt 1 word for word after a missed 'No.')."""
+    P, V = start([LOAN])
+    assert "ask exactly this" in V["state_line"], V["state_line"]          # the today question: not yet a ladder rung
+    ev(P, V, "refuse", stance="refuse")
+    sl = V["state_line"]
+    assert "already said once" in sl and "ask exactly this" not in sl, sl
+    assert "Sorry, I did not catch that. Could you say it again?" in sl and "give it once as the answer" in sl, sl
+    ev(P, V, "refuse", stance="refuse")                                     # attempt 2 (the floor on the deadline)
+    assert "already said once" in V["state_line"] and "ask exactly this" not in V["state_line"], V["state_line"]
+    # a guard correction is not a ladder rung: still asked exactly
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="exact", offer_when="Saturday the 17th of October")
+    assert V["offer_verdict"] == "weekend_or_holiday" and "ask exactly this" in V["state_line"], V["state_line"]
+    # multi-product: the next product's first offer is its attempt 1
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "paid", topic="already_paid", offer_for="first")
+    assert V["cur_pid"] == "p2" and "already said once" in V["state_line"], V["state_line"]
+
+
+@test
+def test_negotiate_task_never_says_ask_the_offer_again():
+    """EXT-B-01: every reference generator told the model 'then ask the current offer again'; negotiate_node rewrites
+    it (and close variants) so the task follows the state line; ONCE_RULE covers every persuasion offer and the cut-off
+    clause reads small talk BEFORE an answer as that answer."""
+    P = mk()
+    for line in ("- If the customer asks a question or says something else, answer it in one short sentence, then ask the current offer again.\n",
+                 "- If the customer says something else, answer in one short sentence, then ask the current offer again.\n",
+                 "- Otherwise repeat the offer in STATE again.\n"):
+        t = P.negotiate_node("TASK " + line, [], [fl.always("negotiate")])["task_message"]
+        assert "offer again" not in t and pol.REASK_SUB in t, t
+        h = P.hardship_node(line, "a", "k", "d", "m")["task_message"]
+        assert "offer again" not in h, h
+    assert "Every persuasion offer" in pol.ONCE_RULE
+    assert "Small talk BEFORE the answer" in fl.CUTOFF_CLAUSE
+    stance = P.negotiate_node("T", [P.stance_extraction("refuse = no.")], [fl.always("negotiate")])["extraction_schema"][0]
+    assert "'Work has been so stressful lately. No.' is that no" in stance["description"], stance["description"]
+
+
+@test
+def test_repeated_claim_on_a_settled_product_changes_nothing():
+    """EXT-B-12: 'I never had a car loan', asked about the car loan, came back offer_for=first (the card, already paid):
+    the card was settled again and the car loan restarted at attempt 1, ~130 times. A claim settles only a live product;
+    on a settled ordinal it goes to the product on the table."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "paid", topic="already_paid", offer_for="first")
+    ev(P, V, "refuse", stance="refuse")
+    ev(P, V, "refuse", stance="refuse")
+    assert V["state_p2"] == "refused" and V["cur_pid"] == "p3"
+    ev(P, V, "dispute", topic="dispute", offer_for="first", customer_said="never had a car loan")
+    assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("paid", "refused", "dispute"), (V["state_p1"], V["state_p2"], V["state_p3"])
+    assert V["route"] == "note" and V["said_dispute_p3"] == "never had a car loan" and not V.get("said_dispute_p1"), V["route"]
+    notes = []
+    while V["route"] == "note":
+        notes.append((V["note_pid"], V["note_reason"])); V["note_ok"] = "true"; ev(P, V, "note_after")
+    assert notes == [("p1", "paid"), ("p2", "refused"), ("p3", "dispute")] and V["final_route"] == "refused", (notes, V.get("final_route"))
+    # the same claim again on a product already settled with it: nothing changes, nothing restarts; the very next
+    # identical repeat is about the product on the table (no fixed point)
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", offer_for="first")
+    q, k = V["offer_question"], V["attempts_used_p2"]
+    ev(P, V, "dispute", topic="dispute", offer_for="first")
+    assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("dispute", "open", "open") and V["attempts_used_p2"] == k, V["attempts_used_p2"]
+    assert V["say_next"] == q and V["route"] == "negotiate", V["say_next"]
+    ev(P, V, "dispute", topic="dispute", offer_for="first")
+    assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("dispute", "dispute", "open") and V["cur_pid"] == "p3", V["say_next"]
+
+
+@test
+def test_claim_on_another_product_never_restarts_the_current_one():
+    """EXT-B-12 review: a paid claim on another live product while the loan's attempt 2 is on the table re-asked the
+    loan's attempt 1 (already refused) with attempts_used reset to 1. start_product never restarts a product under way."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    for _ in range(3):
+        ev(P, V, "refuse", stance="refuse")
+    assert V["cur_pid"] == "p2" and V["attempts_used_p2"] == "2" and V["say_next"] == "For your personal loan, can you pay 700 on Friday 23 October?"
+    ev(P, V, "paid", topic="already_paid", offer_for="third")
+    assert V["state_p3"] == "paid" and V["attempts_used_p2"] == "2" and V["prop_amount"] == "700.0", V["say_next"]
+    assert V["say_next"].endswith("car loan. For your personal loan, can you pay 700 on Friday 23 October?"), V["say_next"]
+    assert "2100" not in V["say_next"]
+
+
+@test
+def test_a_changed_claim_still_changes_and_a_repeat_keeps_its_words():
+    """Review of the EXT-B-12 fix: with nothing else on the table a different claim on a settled product is the customer
+    changing it ('I don't recognise it' ... 'sorry, I mean I already paid it'), as before; the same claim again changes
+    nothing but its new words still reach the note."""
+    P, V = start([CARD], notes=True)
+    ev(P, V, "dispute", topic="dispute", customer_said="I don't recognise it")
+    assert V["state_p1"] == "dispute", V["state_p1"]
+    ev(P, V, "paid", topic="already_paid", customer_said="I paid it on the 3rd")
+    assert V["state_p1"] == "paid" and V["said_paid_p1"] == "I paid it on the 3rd", (V["state_p1"], V.get("said_paid_p1"))
+    ev(P, V, "paid", topic="already_paid", customer_said="by bank transfer")
+    assert V["state_p1"] == "paid" and V["said_paid_p1"] == "I paid it on the 3rd; by bank transfer", V.get("said_paid_p1")
+    # multi-product: the same claim again on a settled product (its ordinal) keeps its words there
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "paid", topic="already_paid", offer_for="first", customer_said="paid the card last week")
+    ev(P, V, "paid", topic="already_paid", offer_for="first", customer_said="through the app")
+    assert V["state_p1"] == "paid" and V["state_p2"] == "open", (V["state_p1"], V["state_p2"])
+    assert V["said_paid_p1"] == "paid the card last week; through the app" and not V.get("said_paid_p2"), V.get("said_paid_p1")
+
+
+@test
+def test_declined_day_with_an_amount_asks_the_exact_day():
+    """EXT-B-14 (now Fri 16 Oct): 'I can't do it this Friday, but I can pay the personal loan in full' (cut off before
+    the day) was read back on the Friday just declined. day_refused=yes: the exact-day question, then the named day
+    through the guard (a holiday moves to the next business day), the full amount kept."""
+    card = {"words": "credit card ending 2288", "full": 300, "floor": 90, "days_late": 9}
+    loan = {"words": "personal loan", "full": 900, "floor": 300, "days_late": 20}
+    P, V = start_on([card, loan], "2026-10-16", True, True)
+    ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_for="first", stance="offer")
+    assert V["say_next"].endswith("can you pay 900 on Friday 23 October?"), V["say_next"]
+    ev(P, V, "offer", offer_kind="none", offer_ref="full", day_refused="yes", offer_for="second", stance="offer", offer_when="")
+    assert V["route"] == "negotiate" and V["say_next"] == "Which exact day would that be?" and V["state_p2"] == "open", V["say_next"]
+    assert V["day_refused"] == "none"
+    ev(P, V, "offer", offer_kind="exact", offer_when="Monday the 26th of October", stance="offer")
+    assert V["say_next"].startswith("Monday 26 October is not a business day. The next business day is Tuesday 27 October."), V["say_next"]
+    ev(P, V, "accept", stance="accept")
+    assert V["readback_line"] == "To confirm: credit card ending 2288, 300, today; personal loan, 900, on Tuesday 27 October. Do you confirm?", V["readback_line"]
+    # the extractor's date (or the words) naming the declined day is not their day either
+    for ext in ({"offer_kind": "exact", "offer_date": "2026-10-23", "offer_when": ""},
+                {"offer_kind": "exact", "offer_when": "this Friday"}, {"offer_kind": "exact", "offer_when": "Friday"}):
+        P, V = start_on([card, loan], "2026-10-16", True, True)
+        ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_for="first", stance="offer")
+        ev(P, V, "offer", offer_ref="full", day_refused="yes", stance="offer", **ext)
+        assert V["route"] == "negotiate" and V["say_next"] == "Which exact day would that be?", (ext, V["route"], V["say_next"])
+    # day_refused=none keeps the old reading (an amount alone keeps the day on the table, rule 27)
+    P, V = start_on([card, loan], "2026-10-16", True, True)
+    ev(P, V, "offer", offer_kind="exact", offer_when="today", offer_for="first", stance="offer")
+    ev(P, V, "offer", offer_kind="none", offer_ref="full", day_refused="none", stance="offer", offer_when="")
+    assert V["route"] == "confirm" and V["agreed_p2"].startswith("900.0|2026-10-23"), V.get("agreed_p2")
+    # a declined day with no amount and no day of their own is a refusal (one attempt), never a promise on that day
+    P, V = start([LOAN])
+    ev(P, V, "refuse", stance="refuse")
+    ev(P, V, "offer", offer_kind="exact", offer_when="Friday", day_refused="yes", stance="refuse")
+    assert V["attempts_used_p1"] == "2" and V["say_next"] == "Can you pay 700 on Friday 23 October?", V["say_next"]
+    # extraction and clearing
+    names = [e["name"] for e in pol.Policy.offer_extraction("d", "a", "k")]
+    assert "day_refused" in names and pol.CLEAR_ENUMS["day_refused"] == "none"
+    assert "CANNOT pay on is not their day" in pol.WHEN_DESC
+
+
+@test
+def test_amount_with_a_vague_period_is_kept_for_the_exact_day():
+    """EXT-B-14 review: '200 next week' -> 'which exact day?' -> 'Tuesday the 20th' read back the full amount."""
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="vague", offer_when="next week", offer_amount="200")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+    ev(P, V, "offer", offer_kind="exact", offer_when="Tuesday the 20th")
+    assert V["route"] == "confirm" and V["agreed_p1"].startswith("200.0|2026-10-20"), V.get("agreed_p1")
+    # vague_again='refuse': an amount with a declined day after the exact-day question is an offer, not a refusal
+    P2 = pol.Policy(HOL, texts=TEXTS, vague_again="refuse")
+    V2 = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([LOAN])}
+    run(P2.prepare_code(BODY, "statement"), V2)
+    ev(P2, V2, "offer", offer_kind="vague", offer_when="next week")
+    ev(P2, V2, "offer", offer_kind="none", offer_ref="full", day_refused="yes", stance="offer", offer_when="")
+    assert V2["attempts_used_p1"] == "0" and V2["say_next"].endswith("Can you pay 2100 on Friday 23 October?"), V2["say_next"]
+
+
+def _walk_cond(c, V):
+    if c.get("operator") == "always":
+        return True
+    if "conditions" in c:
+        r = [_walk_cond(x, V) for x in c["conditions"]]
+        return any(r) if c.get("logic") == "or" else all(r)
+    return c.get("operator") == "equals" and str(V.get(c["variable"])) == str(c["operand"])
+
+
+def _opening_nodes():
+    nodes = {}
+    for key in ("unclear", "declined", "deceased", "wrong_number"):
+        fl.end_pair(key, "not_reached", key, "Goodbye.", nodes)
+    for n in ("ask_dob", "third_party"):
+        nodes[n] = fl.conv(n, "t", transitions=[fl.always("fin_unclear")])
+    vals = ["customer", "someone_else", "wrong_number", "deceased", "refuses", "unclear"]
+    desc = "customer = yes. unclear = anything else: 'hello', 'who is this?', a question, silence."
+    nodes["opening"] = fl.conv("opening", "t", on_enter={"type": "tts", "text": "Hello. ASK?"},
+                               extraction=[fl.ext("who1", vals, desc)], first_only=True)
+    fl.conversation_first("opening", "vars['setup_state'] = 'ok'\n", "who1",
+                          [("customer", "ask_dob", "c"), ("deceased", "fin_deceased", "d"), ("wrong_number", "fin_wrong_number", "w"),
+                           ("someone_else", "third_party", "s")], "opening_retry", nodes)
+    nodes["opening_retry"] = fl.conv("opening_retry", "Then ask exactly: \"ASK?\"", extraction=[fl.ext("who2", vals, desc)],
+                                     transitions=[fl.eq("who2", "customer", "ask_dob", "c"), fl.eq("who2", "someone_else", "third_party", "s"),
+                                                  fl.eq("who2", "refuses", "fin_declined", "r"), fl.always("fin_unclear")])
+    return fl.opening_no_answer(nodes, "ASK?")
+
+
+def _opening_replay(nodes, labels):
+    """One customer turn per label (the who value the extractor gives): follow transitions and code nodes, return the
+    path of conversation / ending nodes entered."""
+    V, node, path = {}, "opening", []
+    for lab in labels:
+        var = "who1" if node in ("opening", "opening_again") else "who2"
+        V[var] = lab
+        nxt = next(t["target_node"] for t in nodes[node]["transitions"] if _walk_cond(t["condition"], V))
+        while nodes[nxt]["node_type"] == "code" and not nxt.startswith("fin_"):
+            exec(nodes[nxt]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"], {"vars": V})
+            nxt = next(t["target_node"] for t in nodes[nxt]["transitions"] if _walk_cond(t["condition"], V))
+        path.append(nxt)
+        node = nxt
+        if nxt.startswith("fin_") or nxt in ("ask_dob", "third_party"):
+            break
+    return path
+
+
+@test
+def test_opening_no_answer_is_not_an_ask():
+    """EXT-A-08 / EXT-A-40: cut-off small talk at the opening was 'unclear', the second ask became 'Please go on.' and
+    the call closed as unclear after one identity question. no_answer is counted in code (one fixed re-ask per ask);
+    a greeting or a question still uses an ask, so 'hello' twice still closes after exactly two asks."""
+    nodes = _opening_nodes()
+    assert fl.check({"initial_node": "opening", "system_prompt": "s", "nodes": nodes, "global_nodes": {}, "tools": [],
+                     "test_variables": {}}) == []
+    e1 = nodes["opening"]["extraction_schema"][0]
+    assert e1["enum_values"] == ["customer", "someone_else", "wrong_number", "deceased", "refuses", "no_answer", "unclear"]
+    assert "no_answer comes before the catch-all 'anything else' of unclear" in e1["description"]
+    for n in ("opening_again", "opening_retry_again"):
+        assert nodes[n]["on_enter"] == {"type": "tts", "text": "Sorry, I did not catch that. ASK?"}, nodes[n]["on_enter"]
+    assert nodes["opening_retry"]["task_message"].endswith(fl.opening_retry_clause("ASK?"))
+    # who1=no_answer -> the fixed re-ask (not one of the two asks) -> the answer routes as usual
+    assert _opening_replay(nodes, ["no_answer", "customer"]) == ["opening_again", "ask_dob"]
+    # EXT-A-40: two cut-offs at the first ask, then the husband at the (fixed) second ask
+    assert _opening_replay(nodes, ["no_answer", "no_answer", "someone_else"]) == ["opening_again", "opening_retry_again", "third_party"]
+    # EXT-A-08: one cut-off at each ask, then the answer
+    assert _opening_replay(nodes, ["no_answer", "unclear", "no_answer", "someone_else"]) == \
+        ["opening_again", "opening_retry", "opening_retry_again", "third_party"]
+    # rule 3 unchanged: a greeting / question twice closes after exactly two asks; who2=unclear still closes
+    assert _opening_replay(nodes, ["unclear", "unclear"]) == ["opening_retry", "fin_unclear"]
+    assert _opening_replay(nodes, ["no_answer", "unclear", "unclear"]) == ["opening_again", "opening_retry", "fin_unclear"]
+    assert _opening_replay(nodes, ["unclear", "refuses"]) == ["opening_retry", "fin_declined"]
+    # a line that never answers closes as unclear after at most four asks
+    assert _opening_replay(nodes, ["no_answer"] * 8) == ["opening_again", "opening_retry_again", "opening_retry_again", "fin_unclear"]
+    # the counter's reset is a value of the enum (a code write outside the enum is rejected and the old value stays)
+    code = nodes["opening_no_answer"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
+    V = {"who1": "no_answer"}
+    exec(code, {"vars": V})
+    assert V["who1"] == "unclear" and V["opening_no_answer_route"] == "retry", V
+
 
 if __name__ == "__main__":
     sys.exit(main())

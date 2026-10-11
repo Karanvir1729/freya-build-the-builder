@@ -116,6 +116,10 @@ nodes["opening_retry"] = fl.conv(
         fl.eq("who2", "refuses", "fin_declined", "refuses again"),
         fl.always("fin_unclear"),
     ])
+# R3: a reply with no answer in it (only small talk, a line cut off mid-way) is not one of the two asks: who1/who2 get
+# 'no_answer', counted in code (one fixed re-ask per ask), and the second ask always ends with the question (talkative
+# EXT-A-08 / EXT-A-40 closed as unclear after asking the identity question once)
+fl.opening_no_answer(nodes, "Am I speaking with {{title}} {{last_name}}?")
 
 # ---------------------------------------------------------------- third party
 cb_tool = fl.api_tool(
@@ -343,7 +347,7 @@ COMMON = ("- If asked whether you are a robot or an AI: you are Freya Bank's dig
 
 NEGOTIATE = ("You are talking with {{title}} {{last_name}}, who is verified, about the late payment. The line you just said and the offer in STATE were decided by the system from the bank's rules.\n"
              "- Never propose, compute or change an amount or a date yourself, and never ask how much they can pay. The only offer you may make is the current offer in STATE, word for word.\n"
-             "- If the customer asks a question or says something else, answer it in one short sentence, then ask the current offer again.\n"
+             "- If the customer asks a question or says something else, answer it in one short sentence, then follow STATE for what to ask: an offer STATE marks already said once is never asked again.\n"
              + COMMON + FACTS)
 neg_ext = [topic, POLICY.stance_extraction(STANCE_DESC)] + POLICY.offer_extraction(DATE_DESC, AMOUNT_DESC, KIND_DESC, ref_desc=REF_DESC)
 neg_trs = TOPIC_TRS + POLICY.offer_guard_transitions() + POLICY.stance_transitions()

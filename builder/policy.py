@@ -106,7 +106,7 @@ DEFAULT_TEXTS = {
 # every turn). So a clear writes a VALID neutral value: the enum's own neutral member, a sentinel date / amount.
 CLEAR_ENUMS = {"stance": "other", "offer_kind": "none", "offer_for": "none", "topic": "none", "confirm": "other",
                "hs_answer": "none", "wrap": "other", "aside": "none",
-               "offer_ref": "none"}
+               "offer_ref": "none", "day_refused": "none"}
 CLEAR_VALUES = {"offer_date": "1900-01-01", "offer_amount": "0", "offer_when": "", "per_product": "", "customer_said": ""}
 SENTINEL_YEAR = 1900
 # the customer's own words for the day, resolved in code against the call's date (the platform's date extraction uses
@@ -115,7 +115,17 @@ WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as
              "'this Saturday', 'the 23rd', 'the sixth of November', 'end of the month', 'when my salary comes'). "
              "Empty when no day or period is mentioned in the latest message, and empty when the customer takes the day back "
              "in the same message before saying the new one ('on Friday, no sorry,' / 'tomorrow, I mean' and it stops): "
-             "the corrected day is still to come.")
+             "the corrected day is still to come. A day the customer says they CANNOT pay on is not their day: leave it out "
+             "('I can't do Friday, but I can pay it in full' -> empty; 'not Friday, Monday' -> 'Monday').")
+# a day turned down while an amount is still offered ('I can't do it this Friday, but I can pay that one in full' and
+# the line stops): the amount stands and the day is still to come; the proposal's day is never filled back in
+# (extended Brief B EXT-B-14, talkative: the read-back named the Friday the customer had just declined). Read only by
+# check_one / offer_date_of; it routes nothing, so a bare 'no' still goes to the stance counter.
+DAY_REFUSED_DESC = ("From the customer's LATEST message only. yes = they say the day the agent proposed, or today, does NOT "
+                    "work for them ('I can't do Friday', 'not this Friday', 'not today', 'that day is no good'), whether or not "
+                    "they also name an amount or another day; 'no, but I can pay it in full' in answer to a question that named "
+                    "a day is yes too. none = anything else: a bare no with no amount and no other day, a customer correcting "
+                    "their own words ('Friday, sorry, I mean Monday'), or no day turned down at all.")
 
 
 # an amount named by reference instead of a number ('the minimum', 'the whole amount'): the extractor does not know the
@@ -315,7 +325,22 @@ def readback(V, ids):
             s += T('moved_bd')
         items.append(s)
     return T('readback_head') + T('readback_sep').join(items) + T('readback_tail')
+def under_way(V, pid):
+    # the product's offer is already on the table (a ladder rung was spoken, or it is the product being asked about)
+    if g(V, 'prop_pid') != pid or not g(V, 'offer_question'):
+        return False
+    k = int(num(pg(V, pid, 'attempts_used'), 0) or 0)
+    return k >= 1 or (g(V, 'cur_pid') == pid and g(V, 'stage') == 'one')
 def start_product(V, pid, prefix):
+    if under_way(V, pid):
+        # never restarted at rung 0: a claim settled ANOTHER product while this one's offer was on the table, and the
+        # restart re-offered an offer already refused with attempts_used reset to 1 (extended Brief B EXT-B-12: the
+        # same line ~130 times); the offer on the table is asked again, unchanged
+        intro = '' if g(V, 'cur_pid') == pid else T('next_product', words=pg(V, pid, 'words'), past_due=fmt(full_of(V, pid)))
+        V['stage'] = 'one'
+        V['cur_pid'] = pid
+        say(V, join([prefix, intro, V['offer_question']]), 'negotiate')
+        return
     V['stage'] = 'one'
     V['cur_pid'] = pid
     if not ladder(V, pid):
@@ -400,6 +425,12 @@ def check_one(V, pid, a, d, kind):
     pa, pd = prop_of(V, pid)
     t = today_of(V)
     dl = deadline_of(V, pid)
+    dr = d is None and a is not None and kind != 'vague' and g(V, 'day_refused') == 'yes'
+    if dr:
+        # 'I can't do it this Friday, but I can pay it in full': the amount is offered, the day is not; the proposal's
+        # day was just turned down, so it is never filled in (extended Brief B EXT-B-14); the brief's exact-day
+        # question asks for it (the amount is kept in vague_amount for the answer)
+        kind = 'vague'
     if kind == 'vague' or (a is None and d is None):
         V['offer_verdict'] = 'vague'
         # an amount named with the vague period ('500 next week') is still checked: below the floor -> the brief's line
@@ -427,13 +458,19 @@ def check_one(V, pid, a, d, kind):
             V['vague_pending'] = pid           # the next answer is the answer to 'which exact day?' (see ev_refuse)
             say(V, join([pre, T('vague')]))
             return
-        if P.get('vague_again') == 'refuse':   # the brief: no exact day after one ask = a non-answer (one attempt)
+        if P.get('vague_again') == 'refuse' and not dr:   # the brief: no exact day after one ask = a non-answer (one attempt)
+            # (an amount with a declined day is an offer, never a refusal: it gets the deadline below)
             refuse(V, pid)
             return
         set_prop(V, pid, amt, dl)
         say(V, join([pre, T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
         return
     amt = pa if a is None or a <= 0 else a
+    va = num(pg(V, pid, 'vague_amount'))
+    if (a is None or a <= 0) and va and g(V, 'vague_prev') == pid:
+        # '500 next week' / 'not Friday, but in full' -> 'which exact day?' -> 'Tuesday': the amount they named, on
+        # that day (not the proposal's amount)
+        amt = va
     day = pd if d is None else d
     pdl = pdate(pg(V, pid, 'part_deadline'))   # optional: a brief with a shorter last date for part payments
     if pdl and amt is not None and amt < full_of(V, pid) and pdl < dl:
@@ -681,10 +718,21 @@ def offer_date_of(V):
     if kind != 'exact' and w.strip():
         V['pending_when'] = w
         V['when_cutoff'] = 'yes' if cut_off(w) else ''
+    refused_day = g(V, 'day_refused') == 'yes'
+    if refused_day and kind == 'exact' and d is not None:
+        # the words name the day that was turned down ('I can't do this Friday': the proposal's Friday, or today when
+        # said on a Friday), not a day of their own
+        said_today = re.search(r'\b(today|tonight|now|this (morning|afternoon|evening))\b', w.lower())
+        if d == pdate(g(V, 'prop_date')) or (d == today_of(V) and not said_today):
+            d, kind = None, 'none'
     if kind == 'exact' and d is not None:
         return d, 'exact'
     if kind == 'vague':
         return None, 'vague'
+    if refused_day:
+        # the customer turned a day down and their own words give no other day: an extracted date is that declined
+        # day (or the real clock), never their day (extended Brief B EXT-B-14)
+        return None, g(V, 'offer_kind')
     d = pdate(g(V, 'offer_date'))
     if d is not None and d < today_of(V):
         return None, 'vague'
@@ -864,6 +912,12 @@ def ev_offer(V):
         a = None   # the unit of a cut-off day ('Friday twenty' / 'three'), not an amount
     if cutoff_turn(V, a, d):
         return
+    if d is None and a is None and k2 != 'vague' and kind != 'vague' and g(V, 'day_refused') == 'yes' and \
+            g(V, 'stance') == 'refuse' and g(V, 'offer_ref') not in ('floor', 'full'):
+        # 'I can't do Friday.' with no amount and no day of their own: the declined day is not an offer, the no is the
+        # flat refusal it is (it reached the guard only because the extractor saw a day in it)
+        ev_refuse(V)
+        return
     if k2 in ('exact', 'vague'):
         kind = k2
     if kind == 'vague':
@@ -976,13 +1030,27 @@ def ev_too_much(V):
         too_much(V, p, join([pre0, pre]))
         return
     too_much(V, g(V, 'cur_pid'))
-def targets_for_topic(V):
+def live(V, p):
+    return bool(p) and state(V, p) in ('open', 'agreed')
+def targets_for_topic(V, kind=''):
+    # a topic (paid / dispute) settles only products still open or agreed. The ordinal is the extractor's guess at a
+    # position: one naming a product already settled while another one is on the table is not trusted (extended Brief B
+    # EXT-B-12, talkative: a dispute of the product being asked about came back with the ordinal of a product already
+    # settled; that one was settled again and the product on the table restarted, ~130 times). The same claim again on
+    # that product is a repeat (nothing to settle); another claim is about the product on the table. With nothing on the
+    # table the old rule stands: a different claim on a settled product is the customer changing it ('I don't recognise
+    # it' ... 'sorry, I mean I already paid it'). kind '' (the hardship words, keep_said) keeps the old rule throughout.
     tp = offer_target(V)
-    if tp:
+    cur = g(V, 'cur_pid')
+    if tp and (live(V, tp) or not kind):
         return [tp]
     if multi(V) and g(V, 'stage') == 'all':
-        return [p for p in pids(V) if state(V, p) in ('open', 'agreed')]
-    return [g(V, 'cur_pid')]
+        return [p for p in pids(V) if live(V, p)]
+    if tp and state(V, tp) == kind:
+        return []
+    if tp and live(V, cur):
+        return [cur]
+    return [tp or cur]
 def ev_settle(V, kind):
     if multi(V):
         pre = settle_claims(V)
@@ -990,7 +1058,20 @@ def ev_settle(V, kind):
             if not pay_claimed(V, pre):
                 advance(V, pre)
             return
-    ts = targets_for_topic(V)
+    ts = targets_for_topic(V, kind)
+    if not ts:
+        # a repeat of a claim already settled changes nothing: the call goes on where it was (the offer on the table,
+        # unchanged: start_product never restarts it; the read-back; the notes). The same repeat in the very next turn
+        # is about the product on the table (an ordinal that keeps naming the settled product is the extractor's, not
+        # the customer's: no fixed point)
+        key = kind + '@' + offer_target(V)
+        cur = g(V, 'cur_pid')
+        if g(V, 'claim_prev') == key and live(V, cur):
+            ts = [cur]
+        else:
+            V['claim_repeat'] = key
+            advance(V, '')
+            return
     words = [pg(V, p, 'words') for p in ts]
     for p in ts:
         pset(V, p, 'state', kind)
@@ -1294,6 +1375,20 @@ def ev_finalize(V):
     # the wrap-up is over without a transfer: the notes still owed are written now, then the ending
     V['wrap_done'] = 'yes'
     note_next(V)
+def attempt_spoken(V, pid):
+    # the current proposal is a counted persuasion attempt (a rung of the ladder, spoken by the system line on entering):
+    # a dialogue turn that asks it again is another attempt (extended Brief B EXT-B-01, talkative: a 'No.' after small
+    # talk was not extracted, the model re-asked attempt 1 word for word and the judge counted three attempts on a
+    # two-attempt product)
+    try:
+        k = int(num(pg(V, pid, 'attempts_used'), 0) or 0)
+        if k < 1 or k > len(ladder(V, pid)):
+            return False
+        a, d = rung(V, pid, k - 1)
+        pa, pd = num(g(V, 'prop_amount')), pdate(g(V, 'prop_date'))
+        return pa is not None and pd is not None and okey(a, d) == okey(pa, pd)
+    except Exception:
+        return False
 def state_line(V):
     ids = pids(V)
     out = []
@@ -1320,11 +1415,18 @@ def state_line(V):
                    'The sympathy and the offer of help were already said once: never say them again.')
     elif g(V, 'offer_question'):
         cp = g(V, 'prop_pid')
-        if cp and state(V, cp) == 'open' and pg(V, cp, 'offered_floor') == 'yes' and abs(num(g(V, 'prop_amount'), -1.0) - floor_of(V, cp)) < 0.005:
-            # the floor is offered once (the brief's rule): a dialogue turn that re-asks it is a second offer (Freya
-            # talkative PUB-06: 'How much can you let me pay?' got the minimum again and the judge counted two)
-            out.append('Current offer, already said once: "' + g(V, 'offer_question') + '" Never repeat its amount or the question; '
-                       'to small talk or a question, reply in one short sentence and ask only whether they can do that.')
+        floor_said = pg(V, cp, 'offered_floor') == 'yes' and abs(num(g(V, 'prop_amount'), -1.0) - floor_of(V, cp)) < 0.005
+        if cp and state(V, cp) == 'open' and (floor_said or attempt_spoken(V, cp)):
+            # the floor is offered once (the brief's rule) and every ladder rung is one persuasion attempt: a dialogue
+            # turn that re-asks it is another offer (Freya talkative PUB-06: 'How much can you let me pay?' got the
+            # minimum again and the judge counted two; EXT-B-01: attempt 1 asked twice). A missed answer is asked for
+            # again, never the offer: the repeated 'No.' then routes to the counter and the next offer is the real one.
+            out.append('Current offer, already said once: "' + g(V, 'offer_question') + '" Never repeat its amount, its date or '
+                       'the question yourself: a repeat counts as another persuasion attempt. If the customer asks what the amount '
+                       'or the date was, give it once as the answer, without the question. To small talk or a side question, reply '
+                       'in one short sentence and ask only whether they can do that. If their latest message already answered it '
+                       '(a no, a yes, a day or an amount, also after small talk), say only: "Sorry, I did not catch that. Could you '
+                       'say it again?"')
         else:
             out.append('Current offer, ask exactly this: "' + g(V, 'offer_question') + '"')
     rec = [p for p in ids if state(V, p) == 'recorded']
@@ -1367,7 +1469,15 @@ def keep_said(V, ev):
     elif kind in ('paid', 'dispute') and multi(V) and [p for p, c in claims(V).items() if c == kind]:
         ps = [p for p, c in claims(V).items() if c == kind]
     else:
-        ps = targets_for_topic(V)
+        ps = targets_for_topic(V, kind if kind in ('paid', 'dispute') else '')   # the products ev_settle will settle
+        if not ps and kind in ('paid', 'dispute'):
+            # a repeat of a settled claim (ev_settle, run after this with claim_prev = this claim_repeat): the second in a
+            # row is about the product on the table; otherwise its new words still reach the settled product's note
+            tp, cur = offer_target(V), g(V, 'cur_pid')
+            if g(V, 'claim_repeat') == kind + '@' + tp and live(V, cur):
+                ps = [cur]
+            elif tp and state(V, tp) == kind:
+                ps = [tp]
     for p in [x for x in ps if x]:
         old = str(pg(V, p, 'said_' + kind) or '').strip()
         if not old or old.lower() in ('none', 'null'):
@@ -1386,6 +1496,8 @@ def main(V, ev):
         V['when_cutoff'] = ''
         V['amount_prev'] = g(V, 'pending_amount')   # a whole amount whose cents were cut off last turn, joined once
         V['pending_amount'] = ''
+        V['claim_prev'] = g(V, 'claim_repeat')      # last turn's claim that repeated one already settled (ev_settle)
+        V['claim_repeat'] = ''
         if ev == 'offer':
             ev_offer(V)
         elif ev == 'accept':
@@ -1440,7 +1552,8 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "said_last",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
            "wrap_human", "vague_all", "vague_pending", "vague_prev", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
-           "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev")
+           "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev",
+           "claim_repeat", "claim_prev")
 
 
 def _declare():
@@ -1464,9 +1577,25 @@ EVENT_NODES = {
     "wrap_human": "wrap_human", "wrap_change": "wrap_change", "finalize": "finalize",
 }
 
-ONCE_RULE = ("\n- An offer the brief allows once (the lowest amount, the support team, a transfer) is said once, by the system line "
-             "you speak on entering: never repeat it yourself. To small talk, a cut-off line or a side question, reply in one short "
-             "sentence (or 'Please go on.') and wait; the system asks again when it is due.")
+ONCE_RULE = ("\n- Every persuasion offer (each attempt of the ladder, the lowest amount), the support team and a transfer are said "
+             "once, by the system line you speak on entering: never repeat them yourself. To small talk, a cut-off line or a side "
+             "question, reply in one short sentence (or 'Please go on.') and wait; the system asks again when it is due.")
+# A generator line telling the model to ask the offer again after small talk or a question (every reference generator
+# had 'then ask the current offer again') contradicts the 'already said once' state line: the model obeyed it and asked
+# a refused attempt again word for word (extended Brief B EXT-B-01). negotiate_node / hardship_node rewrite it.
+REASK_RX = re.compile(r"\b(?:then )?(?:ask|repeat|make|say) (?:the |that )?(?:current )?offer(?: (?:in|from) STATE)? again\b", re.I)
+REASK_SUB = "then follow STATE for what to ask: an offer STATE marks already said once is never asked again"
+# offer_for / per_product name products by position; 'in the order the agent listed them' was read off the agent's latest
+# line, which after a settled product names only the product on the table (extended Brief B EXT-B-12: a dispute of the
+# third product came back 'first' and settled the first product again)
+POSITION_CLAUSE = (" Positions count in the order the agent's statement first listed every product (the bank's order, as in "
+                   "STATE), never in the order of the agent's latest line: a line that names only one product does not make it "
+                   "the first.")
+
+
+def no_reask(task):
+    """The task text with every 'then ask the current offer again' (and close variants) replaced by REASK_SUB."""
+    return REASK_RX.sub(REASK_SUB, str(task or ""))
 
 
 class Policy:
@@ -1662,20 +1791,22 @@ class Policy:
                 o[min(2, len(o) - 1)] + "=pay@monday the 26th'. Empty when the message is about all products together "
                 "in one answer or about one product only. A pair only for a product the message NAMES (its type, its "
                 "card digits or its position): words cut off before the product's name ('and I never had a') name no "
-                "product, so leave that claim out, never guess which product it was.")
+                "product, so leave that claim out, never guess which product it was." + POSITION_CLAUSE)
         return [{"name": "per_product", "type": "string", "description": desc, "min_confidence": conf}]
 
     @staticmethod
     def offer_extraction(date_desc, amount_desc, kind_desc, conf=0.5, ref_desc=None):
         """T1: offer_date (date), offer_amount (float), offer_kind (exact|vague|none), offer_when (the customer's
-        words for the day, resolved in code) and offer_ref (none|floor|full: an amount named by reference, resolved in
-        code against the product; pass the brief's own names for its floor in ref_desc)."""
+        words for the day, resolved in code), offer_ref (none|floor|full: an amount named by reference, resolved in
+        code against the product; pass the brief's own names for its floor in ref_desc) and day_refused (none|yes: the
+        proposed day was turned down, so an amount-only offer gets the exact-day question, never that day)."""
         kd = kind_desc if VAGUE_KIND_CLAUSE in str(kind_desc) else str(kind_desc) + VAGUE_KIND_CLAUSE
         return [fl.ext("offer_kind", ["none", "exact", "vague"], kd, conf),
                 {"name": "offer_date", "type": "date", "description": date_desc, "min_confidence": conf},
                 {"name": "offer_when", "type": "string", "description": WHEN_DESC, "min_confidence": conf},
                 {"name": "offer_amount", "type": "float", "description": amount_desc, "min_confidence": conf},
-                fl.ext("offer_ref", ["none", "floor", "full"], ref_desc or REF_DESC, conf)]
+                fl.ext("offer_ref", ["none", "floor", "full"], ref_desc or REF_DESC, conf),
+                fl.ext("day_refused", ["none", "yes"], DAY_REFUSED_DESC, conf)]
 
     @staticmethod
     def offer_guard_transitions():
@@ -1718,9 +1849,11 @@ class Policy:
         extraction = [dict(e, description=str(e.get("description") or "") + VAGUE_STANCE_CLAUSE)
                       if e.get("name") == "stance" and VAGUE_STANCE_CLAUSE not in str(e.get("description") or "") else
                       dict(e, description=str(e.get("description") or "") + VAGUE_KIND_CLAUSE)
-                      if e.get("name") == "offer_kind" and VAGUE_KIND_CLAUSE not in str(e.get("description") or "") else e
+                      if e.get("name") == "offer_kind" and VAGUE_KIND_CLAUSE not in str(e.get("description") or "") else
+                      dict(e, description=str(e.get("description") or "") + POSITION_CLAUSE)
+                      if e.get("name") == "offer_for" and POSITION_CLAUSE not in str(e.get("description") or "") else e
                       for e in extraction]
-        return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
+        return fl.conv(name, self.state_first(no_reask(task)) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction() + self.said_extraction()),
                        transitions=transitions)
 
@@ -1827,7 +1960,7 @@ class Policy:
                      fl.cond("offer_ref", "equals", "floor"), fl.cond("offer_ref", "equals", "full")),
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]
-        return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
+        return fl.conv(name, self.state_first(no_reask(task)) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=fl.with_cutoff(ext + self.aside_extraction(conf) + self.said_extraction(conf)), transitions=trs)
 
     def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):

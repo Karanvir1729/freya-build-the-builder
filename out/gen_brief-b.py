@@ -106,6 +106,10 @@ nodes["opening_retry"] = fl.conv(
         fl.eq("who2", "refuses", "fin_declined", "refuses again"),
         fl.always("fin_unclear"),
     ])
+# R3: a reply with no answer in it (only small talk, a line cut off mid-way) is not one of the two asks: who1/who2 get
+# 'no_answer', counted in code (one fixed re-ask per ask), and the second ask always ends with the question (talkative
+# EXT-A-08 / EXT-A-40 closed as unclear after asking the identity question once)
+fl.opening_no_answer(nodes, "Am I speaking with {{title}} {{last_name}}?")
 
 # ---------------------------------------------------------------- third party
 cb_tool = fl.api_tool(
@@ -324,7 +328,7 @@ STANCE_DESC = ("The customer's answer to the agent's LATEST payment proposal, fr
 KIND_DESC = ("From the customer's LATEST message only. exact = they name a specific payment day (a date, a weekday, 'tomorrow', 'the 30th') or a specific amount of money, or both. "
              "vague = only a vague period without a day ('next week', 'end of the month', 'when my salary comes'). "
              "none = no date, amount or period in the latest message (also 'yes', 'no', questions).")
-FOR_DESC = ("Which product the customer's LATEST message is about, in the order the agent listed the products: first, second or third "
+FOR_DESC = ("Which product the customer's LATEST message is about, in the order the agent's statement listed the products: first, second or third "
             "(match the product they name, e.g. 'the credit card', 'the car loan'); pick that one even when they mention the other products only to "
             "refuse or exclude them ('the credit card tomorrow, not the loans' = first). all = all of them, everything, both, "
             "or one date or amount for everything. none = no product named.")
@@ -352,7 +356,7 @@ COMMON = ("- If asked whether you are a robot or an AI: you are Freya Bank's dig
 
 NEGOTIATE = ("You are talking with {{title}} {{last_name}}, who is verified, about their late payments. The line you just said and the offer in STATE were decided by the system from the bank's rules.\n"
              "- Never propose, compute or change an amount or a date yourself, and never ask how much they can pay. The only offer you may make is the current offer in STATE, word for word.\n"
-             "- If the customer asks a question or says something else, answer it in one short sentence, then ask the current offer again.\n"
+             "- If the customer asks a question or says something else, answer it in one short sentence, then follow STATE for what to ask: an offer STATE marks already said once is never asked again.\n"
              + COMMON + FACTS)
 neg_ext = [topic, POLICY.stance_extraction(STANCE_DESC), offer_for] + POLICY.offer_extraction(DATE_DESC, AMOUNT_DESC, KIND_DESC, ref_desc=REF_DESC)
 neg_trs = TOPIC_TRS + POLICY.offer_guard_transitions() + POLICY.stance_transitions()

@@ -850,6 +850,110 @@ def third_party_callback(nodes, task, tools, extraction, transitions, reask_text
     return nodes
 
 
+# the opening: a reply with no answer in it (only small talk, or a sentence cut off mid-way) is not one of the brief's
+# asks. Measured on the organisers' simulator, talkative style (extended Brief A EXT-A-08, EXT-A-40): two cut-off
+# small-talk lines were extracted as the catch-all 'unclear', the second ask was replaced by the system prompt's
+# 'Please go on.', and the call closed as unclear after asking the identity question ONCE.
+NO_ANSWER = "no_answer"
+
+
+def no_answer_clause(unclear="unclear"):
+    """The description of the `no_answer` value, which takes precedence over the catch-all value `unclear`."""
+    return (" %s = the message answers nothing and asks nothing: only small talk (the day, the traffic, work, family) "
+            "and/or a sentence cut off mid-way (it stops on 'an', 'the', 'my', 'with', 'because'), with no yes or no, no "
+            "name, no greeting and no question in it. %s comes before the catch-all 'anything else' of %s; every example "
+            "named under %s stays %s, and so do a greeting ('hello'), 'go ahead', any question and silence. A message with "
+            "small talk AND an answer gets the answer's value." % (NO_ANSWER, NO_ANSWER, unclear, unclear, unclear))
+
+
+def with_no_answer(entry, unclear="unclear"):
+    """A copy of an enum extraction entry (e.g. who1) with the value 'no_answer' inserted before the catch-all value
+    `unclear` and no_answer_clause() appended to its description."""
+    e = dict(entry)
+    vals = list(e.get("enum_values") or [])
+    if unclear not in vals:
+        raise ValueError("with_no_answer: %r has no catch-all value %r" % (e.get("name"), unclear))
+    if NO_ANSWER not in vals:
+        vals.insert(vals.index(unclear), NO_ANSWER)
+    e["enum_values"] = vals
+    clause = no_answer_clause(unclear)
+    if clause not in str(e.get("description") or ""):
+        e["description"] = str(e.get("description") or "") + clause
+    return e
+
+
+def opening_retry_clause(ask_line):
+    """Appended to the second ask's task: the system prompt's cut-off line ('Please go on') must not replace the ask."""
+    return ("\nWhatever the person said, also small talk or a sentence cut off mid-way, your message ENDS with \"%s\" word "
+            "for word; never say only 'Please go on' here: this question is the second ask." % ask_line)
+
+
+def opening_no_answer(nodes, ask_line, opening="opening", setup="setup", retry="opening_retry", var1="who1", var2="who2",
+                      unclear="unclear", grace=1, prefix="Sorry, I did not catch that. "):
+    """The brief's 'ask once more, then close as unclear' opening, with a turn that holds no answer counted in code.
+    Call it once the opening (conversation_first: `opening` extracting `var1`, `setup` routing on it, everything else to
+    `retry`) and the second ask (`retry`, extracting `var2`, ending with always -> the unclear ending) are built.
+    `ask_line` is the brief's identity question as spoken (e.g. "Am I speaking with {{title}} {{last_name}}?").
+
+    - var1 / var2 get the value 'no_answer' (with_no_answer), placed before the catch-all `unclear`;
+    - setup: var1 == no_answer -> <opening>_no_answer (counter_code, `grace` re-asks) -> <opening>_again: a fixed tts
+      line (prefix + ask_line), the same extraction and setup's routes; past the grace -> <retry>_again (the second ask,
+      also fixed text, so the system prompt cannot replace it with 'Please go on');
+    - retry and <retry>_again: var2 == no_answer -> <retry>_no_answer (its own counter, `grace` re-asks) ->
+      <retry>_again; past the grace -> the unclear ending;
+    - the retry's task gets opening_retry_clause(ask_line): its message always ends with the question.
+    So a reply with no answer never uses one of the brief's two asks, a greeting or a question still does, and a line
+    that never answers closes as unclear after at most 2 * (1 + grace) asks. Returns nodes."""
+    for n, kind in ((opening, "conversation"), (setup, "code"), (retry, "conversation")):
+        if not isinstance(nodes.get(n), dict) or nodes[n].get("node_type") != kind:
+            raise ValueError("opening_no_answer: %r must be a %s node already in nodes" % (n, kind))
+    o_cnt, o_again, r_cnt, r_again = opening + "_no_answer", opening + "_again", retry + "_no_answer", retry + "_again"
+    for n in (o_cnt, o_again, r_cnt, r_again):
+        if n in nodes:
+            raise ValueError("opening_no_answer: node %r already exists" % n)
+
+    def last_always(n):
+        t = (nodes[n].get("transitions") or [None])[-1]
+        if not t or t.get("condition", {}).get("operator") != "always":
+            raise ValueError("opening_no_answer: %r must end with always(<next>)" % n)
+        return t["target_node"]
+
+    def entry(n, var):
+        ents = nodes[n].get("extraction_schema") or []
+        if not any(e.get("name") == var for e in ents):
+            raise ValueError("opening_no_answer: %r does not extract %r" % (n, var))
+        nodes[n]["extraction_schema"] = [with_no_answer(e, unclear) if e.get("name") == var else e for e in ents]
+        return next(e for e in nodes[n]["extraction_schema"] if e.get("name") == var)
+
+    def insert(n, tr_):
+        nodes[n]["transitions"].insert(len(nodes[n]["transitions"]) - 1, tr_)
+
+    last_always(setup)
+    unclear_target = last_always(retry)
+    e1, e2 = entry(opening, var1), entry(retry, var2)
+    clause = opening_retry_clause(ask_line)
+    if clause not in nodes[retry]["task_message"]:
+        nodes[retry]["task_message"] += clause
+    task = nodes[retry]["task_message"]
+    line = {"type": "tts", "text": prefix + ask_line}
+    limit = int(grace) + 1
+    # the second ask
+    insert(retry, eq(var2, NO_ANSWER, r_cnt, "the reply holds no answer (only small talk or cut off)"))
+    nodes[r_cnt] = code_node(r_cnt, counter_code("no_answer_count_" + var2, limit, r_cnt + "_route", reset={var2: unclear}),
+                             [eq(r_cnt + "_route", "close", unclear_target, "no answer again after the second ask"),
+                              always(r_again)])
+    nodes[r_again] = conv(r_again, task, on_enter=dict(line), extraction=[e2],
+                          transitions=json.loads(json.dumps(nodes[retry]["transitions"])))
+    # the first ask
+    insert(setup, eq(var1, NO_ANSWER, o_cnt, "the reply holds no answer (only small talk or cut off)"))
+    nodes[o_cnt] = code_node(o_cnt, counter_code("no_answer_count_" + var1, limit, o_cnt + "_route", reset={var1: unclear}),
+                             [eq(o_cnt + "_route", "close", r_again, "no answer again: the second ask"),
+                              always(o_again)])
+    nodes[o_again] = conv(o_again, task, on_enter=dict(line), extraction=[e1],
+                          transitions=json.loads(json.dumps(nodes[setup]["transitions"])))
+    return nodes
+
+
 # ----------------------------------------------------------------------------------------------- assembly & checks
 def _no_none(o, path, errors):
     if o is None:
@@ -1084,7 +1188,10 @@ CUTOFF_CLAUSE = (" A cut-off message (it stops mid-sentence, e.g. on 'my', 'the'
                  "wedding or work: judge only what the customer actually said, never where the sentence might be going. "
                  "A message that gives the answer and THEN trails off still counts as that answer, unless the customer takes "
                  "it back before stopping ('on Friday, no sorry,' / 'four hundred, I mean' / 'wait, actually'): then the "
-                 "corrected value is still to come, so it gets the neutral value too.")
+                 "corrected value is still to come, so it gets the neutral value too. Small talk BEFORE the answer does not "
+                 "change the answer: 'Work has been so stressful lately. No.' is that no, 'Busy morning! Yes.' is that yes.")
+# the last sentence: a talkative customer's 'Work has been so stressful lately with everyone asking for things at the last
+# minute. No.' got no stance at all and the model re-asked the refused offer (extended Brief B EXT-B-01)
 
 
 def with_cutoff(entries, neutral=("none", "other")):
