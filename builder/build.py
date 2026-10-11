@@ -385,7 +385,7 @@ def guard_builder_edits(slot, trace, guard):
 
 
 async def main(argv):
-    opts = {"--cases": None, "--runner": "sim", "--minutes": "29", "--slot": None}; flags = set()
+    opts = {"--cases": None, "--runner": "sim", "--minutes": "29", "--slot": None, "--resume": None}; flags = set()
     args = []
     i = 0
     while i < len(argv):
@@ -449,6 +449,13 @@ async def main(argv):
     # resume: an earlier run of this slot left its generator; the agent improves it instead of starting over
     resume_note = None
     gen_prev = ROOT / "out" / ("gen_%s.py" % slot)
+    if opts["--resume"]:   # start this slot from another run's generator (e.g. a parallel slot)
+        src = pathlib.Path(opts["--resume"])
+        if not src.exists():
+            sys.exit("--resume: not found: %s" % src)
+        if src.resolve() != gen_prev.resolve():
+            gen_prev.write_bytes(src.read_bytes())
+            os.utime(gen_prev, (src.stat().st_atime, src.stat().st_mtime))
     if gen_prev.exists() and "--fresh" not in flags:
         keep = gen_prev.with_name("gen_%s.prev.py" % slot)
         keep.write_bytes(gen_prev.read_bytes())
