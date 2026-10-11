@@ -2092,12 +2092,14 @@ class Policy:
         return fl.conv(name, self.state_first(no_reask(task)) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
                        extraction=fl.with_cutoff(ext + self.aside_extraction(conf) + self.said_extraction(conf)), transitions=trs)
 
-    def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):
+    def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=5):
         """After a recorded promise (on_enter tts {{wrap_line}}: the recorded sentence, the brief's sentence after
         a promise, 'anything else?'). wrap in {done, human, new_plan, change, question, other}: done -> finalize
         (the promise ending), human -> wrap_human (ask once, then transfer), new_plan -> restructuring transfer,
         change -> wrap_change (the brief's sentence, promise unchanged), question -> stay (the model answers);
-        max_turns turns at most, then finalize."""
+        max_turns turns at most, then finalize (5: cut-off fragments count as turns; at 3 a talkative customer's
+        'I really just want to speak with' was cut off twice and the call closed on the promise with no transfer,
+        extended Brief A EXT-A-31 on Freya)."""
         name = name or self.targets["wrapup"]
         ext = [fl.ext("wrap", ["other", "done", "human", "new_plan", "change", "question"], wrap_desc, conf)]
         trs = [fl.eq("wrap", "done", "finalize", "nothing else"),
