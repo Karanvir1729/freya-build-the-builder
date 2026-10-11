@@ -775,23 +775,26 @@ vars['weekday_table'] = weekday_table(today)
 
 _CALLBACK_TODAY = r'''if cur < __CLOSE__:
     start = __OPEN__ if cur < __OPEN__ else 'after ' + cur
-    lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to __CLOSE_T__.')
+    lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to __CLOSE_T__ included.')
+    win.append([today.isoformat(), __OPEN__ if cur < __OPEN__ else cur, __CLOSE__, 0 if cur < __OPEN__ else 1])
 '''
 
 _CALLBACK_DAYS = r'''nbd = today
 for _i in range(__DAYS__):
     nbd = addbd(nbd, 1)
     lines.append(txt(nbd) + ' (' + nbd.isoformat() + '), from __OPEN_T__ up to __CLOSE_T__ included.')
+    win.append([nbd.isoformat(), '__OPEN_T__', '__CLOSE_T__', 0])
 tom = today + datetime.timedelta(days=1)
 extra = 'Tomorrow is ' + txt(tom) + '.'
 if not isbd(tom):
     extra += ' Tomorrow is NOT allowed, it is not a business day.'
 vars['callback_text'] = 'The ONLY allowed callback times are:\n- ' + '\n- '.join(lines) + '\n' + extra + ' Any other day or time is outside the window.'
+vars['cb_window'] = json.dumps(win)   # [date, from, to, from_is_exclusive]: third_party_callback checks a named slot in code
 '''
 
 
 def _callback_code(rule):
-    out = "lines = []\ncur = nowdt.strftime('%H:%M')\n"
+    out = "lines = []\nwin = []\ncur = nowdt.strftime('%H:%M')\n"
     if rule["same_day"]:
         out += _CALLBACK_TODAY.replace("__CLOSE__", repr(rule["close"])).replace("__OPEN__", repr(rule["open"])) \
                               .replace("__CLOSE_T__", rule["close"])
@@ -877,7 +880,32 @@ CB_OFFER_DESC = ("The person's LATEST message against the allowed callback windo
                  "ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a "
                  "time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too "
                  "far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything "
-                 "else (no day or time yet, a day without a time, a question, small talk).")
+                 "else (no day or time yet, a day without a time, a question, small talk). A time equal to the closing time "
+                 "is inside when the list says 'included'.")
+CB_AT_DESC = ("The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour "
+              "time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = "
+              "tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = "
+              "19:00). Empty when they do not name both a day (or a word for today) and a time.")
+# a slot the model judged outside is checked in code against the window SETUP_CODE wrote (cb_window): extended Brief A
+# EXT-A-39 on Freya, at 18:30 'Try at seven tonight' (19:00, the window's included closing time) was extracted as outside
+# twice and the call closed as no_callback
+_CB_CHECK = r'''try:
+    import json, re
+    _at = str(vars.get('cb_at') or '').strip()
+    _m = re.match(r'(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2})', _at)
+    vars['cb_route'] = ''
+    if _m:
+        _d, _t = _m.group(1), '%02d:%s' % (int(_m.group(2)), _m.group(3))
+        for _w in json.loads(str(vars.get('cb_window') or '[]')):
+            if _d == _w[0] and ((_t > _w[1]) if _w[3] else (_t >= _w[1])) and _t <= _w[2]:
+                vars['cb_route'] = 'inside'
+                vars['cb_offer'] = 'none'
+                vars['cb_slot_text'] = _d + ' ' + _t
+except Exception:
+    vars['cb_route'] = ''
+'''
+CB_BOOK_LINE = ("\nThe day and time the person just named, {{cb_slot_text}}, IS inside the allowed window: call schedule_callback "
+                "now with that date (YYYY-MM-DD) and time (HH:MM), then speak or call the next tool.")
 
 
 # A relative offered to pay in the middle of the call ('I can pay for her if you like.'): the model said its previous line
@@ -899,17 +927,22 @@ def third_party_callback(nodes, task, tools, extraction, transitions, reask_text
     misreads the time as inside (Ashvale PUB-02: '18:30' against a 17:00 close), the model still says the hours."""
     task = (task.rstrip() + "\nIf the day or time they name is outside the allowed window, do not book it; say exactly: \""
             + reask_text + "\"" + TP_NO_REPEAT)
-    ext_ = list(extraction or []) + [ext("cb_offer", ["none", "inside", "outside", "cannot_say"], offer_desc or CB_OFFER_DESC)]
+    ext_ = list(extraction or []) + [ext("cb_offer", ["none", "inside", "outside", "cannot_say"], offer_desc or CB_OFFER_DESC),
+                                     {"name": "cb_at", "type": "string", "description": CB_AT_DESC, "min_confidence": 0.5}]
     trs = list(transitions or []) + [
         eq("cb_offer", "outside", name + "_count", "a day or time outside the allowed callback window"),
         eq("cb_offer", "cannot_say", no_callback_target, "cannot say when the customer can be reached")]
     nodes[name] = conv(name, task, on_enter=on_enter, tools=tools, extraction=ext_, transitions=trs)
-    nodes[name + "_count"] = code_node(name + "_count", counter_code("cb_outside_count", int(reask_limit) + 1, "cb_route",
-                                                                    reset={"cb_offer": "none"}),
-                                       [eq("cb_route", "close", no_callback_target, "asked for another time already"),
+    count = counter_code("cb_outside_count", int(reask_limit) + 1, "cb_route", reset={"cb_offer": "none"})
+    code = _CB_CHECK + "if vars.get('cb_route') != 'inside':\n" + "".join("    " + l + "\n" for l in count.rstrip("\n").split("\n"))
+    nodes[name + "_count"] = code_node(name + "_count", code,
+                                       [eq("cb_route", "inside", name + "_book", "the slot is inside the window (checked in code)"),
+                                        eq("cb_route", "close", no_callback_target, "asked for another time already"),
                                         always(name + "_reask")])
     nodes[name + "_reask"] = conv(name + "_reask", task, on_enter={"type": "tts", "text": reask_text}, tools=tools,
                                   extraction=ext_, transitions=trs)
+    nodes[name + "_book"] = conv(name + "_book", task + CB_BOOK_LINE, on_enter={"type": "llm"}, tools=tools,
+                                 extraction=ext_, transitions=trs)
     return nodes
 
 

@@ -1327,7 +1327,7 @@
        "properties": {
         "code": {
          "type": "string",
-         "default": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']\nMO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']\ndef isbd(d):\n    return d.weekday() in BWD and d.isoformat() not in HOL\ndef txt(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)\ndef txt_short(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1]\ndef addbd(d, n):\n    c = 0\n    guard = 0\n    while c < n and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n        if isbd(d):\n            c += 1\n    return d\n# next_bd(d) / prev_bd(d): d ITSELF when d is a business day, else the nearest one after / before (on or after, on or\n# before: for moving a named day off a weekend or holiday). \"The next business day after X\" is bd_after(X) = addbd(X, 1),\n# never next_bd(X), which returns X when X is a business day (Kestrel: attempt 1 landed on the call date).\ndef next_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef prev_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d - datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef bd_after(d):\n    return addbd(d, 1)\ndef bd_before(d):\n    return prev_bd(d - datetime.timedelta(days=1))\ndef lastbd_of_week(monday):\n    for k in range(6, -1, -1):\n        d = monday + datetime.timedelta(days=k)\n        if isbd(d):\n            return d\n    return None\ndef weekday_table(today):\n    monday = today - datetime.timedelta(days=today.weekday())\n    tab = []\n    for i in range(7):\n        a = monday + datetime.timedelta(days=i)\n        b = a + datetime.timedelta(days=7)\n        t1 = '\"this ' + WD[i] + '\" = ' + txt(a) + (' (already past)' if a < today else '')\n        tab.append(t1 + '; \"next ' + WD[i] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\ndef weekday_table_first_after(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"this ' + WD[a.weekday()] + '\" = \"next ' + WD[a.weekday()] + '\" = ' + txt(a))\n    return '\\n'.join(tab)\ndef weekday_table_first_after_plus7(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"' + WD[a.weekday()] + '\" = \"this ' + WD[a.weekday()] + '\" = ' + txt(a) + '; \"next ' + WD[a.weekday()] + '\" = ' + txt(a + datetime.timedelta(days=7)))\n    return '\\n'.join(tab)\ndef weekday_table_first_from_today(today):\n    tab = []\n    for k in range(0, 7):\n        a = today + datetime.timedelta(days=k)\n        b = a if k else a + datetime.timedelta(days=7)\n        tab.append('\"' + WD[a.weekday()] + '\" = \"this ' + WD[a.weekday()] + '\" = ' + txt(a) + ('' if k else ' (today)') + '; \"next ' + WD[a.weekday()] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\nif WDRULE == 'first_after':\n    weekday_table = weekday_table_first_after\nif WDRULE == 'first_from_today':\n    weekday_table = weekday_table_first_from_today\nif WDRULE == 'first_after_plus7':\n    weekday_table = weekday_table_first_after_plus7\ndef calendar_text(today, deadline, extra_days=10):\n    cal = []\n    d = today\n    while d <= deadline + datetime.timedelta(days=extra_days):\n        if d > deadline:\n            tag = 'AFTER THE DEADLINE, not allowed'\n        elif isbd(d):\n            tag = 'allowed'\n        elif d.weekday() not in BWD:\n            tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'\n        else:\n            tag = 'bank holiday, not allowed'\n        nb = next_bd(d)\n        extra = ''\n        if tag.startswith('not a business day') or tag.startswith('bank'):\n            extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')\n        cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)\n        d = d + datetime.timedelta(days=1)\n    return '\\n'.join(cal)\ndef fmt(x):\n    try:\n        x = float(x)\n    except Exception:\n        return str(x)\n    s = '%.2f' % x\n    return s[:-3] if s.endswith('.00') else s\ntry:\n    raw = str(vars.get('now') or '').strip()\n    try:\n        nowdt = datetime.datetime.fromisoformat(raw[:16])\n    except Exception:\n        nowdt = datetime.datetime.fromisoformat(raw[:10] + 'T09:00')\n    today = nowdt.date()\n    vars['today_iso'] = today.isoformat()\n    vars['today_text'] = txt(today)\n    vars['now_time'] = nowdt.strftime('%H:%M')\n    vars['weekday_table'] = weekday_table(today)\n    lines = []\n    cur = nowdt.strftime('%H:%M')\n    if cur < '19:00':\n        start = '10:00' if cur < '10:00' else 'after ' + cur\n        lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to 19:00.')\n    nbd = today\n    for _i in range(1):\n        nbd = addbd(nbd, 1)\n        lines.append(txt(nbd) + ' (' + nbd.isoformat() + '), from 10:00 up to 19:00 included.')\n    tom = today + datetime.timedelta(days=1)\n    extra = 'Tomorrow is ' + txt(tom) + '.'\n    if not isbd(tom):\n        extra += ' Tomorrow is NOT allowed, it is not a business day.'\n    vars['callback_text'] = 'The ONLY allowed callback times are:\\n- ' + '\\n- '.join(lines) + '\\n' + extra + ' Any other day or time is outside the window.'\n    monday = today - datetime.timedelta(days=today.weekday())\n    a1 = lastbd_of_week(monday)\n    if a1 is None or a1 <= today:\n        a1 = lastbd_of_week(monday + datetime.timedelta(days=7))\n    vars['attempt1_date'] = a1.isoformat()\n    vars['early_deadline'] = addbd(today, 12).isoformat()\n    vars['late_deadline'] = addbd(today, 7).isoformat()\n    vars['setup_state'] = 'ok'\nexcept Exception as e:\n    vars['setup_state'] = 'error ' + str(e)\n    vars.setdefault('callback_text', 'Callbacks: today later than now up to 19:00, or the next business day from 10:00 to 19:00.')\n    vars.setdefault('today_text', str(vars.get('now')))\n    vars.setdefault('today_iso', str(vars.get('now'))[:10])\n    vars.setdefault('now_time', '')\n    vars.setdefault('weekday_table', '')\n"
+         "default": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']\nMO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']\ndef isbd(d):\n    return d.weekday() in BWD and d.isoformat() not in HOL\ndef txt(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)\ndef txt_short(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1]\ndef addbd(d, n):\n    c = 0\n    guard = 0\n    while c < n and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n        if isbd(d):\n            c += 1\n    return d\n# next_bd(d) / prev_bd(d): d ITSELF when d is a business day, else the nearest one after / before (on or after, on or\n# before: for moving a named day off a weekend or holiday). \"The next business day after X\" is bd_after(X) = addbd(X, 1),\n# never next_bd(X), which returns X when X is a business day (Kestrel: attempt 1 landed on the call date).\ndef next_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef prev_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d - datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef bd_after(d):\n    return addbd(d, 1)\ndef bd_before(d):\n    return prev_bd(d - datetime.timedelta(days=1))\ndef lastbd_of_week(monday):\n    for k in range(6, -1, -1):\n        d = monday + datetime.timedelta(days=k)\n        if isbd(d):\n            return d\n    return None\ndef weekday_table(today):\n    monday = today - datetime.timedelta(days=today.weekday())\n    tab = []\n    for i in range(7):\n        a = monday + datetime.timedelta(days=i)\n        b = a + datetime.timedelta(days=7)\n        t1 = '\"this ' + WD[i] + '\" = ' + txt(a) + (' (already past)' if a < today else '')\n        tab.append(t1 + '; \"next ' + WD[i] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\ndef weekday_table_first_after(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"this ' + WD[a.weekday()] + '\" = \"next ' + WD[a.weekday()] + '\" = ' + txt(a))\n    return '\\n'.join(tab)\ndef weekday_table_first_after_plus7(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"' + WD[a.weekday()] + '\" = \"this ' + WD[a.weekday()] + '\" = ' + txt(a) + '; \"next ' + WD[a.weekday()] + '\" = ' + txt(a + datetime.timedelta(days=7)))\n    return '\\n'.join(tab)\ndef weekday_table_first_from_today(today):\n    tab = []\n    for k in range(0, 7):\n        a = today + datetime.timedelta(days=k)\n        b = a if k else a + datetime.timedelta(days=7)\n        tab.append('\"' + WD[a.weekday()] + '\" = \"this ' + WD[a.weekday()] + '\" = ' + txt(a) + ('' if k else ' (today)') + '; \"next ' + WD[a.weekday()] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\nif WDRULE == 'first_after':\n    weekday_table = weekday_table_first_after\nif WDRULE == 'first_from_today':\n    weekday_table = weekday_table_first_from_today\nif WDRULE == 'first_after_plus7':\n    weekday_table = weekday_table_first_after_plus7\ndef calendar_text(today, deadline, extra_days=10):\n    cal = []\n    d = today\n    while d <= deadline + datetime.timedelta(days=extra_days):\n        if d > deadline:\n            tag = 'AFTER THE DEADLINE, not allowed'\n        elif isbd(d):\n            tag = 'allowed'\n        elif d.weekday() not in BWD:\n            tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'\n        else:\n            tag = 'bank holiday, not allowed'\n        nb = next_bd(d)\n        extra = ''\n        if tag.startswith('not a business day') or tag.startswith('bank'):\n            extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')\n        cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)\n        d = d + datetime.timedelta(days=1)\n    return '\\n'.join(cal)\ndef fmt(x):\n    try:\n        x = float(x)\n    except Exception:\n        return str(x)\n    s = '%.2f' % x\n    return s[:-3] if s.endswith('.00') else s\ntry:\n    raw = str(vars.get('now') or '').strip()\n    try:\n        nowdt = datetime.datetime.fromisoformat(raw[:16])\n    except Exception:\n        nowdt = datetime.datetime.fromisoformat(raw[:10] + 'T09:00')\n    today = nowdt.date()\n    vars['today_iso'] = today.isoformat()\n    vars['today_text'] = txt(today)\n    vars['now_time'] = nowdt.strftime('%H:%M')\n    vars['weekday_table'] = weekday_table(today)\n    lines = []\n    win = []\n    cur = nowdt.strftime('%H:%M')\n    if cur < '19:00':\n        start = '10:00' if cur < '10:00' else 'after ' + cur\n        lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to 19:00 included.')\n        win.append([today.isoformat(), '10:00' if cur < '10:00' else cur, '19:00', 0 if cur < '10:00' else 1])\n    nbd = today\n    for _i in range(1):\n        nbd = addbd(nbd, 1)\n        lines.append(txt(nbd) + ' (' + nbd.isoformat() + '), from 10:00 up to 19:00 included.')\n        win.append([nbd.isoformat(), '10:00', '19:00', 0])\n    tom = today + datetime.timedelta(days=1)\n    extra = 'Tomorrow is ' + txt(tom) + '.'\n    if not isbd(tom):\n        extra += ' Tomorrow is NOT allowed, it is not a business day.'\n    vars['callback_text'] = 'The ONLY allowed callback times are:\\n- ' + '\\n- '.join(lines) + '\\n' + extra + ' Any other day or time is outside the window.'\n    vars['cb_window'] = json.dumps(win)   # [date, from, to, from_is_exclusive]: third_party_callback checks a named slot in code\n    monday = today - datetime.timedelta(days=today.weekday())\n    a1 = lastbd_of_week(monday)\n    if a1 is None or a1 <= today:\n        a1 = lastbd_of_week(monday + datetime.timedelta(days=7))\n    vars['attempt1_date'] = a1.isoformat()\n    vars['early_deadline'] = addbd(today, 12).isoformat()\n    vars['late_deadline'] = addbd(today, 7).isoformat()\n    vars['setup_state'] = 'ok'\nexcept Exception as e:\n    vars['setup_state'] = 'error ' + str(e)\n    vars.setdefault('callback_text', 'Callbacks: today later than now up to 19:00, or the next business day from 10:00 to 19:00.')\n    vars.setdefault('today_text', str(vars.get('now')))\n    vars.setdefault('today_iso', str(vars.get('now'))[:10])\n    vars.setdefault('now_time', '')\n    vars.setdefault('weekday_table', '')\n"
         },
         "timeout_ms": {
          "type": "number",
@@ -1978,7 +1978,13 @@
       "outside",
       "cannot_say"
      ],
-     "description": "The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. {{callback_text}} First write the time they name as 24-hour HH:MM ('half past six in the evening' = 18:30, 'around eleven' in the morning = 11:00), then compare it with the opening and closing time of that day: a time after the closing time or before the opening time is outside (18:30 is outside a window that ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything else (no day or time yet, a day without a time, a question, small talk).",
+     "description": "The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. {{callback_text}} First write the time they name as 24-hour HH:MM ('half past six in the evening' = 18:30, 'around eleven' in the morning = 11:00), then compare it with the opening and closing time of that day: a time after the closing time or before the opening time is outside (18:30 is outside a window that ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything else (no day or time yet, a day without a time, a question, small talk). A time equal to the closing time is inside when the list says 'included'.",
+     "min_confidence": 0.5
+    },
+    {
+     "name": "cb_at",
+     "type": "string",
+     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
      "min_confidence": 0.5
     }
    ],
@@ -1988,6 +1994,20 @@
    "name": "third_party_count",
    "node_type": "code",
    "transitions": [
+    {
+     "target_node": "third_party_book",
+     "description": "the slot is inside the window (checked in code)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "cb_route",
+        "operator": "equals",
+        "operand": "inside"
+       }
+      ]
+     }
+    },
     {
      "target_node": "fin_no_callback",
      "description": "asked for another time already",
@@ -2029,7 +2049,7 @@
        "properties": {
         "code": {
          "type": "string",
-         "default": "try:\n    n = int(float(vars.get('cb_outside_count') or 0)) + 1\n    vars['cb_outside_count'] = n\n    vars['cb_offer'] = 'none'\n    vars['cb_route'] = 'close' if n >= 2 else 'retry'\nexcept Exception:\n    vars['cb_route'] = 'retry'\n"
+         "default": "try:\n    import json, re\n    _at = str(vars.get('cb_at') or '').strip()\n    _m = re.match(r'(\\d{4}-\\d{2}-\\d{2})[ T](\\d{1,2}):(\\d{2})', _at)\n    vars['cb_route'] = ''\n    if _m:\n        _d, _t = _m.group(1), '%02d:%s' % (int(_m.group(2)), _m.group(3))\n        for _w in json.loads(str(vars.get('cb_window') or '[]')):\n            if _d == _w[0] and ((_t > _w[1]) if _w[3] else (_t >= _w[1])) and _t <= _w[2]:\n                vars['cb_route'] = 'inside'\n                vars['cb_offer'] = 'none'\n                vars['cb_slot_text'] = _d + ' ' + _t\nexcept Exception:\n    vars['cb_route'] = ''\nif vars.get('cb_route') != 'inside':\n    try:\n        n = int(float(vars.get('cb_outside_count') or 0)) + 1\n        vars['cb_outside_count'] = n\n        vars['cb_offer'] = 'none'\n        vars['cb_route'] = 'close' if n >= 2 else 'retry'\n    except Exception:\n        vars['cb_route'] = 'retry'\n"
         },
         "timeout_ms": {
          "type": "number",
@@ -2210,7 +2230,193 @@
       "outside",
       "cannot_say"
      ],
-     "description": "The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. {{callback_text}} First write the time they name as 24-hour HH:MM ('half past six in the evening' = 18:30, 'around eleven' in the morning = 11:00), then compare it with the opening and closing time of that day: a time after the closing time or before the opening time is outside (18:30 is outside a window that ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything else (no day or time yet, a day without a time, a question, small talk).",
+     "description": "The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. {{callback_text}} First write the time they name as 24-hour HH:MM ('half past six in the evening' = 18:30, 'around eleven' in the morning = 11:00), then compare it with the opening and closing time of that day: a time after the closing time or before the opening time is outside (18:30 is outside a window that ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything else (no day or time yet, a day without a time, a question, small talk). A time equal to the closing time is inside when the list says 'included'.",
+     "min_confidence": 0.5
+    },
+    {
+     "name": "cb_at",
+     "type": "string",
+     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
+     "min_confidence": 0.5
+    }
+   ],
+   "on_enter_first_entry_only": false
+  },
+  "third_party_book": {
+   "name": "third_party_book",
+   "node_type": "conversation",
+   "transitions": [
+    {
+     "target_node": "fin_callback",
+     "description": "callback booked",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "schedule_callback_response.data.ok",
+        "operator": "equals",
+        "operand": "true"
+       },
+       {
+        "variable": "schedule_callback_response.data.ok",
+        "operator": "equals",
+        "operand": "True"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "fin_deceased",
+     "description": "customer died",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "tp_status",
+        "operator": "equals",
+        "operand": "deceased"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "fin_wrong_number",
+     "description": "wrong number",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "tp_status",
+        "operator": "equals",
+        "operand": "wrong_number"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "third_party_count",
+     "description": "a day or time outside the allowed callback window",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "cb_offer",
+        "operator": "equals",
+        "operand": "outside"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "fin_no_callback",
+     "description": "cannot say when the customer can be reached",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "cb_offer",
+        "operator": "equals",
+        "operand": "cannot_say"
+       }
+      ]
+     }
+    }
+   ],
+   "max_node_turns": 60,
+   "truncation_strategy": "keep_all",
+   "disable_inactivity_monitor": false,
+   "task_message": "You called for {{title}} {{last_name}} ({{first_name}}) but someone else is on the line.\nSTRICT: Never say why you are calling. Never mention the bank account, a product, a debt, an amount, a payment or collections, even if they ask or offer to pay or help. If they ask what it is about, say you can only discuss it with {{title}} {{last_name}} personally. Do not ask them any security question.\nYour only job: ask when {{title}} {{last_name}} can be reached, then book a callback.\nNow: {{today_text}}, {{now_time}}.\n{{callback_text}}\n- If they give a day and time inside the window, call schedule_callback with date YYYY-MM-DD and time HH:MM. 'Tomorrow morning around eleven' means tomorrow at 11:00. If they give only a day, ask for a time; if only a vague time like 'morning', propose a precise time such as 11:00 and ask if it suits.\n- If the day or time is outside the window, or they cannot say when: do not book, and do not ask again yourself: the system asks once for another time and then closes.\nAfter every tool result, speak or call the next tool.\nIf the day or time they name is outside the allowed window, do not book it; say exactly: \"I can only call back today or on the next business day, between 10:00 and 19:00. Could you give me another time?\"\nIf they offer to pay or to help, or say anything else that is not a time: thank them in a few words, say you can only discuss it with the person you are calling, and ask when that person can be reached, in different words from your last message. Never repeat your last message word for word.\nThe day and time the person just named, {{cb_slot_text}}, IS inside the allowed window: call schedule_callback now with that date (YYYY-MM-DD) and time (HH:MM), then speak or call the next tool.",
+   "on_enter": {
+    "type": "llm"
+   },
+   "tools": [
+    {
+     "type": "function",
+     "config": {
+      "timeoutMs": 12000,
+      "maxRetries": 0
+     },
+     "function": {
+      "name": "schedule_callback",
+      "handler": "__function__:api_call",
+      "description": "Book a callback for the customer. CALL it as soon as the person names a day and time inside the allowed window.",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "url": {
+         "type": "string",
+         "default": "https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback"
+        },
+        "method": {
+         "type": "string",
+         "default": "POST"
+        },
+        "headers": {
+         "type": "object",
+         "properties": {
+          "Content-Type": {
+           "type": "string",
+           "default": "application/json"
+          }
+         }
+        },
+        "body": {
+         "type": "object",
+         "required": [
+          "date",
+          "time"
+         ],
+         "properties": {
+          "customer_id": {
+           "type": "string",
+           "default": "{{customer_id}}"
+          },
+          "date": {
+           "type": "string",
+           "default": "{{date}}",
+           "description": "Callback date as YYYY-MM-DD. Must be one of the allowed days."
+          },
+          "time": {
+           "type": "string",
+           "default": "{{time}}",
+           "description": "Callback time as HH:MM, 24 hour, between 10:00 and 19:00."
+          }
+         }
+        }
+       }
+      }
+     },
+     "post_process_code": "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\n        d = result.get('data')\n        if isinstance(d, dict):\n            if d.get('ok') is True or str(d.get('ok')).lower() == 'true':\n                d['what_to_do_next'] = 'Callback booked.'\n            else:\n                d['what_to_do_next'] = 'The booking failed. Try schedule_callback once more with the same values.'\nexcept Exception:\n    pass\n"
+    }
+   ],
+   "extraction_schema": [
+    {
+     "name": "tp_status",
+     "type": "string",
+     "enum_values": [
+      "none",
+      "wrong_number",
+      "deceased"
+     ],
+     "description": "From the person's latest message: wrong_number if they say this number does not belong to the customer or they do not know the customer; deceased if they say the customer has died; otherwise none.",
+     "min_confidence": 0.5
+    },
+    {
+     "name": "cb_offer",
+     "type": "string",
+     "enum_values": [
+      "none",
+      "inside",
+      "outside",
+      "cannot_say"
+     ],
+     "description": "The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. {{callback_text}} First write the time they name as 24-hour HH:MM ('half past six in the evening' = 18:30, 'around eleven' in the morning = 11:00), then compare it with the opening and closing time of that day: a time after the closing time or before the opening time is outside (18:30 is outside a window that ends at 17:00). inside = they name a day AND a time inside that window; outside = they name a day or a time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything else (no day or time yet, a day without a time, a question, small talk). A time equal to the closing time is inside when the list says 'included'.",
+     "min_confidence": 0.5
+    },
+    {
+     "name": "cb_at",
+     "type": "string",
+     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
      "min_confidence": 0.5
     }
    ],

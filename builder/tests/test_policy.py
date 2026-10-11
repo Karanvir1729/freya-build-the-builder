@@ -531,7 +531,7 @@ def third_party_reask_is_counted_in_code():                 # generated Brief B 
     nodes = {}
     fl.third_party_callback(nodes, "task", [], [fl.ext("tp_status", ["none", "deceased"], "d")],
                             [fl.eq("tp_status", "deceased", "fin_deceased", "died")], "Could you give me another time?", "fin_no_callback")
-    assert set(nodes) == {"third_party", "third_party_count", "third_party_reask"}
+    assert set(nodes) == {"third_party", "third_party_count", "third_party_reask", "third_party_book"}
     code = nodes["third_party_count"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
     V = {"cb_offer": "outside"}
     run(code, V)
@@ -543,6 +543,23 @@ def third_party_reask_is_counted_in_code():                 # generated Brief B 
     assert {"third_party_count", "fin_no_callback", "fin_deceased"} <= trs, trs
     assert nodes["third_party_reask"]["on_enter"] == {"type": "tts", "text": "Could you give me another time?"}
     assert not any("matches_intent" in json.dumps(t) for t in nodes["third_party"]["transitions"])
+    # extended Brief A EXT-A-39: at 18:30 'Try at seven tonight' (19:00, the included closing time) was extracted as
+    # outside: the slot is checked in code against the window SETUP_CODE writes, and an inside slot goes to booking
+    src = fl.SETUP_CODE(HOL, callback_rule={"open": "10:00", "close": "19:00", "same_day": True, "days_ahead": 1})
+    W = {"now": "2026-10-14T18:30"}
+    exec(src, {"vars": W})
+    assert json.loads(W["cb_window"]) == [["2026-10-14", "18:30", "19:00", 1], ["2026-10-15", "10:00", "19:00", 0]], W["cb_window"]
+    assert "up to 19:00 included" in W["callback_text"], W["callback_text"]
+    for at, want in (("2026-10-14 19:00", "inside"), ("2026-10-14 18:30", "retry"), ("2026-10-14 20:00", "retry"),
+                     ("2026-10-15 10:00", "inside"), ("2026-10-15 9:59", "retry"), ("2026-10-16 11:00", "retry"), ("", "retry")):
+        V = {"cb_offer": "outside", "cb_at": at, "cb_window": W["cb_window"]}
+        run(code, V)
+        assert V["cb_route"] == want, (at, V)
+        if want == "inside":
+            assert V["cb_offer"] == "none" and V["cb_slot_text"] == at.replace(" 9:", " 09:") and "cb_outside_count" not in V, V
+    trs = [(t["target_node"], (t["condition"].get("conditions") or [{}])[0].get("operand")) for t in nodes["third_party_count"]["transitions"]]
+    assert trs[0] == ("third_party_book", "inside"), trs
+    assert "{{cb_slot_text}}" in nodes["third_party_book"]["task_message"]
 
 
 @test
