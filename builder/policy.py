@@ -113,7 +113,9 @@ SENTINEL_YEAR = 1900
 # the real clock: 'tomorrow' arrived as a date before the call's today on Brief B PUB-12)
 WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as said (for example 'tomorrow', 'next Friday', "
              "'this Saturday', 'the 23rd', 'the sixth of November', 'end of the month', 'when my salary comes'). "
-             "Empty when no day or period is mentioned in the latest message.")
+             "Empty when no day or period is mentioned in the latest message, and empty when the customer takes the day back "
+             "in the same message before saying the new one ('on Friday, no sorry,' / 'tomorrow, I mean' and it stops): "
+             "the corrected day is still to come.")
 
 
 # an amount named by reference instead of a number ('the minimum', 'the whole amount'): the extractor does not know the
