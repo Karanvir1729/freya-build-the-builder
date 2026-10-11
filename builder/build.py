@@ -211,13 +211,34 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
     # version and 8+ minutes left gets one more round in the same session (Brief E on Sonnet stopped at 12 of 29 minutes
     # with 2 of 5 cases failing)
     failing = latest_failures(slot, t_start)
-    if result is not None and not result.is_error and failing and time.time() < t_end - 480:
+    audit_gap = audit_todo(slot, t_start) if not no_rules else ""
+    if result is not None and not result.is_error and (failing or audit_gap) and time.time() < t_end - 480:
         left = int((t_end - time.time()) / 60)
-        await consume("%d minutes are left (stop by %s local time). On the newest tested version these practice cases still fail: %s. "
-                      "Under the skill's rules for repair rounds: read each failure, fix the deterministic agent errors (never "
-                      "weaken a check or follow a low/medium-confidence expectation against the brief), save, re-run only those "
-                      "cases, then finish with step 10's line." % (left, deadline, ", ".join(failing[:12])),
-                      dataclasses.replace(options, resume=result.session_id), "use the time left: repair the cases still failing")
+        todo = []
+        if failing:
+            todo.append("On the newest tested version these practice cases still fail: %s. Under the skill's rules for repair "
+                        "rounds: read each failure and fix the deterministic agent errors (never weaken a check or follow a "
+                        "low/medium-confidence expectation against the brief), then re-run only those cases." % ", ".join(failing[:12]))
+        if audit_gap:
+            todo.append(audit_gap)
+        await consume("%d minutes are left (stop by %s local time). %s Save, then finish with step 10's line." % (left, deadline, " ".join(todo)),
+                      dataclasses.replace(options, resume=result.session_id), "use the time left: repair what is still failing")
+
+
+def audit_todo(slot, since):
+    """The skill's step 8 still owed: '' when the agent ran the audit in this build and it lists nothing contradicted or
+    missing; otherwise one instruction."""
+    f = ROOT / "out" / ("%s.audit.json" % slot)
+    try:
+        if not f.exists() or f.stat().st_mtime < since:
+            return ("You have not run step 8 (the audit) in this build: run it now and fix every contradicted and missing rule "
+                    "and the top fixes.")
+        a = json.loads(f.read_text())
+        bad = [r.get("id", "?") for r in a.get("rules") or [] if r.get("status") in ("contradicted", "missing")]
+        return ("Your last audit lists contradicted or missing rules: %s. Fix each one from the brief (a rule a later dated "
+                "decision replaces is not contradicted), regenerate and save." % ", ".join(bad[:15])) if bad else ""
+    except Exception:
+        return ""
 
 
 def latest_failures(slot, since):
