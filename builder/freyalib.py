@@ -2489,3 +2489,501 @@ def gated_digits_identity(api, stage, field_value, n_digits, ask_task, answer_de
            cond("%s_ok" % stage, "equals", "false"), cond("%s_ok" % stage, "equals", "False")),
         always("%s_wrong" % ask)])
     return nodes
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Language packs: number, ordinal, date, currency and yes/no words of a call language, and lang_code(lang), the
+# pure helpers (parse the caller's words, say numbers/amounts/dates) to paste into a code node. Brief-agnostic.
+# ---------------------------------------------------------------------------------------------------------------
+LANG_PACKS = {
+    "tr": {
+        "units": {"sıfır": 0, "bir": 1, "iki": 2, "üç": 3, "dört": 4, "beş": 5, "altı": 6, "yedi": 7, "sekiz": 8,
+                  "dokuz": 9},
+        "tens": {"on": 10, "yirmi": 20, "otuz": 30, "kırk": 40, "elli": 50, "altmış": 60, "yetmiş": 70,
+                 "seksen": 80, "doksan": 90},
+        "hundred": "yüz", "thousand": "bin", "million": "milyon", "billion": "milyar", "minus": "eksi",
+        "ordinals": {"birinci": 1, "ilk": 1, "ikinci": 2, "üçüncü": 3, "dördüncü": 4, "beşinci": 5, "altıncı": 6,
+                     "yedinci": 7, "sekizinci": 8, "dokuzuncu": 9, "onuncu": 10},
+        "ordinal_suffixes": ["inci", "ıncı", "uncu", "üncü", "nci", "ncı", "ncu", "ncü"],
+        "stem_alias": {"dörd": 4},
+        "last_words": ["sonuncu"],
+        "months": ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim",
+                   "Kasım", "Aralık"],
+        "weekdays": ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"],
+        "relative": {"bugün": 0, "yarın": 1, "öbür gün": 2, "ertesi gün": 2, "yarından sonra": 2, "dün": -1,
+                     "evvelsi gün": -2},
+        "next_week": ["haftaya", "gelecek hafta", "önümüzdeki hafta", "sonraki hafta"],
+        "this_week": ["bu hafta"],
+        "after_word": "sonra", "day_word": "gün", "week_word": "hafta", "month_of": "ayın",
+        "currencies": {"TRY": ["Türk Lirası", "kuruş"], "USD": ["dolar", "sent"], "EUR": ["euro", "sent"],
+                       "GBP": ["sterlin", "peni"]},
+        "currency_alias": {"TL": "TRY", "TRY": "TRY", "LIRA": "TRY", "TÜRK LIRASI": "TRY", "₺": "TRY",
+                           "USD": "USD", "DOLAR": "USD", "$": "USD", "EUR": "EUR", "EURO": "EUR", "€": "EUR",
+                           "GBP": "GBP", "STERLIN": "GBP", "İNGILIZ STERLINI": "GBP", "£": "GBP"},
+        "yes": ["evet", "tabii", "tabi", "olur", "tamam", "doğru", "aynen", "kesinlikle", "onaylıyorum", "peki"],
+        "no": ["hayır", "istemiyorum", "olmaz", "değil", "yanlış", "onaylamıyorum", "hiç"],
+    },
+}
+
+_LANG_CODE = r'''import datetime, re
+LP = __PACK__
+def lang_low(s):
+    try:
+        return str(s).replace('İ', 'i').replace('I', 'ı').lower().replace('̇', '')
+    except Exception:
+        return ''
+def lang_fold(s):
+    t = lang_low(s)
+    for a, b in (('ı', 'i'), ('ş', 's'), ('ğ', 'g'), ('ç', 'c'), ('ö', 'o'), ('ü', 'u'), ('â', 'a'), ('î', 'i'), ('û', 'u')):
+        t = t.replace(a, b)
+    return t
+try:
+    globals()['lang_low'] = lang_low
+    globals()['lang_fold'] = lang_fold
+except Exception:
+    pass
+LP_UNITS = dict((lang_fold(k), v) for k, v in LP['units'].items())
+LP_TENS = dict((lang_fold(k), v) for k, v in LP['tens'].items())
+LP_BIG = {lang_fold(LP['hundred']): 100, lang_fold(LP['thousand']): 1000, lang_fold(LP['million']): 1000000, lang_fold(LP['billion']): 1000000000}
+LP_ORD = dict((lang_fold(k), v) for k, v in LP['ordinals'].items())
+LP_SUF = sorted(set(lang_fold(x) for x in LP['ordinal_suffixes']), key=len, reverse=True)
+LP_ALIAS = dict((lang_fold(k), v) for k, v in LP['stem_alias'].items())
+LP_WORDS = sorted(list(LP_UNITS) + list(LP_TENS) + list(LP_BIG), key=len, reverse=True)
+def lang_split(tok):
+    out = []
+    rest = tok
+    while rest:
+        for w in LP_WORDS:
+            if rest.startswith(w):
+                out.append(w)
+                rest = rest[len(w):]
+                break
+        else:
+            return [tok]
+    return out
+def lang_tokens(text):
+    t = lang_fold(text).replace("'", ' ').replace('’', ' ')
+    toks = []
+    for m in re.findall(r"\d+(?:[.,]\d+)*\.?|[^\W\d_]+", t):
+        if m[0].isdigit() or m in LP_UNITS or m in LP_TENS or m in LP_BIG:
+            toks.append(m)
+        else:
+            toks.extend(lang_split(m))
+    return toks
+def lang_numval(tok):
+    if tok in LP_UNITS:
+        return LP_UNITS[tok]
+    if tok in LP_TENS:
+        return LP_TENS[tok]
+    return None
+def lang_digits_int(tok):
+    try:
+        t = tok.rstrip('.')
+        if re.fullmatch(r'\d{1,3}(\.\d{3})+(,\d+)?', t):
+            t = t.split(',')[0].replace('.', '')
+        t = re.split(r'[.,]', t)[0]
+        return int(t)
+    except Exception:
+        return None
+def lang_run(toks, i):
+    total = 0
+    cur = 0
+    seen = False
+    j = i
+    while j < len(toks):
+        tok = toks[j]
+        if tok[0].isdigit():
+            if seen and cur:
+                break
+            v = lang_digits_int(tok)
+            if v is None:
+                break
+            cur += v
+        elif lang_numval(tok) is not None:
+            cur += lang_numval(tok)
+        elif tok in LP_BIG:
+            m = LP_BIG[tok]
+            if m == 100:
+                cur = (cur or 1) * 100
+            else:
+                total += (cur or 1) * m
+                cur = 0
+        else:
+            break
+        seen = True
+        j += 1
+    if not seen:
+        return None, i
+    return total + cur, j
+def words_to_int(text):
+    try:
+        toks = lang_tokens(text)
+        for i in range(len(toks)):
+            v, j = lang_run(toks, i)
+            if v is not None:
+                return v
+        return None
+    except Exception:
+        return None
+def spoken_digits(text):
+    try:
+        out = []
+        g = [None, 0]
+        def flush():
+            if g[0] is not None:
+                out.append(str(g[0]))
+            g[0] = None
+            g[1] = 0
+        for tok in lang_tokens(text):
+            if tok[0].isdigit():
+                flush()
+                out.append(re.sub(r'\D', '', tok))
+                continue
+            v = lang_numval(tok)
+            if v is not None:
+                mag = 1 if v < 10 else 10
+                if v == 0:
+                    flush()
+                    out.append('0')
+                elif g[0] is not None and g[1] > mag:
+                    g[0] += v
+                    g[1] = mag
+                else:
+                    flush()
+                    g[0] = v
+                    g[1] = mag
+            elif tok in LP_BIG and LP_BIG[tok] == 100:
+                if g[0] is not None and g[1] == 1 and g[0] < 10:
+                    g[0] *= 100
+                    g[1] = 100
+                elif g[0] is not None and g[1] > 100:
+                    g[0] += 100
+                    g[1] = 100
+                else:
+                    flush()
+                    g[0] = 100
+                    g[1] = 100
+            elif tok in LP_BIG and LP_BIG[tok] == 1000:
+                if g[0] is not None and g[0] < 1000:
+                    g[0] *= 1000
+                else:
+                    flush()
+                    g[0] = 1000
+                g[1] = 1000
+            else:
+                flush()
+        flush()
+        s = ''.join(out)
+        return s or None
+    except Exception:
+        return None
+def lang_ordinal_stem(tok):
+    for k in range(0, 4):
+        t = tok[:len(tok) - k] if k else tok
+        if len(t) < 3:
+            break
+        v = lang_ordinal_word(t)
+        if v is not None:
+            return v
+    return None
+def lang_num_prefix(tok):
+    for k in range(0, 4):
+        t = tok[:len(tok) - k] if k else tok
+        if not t:
+            break
+        parts = lang_split(t)
+        if all(lang_numval(x) is not None or x in LP_BIG for x in parts):
+            v, _ = lang_run(parts, 0)
+            if v is not None:
+                return v
+    return None
+def lang_ordinal_word(tok):
+    if tok in LP_ORD:
+        return LP_ORD[tok]
+    for suf in LP_SUF:
+        if tok.endswith(suf) and len(tok) > len(suf):
+            stem = tok[:-len(suf)]
+            if stem in LP_ALIAS:
+                return LP_ALIAS[stem]
+            v = lang_numval(stem)
+            if v is None and stem in LP_BIG:
+                v = LP_BIG[stem]
+            if v is not None:
+                return v
+    return None
+def ordinal_in(text, max_n):
+    try:
+        max_n = int(max_n)
+        toks = lang_tokens(text)
+        last = set(lang_fold(x) for x in LP['last_words'])
+        i = 0
+        while i < len(toks):
+            tok = toks[i]
+            if tok in last:
+                return max_n if max_n >= 1 else None
+            o = lang_ordinal_stem(tok) if not tok[0].isdigit() else None
+            if o is not None:
+                if 1 <= o <= max_n:
+                    return o
+                i += 1
+                continue
+            v, j = lang_run(toks, i)
+            if v is not None:
+                if j < len(toks) and not toks[j][0].isdigit():
+                    o2 = lang_ordinal_stem(toks[j])
+                    if o2 is not None and o2 < 10 and v % 10 == 0:
+                        v += o2
+                        j += 1
+                if 1 <= v <= max_n:
+                    return v
+                i = max(j, i + 1)
+                continue
+            i += 1
+        return None
+    except Exception:
+        return None
+def say_number(n):
+    try:
+        n = int(n)
+        if n == 0:
+            return lang_low(LP['units'] and [k for k, v in LP['units'].items() if v == 0][0])
+        if n < 0:
+            return LP['minus'] + ' ' + say_number(-n)
+        un = dict((v, k) for k, v in LP['units'].items())
+        te = dict((v, k) for k, v in LP['tens'].items())
+        def three(x, is_thousand):
+            w = []
+            h, r = divmod(x, 100)
+            if h:
+                w.append(LP['hundred'] if h == 1 else un[h] + ' ' + LP['hundred'])
+            t, u = divmod(r, 10)
+            if t:
+                w.append(te[t * 10])
+            if u and not (is_thousand and x == 1):
+                w.append(un[u])
+            return w
+        words = []
+        for m, name in ((1000000000, LP['billion']), (1000000, LP['million']), (1000, LP['thousand'])):
+            q, n = divmod(n, m)
+            if q:
+                words += three(q, m == 1000) + [name] if q < 1000 else [say_number(q), name]
+        words += three(n, False)
+        return ' '.join(w for w in words if w)
+    except Exception:
+        return None
+def lang_currency(code):
+    try:
+        c = str(code or '').strip()
+        key = LP['currency_alias'].get(c.upper()) or LP['currency_alias'].get(c.replace('i', 'İ').upper()) or c.upper()
+        return LP['currencies'].get(key)
+    except Exception:
+        return None
+def say_amount(x, currency_code):
+    try:
+        cents = int(round(float(x) * 100))
+        neg = cents < 0
+        cents = abs(cents)
+        main, sub = divmod(cents, 100)
+        cur = lang_currency(currency_code) or [str(currency_code or ''), '']
+        s = say_number(main) + (' ' + cur[0] if cur[0] else '')
+        if sub:
+            s += ' ' + say_number(sub) + (' ' + cur[1] if cur[1] else '')
+        return (LP['minus'] + ' ' + s) if neg else s
+    except Exception:
+        return None
+def lang_parse_date(d):
+    try:
+        if isinstance(d, datetime.datetime):
+            return d.date()
+        if isinstance(d, datetime.date):
+            return d
+        s = str(d).strip()
+        m = re.match(r'(\d{4})-(\d{1,2})-(\d{1,2})', s)
+        if m:
+            return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        m = re.match(r'(\d{1,2})[./-](\d{1,2})[./-](\d{4})', s)
+        if m:
+            return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        return None
+    except Exception:
+        return None
+def say_date(d, weekday=False):
+    try:
+        x = lang_parse_date(d)
+        if x is None:
+            return None
+        s = '%d %s %d' % (x.day, LP['months'][x.month - 1], x.year)
+        if weekday:
+            s += ' ' + LP['weekdays'][x.weekday()]
+        return s
+    except Exception:
+        return None
+def lang_has(ft, phrase):
+    p = lang_fold(phrase)
+    return re.search(r'(^|[^\w])' + re.escape(p), ft) is not None
+def resolve_day(text, now_iso, future=True):
+    try:
+        today = lang_parse_date(str(now_iso)[:10])
+        if today is None:
+            return None
+        ft = ' ' + ' '.join(lang_fold(text).replace("'", ' ').replace('’', ' ').split()) + ' '
+        toks = lang_tokens(text)
+        m = re.search(r'(?<![\d.])(\d{1,2})[./](\d{1,2})(?:[./](\d{2,4}))?(?![\d.]*\d)', ft)
+        if m:
+            y = int(m.group(3)) if m.group(3) else today.year
+            if y < 100:
+                y += 2000
+            try:
+                d = datetime.date(y, int(m.group(2)), int(m.group(1)))
+                if future and not m.group(3) and d < today:
+                    d = datetime.date(y + 1, d.month, d.day)
+                return d.isoformat()
+            except Exception:
+                pass
+        months = [lang_fold(x) for x in LP['months']]
+        for i, tok in enumerate(toks):
+            for mi, mo in enumerate(months):
+                if tok.startswith(mo):
+                    k = i - 1
+                    while k >= 0 and (toks[k][0].isdigit() or lang_numval(toks[k]) is not None):
+                        k -= 1
+                    day, _ = lang_run(toks, k + 1) if k + 1 < i else (None, 0)
+                    if day is None or not 1 <= day <= 31:
+                        continue
+                    y = None
+                    if i + 1 < len(toks) and toks[i + 1][0].isdigit() and len(toks[i + 1].rstrip('.')) == 4:
+                        y = int(toks[i + 1].rstrip('.'))
+                    try:
+                        d = datetime.date(y or today.year, mi + 1, day)
+                        if future and y is None and d < today:
+                            d = datetime.date(today.year + 1, mi + 1, day)
+                        return d.isoformat()
+                    except Exception:
+                        return None
+        mo_of = lang_fold(LP['month_of'])
+        if mo_of in toks:
+            i = toks.index(mo_of)
+            day, _ = lang_run(toks, i + 1)
+            if day is None and i + 1 < len(toks):
+                day = lang_num_prefix(toks[i + 1])
+            if day and 1 <= day <= 31:
+                y, mth = today.year, today.month
+                for _ in range(3):
+                    try:
+                        d = datetime.date(y, mth, day)
+                        if not future or d >= today:
+                            return d.isoformat()
+                    except Exception:
+                        pass
+                    mth += 1
+                    if mth > 12:
+                        mth, y = 1, y + 1
+                return None
+        after = lang_fold(LP['after_word'])
+        if after in toks:
+            i = toks.index(after)
+            if i >= 1 and toks[i - 1] in (lang_fold(LP['day_word']), lang_fold(LP['week_word'])):
+                k = i - 2
+                while k >= 0 and (toks[k][0].isdigit() or lang_numval(toks[k]) is not None or toks[k] in LP_BIG):
+                    k -= 1
+                n, _ = lang_run(toks, k + 1) if k + 1 <= i - 2 else (1, 0)
+                if n is not None:
+                    mult = 7 if toks[i - 1] == lang_fold(LP['week_word']) else 1
+                    return (today + datetime.timedelta(days=n * mult)).isoformat()
+        rel = sorted(LP['relative'].items(), key=lambda kv: -len(kv[0]))
+        wds = sorted([(lang_fold(w), n) for n, w in enumerate(LP['weekdays'])], key=lambda kv: -len(kv[0]))
+        wd = None
+        for tok in toks:
+            for w, n in wds:
+                if tok.startswith(w):
+                    wd = n
+                    break
+            if wd is not None:
+                break
+        nextw = any(lang_has(ft, p) for p in LP['next_week'])
+        thisw = any(lang_has(ft, p) for p in LP['this_week'])
+        if wd is not None:
+            monday = today - datetime.timedelta(days=today.weekday())
+            if nextw:
+                return (monday + datetime.timedelta(days=7 + wd)).isoformat()
+            if thisw:
+                return (monday + datetime.timedelta(days=wd)).isoformat()
+            delta = (wd - today.weekday()) % 7 or 7
+            return (today + datetime.timedelta(days=delta)).isoformat()
+        for w, n in rel:
+            if lang_has(ft, w):
+                return (today + datetime.timedelta(days=n)).isoformat()
+        if nextw:
+            return (today + datetime.timedelta(days=7)).isoformat()
+        if thisw:
+            return today.isoformat()
+        return None
+    except Exception:
+        return None
+def yes_no(text):
+    try:
+        toks = set(lang_tokens(text))
+        if toks & set(lang_fold(w) for w in LP['no']):
+            return 'no'
+        if toks & set(lang_fold(w) for w in LP['yes']):
+            return 'yes'
+        return None
+    except Exception:
+        return None
+def lang_stem_eq(a, b):
+    cp = 0
+    while cp < min(len(a), len(b)) and a[cp] == b[cp]:
+        cp += 1
+    return cp >= 4 and cp >= min(len(a), len(b)) - 2
+def match_items(text, items, name_key='name', digits_key='digits'):
+    try:
+        toks = [t for t in lang_tokens(text) if not t[0].isdigit()]
+        sd = spoken_digits(text) or ''
+        dig = []
+        score = []
+        for n, it in enumerate(items or []):
+            name = it if isinstance(it, str) else (it.get(name_key) if isinstance(it, dict) else None)
+            dg = None if isinstance(it, str) else (it.get(digits_key) if isinstance(it, dict) else None)
+            d = re.sub(r'\D', '', str(dg)) if dg is not None else ''
+            if d and sd and (sd == d or sd.endswith(d) or (len(sd) >= 4 and d.endswith(sd))):
+                dig.append(n)
+            words = [w for w in re.findall(r'[^\W\d_]+', lang_fold(name or '')) if len(w) >= 3]
+            s = 0
+            for w in words:
+                if any(t == w or lang_stem_eq(t, w) for t in toks):
+                    s += 1
+            score.append(s)
+        if dig:
+            return dig
+        best = max(score) if score else 0
+        return [n for n, s in enumerate(score) if best and s == best]
+    except Exception:
+        return []
+try:
+    for _k, _v in list(locals().items()):
+        if not _k.startswith('_'):
+            globals()[_k] = _v
+except Exception:
+    pass
+'''
+
+
+def lang_code(lang="tr"):
+    """Python source to paste into a code node (like CAL_HELPERS): the language pack LANG_PACKS[lang] as `LP` and
+    pure helpers that never raise. words_to_int(text) number words/digits -> int ('iki bin yüz kırk' -> 2140) or None;
+    spoken_digits(text) the digits said one by one or in groups ('kırk iki elli üç' -> '4253') or None;
+    ordinal_in(text, max_n) first ordinal or number 1..max_n ('üçüncü', '3.', 'sonuncu' = max_n) or None;
+    say_number(n); say_amount(x, code) ('seksen beş euro yirmi sent'; the subunit only when not 0);
+    say_date(d, weekday=False) ISO or DD.MM.YYYY -> '5 Kasım 2026'; resolve_day(text, now_iso, future=True) ISO date
+    for relative words, weekday names (bare = the first after today; with a next-week word = that day of next week),
+    'N gün/hafta sonra', 'ayın 15i', '15 Ekim', '15.10' against now's own date (never the system clock), or None;
+    yes_no(text) 'yes'/'no'/None; match_items(text, items, name_key, digits_key) indices of items whose digits match the
+    spoken digits (preferred) or that share the most name words with the text, [] if none. Words are compared
+    casefolded with Turkish İ/I and diacritics folded, so 'dort', 'DÖRT' and 'dört' are the same word.
+    No '{{' or '}}' in the source."""
+    if lang not in LANG_PACKS:
+        raise ValueError("no language pack %r (have %s)" % (lang, ", ".join(sorted(LANG_PACKS))))
+    pack = repr(LANG_PACKS[lang])
+    while "}}" in pack or "{{" in pack:
+        pack = pack.replace("}}", "} }").replace("{{", "{ {")
+    return _LANG_CODE.replace("__PACK__", pack)
