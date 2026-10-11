@@ -785,5 +785,28 @@ def test_above_full_again():
 
 
 
+@test
+def test_identity_parts_across_turns():
+    """An identity answer given in parts over two turns is joined (extra-styles run, pieces_identity, 11 Oct: 'eighty-eight'
+    then 'forty-six' was answered with 'I need the full four digits' 30 times). The node sentence and the conduct line say
+    to join across turns and to call the tool once the parts are complete; lint warns on an identity node without it."""
+    s = fl.latest_value_note(4)
+    for part in ("across turns", "8846", "call the tool with the joined value", "LAST value"):
+        assert part in s, (part, s)
+    d = fl.latest_value_note(what="the date of birth")
+    assert "the date of birth" in d and "across turns" in d and "8846" not in d, d
+    assert "across turns" in fl.PERSONA_CONDUCT and "third time" in fl.PERSONA_CONDUCT
+    from lint import lint
+    tool = {"type": "function", "function": {"name": "verify_identity", "handler": "__function__:api_call",
+                                             "description": "CALL it.", "parameters": {"type": "object", "properties": {}}}}
+    def node(task):
+        return {"initial_node": "ask", "system_prompt": "x", "global_nodes": {}, "nodes": {
+            "ask": {"name": "ask", "node_type": "conversation", "task_message": task, "tools": [tool],
+                    "transitions": [{"target_node": "ask", "description": "always", "condition": {"operator": "always"}}]}}}
+    msg = "join an answer given in parts"
+    assert any(msg in f["message"] for f in lint(node("Ask for the four digits. CALL verify_identity."))), "no lint warning"
+    assert not any(msg in f["message"] for f in lint(node("Ask. CALL verify_identity. " + s)))
+
+
 if __name__ == "__main__":
     sys.exit(main())

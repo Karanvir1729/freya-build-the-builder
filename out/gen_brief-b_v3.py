@@ -159,7 +159,7 @@ nodes["ask_dob"] = fl.conv(
     "ask_dob",
     "The person confirmed they are {{title}} {{last_name}}. You must check identity with two security questions, one at a time. Now ask the first: their date of birth.\n"
     "When they give it, call verify_identity with answer = the date as YYYY-MM-DD, whatever way they said it. A date said only as numbers is day, then month, then year (05/03/1990 = 1990-03-05). "
-    "If they give only part of the date, ask for the rest before calling the tool.\n" + ID_COMMON,
+    "If they give only part of the date, ask for the rest before calling the tool. " + fl.latest_value_note(what="the date of birth") + "\n" + ID_COMMON,
     tools=[fl.api_tool(API, "verify_identity", baked={"field": "date_of_birth"}, pre=fl.reset_pre(["question_count_dob"]),
                        description="Check the date of birth. CALL it every time the customer gives a full date of birth.",
                        field_descriptions={"answer": "The date of birth as YYYY-MM-DD."},
@@ -176,7 +176,7 @@ nodes["ask_dob"] = fl.conv(
 nodes["ask_phone"] = fl.conv(
     "ask_phone",
     "The date of birth was correct. Now ask the second security question: the last four digits of the phone number on file.\n"
-    "When they give four digits, call verify_identity with answer = the four digits only.\n" + ID_COMMON,
+    "When they give four digits, call verify_identity with answer = the four digits only. " + fl.latest_value_note(4) + "\n" + ID_COMMON,
     tools=[fl.api_tool(API, "verify_identity", baked={"field": "phone_last4"}, pre=fl.reset_pre(["question_count_phone"]),
                        description="Check the last four digits of the phone number. CALL it every time the customer gives four digits.",
                        field_descriptions={"answer": "Exactly four digits."},

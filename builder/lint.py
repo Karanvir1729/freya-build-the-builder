@@ -610,6 +610,12 @@ class _Linter:
             cfg = tool.get("config")
             if isinstance(cfg, dict) and cfg.get("alwaysRunsAt"):
                 self.warn(twhere, "lifecycle tool (alwaysRunsAt) inside a node: it runs only when the call starts/ends in this node. Put it in the workflow-level tools array")
+        # an identity answer given in parts across turns ('eighty-eight' ... 'forty-six') was never joined and the agent
+        # asked for 'the full four digits' 30 times (extra-styles run, pieces_identity, 11 Oct): the node's own prompt must
+        # say to join parts across turns (fl.latest_value_note)
+        if "verify_identity" in names_seen and not re.search(r"in parts|across turns", task + "\n" + loop_prompt, re.I):
+            self.warn(f"{where}.task_message", "node holds verify_identity but its prompt does not say how to join an answer given "
+                      "in parts across turns: append fl.latest_value_note(N) (N digits) or fl.latest_value_note(what=...)")
         # transition_to_<node> mentions
         tool_call_targets = {t.get("target_node") for t in trs if isinstance(t, dict) and t.get("is_tool_call") is True}
         for m in re.finditer(r"transition_to_([A-Za-z0-9_]+)", task + "\n" + loop_prompt):

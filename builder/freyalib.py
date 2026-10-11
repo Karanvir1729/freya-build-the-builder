@@ -1018,7 +1018,9 @@ PERSONA_CONDUCT = (
     "unless the rules say such a question counts. When the message contains the answer AND a question, use the answer (call the "
     "tool) and answer the question in the same turn. Only what the rules name counts as a refusal.\n"
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
-    "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
+    "order, also across turns (the part said before your last question counts). Once the parts together are complete, use "
+    "the joined value; never ask a third time for a value whose parts you already have. When the customer corrects a "
+    "value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
     "the rules give you.")
 # appended by builder/policy.py to every enum on the payment nodes (topic, stance, offer_kind, confirm, hs_answer, wrap,
@@ -1668,10 +1670,16 @@ def relative_days_code(now_var="now", out_var="relative_days", next_means_week_a
 
 
 def latest_value_note(n_digits=None, what="the digits"):
-    """Prompt sentence for identity/promise nodes (T21): parts are joined, the last correction wins."""
+    """Prompt sentence for identity/promise nodes (T21): parts are joined, the last correction wins.
+    The parts may sit in DIFFERENT customer turns: a customer who said 'eighty-eight', was asked for four digits and
+    then said 'forty-six' was asked for 'the full four digits' 30 times while the two parts were already 8846
+    (extra-styles run, pieces_identity, 11 Oct): the sentence says to join across turns and to call the tool."""
     n = ("all %d digits" % n_digits) if n_digits else ("all of %s" % what)
-    return ("If the customer gives %s in parts, wait for %s and join them; if they correct themselves, use the "
-            "LAST value they gave." % (what, n))
+    ex = (" (for example 'eighty-eight' and then 'forty-six' is 8846)" if n_digits == 4 else "")
+    return ("If the customer gives %s in parts, wait for %s and join them in order, also across turns: the part from "
+            "their previous message plus the part from their latest message together are the answer%s. As soon as the "
+            "parts together are complete, call the tool with the joined value; never ask again for a value the parts "
+            "already give. If they correct themselves, use the LAST value they gave." % (what, n, ex))
 
 
 def digit_extraction(name, n_digits, description, conf=0.5, max_retries=2):
