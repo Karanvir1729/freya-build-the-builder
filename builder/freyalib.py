@@ -934,7 +934,8 @@ def third_party_callback(nodes, task, tools, extraction, transitions, reask_text
         eq("cb_offer", "cannot_say", no_callback_target, "cannot say when the customer can be reached")]
     nodes[name] = conv(name, task, on_enter=on_enter, tools=tools, extraction=ext_, transitions=trs)
     count = counter_code("cb_outside_count", int(reask_limit) + 1, "cb_route", reset={"cb_offer": "none"})
-    code = _CB_CHECK + "if vars.get('cb_route') != 'inside':\n" + "".join("    " + l + "\n" for l in count.rstrip("\n").split("\n"))
+    body = _CB_CHECK + "if vars.get('cb_route') != 'inside':\n" + "".join("    " + l + "\n" for l in count.rstrip("\n").split("\n"))
+    code = "try:\n" + "".join("    " + l + "\n" for l in body.rstrip("\n").split("\n")) + "except Exception:\n    vars['cb_route'] = 'retry'\n"
     nodes[name + "_count"] = code_node(name + "_count", code,
                                        [eq("cb_route", "inside", name + "_book", "the slot is inside the window (checked in code)"),
                                         eq("cb_route", "close", no_callback_target, "asked for another time already"),
@@ -1352,6 +1353,9 @@ def check(wf):
     return warnings
 
 
+# A talkative customer on the organisers' simulator can send dozens of cut-off fragments in a row; 'Please go on.' each
+# time invites another long sentence that is cut again, and two calls hit the 80-turn cap with no notes written
+# (extended Brief B EXT-B-02, EXT-B-05, talkative). The second cut-off in a row asks for a short answer instead.
 # --- how customers talk (brief-agnostic). Measured on the organisers' simulator with the kit's styles: small talk at a
 # security question was read as a refusal (3 calls closed as declined), "how much can I pay instead?" became a plan
 # request (a transfer), and sympathy was said for a busy day (the judge counts sympathy sentences).
@@ -1364,7 +1368,9 @@ PERSONA_CONDUCT = (
     "stops mid-sentence AND contains no answer, say only: 'Sorry, I think you were cut off. Please go on.' If it contains "
     "an answer (a date, digits, an amount, a day) and then trails off, USE the answer: call the tool as usual; never ask them "
     "to go on instead of processing an answer they gave. But when they take the answer back before stopping ('Friday, no "
-    "sorry,' / 'I mean'), the answer does not count: say only 'Sorry, I think you were cut off. Please go on.'. Otherwise ask for the answer in one short sentence; at a security "
+    "sorry,' / 'I mean'), the answer does not count: say only 'Sorry, I think you were cut off. Please go on.'. When their "
+    "previous message was cut off too (you already asked them to go on), say instead: 'Sorry, you were cut off again. A short "
+    "answer is enough.' Otherwise ask for the answer in one short sentence; at a security "
     "question repeat the question, at a payment proposal do not repeat the amount or the date word for word (an offer is made once).\n"
     "- A question back (why do you need that, which account, who is this) gets one short answer, then the same question again, "
     "unless the rules say such a question counts. When the message contains the answer AND a question, use the answer (call the "
