@@ -537,6 +537,13 @@ async def _ask_sdk(system, prompt, model):
 
 def ask_customer(system, prompt, model):
     """The customer's next line, from the Claude Agent SDK, or from `claude -p` when the SDK is not installed."""
+    path = os.environ.get("BUILD_MODEL_LOG")
+    if path:
+        try:
+            with open(path, "a") as f:
+                f.write("%s | claude %s | smoke.py driven customer turn\n" % (time.strftime("%H:%M:%S"), model))
+        except Exception:
+            pass
     try:
         import claude_agent_sdk  # noqa: F401
         return asyncio.run(_ask_sdk(system, prompt, model))

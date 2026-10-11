@@ -196,6 +196,18 @@ def first_node_info(workflow_id):
 
 
 # ----------------------------------------------------------------------------------------------------- the models
+def log_model_call(provider, model, purpose):
+    """One line per customer/judge model call in $BUILD_MODEL_LOG (build.py merges it into the trace: every model call)."""
+    path = os.environ.get("BUILD_MODEL_LOG")
+    if not path:
+        return
+    try:
+        with open(path, "a") as f:
+            f.write("%s | %s %s | %s\n" % (time.strftime("%H:%M:%S"), provider, model, " ".join(str(purpose).split())[:160]))
+    except Exception:
+        pass
+
+
 class Provider:
     """Customer and judge model calls. OpenAI chat completions over urllib, or the Claude CLI (`claude -p`)."""
 
@@ -208,8 +220,9 @@ class Provider:
             return Provider(forced)
         return Provider("openai" if os.environ.get("OPENAI_API_KEY") else "claude")
 
-    def chat(self, model, system, turns, json_mode=False):
+    def chat(self, model, system, turns, json_mode=False, purpose="simulator call"):
         """`turns` is a list of (role, text), role in ('user', 'assistant'), the last one 'user'. Returns the reply text."""
+        log_model_call(self.kind, model, purpose)
         if self.kind == "openai":
             return self._openai(model, [{"role": "system", "content": system}] + [{"role": r, "content": t} for r, t in turns], json_mode)
         return self._claude(model, system, self._serialize(turns))
@@ -281,7 +294,7 @@ class Customer:
 
     def next_line(self):
         count("customer_calls")
-        raw = self.provider.chat(self.model, self.system, self.turns)
+        raw = self.provider.chat(self.model, self.system, self.turns, purpose="sim.py simulated customer turn")
         return clean_line(raw)
 
 
@@ -313,14 +326,14 @@ def judge(provider, model, checks, transcript_lines, tool_calls, opening="Hello?
               'Is every criterion true? Answer with JSON only: {"outcome": "pass" or "fail", "reason": "..."}'
               % (criteria, json.dumps(opening, ensure_ascii=False), "\n".join(transcript_lines), tools))
     count("judge_calls")
-    raw = provider.chat(model, JUDGE_SYSTEM, [("user", scrub(prompt))], json_mode=True)
+    raw = provider.chat(model, JUDGE_SYSTEM, [("user", scrub(prompt))], json_mode=True, purpose="sim.py judge: conversation checks of one case")
     outcome, reason = parse_verdict(raw)
     if outcome is None:
         # Prose without a verdict. OpenAI's json_object mode makes this rare; the CLI path has no such guard: ask once more.
         count("judge_calls"); count("judge_retries")
         nudge = prompt + ("\n\nYour previous answer contained no verdict. Reply with the JSON object only, nothing else: "
                           '{"outcome": "pass" or "fail", "reason": "..."}')
-        outcome, reason = parse_verdict(provider.chat(model, JUDGE_SYSTEM, [("user", scrub(nudge))], json_mode=True))
+        outcome, reason = parse_verdict(provider.chat(model, JUDGE_SYSTEM, [("user", scrub(nudge))], json_mode=True, purpose="sim.py judge: retry after an unreadable verdict"))
         if outcome is None:
             return "fail", "no verdict (the judge answered twice without pass/fail): " + reason
     return outcome, reason

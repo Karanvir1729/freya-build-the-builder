@@ -118,7 +118,7 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
     options = ClaudeAgentOptions(
         cwd=str(ROOT), model=model, skills=[SKILL], setting_sources=["project"],
         allowed_tools=["Read", "Write", "Edit", "Glob", "Grep", "Bash"], permission_mode="dontAsk", max_turns=200,
-        env={"BASH_DEFAULT_TIMEOUT_MS": "900000", "BASH_MAX_TIMEOUT_MS": "1200000", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"},
+        env={"BUILD_MODEL_LOG": os.environ.get("BUILD_MODEL_LOG", ""), "BASH_DEFAULT_TIMEOUT_MS": "900000", "BASH_MAX_TIMEOUT_MS": "1200000", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"},
     )
     gen_line = ""
     if generated and generated == cases:
@@ -203,6 +203,11 @@ async def main(argv):
     budget = float(opts["--minutes"]); slot = pathlib.Path(briefs[-1]).stem
     cases, brief_filter = (opts["--cases"], None) if opts["--cases"] else detect_cases(briefs)
     trace = Trace(slot)
+    # the simulator's and smoke tests' customer/judge model calls run inside the agent's shell: each one is a line in
+    # this file, merged into the trace after the agent run (the trace lists every model call)
+    model_log = ROOT / "results" / ("%s.model-calls.log" % slot)
+    model_log.parent.mkdir(exist_ok=True); model_log.write_text("")
+    os.environ["BUILD_MODEL_LOG"] = str(model_log)
     trace.line("build start %s | briefs=%s tool_api=%s slot=%s | cases=%s runner=%s budget=%.0f min | builder model=%s | phone agent model=%s"
                % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), briefs, tool_api, slot, cases, opts["--runner"], budget, os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL), os.environ.get("FREYA_AGENT_MODEL", "experimental-5")))
     (ROOT / "out").mkdir(exist_ok=True)
@@ -236,12 +241,21 @@ async def main(argv):
         trace.close()
         return 2
     try:
-        left = budget - trace.elapsed_min() - 3          # keep 3 minutes for verify + export
+        # keep 3 minutes for lint + export and 4 for the final audit (about 2 min: 8 batches, 3 in parallel); the
+        # harrow rehearsal gave the agent all but 3 and the audit was skipped with 6 minutes left
+        left = budget - trace.elapsed_min() - 3 - (0 if "--no-audit" in flags else 4)
         await asyncio.wait_for(run_claude(briefs, tool_api, slot, trace, cases, brief_filter, opts["--runner"], left, generated=gen_cases), timeout=max(60, left * 60))
     except asyncio.TimeoutError:
         trace.line("STOPPED: the build budget was reached. Verifying and exporting whatever is saved on Freya.")
     except Exception as e:
         trace.line("ERROR in the agent run: %r" % (e,))
+    try:
+        calls = [x for x in model_log.read_text().splitlines() if x.strip()]
+        trace.line("simulator/smoke model calls during the agent run: %d (one line each below; time | provider model | purpose)" % len(calls))
+        for x in calls:
+            trace.line("model call (test): " + x)
+    except Exception as e:
+        trace.line("model-call log not read: %r" % (e,))
     wf_path = ROOT / "out" / ("%s.workflow.json" % slot)
     if wf_path.exists():
         rules_file = ROOT / "out" / ("%s.rules.json" % slot)
@@ -257,7 +271,7 @@ async def main(argv):
         run_step(trace, "lint", lint_cmd, timeout=max(30, min(120, int((budget - trace.elapsed_min() - 1) * 60))))
         # the audit only when it cannot push the trace's end past the budget (worst case was 34 min before this guard)
         left_min = budget - trace.elapsed_min()
-        if "--no-audit" not in flags and rules_file.exists() and left_min > 7:
+        if "--no-audit" not in flags and rules_file.exists() and left_min > 4.5:
             gen = ROOT / "out" / ("gen_%s.py" % slot)
             run_step(trace, "audit", [PY, "builder/audit.py", "--rules", str(rules_file), "--workflow", str(wf_path),
                                       "--generator", str(gen) if gen.exists() else "", "--out", "out/%s.audit.json" % slot],

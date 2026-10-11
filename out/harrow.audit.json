@@ -1,0 +1,856 @@
+{
+ "rules": [
+  {
+   "id": "R01",
+   "status": "implemented",
+   "where": "generator docstring + tool close_call reason enum",
+   "evidence": "outcome_desc=\"From the dialler code card: promise, paid, transferred, no_promise, not_verified, not_reached.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R02",
+   "status": "superseded",
+   "where": "superseded by ",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R03",
+   "status": "implemented",
+   "where": "setup code (dates from now) + prepare code (credit_card / loan types, 1-3 products, day bands)",
+   "evidence": "raw = str(vars.get('now') or '').strip()",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R04",
+   "status": "implemented",
+   "where": "setup code: today/now_time derived from vars['now']",
+   "evidence": "nowdt = datetime.datetime.fromisoformat(raw[:16])",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R05",
+   "status": "implemented",
+   "where": "every tool definition body.customer_id",
+   "evidence": "body.customer_id (string): default \"{{customer_id}}\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R06",
+   "status": "implemented",
+   "where": "check_offer policy code check_one (weekend/holiday, deadline, floor guards)",
+   "evidence": "\"below_floor\": \"I cannot record [named]. The smallest amount I can record is [floor].\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R07",
+   "status": "implemented",
+   "where": "opening on_enter tts",
+   "evidence": "on_enter tts: \"Hello, this is the automated assistant of Corran Bay Bank. This call may be recorded. Could I speak to {{first_name}} {{last_name}}, please?\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R08",
+   "status": "implemented",
+   "where": "who1/who2 extraction + setup -> opening_retry; opening_retry always -> fin_nocon (NOCON)",
+   "evidence": "unclear = anything else: 'hello?', 'who wants to know?', 'what's this about?', any question, silence.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R09",
+   "status": "implemented",
+   "where": "system prompt",
+   "evidence": "Once the right person is on the line, call them {{title}} {{last_name}}.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R10",
+   "status": "implemented",
+   "where": "system prompt + node task_messages + negotiate aside handling",
+   "evidence": "- Robot question: say \"Yes, I am an automated assistant.\", then continue.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R11",
+   "status": "implemented",
+   "where": "system prompt + node task_messages",
+   "evidence": "Scam question: they are free to hang up and call us on the number on the Corran Bay website, then continue.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R12",
+   "status": "implemented",
+   "where": "system prompt + ask_dob/ask_phone/opening_retry/third_party task_message FORBID line",
+   "evidence": "- Before both security questions are passed never say: overdue, arrears, missed, owe, debt, balance, payment, account, card, credit card, loan, car loan.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R13",
+   "status": "implemented",
+   "where": "ask_dob / ask_phone task_message rules",
+   "evidence": "- The questions are there to protect their personal details: say exactly that if they ask why, or will not answer, then ask the same question again.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R14",
+   "status": "implemented",
+   "where": "third_party.task_message",
+   "evidence": "Never say why you are calling or which department. Say that you are calling with a personal message for {{title}} {{last_name}}, and ask when they will be available. Nothing else.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R15",
+   "status": "implemented",
+   "where": "third_party.task_message",
+   "evidence": "If they offer to answer questions, pay or arrange anything for the customer: thank them, decline, and ask again when {{title}} {{last_name}} can be reached.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R16",
+   "status": "implemented",
+   "where": "third_party.task_message + setup code: callback_text + tool schedule_callback",
+   "evidence": "- If it does not fit, propose ONCE the nearest slot that fits: the same time on the first allowed day, or if the time is outside 10:00-16:00 the nearest end of those hours (10:00 or 16:00). If they accept, book it.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R17",
+   "status": "partial",
+   "where": "setup/opening_retry/third_party transitions -> fin_nocon / fin_deceased; end_deceased terminal",
+   "evidence": "terminal: endedReason=not_reached_NOCON, spoken_message=\"I am very sorry to hear that. Thank you. Goodbye.\"",
+   "fix_hint": "Set end_deceased spoken_message to exactly \"I am very sorry to hear that.\" (drop \"Thank you. Goodbye.\"), because the rule says to speak only that sentence.",
+   "evidence_found": true
+  },
+  {
+   "id": "R18",
+   "status": "implemented",
+   "where": "ask_dob -> ask_phone, tools verify_identity / verify_identity#2",
+   "evidence": "2. -> ask_phone  if (verify_identity_response.data.verified equals \"true\" OR verify_identity_response.data.verified equals \"True\")  [\"date of birth correct\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R19",
+   "status": "implemented",
+   "where": "ask_dob.task_message + verify_identity post_process_code",
+   "evidence": "msg = 'Day and month look swapped. NOT a wrong answer. Ask for the date of birth again with the month as a word, for example 14 March 1988.'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R20",
+   "status": "implemented",
+   "where": "verify_identity post_process_code (id_wrong_dob / id_wrong_phone) + transition id_route_* -> fin_failed",
+   "evidence": "done = nw >= 2 or str(left) == '0'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R21",
+   "status": "implemented",
+   "where": "fin_failed code + end_failed terminal; verify post LIMIT_TXT",
+   "evidence": "terminal: endedReason=not_verified_IDNO, spoken_message=\"For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R22",
+   "status": "partial",
+   "where": "ask_dob/ask_phone task_message; count_decline_* and qb_* code -> fin_declined",
+   "evidence": "refused if they refuse to answer the security question, say they do not want to talk, or ask AGAIN what the call is about instead of answering.",
+   "fix_hint": "A second 'what is this about' that is extracted as 'refused' only takes decline_count to 1 and the agent asks again. Route refusal_dob/refusal_phone == refused straight to fin_declined when question_count_* >= 1, or when the protect-details line was already said.",
+   "evidence_found": true
+  },
+  {
+   "id": "R23",
+   "status": "implemented",
+   "where": "load_account (get_account) -> prepare code: statement",
+   "evidence": "head = \"I'm calling from Corran Bay Bank's Payments Support team about a missed payment. \"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R24",
+   "status": "implemented",
+   "where": "SYSTEM PROMPT + negotiate/confirm/wrapup task_message",
+   "evidence": "- Never ask how much the customer can pay. Never mention fees, credit file, recovery agents or court.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R25",
+   "status": "implemented",
+   "where": "prepare code: statement + init_negotiation stage 'all' + to_one_by_one",
+   "evidence": "statement += 'Can you pay the overdue amount in full today?' if len(items) == 1 else 'Can you pay all of these in full today?'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R26",
+   "status": "implemented",
+   "where": "SYSTEM PROMPT; negotiate.task_message; prepare code (amounts set by the system)",
+   "evidence": "- Never propose, compute or change an amount or a date yourself, and never ask how much they can pay.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R27",
+   "status": "implemented",
+   "where": "negotiate stance extraction + transition 7 -> check_offer before count_refusal; policy code refuse()/refused_list/too_much()",
+   "evidence": "offer = names their own date, amount or period (a date or amount is NEVER a refusal)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R28",
+   "status": "partial",
+   "where": "policy code check_one (floor/part_deadline), recorded_guard; end_promise_part terminal",
+   "evidence": "\"too_much_floor\": \"I understand. The smallest amount I can record is [floor]. The rest stays overdue and we will contact you about it.\"",
+   "fix_hint": "Add a split-payment rule to the offer_amount/offer_when extraction: take only the first part. When a part amount (at least the floor, below the full amount) is agreed, have check_one/agree add 'The rest stays overdue and we will contact you about it.' at agreement time. Right now that line is only spoken on the too-much path.",
+   "evidence_found": true
+  },
+  {
+   "id": "R29",
+   "status": "contradicted",
+   "where": "policy code advance()/readback(); confirm node",
+   "evidence": "if opn:\n                start_product(V, opn[0], prefix)\n                return\n            agreed = [p for p in ids if state(V, p) == 'agreed']",
+   "fix_hint": "In advance(), route to confirm (read-back) and then record after each product is agreed, before calling start_product for the next open product. Do not agree every product first and read them back together.",
+   "evidence_found": true
+  },
+  {
+   "id": "R30",
+   "status": "partial",
+   "where": "policy code enter_wrapup -> wrapup on_enter tts",
+   "evidence": "\"recorded\": \"Your payment arrangement is recorded.\"",
+   "fix_hint": "Speak 'Your payment arrangement is recorded.' after each successful create_promise (in ev_rec_after, before moving to the next product). Today it is said once, after all products are recorded.",
+   "evidence_found": true
+  },
+  {
+   "id": "R31",
+   "status": "partial",
+   "where": "policy code ev_rec_after (fail_max 2), note_next service_error, enter_wrapup rec_failed",
+   "evidence": "parts = [line] + [T('rec_failed', words=pg(V, p, 'words')) for p in bad]",
+   "fix_hint": "Speak 'I'm sorry, I could not record that.' right after the second failure, even when no product was recorded (today that case goes to fin_sysf and the apology is never said). Also add a note text field to add_note that contains 'create_promise' and the number of tries.",
+   "evidence_found": true
+  },
+  {
+   "id": "R32",
+   "status": "partial",
+   "where": "fin_secondlook -> offer_second_look; schedule_callback#2; end_tdn2l spoken_message",
+   "evidence": "Your second-look call is booked for {{second_look_text}} at {{sl_time}}. Thank you for your time, {{title}} {{last_name}}. Speak to you then. Goodbye.",
+   "fix_hint": "In finalize(), route to fin_secondlook whenever any product has state 'refused', even if another product was recorded (today final_route 'promise' skips the offer) or an earlier product was disputed or hardship.",
+   "evidence_found": true
+  },
+  {
+   "id": "R33",
+   "status": "implemented",
+   "where": "policy code finalize() fin_keys; fin_secondlook code (notalk_count skip); single offer_second_look node",
+   "evidence": "vars['sl_route'] = 'skip' if n >= 2 else 'offer'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R34",
+   "status": "partial",
+   "where": "policy code ev_settle (T('paid')), note_reasons paid -> record_note",
+   "evidence": "pre = T(kind, words=T('and').join(words)) if multi(V) else ''",
+   "fix_hint": "Speak 'Thank you. A payment can take up to two business days to reach us.' for single-product calls too (remove the multi(V) condition in ev_settle). Also add a note text field to add_note that captures how and when the customer paid.",
+   "evidence_found": true
+  },
+  {
+   "id": "R35",
+   "status": "partial",
+   "where": "pol_dispute -> ev_settle state 'dispute'; note_reasons dispute -> record_note",
+   "evidence": "body.reason (string): default \"{{note_reason}}\"",
+   "fix_hint": "Add a note text field to add_note stating what is disputed. Add 'Do not argue about a dispute' to the negotiate/confirm task_message.",
+   "evidence_found": true
+  },
+  {
+   "id": "R36",
+   "status": "implemented",
+   "where": "negotiate/confirm/wrapup transition topic new_plan -> xfer_restructuring (queue restructuring) -> fin_transferred_restructuring (XRST)",
+   "evidence": "-> xfer_restructuring  if (topic equals \"new_plan\")  [\"topic new_plan\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R37",
+   "status": "partial",
+   "where": "policy code ev_human (human_limit 2) -> xfer_general; ask_dob/ask_phone task_message",
+   "evidence": "\"human_first\": \"I can help you with this now. Are you happy to continue with me?\"",
+   "fix_hint": "After human_first is spoken in negotiate, treat a 'no' to 'Are you happy to continue with me?' as a request for a person: add a human_pending flag that sends a stance refuse to pol_human/xfer_general instead of count_refusal.",
+   "evidence_found": true
+  },
+  {
+   "id": "R38",
+   "status": "implemented",
+   "where": "prepare code texts.hardship + hardship node + hardship transition support_yes -> xfer_support (queue support) -> fin_transferred_support XCARE",
+   "evidence": "\"hardship\": \"I'm sorry to hear that. I will put you through to our Customer Care team, who can help. Is that all right?\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R39",
+   "status": "partial",
+   "where": "hardship transition support_no -> hs_decline; ev_hs_decline/note_next -> record_note; finalize -> fin_hardship HDNX",
+   "evidence": "body.reason (string): default \"{{note_reason}}\"",
+   "fix_hint": "add_note sends only product_id and reason, so the customer's own words are never stored. Add a text/details body field filled from an extraction of the hardship circumstance in their words (if the API allows it).",
+   "evidence_found": true
+  },
+  {
+   "id": "R40",
+   "status": "partial",
+   "where": "opening_retry task_message + refuses -> fin_declined; ev_notalk (notalk_limit 2) + fin_secondlook skip -> fin_tdn",
+   "evidence": "If they said they do not want to talk: say \"This will only take a moment.\"",
+   "fix_hint": "In ask_dob/ask_phone ID_COMMON, have the first 'do not want to talk' get \"This will only take a moment.\" (a second one -> fin_declined), instead of counting it as a plain refusal without the sentence.",
+   "evidence_found": true
+  },
+  {
+   "id": "R41",
+   "status": "implemented",
+   "where": "system prompt + negotiate/confirm/wrapup/offer_second_look COMMON",
+   "evidence": "- A question the facts do not answer: \"I don't have that information.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R42",
+   "status": "implemented",
+   "where": "prepare code note_next/finalize; notes_on_transfer False (xfer routes skip notes); load_account failure -> fin_sysf",
+   "evidence": "# notes wait until the wrap-up has decided the ending: a transfer from the wrap-up adds no notes at all",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R43",
+   "status": "partial",
+   "where": "fin_* code nodes + end_* terminals; xfer_* on_enter tts; close_call alwaysRunsAt end_of_call",
+   "evidence": "- If they ask for a person: the first time say \"I can help you with this now. Are you happy to continue with me?\" If they ask again or say no, call transfer_to_agent.",
+   "fix_hint": "In ask_dob/ask_phone, have the model say \"I am putting you through now. Please stay on the line.\" before calling transfer_to_agent, or route to xfer_general instead of the in-node tool.",
+   "evidence_found": true
+  },
+  {
+   "id": "R44",
+   "status": "superseded",
+   "where": "superseded by R71",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R45",
+   "status": "implemented",
+   "where": "setup/prepare code isbd/next_bd; check_one weekend_or_holiday; fit_day; ev_accept",
+   "evidence": "issues.append(('weekend_or_holiday', T('weekend_or_holiday', named=txt_short(nd), date=txt_short(nb))))",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R46",
+   "status": "implemented",
+   "where": "setup code addbd",
+   "evidence": "while c < n and guard < 4000:\n        d = d + datetime.timedelta(days=1)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R47",
+   "status": "implemented",
+   "where": "prepare code resolve_when (weekday_rule this_week)",
+   "evidence": "else:   # that weekday in the following calendar week\n                        delta = (7 - today.weekday()) + wd",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R48",
+   "status": "superseded",
+   "where": "superseded by R69",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R49",
+   "status": "superseded",
+   "where": "superseded by R68",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R50",
+   "status": "implemented",
+   "where": "prepare code check_one (dl = deadline_of; part deadline only when amt < full)",
+   "evidence": "if pdl and amt is not None and amt < full_of(V, pid) and pdl < dl:",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R51",
+   "status": "implemented",
+   "where": "prepare code check_one part_deadline cap + below_floor check; setup part_deadline",
+   "evidence": "pset(vars, pid, 'part_deadline', part.isoformat())   # 5.4 part-payment last date",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R52",
+   "status": "implemented",
+   "where": "prepare code check_one above_full with P above_full='agree'",
+   "evidence": "agree(V, pid, na, nd, prefix=pre)   # the brief: above the full amount, record the full amount and say so",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R53",
+   "status": "partial",
+   "where": "check_offer code: check_one below_floor branch; refuse()",
+   "evidence": "\"below_floor\": \"I cannot record [named]. The smallest amount I can record is [floor].\"",
+   "fix_hint": "In refuse(), when offered_floor is 'yes' and the refused offer was the floor, mark the product 'refused' right away. Do not move on to the next offer on the attempt list.",
+   "evidence_found": true
+  },
+  {
+   "id": "R54",
+   "status": "partial",
+   "where": "check_offer code: too_much() / ev_offer too_much branch",
+   "evidence": "\"too_much_floor\": \"I understand. The smallest amount I can record is [floor]. The rest stays overdue and we will contact you about it.\"",
+   "fix_hint": "When the customer refuses the floor offered after 'too much', mark the product 'refused' right away. Today refuse() can still offer the next attempt, for example the floor on the part-payment last date.",
+   "evidence_found": true
+  },
+  {
+   "id": "R55",
+   "status": "partial",
+   "where": "check_offer code: check_one (amount between floor and full accepted, part_deadline applied)",
+   "evidence": "if pdl and amt is not None and amt < full_of(V, pid) and pdl < dl:",
+   "fix_hint": "Add a 'split' instruction or extraction so that when the customer proposes several instalments, only the first amount is taken as the offer and recorded as a part payment if it is at least the floor.",
+   "evidence_found": true
+  },
+  {
+   "id": "R56",
+   "status": "implemented",
+   "where": "setup code: part_deadline; prepare code: part = min(part_raw, dl)",
+   "evidence": "vars['part_deadline'] = addbd(today, 2).isoformat()",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R57",
+   "status": "implemented",
+   "where": "negotiate extraction stance + count_refusal -> refuse(); start_product sets attempts_used 1 per product",
+   "evidence": "refuse = a no with no date and no amount, a flat refusal, or no answer ('I don't know').",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R58",
+   "status": "implemented",
+   "where": "prepare code: rungs per band",
+   "evidence": "rungs = [('full_or_floor', D('late_a1')), ('floor', part)]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R59",
+   "status": "partial",
+   "where": "refuse() sets state 'refused'; note_next -> record_note add_note reason refused",
+   "evidence": "body.reason (string): default \"{{note_reason}}\"",
+   "fix_hint": "Give add_note a text field (pre_process_code or body) that holds the number of attempts made and the last offer's amount and date, taken from attempts_used, prop_amount and prop_date.",
+   "evidence_found": true
+  },
+  {
+   "id": "R60",
+   "status": "implemented",
+   "where": "check_offer code: check_one date issues and vague handling (vague_again deadline)",
+   "evidence": "\"before_today\": \"I cannot record a day that has passed. Please choose a day from today on.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R61",
+   "status": "implemented",
+   "where": "setup code callback_text; third_party.task_message",
+   "evidence": "- If it does not fit, propose ONCE the nearest slot that fits: the same time on the first allowed day, or if the time is outside 10:00-16:00 the nearest end of those hours (10:00 or 16:00).",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R62",
+   "status": "implemented",
+   "where": "setup code second_look_date; offer_second_look.task_message",
+   "evidence": "- If the time is outside 12:00-18:00: say the hours are 12:00 to 18:00 once and ask again. If the second time does not fit either, or they decline, call transition_to_fin_tdn.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R63",
+   "status": "implemented",
+   "where": "ev_rec_after fail_max 2; recorded_guard / wrap_change",
+   "evidence": "\"wrap_change\": \"An arrangement already recorded cannot be changed on this call.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R64",
+   "status": "implemented",
+   "where": "prepare code: order by days_late then index; register_product per product",
+   "evidence": "order = sorted(range(len(prods)), key=lambda i: (-int(float(prods[i].get('days_late') or 0)), i))",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R65",
+   "status": "implemented",
+   "where": "prepare/check_offer code: ev_settle/refuse -> advance(); xfer_* -> fin_transferred_* -> end_transferred_*",
+   "evidence": "if opn:\n            start_product(V, opn[0], prefix)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R66",
+   "status": "implemented",
+   "where": "tool verify_identity post_process_code; verify_identity#2 answer field description",
+   "evidence": "msg = 'The answer could not be read. It does not count as wrong. Ask again: What is your date of birth?'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R67",
+   "status": "implemented",
+   "where": "prepare code: credit card floor gated on today_iso >= '2026-10-14'",
+   "evidence": "if str(vars.get('today_iso')) >= '2026-10-14':",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R68",
+   "status": "implemented",
+   "where": "prepare code: floor computation per product type",
+   "evidence": "floor = float(int(math.ceil(past_due / 2.0 / 5.0 - 1e-9)) * 5)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R69",
+   "status": "implemented",
+   "where": "setup code: early_deadline/middle_deadline/late_deadline; prepare code days_late bands",
+   "evidence": "vars['middle_deadline'] = addbd(today, 4).isoformat()",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R70",
+   "status": "superseded",
+   "where": "superseded by ",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R71",
+   "status": "implemented",
+   "where": "setup code HOL set",
+   "evidence": "HOL = set(['2026-10-22', '2026-11-06', '2026-11-24', '2026-12-25', '2026-12-28'])",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R72",
+   "status": "implemented",
+   "where": "offer_second_look task_message, on_enter tts and tool schedule_callback#2",
+   "evidence": "at a time you choose between 12:00 and 18:00?",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R73",
+   "status": "implemented",
+   "where": "verify_identity post_process_code per-question counter; ask_dob/ask_phone transition -> fin_failed",
+   "evidence": "done = nw >= 2 or str(left) == '0'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R74",
+   "status": "partial",
+   "where": "close_call enums; fin_* code nodes; xfer_* on_enter tts",
+   "evidence": "vars['reason'] = str(vars.get('promise_reason') or '')",
+   "fix_hint": "In the fin_transferred_* nodes, always set outcome transferred with XRST/XGEN/XCARE and never a blank reason. In ask_dob/ask_phone, make the agent say 'I am putting you through now. Please stay on the line.' before calling transfer_to_agent.",
+   "evidence_found": true
+  },
+  {
+   "id": "R75",
+   "status": "partial",
+   "where": "xfer_* on_enter tts; ask_dob/ask_phone transfer_to_agent tool; end_* spoken_message",
+   "evidence": "- If they ask for a person: the first time say \"I can help you with this now. Are you happy to continue with me?\" If they ask again or say no, call transfer_to_agent.",
+   "fix_hint": "In ask_dob/ask_phone, have the agent say 'I am putting you through now. Please stay on the line.' before transfer_to_agent, or route the transfer through the xfer_general node. Remove the extra 'Goodbye.' from the end_transferred_* terminals.",
+   "evidence_found": true
+  },
+  {
+   "id": "R76",
+   "status": "contradicted",
+   "where": "fin_transferred_restructuring/human/support code",
+   "evidence": "if True and rec and rec.lower() not in ('none', 'null'):\n            vars['outcome'] = 'promise'",
+   "fix_hint": "In the fin_transferred_* nodes, drop the recorded_pids branch so a transfer always closes as transferred/XRST|XGEN|XCARE. Also remove the extra sentences added to end_tdn2l and end_deceased.",
+   "evidence_found": true
+  },
+  {
+   "id": "R77",
+   "status": "implemented",
+   "where": "fin_promise code -> end_promise terminal spoken_message",
+   "evidence": "terminal: endedReason=promise_FULLPTP, spoken_message=\"Thank you, {{title}} {{last_name}}. Your arrangement is in place. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R78",
+   "status": "partial",
+   "where": "fin_promise transition -> end_promise_part; end_promise_part terminal spoken_message; fin_transferred_* code",
+   "evidence": "terminal: endedReason=promise_PARTPTP, spoken_message=\"Thank you, {{title}} {{last_name}}. The rest of the overdue amount is still due and we will be in touch about it. Goodbye.\"",
+   "fix_hint": "PARTPTP must require no transfer after the recording: in fin_transferred_restructuring/human/support, drop the 'recorded_pids -> outcome promise' branch so a transfer after a recorded arrangement ends transferred/X*, not promise/PARTPTP.",
+   "evidence_found": true
+  },
+  {
+   "id": "R79",
+   "status": "implemented",
+   "where": "finalize (all states paid -> fin_paid); fin_paid code; end_paid terminal spoken_message",
+   "evidence": "terminal: endedReason=paid_CLMPD, spoken_message=\"Thank you for letting us know. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R80",
+   "status": "partial",
+   "where": "xfer_restructuring on_enter tts + transfer_to_agent#2 (queue restructuring); fin_transferred_restructuring code",
+   "evidence": "            vars['outcome'] = 'promise'\n            vars['reason'] = str(vars.get('promise_reason') or '')",
+   "fix_hint": "In fin_transferred_restructuring always set outcome transferred / reason XRST, even when recorded_pids is set (a transfer after the arrangement is not a promise ending).",
+   "evidence_found": true
+  },
+  {
+   "id": "R81",
+   "status": "partial",
+   "where": "xfer_general on_enter tts + transfer_to_agent#4 (queue general); fin_transferred_human code",
+   "evidence": "NODE xfer_general [api_request] (passthrough)\n  on_enter tts: \"I am putting you through now. Please stay on the line.\"",
+   "fix_hint": "In fin_transferred_human always set outcome transferred / reason XGEN; remove the recorded_pids promise override (e.g. a transfer requested in wrapup after recording).",
+   "evidence_found": true
+  },
+  {
+   "id": "R82",
+   "status": "partial",
+   "where": "xfer_support on_enter tts + transfer_to_agent#3 (queue support); fin_transferred_support code",
+   "evidence": "on_enter tts: \"I am putting you through to Customer Care now. Please stay on the line.\"",
+   "fix_hint": "In fin_transferred_support always set outcome transferred / reason XCARE; remove the recorded_pids promise override.",
+   "evidence_found": true
+  },
+  {
+   "id": "R83",
+   "status": "implemented",
+   "where": "fin_secondlook (notalk skip) -> fin_tdn; offer_second_look transition_to_fin_tdn; end_tdn terminal",
+   "evidence": "terminal: endedReason=no_promise_TDN, spoken_message=\"Thank you for your time, {{title}} {{last_name}}. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R84",
+   "status": "partial",
+   "where": "offer_second_look -> fin_tdn2l; end_tdn2l terminal spoken_message",
+   "evidence": "spoken_message=\"Your second-look call is booked for {{second_look_text}} at {{sl_time}}. Thank you for your time, {{title}} {{last_name}}. Speak to you then. Goodbye.\"",
+   "fix_hint": "Make end_tdn2l spoken_message exactly \"Thank you for your time, {{title}} {{last_name}}. Speak to you then. Goodbye.\" (drop the added booking sentence).",
+   "evidence_found": true
+  },
+  {
+   "id": "R85",
+   "status": "implemented",
+   "where": "hardship node hs_answer support_no -> hs_decline -> finalize fin_keys hardship -> fin_hardship; end_hardship terminal",
+   "evidence": "terminal: endedReason=no_promise_HDNX, spoken_message=\"Thank you for telling me. Take care, {{title}} {{last_name}}. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R86",
+   "status": "implemented",
+   "where": "negotiate topic dispute -> pol_dispute -> fin_dispute; end_dispute terminal",
+   "evidence": "terminal: endedReason=no_promise_DSPT, spoken_message=\"We will look into this and write to you. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R87",
+   "status": "implemented",
+   "where": "load_account get_account_response.ok false -> fin_sysf; ev_rec_after fail_max 2 -> service_error -> fin_sysf; end_sysf terminal",
+   "evidence": "terminal: endedReason=no_promise_SYSF, spoken_message=\"I'm sorry, our system is not responding. We will call you again. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R88",
+   "status": "implemented",
+   "where": "ask_dob/ask_phone id_route exhausted -> fin_failed; end_failed terminal",
+   "evidence": "terminal: endedReason=not_verified_IDNO, spoken_message=\"For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R89",
+   "status": "implemented",
+   "where": "count_decline_*/qb_*/opening_retry -> fin_declined; end_declined terminal",
+   "evidence": "terminal: endedReason=not_verified_IDREF, spoken_message=\"I understand. You can use the Corran Bay app or visit any branch. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R90",
+   "status": "implemented",
+   "where": "third_party transition -> fin_callback (not_reached/TPCB); end_callback terminal spoken_message",
+   "evidence": "terminal: endedReason=not_reached_TPCB, spoken_message=\"Thank you, we will call back then. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R91",
+   "status": "partial",
+   "where": "fin_nocon/end_nocon; third_party, opening_retry always -> fin_nocon; fin_deceased/end_deceased",
+   "evidence": "terminal: endedReason=not_reached_NOCON, spoken_message=\"I am very sorry to hear that. Thank you. Goodbye.\"",
+   "fix_hint": "Outcome/reason are right on every NOCON path, but end_deceased speaks extra words. Set end_deceased spoken_message to the NOCON sentence \"Thank you. Goodbye.\" unless the brief gives a separate deceased line.",
+   "evidence_found": true
+  },
+  {
+   "id": "R92",
+   "status": "partial",
+   "where": "policy code finalize() in check_offer and other policy nodes; fin_secondlook -> offer_second_look",
+   "evidence": "for s in sts:\n                    if s != 'paid':\n                        key = fk.get(s) or fk['default']\n                        break",
+   "fix_hint": "In finalize(), choose the ending by severity across all products (service_error > hardship > dispute > refused/second look) instead of the first unpaid product in list order.",
+   "evidence_found": true
+  },
+  {
+   "id": "R93",
+   "status": "partial",
+   "where": "tool add_note; policy note_reasons / note_next()",
+   "evidence": "body.reason (string): default \"{{note_reason}}\"",
+   "fix_hint": "Add a text field to add_note. Have note_next() build it per reason: attempts plus last offer (refused), customer's words (hardship), what is disputed (dispute), how/when paid (paid), 'create_promise' plus number of tries (service_error).",
+   "evidence_found": true
+  },
+  {
+   "id": "R94",
+   "status": "implemented",
+   "where": "tool create_promise body + pre_process_code; record_promise node; recorded_guard()",
+   "evidence": "want = [('product_id', str(vars.get('rec_pid') or '')), ('amount', str(vars.get('rec_amount') or '')), ('date', str(vars.get('rec_date') or '')[:10])]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R95",
+   "status": "partial",
+   "where": "tool close_call (alwaysRunsAt end_of_call) pre_process_code; fin_* code nodes",
+   "evidence": "vars['reason'] = str(vars.get('promise_reason') or '')",
+   "fix_hint": "In fin_paid/fin_tdn/fin_tdn2l/fin_hardship/fin_dispute/fin_sysf/fin_transferred_*, fall back to 'FULLPTP' instead of '' when promise_reason is empty, and stop close_call pre_process_code from dropping reason.",
+   "evidence_found": true
+  },
+  {
+   "id": "R96",
+   "status": "implemented",
+   "where": "tool create_promise pre_process_code; record_promise node",
+   "evidence": "b[f] = float(w)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R97",
+   "status": "implemented",
+   "where": "ask_dob (verify_identity field date_of_birth) -> ask_phone (verify_identity#2 field phone_last4); post_process_code",
+   "evidence": "msg = 'The answer could not be read. It does not count as wrong. Ask again: What is your date of birth?'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R98",
+   "status": "implemented",
+   "where": "ask_phone all_verified transition -> load_account (get_account); prepare code reads product fields",
+   "evidence": "2. -> load_account  if (verify_identity_response.data.all_verified equals \"true\" OR verify_identity_response.data.all_verified equals \"True\")",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R99",
+   "status": "implemented",
+   "where": "tool schedule_callback (third_party) and schedule_callback#2 (offer_second_look); pre_process_code to_time",
+   "evidence": "body.time* (string): default \"{{time}}\"; Callback time as HH:MM, 24 hour, from 10:00 to 16:00.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R100",
+   "status": "superseded",
+   "where": "superseded by ",
+   "evidence": "",
+   "fix_hint": ""
+  }
+ ],
+ "summary": {
+  "implemented": 65,
+  "partial": 27,
+  "missing": 0,
+  "contradicted": 2,
+  "superseded": 6,
+  "total": 100,
+  "evidence_unverified": 0
+ },
+ "top_fixes": [
+  {
+   "id": "R76",
+   "status": "contradicted",
+   "rule": "Outcome/reason/closing-sentence table: each situation maps to an outcome, reason code and closing sentence said verbatim.",
+   "why": "A transfer that comes after a recorded arrangement (for example 'can I speak to someone' in wrapup, or hardship after recording) closes as promise/FULLPTP|PARTPTP, or with a blank reason, when it should close as transferred/XRST|XGEN|XCARE. That fails the close_call check on every transfer-after-recording case (this also covers R78, R80, R81, R82, R74 and R95).",
+   "fix": "In the code of fin_transferred_restructuring, fin_transferred_human and fin_transferred_support, delete the `if rec and rec.lower() not in ('none','null'): vars['outcome']='promise'; vars['reason']=promise_reason` branch. Always set vars['outcome']='transferred' and vars['reason'] to 'XRST', 'XGEN' or 'XCARE' respectively. In close_call pre_process_code, never drop or blank `reason`."
+  },
+  {
+   "id": "R29",
+   "status": "contradicted",
+   "rule": "Before recording, read back and record only after a clear yes; on a change, check the new value and read back again. With several products, agree, read back and record each before the next.",
+   "why": "With several products the agent agrees all of them first and then reads them back and records them together, so the read-back, create_promise and 'Your payment arrangement is recorded.' sequence is in the wrong order for every multi-product case (this also covers R30 and R31).",
+   "fix": "In the policy code, change advance(). As soon as a product reaches state 'agreed', go to confirm and read back \"So that is {amount} for your {product} on {weekday, day month}. Is that right?\". Call create_promise only after a clear yes. Only then call start_product(V, opn[0]) for the next open product. In ev_rec_after, speak \"Your payment arrangement is recorded.\" right after each ok:true, not once in enter_wrapup. After the 2nd failure, speak \"I'm sorry, I could not record that.\" right away (also when nothing else was recorded, before fin_sysf), then add_note service_error and continue with the next product."
+  },
+  {
+   "id": "R84",
+   "status": "partial",
+   "rule": "No arrangement, product(s) turned down, second-look call booked: no_promise / TDN2L.",
+   "why": "The terminal farewells say extra words beyond the mandated closing sentence, so the verbatim closing check fails on every second-look and deceased case (this also covers R17 and R91).",
+   "fix": "Set end_tdn2l spoken_message to exactly \"Thank you for your time, {{title}} {{last_name}}. Speak to you then. Goodbye.\" Move the booking sentence \"Your second-look call is booked for {{second_look_text}} at {{sl_time}}.\" into offer_second_look, to be spoken after schedule_callback succeeds, before the transition to fin_tdn2l. Set end_deceased spoken_message to exactly \"I am very sorry to hear that.\""
+  },
+  {
+   "id": "R92",
+   "status": "partial",
+   "rule": "Several products, nothing recorded, no transfer: all claimed paid → CLMPD; otherwise most serious decides in order SYSF, HDNX, DSPT, TDN2L, TDN. Paid next to turned-down is TDN or TDN2L.",
+   "why": "With several products, finalize() takes the ending from the first non-paid product in list order, not from the most serious one, so mixed cases (for example refused + dispute, or paid + hardship-declined) get the wrong no_promise reason code.",
+   "fix": "In policy code finalize(), when nothing is recorded and there is no transfer: if every product is 'paid', close CLMPD. Otherwise pick the key by severity across all product states, in this order: service_error→SYSF, hardship_declined→HDNX, dispute→DSPT, refused with second look booked→TDN2L, refused/notalk→TDN. Treat 'paid' next to 'refused' as TDN/TDN2L. Also send any 'refused' product to fin_secondlook before closing, even if another product was recorded (R32)."
+  },
+  {
+   "id": "R93",
+   "status": "partial",
+   "rule": "`add_note` reason is one of `refused`, `hardship`, `dispute`, `paid`, `service_error`, and text must contain the specified content per reason.",
+   "why": "add_note only sends product_id and reason, so the required note content is never stored. Every refused/hardship/dispute/paid/service_error note case fails (this also covers R34, R35, R39, R59 and R31).",
+   "fix": "Add a body field `text` (default \"{{note_text}}\") to the add_note tool. In note_next(), set vars['note_text'] per reason: refused → f\"{attempts_used} attempts; last offer {prop_amount} on {prop_date}\"; hardship → the customer's words (new extraction field hardship_words); dispute → what is disputed (extraction dispute_what); paid → how and when paid (extraction paid_how_when); service_error → f\"create_promise failed after {create_promise_failure_count} tries\". Also, in ev_settle, remove the multi(V) condition so \"Thank you. A payment can take up to two business days to reach us.\" is spoken on single-product calls too."
+  }
+ ],
+ "meta": {
+  "model": "claude-opus-5-5",
+  "seconds": 115.1,
+  "cost_usd": 4.41,
+  "calls": 9,
+  "batches": 8,
+  "rules": "out/harrow.rules.json",
+  "workflow": "out/harrow.workflow.json",
+  "generator": "out/gen_harrow.py",
+  "digest_chars": 198320,
+  "generator_chars": 32487
+ }
+}

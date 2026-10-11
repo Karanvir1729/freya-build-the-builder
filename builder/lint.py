@@ -1515,6 +1515,20 @@ class _Linter:
         return re.compile(rx, re.I | re.S)
 
     @staticmethod
+    def _assembled(phrase, fixed):
+        """True when a phrase with placeholders has every fixed piece (the text between placeholders, punctuation and
+        spacing at its ends ignored) in some fixed text: code that builds the line from parts says it word for word."""
+        parts = re.split(r"\{\{[^{}]*\}\}|\{[^{}]*\}|\[[^\[\]]*\]|<[^<>]*>", _Linter._norm(phrase))
+        if len(parts) < 2:
+            return False
+        pieces = [p.strip(" .,;:!?") for p in parts]
+        pieces = [p for p in pieces if re.search(r"\w", p)]
+        if len(pieces) < 2:      # one fixed piece: _phrase_rx already lets placeholders stand for any short text
+            return False
+        low = [t.lower() for t in fixed]
+        return all(any(pc.lower() in t for t in low) for pc in pieces)
+
+    @staticmethod
     def _word_rx(word):
         w = word.strip().lower()
         if not w:
@@ -1576,6 +1590,9 @@ class _Linter:
                     continue
                 if any(rx.search(t) for t in prompts):
                     self.warn(f"rules.{r.get('id')}", f"verbatim line {phrase!r} is only in a prompt; make it fixed text (tts on_enter, farewell or code-built text) so the model cannot paraphrase it")
+                elif self._assembled(phrase, fixed):
+                    # a templated line built by code from fixed pieces (head + item + tail, e.g. a read-back of 1-3 products)
+                    self.info(f"rules.{r.get('id')}", f"verbatim line {phrase!r} is assembled by code: every fixed piece is in fixed text")
                 else:
                     self.err(f"rules.{r.get('id')}", f"verbatim line {phrase!r} appears in no tts on_enter, farewell or code-built text")
 

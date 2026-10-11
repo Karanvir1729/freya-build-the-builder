@@ -460,6 +460,32 @@ def test_rules_verbatim_code_built():
     assert not has(rl(wf), ERROR, "rules.R01"), rl(wf)
 
 
+def test_rules_verbatim_assembled():
+    # a read-back built by code from a head, items and a tail (1-3 products): every fixed piece is fixed text
+    wf = gated()
+    wf["nodes"]["talk"]["on_enter"]["text"] = "{{readback}}"
+    wf["nodes"]["talk"]["tools"][0]["post_process_code"] = (
+        "try:\n    head = 'So that is '\n    tail = '. Is that right?'\n    item = vars.get('amt', '') + ' for your ' + vars.get('words', '') + ' on ' + vars.get('day', '')\n"
+        "    vars['readback'] = head + item + tail\n"
+        "except Exception:\n    pass\n")
+    rules = json.loads(json.dumps(RULES)) + [{"id": "R09", "category": "confirmation", "text": "Read back.", "in_force": True,
+                                               "verbatim": ["So that is {amount} for your {product} on {date}. Is that right?"], "values": {}}]
+    f = rl(wf, rules)
+    assert not has(f, ERROR, "rules.R09"), f
+    # pieces in different snippets (a template dict of head / item / tail, as policy.py's text table): assembled
+    wf["nodes"]["talk"]["tools"][0]["post_process_code"] = (
+        "try:\n    T = {'head': 'So that is ', 'item': '[amount] for your [words] on [date]', 'tail': '. Is that right?'}\n"
+        "    vars['readback'] = T.get('head', '')\nexcept Exception:\n    pass\n")
+    f = rl(wf, rules)
+    assert not has(f, ERROR, "rules.R09"), f
+    from lint import _Linter
+    assert _Linter._assembled("So that is {amount} for your {product} on {date}. Is that right?",
+                              ["so that is", "[amount] for your [words] on [date]", ". is that right?"])
+    assert not _Linter._assembled("So that is {amount} for your {product} on {date}. Is that right?", ["so that is", ". is that right?"])
+    wf["nodes"]["talk"]["tools"][0]["post_process_code"] = wf["nodes"]["talk"]["tools"][0]["post_process_code"].replace("'head': 'So that is '", "'head': 'That makes '")
+    assert has(rl(wf, rules), ERROR, "rules.R09", "appears in no tts"), rl(wf, rules)
+
+
 def test_rules_forbidden_words():
     wf = gated()
     wf["nodes"]["opening"]["on_enter"]["text"] += " It is about your debt."
