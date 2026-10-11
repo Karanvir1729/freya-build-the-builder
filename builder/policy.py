@@ -401,6 +401,9 @@ def check_one(V, pid, a, d, kind):
         return
     amt = pa if a is None or a <= 0 else a
     day = pd if d is None else d
+    pdl = pdate(pg(V, pid, 'part_deadline'))   # optional: a brief with a shorter last date for part payments
+    if pdl and amt is not None and amt < full_of(V, pid) and pdl < dl:
+        dl = pdl
     issues = []
     na, nd = amt, day
     if nd < t:
@@ -528,6 +531,10 @@ def _cardinal_days(t):
     # month name, so an amount ('twenty') is never read as a day
     t = re.sub(r' (?:the )?' + CARD_RX + r' (?:of )?' + MON_RX + r' ', lambda m: ' %d %s ' % (_card_val(m.group(1)), m.group(2)), t)
     t = re.sub(r' ' + MON_RX + r' (?:the )?' + CARD_RX + r' ', lambda m: ' %s %d ' % (m.group(1), _card_val(m.group(2))), t)
+    # a tens word with its unit after a weekday or 'the' ('Friday twenty three', 'the thirty one'): a day of the month
+    # (said in pieces, 'Friday twenty' / 'three' joins to this; Freya pieces PUB-04 read it as plain Friday)
+    t = re.sub(r' (monday|tuesday|wednesday|thursday|friday|saturday|sunday|the) (twenty|thirty) (one|two|three|four|five|six|seven|eight|nine) ',
+               lambda m: ' %s %dth ' % (m.group(1), CARDW[m.group(2)] + CARDW[m.group(3)]), t)
     return t
 def cut_off(text):
     # the words stop on a bare tens word ('Monday the twenty', 'thirty...'): a day cut off mid-word
@@ -745,6 +752,31 @@ def claims_first(V):
         return False
     advance(V, pre)
     return True
+def amount_targets(V):
+    # the amounts the customer may be saying: floor, full amount and the amount on the table, of the open products
+    out = []
+    for p in [x for x in pids(V) if state(V, x) == 'open']:
+        for x in (floor_of(V, p), full_of(V, p), prop_of(V, p)[0]):
+            if x is not None:
+                out.append(float(x))
+    return out
+def cut_cents(V, a):
+    # a whole amount that is a target with its cents missing (637 for 637.50)
+    if a is None or abs(a - round(a)) >= 0.005 or a < 1:
+        return False
+    return any(abs(x - round(x)) >= 0.005 and int(x) == int(round(a)) for x in amount_targets(V))
+def join_amount(V, a):
+    # the cents of last turn's whole amount ('and fifty cents' -> 0.5, 'and fifty' -> 50): joined to it
+    ap = num(g(V, 'amount_prev'))
+    if ap is None or a is None or a <= 0:
+        return a
+    if a < 1:
+        return round(ap + a, 2)
+    if abs(a - round(a)) < 0.005 and a < 100:
+        j = round(ap + a / 100.0, 2)
+        if any(abs(j - x) < 0.005 for x in amount_targets(V)):
+            return j
+    return a
 def cutoff_turn(V, a, d):
     # a cut-off day ('Monday the twenty') or a day-sized amount with no day ('I accept the twenty' -> 20, below the
     # floor) is asked again, twice at most per call, before any rule uses it (Freya corrects PUB-07 offered the
@@ -752,10 +784,18 @@ def cutoff_turn(V, a, d):
     c = int(num(g(V, 'cutoff_count'), 0) or 0)
     if c >= 2:
         return False
-    if g(V, 'when_cutoff') == 'yes' and a is None:
+    if g(V, 'when_cutoff') == 'yes' and (a is None or abs(a - 20) < 0.005 or abs(a - 30) < 0.005):
         V['cutoff_count'] = str(c + 1)
         V['offer_verdict'] = 'cutoff'
         say(V, T('cutoff_day'))
+        return True
+    if a is not None and d is None and cut_cents(V, a):
+        # an amount whose cents did not come ('six hundred and thirty-seven' for 637.50): kept for the next turn's
+        # cents and asked again, never checked as 637 (Freya pieces PUB-06 counted it below the floor and ended)
+        V['pending_amount'] = str(int(round(a)))
+        V['cutoff_count'] = str(c + 1)
+        V['offer_verdict'] = 'cutoff_amount'
+        say(V, join([T('cutoff_amount'), g(V, 'offer_question')]))
         return True
     if a is not None and d is None and abs(a - round(a)) < 0.005 and 1 <= a <= 31:
         ps = [p for p in pids(V) if state(V, p) == 'open']
@@ -775,7 +815,10 @@ def ev_offer(V):
     a = num(g(V, 'offer_amount'))
     if a is not None and a <= 0:
         a = None
+    a = join_amount(V, a)
     d, k2 = offer_date_of(V)
+    if d is not None and k2 == 'exact' and cut_off(g(V, 'when_prev')) and a is not None and abs(a - round(a)) < 0.005 and 1 <= a <= 9:
+        a = None   # the unit of a cut-off day ('Friday twenty' / 'three'), not an amount
     if cutoff_turn(V, a, d):
         return
     if k2 in ('exact', 'vague'):
@@ -1078,6 +1121,25 @@ def ev_rec_after(V):
                 return
             pset(V, p, 'state', 'service_error')
     rec_next(V)
+def note_text(V, p, st):
+    # the note's free text (when the API's note tool has one): what a reviewer needs per reason
+    try:
+        w = pg(V, p, 'words')
+        said = str(g(V, 'customer_said') or '').strip()
+        if said.lower() in ('', 'none', 'null'):
+            said = ''
+        if st == 'refused':
+            a, d = prop_of(V, p)
+            n = int(num(pg(V, p, 'attempts_used'), 0) or 0)
+            return ('%s: turned down. Attempts made: %d. Last offer: %s on %s.' % (w, max(n, 1), fmt(a), d.isoformat() if d else '')
+                    + ((' Customer said: ' + said) if said else ''))
+        if st == 'service_error':
+            n = int(num(pg(V, p, 'fails'), 0) or 0)
+            return '%s: create_promise failed, number of tries: %d.' % (w, max(n, 2))
+        lab = {'paid': 'says already paid', 'dispute': 'disputes', 'hardship': 'hardship'}.get(st, st)
+        return '%s: customer %s. In their words: %s' % (w, lab, said or '(not stated)')
+    except Exception:
+        return str(st)
 def note_next(V):
     if P['notes']:
         for p in pids(V):
@@ -1085,6 +1147,7 @@ def note_next(V):
             if st in P['note_reasons'] and pg(V, p, 'noted') == 'no':
                 V['note_pid'] = p
                 V['note_reason'] = P['note_reasons'][st]
+                V['note_text'] = note_text(V, p, st)
                 V['note_ok'] = 'pending'
                 V['route'] = 'note'
                 return
@@ -1235,6 +1298,8 @@ def main(V, ev):
         V['when_prev'] = g(V, 'pending_when')   # unresolved day words of the last policy turn, joined once
         V['pending_when'] = ''
         V['when_cutoff'] = ''
+        V['amount_prev'] = g(V, 'pending_amount')   # a whole amount whose cents were cut off last turn, joined once
+        V['pending_amount'] = ''
         if ev == 'offer':
             ev_offer(V)
         elif ev == 'accept':
@@ -1285,10 +1350,10 @@ def main(V, ev):
 # end of every policy node so that static checks (builder/lint.py) see who sets them; setdefault never overwrites.
 WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verdict", "next_offer_text", "route",
            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
-           "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok",
+           "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok", "note_text",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
            "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
-           "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked")
+           "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev")
 
 
 def _declare():
@@ -1633,8 +1698,11 @@ class Policy:
             for st, r in self.P["note_reasons"].items():
                 if enum and r not in enum:
                     raise ValueError("note reason %r (state %s) is not in the API's %s.%s enum %s" % (r, st, note_tool, reason_field, enum))
-            omit = [f for f in nspec["fields"] if f not in (pid_field, reason_field, fl.CUSTOMER_ID) and f not in nspec["required"]]
-            ntool = fl.api_tool(api, note_tool, baked={pid_field: "{{note_pid}}", reason_field: "{{note_reason}}"},
+            baked_n = {pid_field: "{{note_pid}}", reason_field: "{{note_reason}}"}
+            if "text" in nspec["fields"]:
+                baked_n["text"] = "{{note_text}}"
+            omit = [f for f in nspec["fields"] if f not in baked_n and f != fl.CUSTOMER_ID and f not in nspec["required"]]
+            ntool = fl.api_tool(api, note_tool, baked=baked_n,
                                 description="Record why one product has no promise.", omit=omit)
             nodes[self.targets["note"]] = fl.api_node(self.targets["note"], ntool, [fl.always("note_after")],
                                                       mapping=[{"path": "data.%s" % ok_field, "variable": "note_ok"}])

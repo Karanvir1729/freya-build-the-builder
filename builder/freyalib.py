@@ -1673,7 +1673,9 @@ def latest_value_note(n_digits=None, what="the digits"):
     """Prompt sentence for identity/promise nodes (T21): parts are joined, the last correction wins."""
     n = ("all %d digits" % n_digits) if n_digits else ("all of %s" % what)
     return ("If the customer gives %s in parts, wait for %s and join them; if they correct themselves, use the "
-            "LAST value they gave." % (what, n))
+            "LAST value they gave. When only part is in (for example two digits, or a day without the year), do NOT "
+            "repeat the question and do not say it is wrong or incomplete: say only 'Thank you, and the rest?' and wait "
+            "(a repeated question counts as asking again)." % (what, n))
 
 
 def digit_extraction(name, n_digits, description, conf=0.5, max_retries=2):
@@ -1742,7 +1744,8 @@ def gated_digits_identity(api, stage, field_value, n_digits, ask_task, answer_de
     extraction = [ext_entry] + list(extraction or [])
     routes = [gate] + list(transitions or [])
     task = ask_task + ("\nYou do not call a tool for this answer: it is checked automatically once all %d digits are "
-                       "given. If the customer gives only part, or the line is cut off, ask for the rest and wait." % n)
+                       "given. If the customer gives only part, or the line is cut off, say only 'Thank you, and the rest?' and "
+                       "wait: never repeat the question for half an answer." % n)
     nodes = {}
     for name, enter in ((ask, on_enter), ("%s_wrong" % ask, {"type": "tts", "text": wrong_line}),
                         ("%s_unread" % ask, {"type": "tts", "text": unreadable_line})):

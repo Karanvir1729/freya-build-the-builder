@@ -821,6 +821,37 @@ def test_cutoff_day_and_amount():
 
 
 @test
+def test_pieces_day_units_and_cents():
+    """A day or an amount said in two turns (Freya pieces, cert5: PUB-04 'Friday twenty' / 'Three' became Friday 16
+    and an amount of 3; PUB-06 'six hundred and thirty-seven' / 'and fifty cents this Friday' ended as refused)."""
+    G = {"vars": {"today_iso": TODAY, "now": TODAY + "T11:00"}}
+    P, V = start([LOAN])
+    exec(P.core() + "\nr = [resolve_when(vars, w) for w in ['Friday twenty three', 'the thirty one', 'friday twenty']]\n", G)
+    got = [(d.isoformat() if d else None, k) for d, k in G["r"]]
+    assert got[0][0] and got[0][0].endswith("-23") and got[1][0] and got[1][0].endswith("-31") and got[2] == (None, "vague"), got
+    # 'Friday twenty' with the tens word taken as amount 20: a cut-off DAY; 'Three' completes it, not an amount
+    P, V = start([LOAN])
+    ev(P, V, "offer", offer_kind="exact", offer_amount="20", offer_when="Friday twenty")
+    assert V["offer_verdict"] == "cutoff", (V["offer_verdict"], V["say_next"])
+    ev(P, V, "offer", offer_kind="exact", offer_amount="3", offer_when="Three")
+    txt = V.get("readback_line", "") + " " + V.get("say_next", "")
+    assert "cannot record 3" not in txt and " 23 " in txt and "2100" in txt.replace(",", ""), txt
+    # cents in the next turn: 637 is asked again (not below the floor), then 'and fifty cents' makes 637.50
+    CENTS = {"words": "credit card ending 1903", "full": 2125.10, "floor": 637.50, "days_late": 12}
+    for piece in ("0.5", "50"):
+        P, V = start([CENTS])
+        ev(P, V, "too_much", stance="too_much")
+        ev(P, V, "offer", offer_kind="exact", offer_amount="637")
+        assert V["offer_verdict"] == "cutoff_amount" and V["pending_amount"] == "637", (V["offer_verdict"], V["say_next"])
+        ev(P, V, "offer", offer_kind="exact", offer_amount=piece, offer_when="this Friday")
+        assert V["route"] == "confirm" and "637.50" in V["readback_line"], (piece, V["offer_verdict"], V.get("readback_line"), V["say_next"])
+    # a whole amount that is no target's cut-off goes through the guard as before
+    P, V = start([CENTS])
+    ev(P, V, "offer", offer_kind="exact", offer_amount="500")
+    assert V["offer_verdict"] == "below_floor" and not V.get("pending_amount"), V["offer_verdict"]
+
+
+@test
 def test_once_only_offers_not_repeated():
     """The floor and the hardship offer are said once by code; the state line and the node prompts forbid the
     dialogue model to repeat them on small talk (Freya talkative PUB-05: support offered 3 times; PUB-06: the
