@@ -1590,5 +1590,23 @@ def test_topic_contradicted_by_per_product_refuse():
     ev(P, V, "dispute", topic="dispute", offer_for="second", per_product="personal loan=dispute", customer_said="I never had a personal loan")
     assert V["state_p2"] == "dispute", V["state_p2"]
 
+@test
+def test_empty_account_is_read_again_then_technical_problem():
+    """Extended Brief A EXT-A-20 (Freya): get_account failed on the platform, the products came back empty and the agent
+    said the past-due amount was 0 and recorded a promise of 0. No product with an amount owed: read again once, then the
+    technical-problem ending (Policy.prepare_transitions)."""
+    P = mk()
+    code = P.prepare_code(BODY, "statement")
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([])}
+    run(code, V)
+    assert V["prepare_route"] == "retry", V.get("prepare_route")
+    run(code, V)
+    assert V["prepare_route"] == "no_account", V.get("prepare_route")
+    V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD])}
+    run(code, V)
+    assert V["prepare_route"] == "ok" and V["prepare_state"] == "ok", (V.get("prepare_route"), V.get("prepare_state"))
+    trs = [(t["target_node"], (t["condition"].get("conditions") or [{}])[0].get("operand")) for t in P.prepare_transitions()]
+    assert trs == [("load_account", "retry"), ("fin_service_error", "no_account"), ("negotiate", None)], trs
+
 if __name__ == "__main__":
     sys.exit(main())

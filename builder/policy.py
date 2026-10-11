@@ -1713,6 +1713,26 @@ EVENT_NODES = {
     "wrap_human": "wrap_human", "wrap_change": "wrap_change", "finalize": "finalize",
 }
 
+# get_account failed on the platform ('Failed to reach snekbox: Connection reset by peer', extended Brief A EXT-A-20 on
+# Freya): the agent told the customer they owed 0 and recorded a promise of 0. No product with an amount owed: read the
+# account again once, then the technical-problem ending (Policy.prepare_transitions).
+ACCOUNT_CHECK = r'''try:
+    _ok = False
+    for _p in [x for x in str(vars.get('pids_csv') or '').split(',') if x]:
+        try:
+            if float(vars.get('full_' + _p) or 0) > 0:
+                _ok = True
+        except Exception:
+            pass
+    if _ok:
+        vars['prepare_route'] = 'ok'
+    else:
+        _n = int(float(vars.get('account_tries') or 0)) + 1
+        vars['account_tries'] = _n
+        vars['prepare_route'] = 'retry' if _n < 2 else 'no_account'
+except Exception:
+    vars['prepare_route'] = 'ok'
+'''
 ONCE_RULE = ("\n- Every persuasion offer (each attempt of the ladder, the lowest amount), the support team and a transfer are said "
              "once, by the system line you speak on entering: never repeat them yourself. To small talk, a cut-off line or a side "
              "question, reply in one short sentence (or 'Please go on.') and wait; the system asks again when it is due.")
@@ -1850,7 +1870,16 @@ class Policy:
         fb = {"say_next": "", "state_line": "", "offer_question": "", "route": "negotiate"}
         fb.update(fallbacks or {})
         inner = self.core() + body.strip("\n") + "\ninit_negotiation(vars, %s)\n" % statement_expr + _declare()
-        return fl.guarded(inner, state_var, fb)
+        return fl.guarded(inner, state_var, fb) + ACCOUNT_CHECK
+
+    @staticmethod
+    def prepare_transitions(reload_target="load_account", fail_target="fin_service_error", next_target="negotiate"):
+        """prepare's routes with the account check (ACCOUNT_CHECK): no product with an amount owed -> the account is read
+        again once (reload_target, the get_account node), then fail_target (the brief's technical-problem ending);
+        otherwise next_target."""
+        return [fl.eq("prepare_route", "retry", reload_target, "the account came back empty: read it again"),
+                fl.eq("prepare_route", "no_account", fail_target, "the account is still empty: technical problem"),
+                fl.always(next_target)]
 
     def ending_code(self, outcome, reason, promise_decides=True):
         """Code of a fin_<key> node: writes outcome/reason; with promise_decides, a promise recorded earlier in the
