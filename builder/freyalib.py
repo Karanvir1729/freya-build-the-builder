@@ -55,7 +55,7 @@ from collections import deque
 HEADERS = {"type": "object", "properties": {"Content-Type": {"type": "string", "default": "application/json"}}}
 STRIP_HEADER = "try:\n    if isinstance(result, dict):\n        result.pop('header', None)\nexcept Exception:\n    pass\n"
 BUSINESS_WEEKDAYS = [0, 1, 2, 3, 4]        # Monday .. Friday
-DEFAULT_TIMEOUT_MS = 12000
+DEFAULT_TIMEOUT_MS = 30000   # a bank service can answer after more than 10 s and still succeed; the chat gateway waits about 60 s
 CODE_TIMEOUT_MS = 30000   # the platform default; 10 s left no room when the platform was slow (11 Oct: 17 s turns, 503/504s)
 CUSTOMER_ID = "customer_id"
 # Call variables: a request body field, path, query or header parameter whose name is one of these is baked from the

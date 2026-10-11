@@ -56,6 +56,15 @@ opening   fl.opening_conv(name, <the documents' greeting>, task, [fl.ext("intent
 - **Every ending** `fl.end_node` with the documents' closing words in the language; every path reaches one; a caller who says they are done gets the goodbye.
 - System prompt (in the language): who the agent is (the documents' name), what it can and cannot do, the conduct rules, FAQ answers, "after every tool result speak or call the next tool", never invent a figure, never say an action is done before the tool succeeded.
 
+## Service-line patterns that decide calls (measured on an independent test set, 11 Oct)
+
+- **Business answer vs technical failure.** For every service, route each documented answer separately: success; the documented business 4xx ("no eligible item", "not found", "no document"); a technical failure (5xx, timeout, `status` not success without a documented business code). A technical failure is NEVER spoken as a business fact ("you have no card", "no e-mail on file"): it gets the documents' technical-error line and routing (often a person). Test each status the test data contains.
+- **Slow answers.** Tool timeouts are 30 s (library default); never shorten them below the slowest answer the documents or the test data mention.
+- **Restricted variants of a request.** When the caller asks for a variant the documents restrict (an older period, another address or channel, something only a person can do), extract that variant (an enum value) and have CODE speak the documents' restriction line, then the allowed offer; a turn routed straight to a fixed question never lets the model say it.
+- **Emotion and de-escalation.** If the documents set a number of calming replies before a transfer, keep a counter in code and speak them before transferring; never transfer on the first angry sentence unless the documents say so.
+- **The caller's first sentence.** It often names the item (a product name, last digits) and the request; resolve it in code against the list (exactly one match -> no selection question; several -> the documents' disambiguation question) and serve the request after the reading.
+- **Other language / out of scope.** Follow the documents' own routing for a caller who does not speak the call's language or asks for something outside the line (main menu vs a person).
+
 ## Self-tests without practice cases (own mock, no organisers' ledger)
 
 - **Use the whole budget.** Do not finish early while time is left: after the happy paths pass, run the remaining example conversations of the case (every one, the adversarial ones included) and one call per error status the test data contains (each 4xx/5xx answer of each service, a slow answer), then the branches the documents describe that no test has reached (several items with the same name, nothing to read, a write the caller declines, a request outside scope, a caller who asks for a person or to do something only a person can). Fix and save after each failing round; stop only at the deadline or when every listed branch has passed once.
