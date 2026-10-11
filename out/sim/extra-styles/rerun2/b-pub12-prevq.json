@@ -1,0 +1,109 @@
+{
+ "runner": "sim",
+ "workflow_id": "6e8d8427-cbe5-407f-916c-de2fa5e3107f",
+ "agent_id": "01be3409-fdf0-4700-ab84-189fb4e29d11",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 272,
+ "passed": 0,
+ "total": 1,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-12[previous_question]",
+   "family": "Multi-product",
+   "style": "previous_question",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-12[previous_question]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "conversation: The phone last-4 question was asked three times total (initial ask, then re-asked after the customer gave a DOB response, and again after 4401 was verified wrong), so it was asked again twice rather than once. All other criteria are met."
+   ],
+   "call_id": "f11444eb-dc28-4b78-aff6-d1afca4ad8ff",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_3c408bc8-c58",
+   "transcript": "out/sim/extra-styles/rerun2/transcripts/PUB-12[previous_question].txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The phone last-4 question was asked three times total (initial ask, then re-asked after the customer gave a DOB response, and again after 4401 was verified wrong), so it was asked again twice rather than once. All other criteria are met.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f11444eb-dc28-4b78-aff6-d1afca4ad8ff",
+   "slowest_turn_s": 4.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-12[previous_question]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "conversation: The phone last-4 question was asked three times total (initial ask, then re-asked after the customer gave a DOB response, and again after 4401 was verified wrong), so it was asked again twice rather than once. All other criteria are met."
+    ],
+    "call_id": "f11444eb-dc28-4b78-aff6-d1afca4ad8ff",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_3c408bc8-c58",
+    "transcript": "out/sim/extra-styles/rerun2/transcripts/PUB-12[previous_question].txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The phone last-4 question was asked three times total (initial ask, then re-asked after the customer gave a DOB response, and again after 4401 was verified wrong), so it was asked again twice rather than once. All other criteria are met.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f11444eb-dc28-4b78-aff6-d1afca4ad8ff",
+    "slowest_turn_s": 4.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 12,
+  "customer_calls": 11,
+  "judge_calls": 1,
+  "judge_retries": 0,
+  "ledger_polls": 12,
+  "ledger_errors": 0,
+  "call_fetches": 2
+ }
+}

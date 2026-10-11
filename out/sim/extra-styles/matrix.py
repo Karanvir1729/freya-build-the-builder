@@ -64,6 +64,8 @@ def totals(rows_, after=None):
 A = rows(["a-pub.part1.json", "a-pub.part2.json", "a-pub.part3.json"])
 B = rows(["b-pub.json"])
 after = rows(["rerun/" + f.name for f in sorted((D / "rerun").glob("*.json"))]) if (D / "rerun").exists() else {}
+# rerun2: the one case re-run after the third fix (PUB-12[previous_question] on version 3), when it ran
+after.update(rows(["rerun2/" + f.name for f in sorted((D / "rerun2").glob("*.json"))]) if (D / "rerun2").exists() else {})
 print("## Brief A (brief-a-v3-x, public cases PUB-01..10)\n")
 print(table(A, ["PUB-%02d" % i for i in range(1, 11)], after))
 print("\n" + totals(A, after))

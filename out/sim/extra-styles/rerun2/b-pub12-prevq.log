@@ -1,0 +1,9 @@
+sim | workflow 6e8d8427-cbe5-407f-916c-de2fa5e3107f (slot brief-b-v3-x) | 1 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+FAIL PUB-12[previous_question] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+       - conversation: The phone last-4 question was asked three times total (initial ask, then re-asked after the customer gave a DOB response, and again after 4401 was verified wrong), so it was asked again twice rather than once. All other criteria are met.
+
+slowest agent turn per call: median 4 s, worst 4 s (chat-route timing, not a simulation's).
+style previous_question: 0 / 1 passed
+
+0 / 1 passed (bank records and conversation checks). Local chat-route simulation, 272 s.
+cost: 12 chat turns, 12 model calls (11 customer on gpt-5-mini, 1 judge on gpt-5), 12 ledger polls, 2 call fetches.

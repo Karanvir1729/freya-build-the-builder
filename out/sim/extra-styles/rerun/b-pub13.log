@@ -1,1 +1,12 @@
 sim | workflow 6e8d8427-cbe5-407f-916c-de2fa5e3107f (slot brief-b-v3-x) | 1 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+FAIL PUB-13[rambling_corrects] hard   Multi-product  | close_call
+       - outcome ('not_verified', 'failed'), expected ('promise', None)
+       - promises [], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')]
+       - conversation: No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October.
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+
+slowest agent turn per call: median 8 s, worst 8 s (chat-route timing, not a simulation's).
+style rambling_corrects: 0 / 1 passed
+
+0 / 1 passed (bank records and conversation checks). Local chat-route simulation, 449 s.
+cost: 5 chat turns, 5 model calls (4 customer on gpt-5-mini, 1 judge on gpt-5), 10 ledger polls, 31 call fetches.

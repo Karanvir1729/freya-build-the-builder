@@ -1,0 +1,103 @@
+{
+ "runner": "sim",
+ "workflow_id": "6e8d8427-cbe5-407f-916c-de2fa5e3107f",
+ "agent_id": "01be3409-fdf0-4700-ab84-189fb4e29d11",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 449,
+ "passed": 0,
+ "total": 1,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-13[rambling_corrects]",
+   "family": "Multi-product",
+   "style": "rambling_corrects",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-13[rambling_corrects]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "outcome ('not_verified', 'failed'), expected ('promise', None)",
+    "promises [], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')]",
+    "conversation: No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October."
+   ],
+   "call_id": "a5c0a399-b85b-4bf5-9f14-69ffa074b32a",
+   "tools": [
+    "close_call"
+   ],
+   "customer_id": "c_f1f48362-05a",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-13[rambling_corrects].txt",
+   "turns": 5,
+   "stop": "two empty replies in a row",
+   "judge": {
+    "outcome": "fail",
+    "reason": "No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-13",
+   "ended": null,
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/a5c0a399-b85b-4bf5-9f14-69ffa074b32a",
+   "slowest_turn_s": 8.0,
+   "ended_how": null,
+   "close_call_from_ledger": true
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-13[rambling_corrects]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "outcome ('not_verified', 'failed'), expected ('promise', None)",
+     "promises [], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')]",
+     "conversation: No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October."
+    ],
+    "call_id": "a5c0a399-b85b-4bf5-9f14-69ffa074b32a",
+    "tools": [
+     "close_call"
+    ],
+    "customer_id": "c_f1f48362-05a",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-13[rambling_corrects].txt",
+    "turns": 5,
+    "stop": "two empty replies in a row",
+    "judge": {
+     "outcome": "fail",
+     "reason": "No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-13",
+    "ended": null,
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/a5c0a399-b85b-4bf5-9f14-69ffa074b32a",
+    "slowest_turn_s": 8.0,
+    "ended_how": null,
+    "close_call_from_ledger": true
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 5,
+  "customer_calls": 4,
+  "judge_calls": 1,
+  "judge_retries": 0,
+  "ledger_polls": 10,
+  "ledger_errors": 0,
+  "call_fetches": 31
+ }
+}

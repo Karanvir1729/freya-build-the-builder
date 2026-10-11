@@ -1,0 +1,44 @@
+# PUB-13[rambling_corrects] One date for both, but the deadlines differ [style: rambling_corrects]
+# mock customer: PUB-13 | style text: HOW YOU TALK: you talk a lot and add a sentence about your day before most answers. The first time you say a payment day or an amount, you say a slightly different one. When the caller reads it back to you, you say 'no, sorry, I meant' and give the right one, which is the one written above. Do this once in the call. Never do it with a security answer.
+# workflow 6e8d8427-cbe5-407f-916c-de2fa5e3107f | call a5c0a399-b85b-4bf5-9f14-69ffa074b32a | customer c_f1f48362-05a | 2026-10-11 01:51:31
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: two empty replies in a row | transcript from: GET /api/v2/call/a5c0a399-b85b-4bf5-9f14-69ffa074b32a
+# RESULT: FAIL | outcome ('not_verified', 'failed'), expected ('promise', None) | promises [], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')] | conversation: No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October.
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Ms Rossi?
+customer: I've been running errands all morning. Yes, this is Elena Rossi.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_dob: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_dob
+agent: Thank you, Ms Rossi. To start, could you please tell me your date of birth?
+customer: I've been running errands all morning. Are you still there?
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> opening_retry: always always
+   [node] setup -> opening_retry
+agent: Yes, I am here. Am I speaking with Ms Rossi?
+customer: I've been running errands all morning. Are you still there?
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> opening_retry: always always
+   [node] setup -> opening_retry
+agent: Yes, I am still here. Am I speaking with Ms Rossi?
+   [harness] the chat route resumed this call from an older message (conversation_resumed isBranch=true): a chat-route artefact
+   [tool] close_call args={"reason": "failed", "outcome": "not_verified"} (end of call; from the bank's ledger, after the last line)
+
+## tool calls (4)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+3. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+4. close_call args={"reason": "failed", "outcome": "not_verified"} -> {"ok": true}
+
+## ledger: outcome=not_verified reason=failed promises=[] notes=[] callbacks=[] transfers=[] calls=['close_call']
+
+## judge (gpt-5): fail - No credit card or loan was recorded (the call ended as not_verified), and there was no read-back mentioning 30 October or 23 October.
