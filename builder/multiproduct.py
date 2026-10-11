@@ -104,9 +104,7 @@ def product_fields(api, account_tool="get_account", products_field=None):
     """{field: {"type", "description", "enum"}} of ONE product as the account tool returns it: the items of its
     `products_field` array in the 200 response (None = the first array property). Raises ValueError when the API
     file describes no such array."""
-    op = ((api.get("paths") or {}).get("/" + account_tool) or {}).get("post")
-    if op is None:
-        raise KeyError("tool %r: the API file has no POST /%s" % (account_tool, account_tool))
+    op = fl._find_op(api, account_tool)[2]    # POST /<name> (the kit), an operationId or a path's last segment
     schema = _resolve(api, _json_schema((op.get("responses") or {}).get("200")))
     props = schema.get("properties") or {}
     if products_field is None:

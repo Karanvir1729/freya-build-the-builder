@@ -1,0 +1,9 @@
+{
+  "name": "freya-bank-mock-kk",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "npx --yes wrangler deploy",
+    "dev": "npx --yes wrangler dev"
+  }
+}

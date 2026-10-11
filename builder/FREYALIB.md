@@ -12,10 +12,10 @@ generator ported onto the library; `out/compare_brief-a_lib.py` proves the two o
 | Area | Function | What it gives |
 |---|---|---|
 | OpenAPI | `load_api(path)` | the tool API file as a dict |
-| | `base_url(api)` | server URL; tool `name` is `POST <base_url>/<name>` |
-| | `tool_spec(api, name)` | `{"fields": {f: {type, description, enum, required}}, "required": [...], "summary", "response_props": {...}}` from `paths["/<name>"]["post"]` |
-| | `tool_names(api)` | every tool in the file |
-| Tools | `api_tool(api, name, baked=None, description="", required=None, retries=0, pre=None, post=None, mapping=None, field_descriptions=None, omit=None, var_map=None)` | the `api_call` tool. url/method/headers baked; `body.properties` = every spec field as a leaf; `customer_id` baked from `{{customer_id}}`; `baked` fields get a literal default (hidden from the model, checked against the enum; `"{{var}}"` bakes from a variable an earlier node always sets); all other fields are model-filled with `default: "{{<field>}}"` and the spec's type/description/enum (`field_descriptions` overrides). **A model-filled field must not share its name with an existing variable.** `required` = spec required − customer_id − baked. `post` defaults to `STRIP_HEADER` |
+| | `base_url(api)` | server URL (server variables take their defaults); an operation's url is `base_url + path` (the kit: `POST <base_url>/<name>`) |
+| | `tool_spec(api, name)` | `{"fields": {f: {type, description, enum, required}}, "required": [...], "summary", "response_props": {...}, "method", "path", "path_params", "query_params", "header_params", "has_body", "operation_id"}`. The operation is found by: `POST /<name>` (the kit), else `operationId == name`, else the name `tool_names` gives, else the last non-parameter path segment (any method). Local `$ref`s are followed; the response is 200, else the first 2xx |
+| | `tool_names(api)` | every operation's name, file order: operationId (made a valid function name: ASCII letters/digits/`_`, Turkish letters transliterated, ≤64 chars; `tool_name_of(text)`), else `<name>` of the kit's `POST /<name>`, else the last path segment (a repeat gets the method in front). `operations(api)` gives `(name, method, path, op, path_item)` |
+| Tools | `api_tool(api, name, baked=None, description="", required=None, retries=0, pre=None, post=None, mapping=None, field_descriptions=None, omit=None, var_map=None)` | the `api_call` tool. url/method/headers baked; `body.properties` = every spec field as a leaf; a field named after a call variable (`CALL_VARS`, default `{"customer_id"}`; a kit `POST /<name>` tool always carries `customer_id`) is baked from `{{<name>}}`; `baked` fields get a literal default (hidden from the model, checked against the enum; `"{{var}}"` bakes from a variable an earlier node always sets); all other fields are model-filled with `default: "{{<field>}}"` and the spec's type/description/enum (`field_descriptions` overrides). **A model-filled field must not share its name with an existing variable.** `required` = spec required − call variables − baked. `post` defaults to `STRIP_HEADER`. **Any method and path** (see below) |
 | | `close_call_tool(api, outcome_desc, reason_desc, no_reason_outcomes=None)` | the workflow-level `end_of_call` lifecycle tool reading `{{outcome}}`/`{{reason}}`; enum from the spec; pre-hook drops an empty reason (and the reason of `no_reason_outcomes`) |
 | Nodes | `conv(name, task, on_enter=None, tools=None, extraction=None, transitions=None, first_only=False, max_turns=60)` | conversation node |
 | | `code_node(name, code, transitions)` | passthrough code node (`code_exec`, 10 s); `ValueError` naming the node when `transitions` is empty |
@@ -51,6 +51,29 @@ Rules the helpers encode: fixed values use `default`, never `const`; booleans fr
 spellings; routing flags written by code are strings; code never raises and reads everything from `vars`; every
 passthrough node ends with `always`; the farewell comes from the terminal and `endedReason` is its function name;
 `close_call` runs once per call as a lifecycle tool, from the `outcome`/`reason` the `fin_*` node wrote.
+
+## Tool APIs that are not the kit's `POST /<name>`
+
+An API file with arbitrary paths, GET/DELETE operations, path and query parameters and operationIds works through
+the same `api_tool` (tests: `builder/tests/test_api_general.py`):
+
+```python
+fl.CALL_VARS.add("clientRef")        # the brief's call variables that identify the customer (before api_tool)
+debt = fl.api_tool(api, "getAccountSummary",    # GET /api/v2/accounts/{clientRef}?period=...
+                   description="Read the card's account summary. CALL it once, first.", omit=["period"])
+# url = <base>/api/v2/accounts/{{clientRef}}, method GET, no body
+mail = fl.api_tool(api, "sendDocumentEmail", description="...")   # POST body {clientRef (baked), email (model)}
+```
+
+- A path/query parameter that is a call variable or in `baked` is written into the url (`{{var}}` is resolved by the
+  engine, a literal is percent-encoded). A model-filled one is declared as a body leaf (the model sees its description
+  and enum) and a generated pre-hook moves it into the url (`{param}` / `?a=...`, empty optional values skipped) and
+  drops the body of a GET/DELETE that has none in the file. A caller's `pre` runs before that hook.
+- There may be no `close_call` / `create_promise`: do not use `close_call_tool`, `promise_*`, `multiproduct` or
+  `policy` payment helpers for such an API; build the flow from `api_tool`, `api_node`, `conv` and code nodes.
+- Result variables and counters are named after the tool name (`getAccountSummary_success_count`); routes on a tool
+  result use that name and the response's own fields (`fl.is_true("sendDocumentEmail_response.data.<field>", ...)`;
+  `fl.ok_true` only when the response has an `ok` field). `api_node(name, tool, ...)` runs any of these tools on entry.
 
 ## Speech normalisation (T21, T8)
 

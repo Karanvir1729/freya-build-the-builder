@@ -27,6 +27,22 @@ Everything the organisers published is in this repo:
 
 ## Setup
 
+### Environment variables the builder expects
+
+Every key is read from the environment only. None is stored in the repository, and `build.py` scrubs them from the traces.
+
+| Variable | Needed | What for |
+|---|---|---|
+| `ANTHROPIC_API_KEY` **or** a Claude Code login | one of the two | the builder's Claude model calls (Claude Agent SDK, which bundles the Claude Code binary): rule inventory, case writer, building agent, audit, local simulator. With the key set, the key is used; without it, the machine's Claude Code login (`claude login`) is used. Nothing else changes. |
+| `FREYA_API_KEY` | yes | the Freya workspace the phone agent is saved to (`fak_...`) |
+| `FREYA_BANK_TEAM_KEY` | yes | the team key for the mock bank (smoke tests and the simulator) |
+| `FREYA_API_URL` | no | default `https://staging-app.freyavoice.ai` |
+| `OPENAI_API_KEY` | no | if set, the local simulator's customer and judge use OpenAI; otherwise Claude |
+| `BUILDER_MODEL`, `FALLBACK_MODEL`, `BUILDER_EFFORT` | no | defaults `claude-fable-5-1`, `claude-opus-5-5` (used when the first is overloaded), `high` |
+| `TURN_TAKING` | no | `1` sets a longer turn-taking wait on the agent; off by default |
+
+The phone agent's own model is fixed in `freya.py` (`FREYA_AGENT_PROVIDER` / `FREYA_AGENT_MODEL`, default `experimental-5`).
+
 1. `cp env.example env.sh` (gitignored) and fill in the three variables the builder needs: `FREYA_API_KEY` (sign in at https://staging-app.freyavoice.ai, open **API keys**, create one, `fak_...`), `FREYA_API_URL` (`https://staging-app.freyavoice.ai`) and `FREYA_BANK_TEAM_KEY` (your team key for the mock bank). Claude access for the builder's model calls: either `ANTHROPIC_API_KEY` in the environment or `claude login` on the machine (the SDK bundles the Claude Code binary). No OpenAI key is needed: the local simulator plays the customer and judge with Claude.
 2. `source env.sh`
 3. Python 3.10+. The kit itself is standard library only. The builder uses the Claude Agent SDK, installed in `.venv`:

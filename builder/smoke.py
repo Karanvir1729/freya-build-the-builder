@@ -42,6 +42,17 @@ RULES: Answer what you are asked. Do not volunteer facts nobody asked for. Stay 
 not in your persona; for anything not covered give a short neutral answer. When you give a number or a date, say all of it \
 in one turn. If the agent reads something back and it matches what you agreed, say "Yes, I confirm." When the agent says \
 goodbye or the call is clearly over, reply with exactly [HANGUP] and nothing else."""
+# --language: the agent speaks another language than English. The customer must too, or the agent's model answers in
+# English and the test says nothing about the real calls.
+LANGUAGE_RULE = ("\nLANGUAGE: you speak only %s, like a native speaker on the phone: every line, numbers, amounts, dates "
+                 "and your confirmation of a read-back (the %s for 'yes, that is right') included. Never switch language, "
+                 "even if the agent does. [HANGUP] stays exactly [HANGUP].")
+# On the chat route the customer speaks first and the agent answers with its opening line, so the first line is only the
+# "hello?" of a line that has just connected (what 'Hello?' is in English): the request comes after the agent's greeting,
+# as on a real call.
+FIRST_LINE_PROMPT = ("YOUR PERSONA:\n%s\n\nThe phone line to the bank's assistant has just connected and nobody has spoken yet. "
+                     "Write only what you say first when a line connects, the equivalent of 'Hello?': one or two words, "
+                     "nothing about why you are calling yet.")
 
 
 # ----------------------------------------------------------------------------------------------------- HTTP helpers
@@ -90,6 +101,18 @@ def fn_name(ev):
     if isinstance(f, dict):
         return f.get("name") or f.get("function") or "?"
     return str(f or ev.get("name") or ev.get("tool") or "?")
+
+
+def endpoint_name(url):
+    """The tool name of an api_request pre_action, from its URL: the last path segment that is not an id (digits, a
+    filled-in path parameter such as /customers/12345678/cards -> 'cards', /statements/12345678 -> 'statements')."""
+    path = str(url).split("?", 1)[0].split("#", 1)[0]
+    path = re.sub(r"^[a-z]+://[^/]+", "", path)
+    segs = [x for x in path.split("/") if x]
+    for seg in reversed(segs):
+        if not re.fullmatch(r"[\d\-_.:]+|\{.*\}|[0-9a-fA-F\-]{16,}", seg):
+            return seg
+    return segs[-1] if segs else ""
 
 
 def tool_result_line(result):
@@ -225,7 +248,7 @@ class Chat:
         elif e == "function_call_start":
             name, args = fn_name(ev), ev.get("args")
             if name == "api_call" and isinstance(args, dict) and args.get("url"):   # a pre_action api_request: name it by its endpoint
-                name = args["url"].rstrip("/").rsplit("/", 1)[-1].split("?")[0] or name
+                name = endpoint_name(args["url"]) or name
                 self.api_alias = name
             rec = {"turn": turn["n"], "tool": name, "args": args, "result": None, "after_end": self.in_tail}
             self.tool_calls.append(rec)
@@ -652,12 +675,15 @@ def main(argv=None):
     ap.add_argument("--customer", help="driven mode: persona text for the Claude-played customer")
     ap.add_argument("--max-turns", type=int, default=12, help="driven mode: customer lines at most (default 12)")
     ap.add_argument("--model", default=DEFAULT_CUSTOMER_MODEL, help="driven mode: the customer's model (default %s)" % DEFAULT_CUSTOMER_MODEL)
-    ap.add_argument("--opening", default="Hello?", help="driven mode: the customer's first line (default 'Hello?')")
+    ap.add_argument("--opening", default=None, help="driven mode: the customer's first line (default 'Hello?'; with --language the customer model says its 'hello?' in that language)")
+    ap.add_argument("--language", help="driven mode: the language the customer speaks (e.g. Turkish), when the agent speaks it")
     ap.add_argument("--case", help="take the call variables (and, in driven mode without --customer, the persona) from this practice case id")
     ap.add_argument("--cases", help="the case file --case is looked up in (default public-test-set.json; a generated cases file works, its mock_case opens the practice customer)")
     ap.add_argument("--practice", action="store_true", help="with --case: open a practice customer on the mock bank (real customer_id), so bank tools answer for real")
     ap.add_argument("--answers", help="JSON list of the security answers for {{answer1}}, {{answer2}}, ... (default: the case's identity values in order)")
     ap.add_argument("--vars", help="JSON object merged over the call variables, e.g. '{\"customer_id\": \"c_123\"}'")
+    ap.add_argument("--vars-only", action="store_true", help="the call variables are exactly --vars (and the script's own), without the kit defaults "
+                    "(customer_id, first_name, last_name, title, now): for a brief whose calls carry other variables")
     ap.add_argument("--out", help="write a JSON record of the run here")
     a = ap.parse_args(argv)
     if not os.environ.get("FREYA_API_KEY"):
@@ -671,7 +697,7 @@ def main(argv=None):
         problems = validate_script(script)
         if problems:
             die("the script %s cannot be run:\n  - %s" % (a.script, "\n  - ".join(problems)))
-    variables = dict(DEFAULT_VARIABLES)
+    variables = {} if a.vars_only else dict(DEFAULT_VARIABLES)
     case = case_by_id(a.case, a.cases) if a.case else None
     if a.practice and not case:
         die("--practice needs --case <id>")
@@ -699,7 +725,10 @@ def main(argv=None):
         variables.update(extra)
     if a.practice:
         variables.update(practice_variables(case))
-    variables.setdefault("customer_id", "c_smoke")
+    if not a.vars_only:
+        variables.setdefault("customer_id", "c_smoke")
+    elif not variables:
+        die("--vars-only needs --vars '{...}' (the call variables of a test customer)")
 
     mode = "scripted" if a.script else "driven"
     persona = None
@@ -727,10 +756,17 @@ def main(argv=None):
                     rc = 2
                     break
         else:
-            print("customer model: %s" % a.model)
+            print("customer model: %s%s" % (a.model, " | language: " + a.language if a.language else ""))
             if not a.customer:
                 print("persona (from case %s): %s" % (a.case, compact(persona, 400)))
+            system = CUSTOMER_SYSTEM + (LANGUAGE_RULE % (a.language, a.language) if a.language else "")
             line = a.opening
+            if line is None and a.language:
+                try:
+                    line = clean_line(ask_customer(system, FIRST_LINE_PROMPT % persona, a.model))
+                except Exception as e:
+                    die("the customer model failed on the first line: %s" % compact(str(e), 300))
+            line = line or "Hello?"
             for i in range(a.max_turns):
                 t = chat.send(line)
                 print_turn(t)
@@ -745,7 +781,7 @@ def main(argv=None):
                     break
                 t0 = time.time()
                 try:
-                    nxt = clean_line(ask_customer(CUSTOMER_SYSTEM, customer_prompt(persona, chat.turns), a.model))
+                    nxt = clean_line(ask_customer(system, customer_prompt(persona, chat.turns), a.model))
                 except Exception as e:
                     print("!! the customer model failed: %s. Stopping." % compact(str(e), 300))
                     rc = 2

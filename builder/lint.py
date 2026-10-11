@@ -945,9 +945,25 @@ class _Linter:
             return None
         if hasattr(self, "_spec_cache"):
             return self._spec_cache
+        try:
+            import freyalib as _fl
+        except Exception:      # lint.py used without builder/ on the path
+            _fl = None
         servers = self.api.get("servers") or []
         base = servers[0].get("url", "").rstrip("/") if servers and isinstance(servers[0], dict) else ""
+        if _fl is not None:
+            try:
+                base = _fl.base_url(self.api)
+            except Exception:
+                pass
         ops = {}
+        named = []
+        if _fl is not None:
+            try:
+                named = _fl.operations(self.api)
+            except Exception:
+                named = []
+        by_op = {(m, p): n for n, m, p, _o, _i in named}
         for path, item in (self.api.get("paths") or {}).items():
             if not isinstance(item, dict):
                 continue
@@ -960,13 +976,36 @@ class _Linter:
                     schema = op["requestBody"]["content"]["application/json"]["schema"]
                 except Exception:
                     schema = {}
-                ops.setdefault(name, {})[method.upper()] = {
+                params = {}
+                if _fl is not None:
+                    try:
+                        schema = _fl._json_schema(op.get("requestBody"), self.api) or schema
+                        schema = dict(schema, properties={k: _fl._deref(self.api, v) for k, v in (schema.get("properties") or {}).items()})
+                        prm = _fl._params(self.api, op, item)
+                        params = dict(prm["query"], **prm["path"])
+                    except Exception:
+                        params = {}
+                entry = {
                     "path": path,
                     "properties": schema.get("properties") or {},
                     "required": schema.get("required") or [],
+                    "params": params,
                 }
+                # every name a tool may carry: the kit's last path segment, the freyalib name, the operationId
+                aliases = [name, by_op.get((method.lower(), path)), op.get("operationId")]
+                for a in aliases:
+                    if a:
+                        ops.setdefault(a, {}).setdefault(method.upper(), entry)
         self._spec_cache = {"base": base, "ops": ops}
         return self._spec_cache
+
+    @staticmethod
+    def _url_matches(url, base, path):
+        """url == base + path, where each {param} of the path may be filled (a '{{var}}', a literal, or the
+        '{param}' placeholder a pre-hook replaces) and a '?query' may follow."""
+        rx = re.escape(base + path)
+        rx = re.sub(r"\\\{[^/{}]+?\\\}", r"[^/?]+", rx)
+        return re.fullmatch(rx + r"(\?.*)?", url) is not None
 
     def check_api_against_spec(self, name, props, body_fields, where, placement):
         spec = self._spec()
@@ -978,8 +1017,12 @@ class _Linter:
             return
         url = props.get("url", {}).get("default") if isinstance(props.get("url"), dict) else None
         expected = f"{spec['base']}/{name}"
-        if isinstance(url, str) and url != expected:
-            self.err(f"{where}.parameters.url", f"url {url!r} is not base_url + '/' + name ({expected!r})")
+        if isinstance(url, str) and url != expected and not any(self._url_matches(url, spec["base"], o["path"]) for o in ops.values()):
+            paths = sorted({o["path"] for o in ops.values()})
+            if paths == ["/" + name]:
+                self.err(f"{where}.parameters.url", f"url {url!r} is not base_url + '/' + name ({expected!r})")
+            else:
+                self.err(f"{where}.parameters.url", f"url {url!r} is not base_url + the operation's path ({', '.join(spec['base'] + p for p in paths)})")
         method = props.get("method", {}).get("default") if isinstance(props.get("method"), dict) else None
         m = method.upper() if isinstance(method, str) else None
         op = ops.get(m) if m else None
@@ -995,12 +1038,18 @@ class _Linter:
                 self.err(f"{where}.parameters.body.{r}", "required body field has no default: neither baked nor model-filled")
         for fk, fv in body_fields.items():
             fwhere = f"{where}.parameters.body.{fk}"
-            if fk not in sprops:
+            if fk not in sprops and fk not in op.get("params", {}):
                 self.warn(fwhere, f"body field '{fk}' is not in the spec for /{name}")
                 continue
             if not isinstance(fv, dict):
                 continue
-            sp = sprops[fk] if isinstance(sprops[fk], dict) else {}
+            if fk in sprops:
+                sp = sprops[fk] if isinstance(sprops[fk], dict) else {}
+            else:
+                pp = op["params"][fk]
+                sp = {"type": pp.get("type")}
+                if pp.get("enum"):
+                    sp["enum"] = pp["enum"]
             senum = sp.get("enum")
             d = fv.get("default")
             ph = self.single_placeholder(d)
@@ -1654,8 +1703,13 @@ class _Linter:
     def _write_tool_names(self):
         spec_names = set()
         if isinstance(self.api, dict):
-            for p in (self.api.get("paths") or {}):
-                spec_names.add(p.rstrip("/").rsplit("/", 1)[-1])
+            for p, item in (self.api.get("paths") or {}).items():
+                if isinstance(item, dict) and any(m.lower() in {"post", "put", "patch", "delete"} for m in item):
+                    spec_names.add(p.rstrip("/").rsplit("/", 1)[-1])
+            spec = self._spec() or {"ops": {}}
+            for n, ops in spec["ops"].items():       # operationIds and freyalib names of every write operation
+                if any(m in {"POST", "PUT", "PATCH", "DELETE"} for m in ops):
+                    spec_names.add(n)
         return spec_names - {"get_account", "verify_identity"}
 
     @staticmethod

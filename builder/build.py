@@ -152,7 +152,8 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
     elif generated:
         gen_line = (" Extra generated rule-branch cases (independent case writer, sim.py only): %s; use them only if time is "
                     "left after the practice cases, under skill step 9's rules for generated cases." % generated)
-    test_line = ("No practice cases exist for this brief: test with lint, dry run, the smoke scripts and the audit only."
+    test_line = ("No practice cases exist for this brief: test with lint, dry run, the smoke runs of the skill's \"Self-tests "
+                 "without practice cases\" section and the audit only."
                  if not cases else
                  "Practice cases: %s%s. Test runner: %s (%s)." % (cases, (" --brief " + brief_filter) if brief_filter else "", runner,
                  "python3 builder/sim.py <slot> --cases <file>%s --concurrency 3 (the chat route answers 504 above that)" % ((" --brief " + brief_filter) if brief_filter else "")
@@ -167,6 +168,8 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
               "time; check `date` before starting a test round) for everything, including your own tests; save a working "
               "agent early and improve it. A step you decide on is something to run now, not to announce: do not end your "
               "turn before step 10's finish line or the deadline." % (SKILL, " ".join(briefs), tool_api, slot, inventory, test_line, gen_line, int(minutes_left), deadline))
+    if os.environ.get("BUILD_CASE_NOTE"):
+        prompt += " " + os.environ["BUILD_CASE_NOTE"]
     t_start = time.time()
     t_end = t_start + minutes_left * 60
 
@@ -380,7 +383,7 @@ def guard_builder_edits(slot, trace, guard):
 
 
 async def main(argv):
-    opts = {"--cases": None, "--runner": "sim", "--minutes": "29"}; flags = set()
+    opts = {"--cases": None, "--runner": "sim", "--minutes": "29", "--slot": None}; flags = set()
     args = []
     i = 0
     while i < len(argv):
@@ -388,6 +391,35 @@ async def main(argv):
         if a in opts and i + 1 < len(argv): opts[a] = argv[i + 1]; i += 2; continue
         if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases", "--keep-builder-edits", "--allow-parallel"): flags.add(a); i += 1; continue
         args.append(a); i += 1
+    # a case folder and a mock URL (the final's run_command: build.py {case_folder} {mock_url}): the folder becomes one
+    # combined brief (builder/casefolder.py), the tool API is the mock's own /openapi.json with the mock as the server
+    folders = [a for a in args if pathlib.Path(a).is_dir()]
+    urls = [a for a in args if re.match(r"https?://", a)]
+    case_note = None
+    if folders or urls:
+        import casefolder
+        if len(folders) != 1 or len(urls) > 1:
+            sys.exit("give one case folder (and the mock URL, or a tool API .json): " + " ".join(args))
+        slot0 = opts["--slot"] or casefolder.slot_name(folders[0])
+        (ROOT / "out").mkdir(exist_ok=True)
+        combined, n_files, missing = casefolder.combine(folders[0], ROOT / "out" / ("%s.case.md" % slot0))
+        rest = [a for a in args if a not in folders and a not in urls]
+        args = [combined] + [a for a in rest if a.lower().endswith(".md")]
+        if urls:
+            try:
+                api_path = casefolder.fetch_openapi(urls[0], ROOT / "out" / ("%s.openapi.json" % slot0))
+            except Exception as e:
+                sys.exit("the mock's tool API %s/openapi.json could not be read: %r" % (urls[0].rstrip("/"), e))
+            args.append(api_path)
+            flags.add("--no-gen-cases")   # cases.py writes cases for the organisers' mock customers, not for an own mock
+        else:
+            args += [a for a in rest if a.lower().endswith(".json")]
+        opts["--slot"] = slot0
+        case_note = ("Case folder: %s (%d files; every original document is there, and the brief file is their combined "
+                     "text%s). The tool API is the mock's /openapi.json; its server is %s." % (
+                         pathlib.Path(folders[0]).resolve(), n_files,
+                         "; NOT converted, read them yourself: " + ", ".join(r for r, _ in missing) if missing else "",
+                         urls[0].rstrip("/") if urls else "the API file's"))
     briefs = [a for a in args if a.lower().endswith(".md")]
     apis = [a for a in args if a.lower().endswith(".json")]
     if len(apis) == 1: tool_api = apis[0]
@@ -398,7 +430,9 @@ async def main(argv):
         if not pathlib.Path(p).exists(): sys.exit("not found: " + p)
     for k in ("FREYA_API_KEY", "FREYA_BANK_TEAM_KEY"):
         if not os.environ.get(k) or os.environ[k].endswith("your_key_here"): sys.exit(k + " is not set. source env.sh first.")
-    budget = float(opts["--minutes"]); slot = pathlib.Path(briefs[-1]).stem
+    if case_note:
+        os.environ["BUILD_CASE_NOTE"] = case_note
+    budget = float(opts["--minutes"]); slot = opts["--slot"] or pathlib.Path(briefs[-1]).stem
     cases, brief_filter = (opts["--cases"], None) if opts["--cases"] else detect_cases(briefs)
     # one build per checkout: two agents would load each other's library edits while they run (rehearsal, 10 Oct)
     others = buildguard.other_builds(ROOT / "results" / "builds", os.getpid())
@@ -406,6 +440,8 @@ async def main(argv):
         sys.exit("another build is running from this checkout (%s): run the briefs one after another, or each from its own "
                  "worktree (git worktree add ../bb-%s HEAD; link env.sh and .venv there), or pass --allow-parallel" % (", ".join(others), slot))
     trace = Trace(slot)
+    if case_note:
+        trace.line("input: " + case_note + " Brief: %s; tool API: %s" % (" ".join(briefs), tool_api))
     guard = {"snapshot": buildguard.snapshot_builder(), "head": buildguard.git_head(),   # before any step can edit the builder
              "keep": "--keep-builder-edits" in flags, "lock_dir": ROOT / "results" / "builds"}
     guard["lock_dir"].mkdir(parents=True, exist_ok=True)
@@ -513,6 +549,10 @@ async def build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags,
             cs = json.load(open(cases)) if cases else []
             cs = cs.get("cases", cs) if isinstance(cs, dict) else cs
             names = sorted({"customer_id"} | set((cs[0].get("variables") or {}).keys())) if cs else []
+            gen = ROOT / "out" / ("gen_%s.py" % slot)   # without cases: the generator's '# CALL VARIABLES:' header (skill section 0)
+            if not names and gen.exists():
+                m = re.search(r"^#\s*CALL VARIABLES:\s*(.+)$", gen.read_text(errors="ignore"), re.M)
+                names = sorted({"customer_id"} | {n for n in re.split(r"[,\s]+", m.group(1)) if re.match(r"^[A-Za-z_]\w*$", n)}) if m else []
             if names:
                 lint_cmd += ["--call-vars", ",".join(names)]
         except Exception:

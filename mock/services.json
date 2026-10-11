@@ -1,0 +1,715 @@
+{
+ "_config": {
+  "envelope": "data"
+ },
+ "_envelope": {
+  "name": "data",
+  "extra": {
+   "call": {
+    "type": "object",
+    "description": "call metadata, logged by the bank, not used in test",
+    "properties": {
+     "ani": {
+      "type": "string"
+     },
+     "lang": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ },
+ "cards.list": {
+  "method": "POST",
+  "path": "/voice/v1/cards.list",
+  "operationId": "cards_list",
+  "summary": "The customer's cards the assistant may talk about (customer number in).",
+  "customer": "body.data.customerNo",
+  "request": {
+   "customerNo": {
+    "type": "string",
+    "description": "customer number (string or number)"
+   },
+   "aiFlow": {
+    "type": "string",
+    "description": "use case, 'CardOps'"
+   }
+  },
+  "required": [
+   "customerNo"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.customerNo",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "customer number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "customer number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": null,
+  "not_found": {
+   "status": 404,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+     "returnCode": "FB_IVR_CHANNEL_102",
+     "messageText": "Müşteriye ait geçerli kart bilgisi bulunamadı.",
+     "code": "FB_IVR_CHANNEL_102",
+     "message": "Müşteriye ait geçerli kart bilgisi bulunamadı.",
+     "type": "WARNING",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+      "rootCause": "NotFoundException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ },
+ "cards.balance": {
+  "method": "POST",
+  "path": "/voice/v1/cards.balance",
+  "operationId": "cards_balance",
+  "summary": "Statement and due dates and debt per currency of one card.",
+  "customer": "body.data.cardNumber",
+  "request": {
+   "cardNumber": {
+    "type": "string",
+    "description": "cardNumber exactly as cards.list returned it"
+   }
+  },
+  "required": [
+   "cardNumber"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.cardNumber",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "card number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "card number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": null,
+  "not_found": {
+   "status": 404,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+     "returnCode": "FB_IVR_CHANNEL_120",
+     "messageText": "Kart bakiye servisi hatası: kart bulunamadı",
+     "code": "FB_IVR_CHANNEL_120",
+     "message": "Kart bakiye servisi hatası: kart bulunamadı",
+     "type": "WARNING",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+      "rootCause": "NotFoundException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ },
+ "statement.week.get": {
+  "method": "POST",
+  "path": "/voice/v1/statement.week.get",
+  "operationId": "statement_week_get",
+  "summary": "The card's current statement week and day, joint statement info.",
+  "customer": "body.data.cardNumber",
+  "request": {
+   "cardNumber": {
+    "type": "string",
+    "description": "cardNumber exactly as cards.list returned it"
+   }
+  },
+  "required": [
+   "cardNumber"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.cardNumber",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "card number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "card number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": null,
+  "not_found": {
+   "status": 404,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+     "returnCode": "FB_IVR_CHANNEL_121",
+     "messageText": "Kart bulunamadı",
+     "code": "FB_IVR_CHANNEL_121",
+     "message": "Kart bulunamadı",
+     "type": "WARNING",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+      "rootCause": "NotFoundException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ },
+ "statement.week.decide": {
+  "method": "POST",
+  "path": "/voice/v1/statement.week.decide",
+  "operationId": "statement_week_decide",
+  "summary": "Preview: the dates the card would get with the requested week (changes nothing).",
+  "customer": "body.data.cardNumber",
+  "request": {
+   "cardNumber": {
+    "type": "string",
+    "description": "cardNumber exactly as cards.list returned it"
+   },
+   "newStatementWeek": {
+    "type": "integer",
+    "description": "requested statement week, 1-4"
+   },
+   "statementDay": {
+    "type": "integer",
+    "description": "the card's current statementDay from statement.week.get"
+   }
+  },
+  "required": [
+   "cardNumber",
+   "newStatementWeek",
+   "statementDay"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.cardNumber",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "card number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "card number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.newStatementWeek",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "newStatementWeek cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "newStatementWeek cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.statementDay",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "statementDay cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "statementDay cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": "body.data.newStatementWeek",
+  "not_found": {
+   "status": 400,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+     "returnCode": "INVALID_ARGUMENTS_ERROR",
+     "messageText": "card number or statement week not found",
+     "code": "INVALID_ARGUMENTS_ERROR",
+     "message": "card number or statement week not found",
+     "type": "ERROR",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+      "rootCause": "InvalidArgumentsException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ },
+ "statement.week.change": {
+  "method": "POST",
+  "path": "/voice/v1/statement.week.change",
+  "operationId": "statement_week_change",
+  "summary": "Changes the card's statement week (only after the caller agreed to the previewed dates).",
+  "customer": "body.data.cardNumber",
+  "request": {
+   "cardNumber": {
+    "type": "string",
+    "description": "cardNumber exactly as cards.list returned it"
+   },
+   "newStatementWeek": {
+    "type": "integer",
+    "description": "requested statement week, 1-4"
+   },
+   "statementDay": {
+    "type": "integer",
+    "description": "the card's current statementDay from statement.week.get"
+   }
+  },
+  "required": [
+   "cardNumber",
+   "newStatementWeek",
+   "statementDay"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.cardNumber",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "card number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "card number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.newStatementWeek",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "newStatementWeek cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "newStatementWeek cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.statementDay",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "statementDay cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "statementDay cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": "body.data.newStatementWeek",
+  "not_found": {
+   "status": 400,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+     "returnCode": "INVALID_ARGUMENTS_ERROR",
+     "messageText": "card number or statement week not found",
+     "code": "INVALID_ARGUMENTS_ERROR",
+     "message": "card number or statement week not found",
+     "type": "ERROR",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+      "rootCause": "InvalidArgumentsException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ },
+ "contact.email.get": {
+  "method": "POST",
+  "path": "/voice/v1/contact.email.get",
+  "operationId": "contact_email_get",
+  "summary": "The customer's registered e-mail / phone.",
+  "customer": "body.data.customerNo",
+  "request": {
+   "customerNo": {
+    "type": "string",
+    "description": "customer number"
+   },
+   "intAddressInfoType": {
+    "type": "string",
+    "enum": [
+     "E",
+     "P",
+     "B"
+    ],
+    "description": "E e-mail, P phone, B both"
+   }
+  },
+  "required": [
+   "customerNo",
+   "intAddressInfoType"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.customerNo",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "customer number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "customer number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.intAddressInfoType",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "intAddressInfoType cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "intAddressInfoType cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": null,
+  "not_found": {
+   "status": 400,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+     "returnCode": "INVALID_ARGUMENTS_ERROR",
+     "messageText": "customer number not found",
+     "code": "INVALID_ARGUMENTS_ERROR",
+     "message": "customer number not found",
+     "type": "ERROR",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+      "rootCause": "InvalidArgumentsException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ },
+ "statement.pdf.send": {
+  "method": "POST",
+  "path": "/voice/v1/statement.pdf.send",
+  "operationId": "statement_pdf_send",
+  "summary": "Sends the statement PDF by e-mail to the address in the request.",
+  "customer": "body.data.customerNo",
+  "request": {
+   "customerNo": {
+    "type": "string",
+    "description": "customer number"
+   },
+   "cardNumber": {
+    "type": "string",
+    "description": "cardNumber exactly as cards.list returned it"
+   },
+   "currencyType": {
+    "type": "string",
+    "enum": [
+     "TL",
+     "USD",
+     "EUR",
+     "GBP"
+    ]
+   },
+   "statementDate": {
+    "type": "string",
+    "description": "statementDate from cards.balance, dd.MM.yyyy"
+   },
+   "emailAddress": {
+    "type": "string",
+    "description": "address to send to"
+   }
+  },
+  "required": [
+   "customerNo",
+   "cardNumber",
+   "currencyType",
+   "statementDate",
+   "emailAddress"
+  ],
+  "validate": [
+   {
+    "in": "body",
+    "name": "data.customerNo",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "customer number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "customer number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.cardNumber",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "card number cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "card number cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.currencyType",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "currencyType cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "currencyType cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.statementDate",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "statementDate cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "statementDate cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   },
+   {
+    "in": "body",
+    "name": "data.emailAddress",
+    "required": true,
+    "error": {
+     "status": 400,
+     "body": {
+      "result": {
+       "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+       "returnCode": "INVALID_ARGUMENTS_ERROR",
+       "messageText": "emailAddress cannot be empty",
+       "code": "INVALID_ARGUMENTS_ERROR",
+       "message": "emailAddress cannot be empty",
+       "type": "ERROR",
+       "details": {
+        "guid": "f0e1d2c3b4a5968778695a4b3c2d0400",
+        "rootCause": "InvalidArgumentsException",
+        "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+       }
+      }
+     }
+    }
+   }
+  ],
+  "card": null,
+  "week": null,
+  "not_found": {
+   "status": 404,
+   "body": {
+    "result": {
+     "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+     "returnCode": "FB_IVR_CHANNEL_107",
+     "messageText": "Pdf dokümanı bulunamadı",
+     "code": "FB_IVR_CHANNEL_107",
+     "message": "Pdf dokümanı bulunamadı",
+     "type": "WARNING",
+     "details": {
+      "guid": "f0e1d2c3b4a5968778695a4b3c2d0404",
+      "rootCause": "NotFoundException",
+      "errorOrigin": "ivr-gateway-test:ivr-channel-v0"
+     }
+    }
+   }
+  }
+ }
+}

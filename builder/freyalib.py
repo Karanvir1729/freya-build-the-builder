@@ -35,7 +35,7 @@ Usage (a minimal generator; see out/gen_brief-a_lib.py for a complete one):
     fl.write_workflow(wf, "out/my.workflow.json")
 
 Design rules baked into the helpers (from the platform docs and the proven generator):
-- fixed values use `default`, never `const`; customer_id is always baked from the call variable;
+- fixed values use `default`, never `const`; customer_id (and every name in CALL_VARS) is baked from the call variable;
 - a model-filled body field is a leaf under body.properties with `default: "{{<field>}}"` and MUST NOT share its
   name with a variable that is already set when the node is entered (it would be baked and hidden from the model);
 - booleans from tool results are tested as "true" and "True"; routing flags written by code are strings;
@@ -58,6 +58,11 @@ BUSINESS_WEEKDAYS = [0, 1, 2, 3, 4]        # Monday .. Friday
 DEFAULT_TIMEOUT_MS = 12000
 CODE_TIMEOUT_MS = 30000   # the platform default; 10 s left no room when the platform was slow (11 Oct: 17 s turns, 503/504s)
 CUSTOMER_ID = "customer_id"
+# Call variables: a request body field, path, query or header parameter whose name is one of these is baked from the
+# call variable of the same name ("{{clientRef}}") and never shown to the model. A generator for an API whose
+# identity field is named after another call variable extends it: fl.CALL_VARS.add("clientRef").
+CALL_VARS = {CUSTOMER_ID}
+_OP_METHODS = ("get", "post", "put", "patch", "delete")
 
 
 # ----------------------------------------------------------------------------------------------- OpenAPI
@@ -68,54 +73,233 @@ def load_api(path):
 
 
 def base_url(api):
-    """The server URL without a trailing slash. Tool <name> is POST <base_url>/<name>."""
-    return api["servers"][0]["url"].rstrip("/")
+    """The server URL without a trailing slash (server variables take their defaults). An operation's url is
+    base_url + its path (the kit: tool <name> is POST <base_url>/<name>)."""
+    srv = (api.get("servers") or [{}])[0] or {}
+    url = str(srv.get("url") or "")
+    for k, v in (srv.get("variables") or {}).items():
+        if isinstance(v, dict) and v.get("default") is not None:
+            url = url.replace("{%s}" % k, str(v["default"]))
+    return url.rstrip("/")
 
 
-def _json_schema(holder):
-    """requestBody / response object -> its application/json schema, or {}."""
+def _deref(api, obj):
+    """Follow local JSON references ('#/components/schemas/X'); anything else is returned unchanged."""
+    for _ in range(10):
+        if not (isinstance(obj, dict) and isinstance(obj.get("$ref"), str) and obj["$ref"].startswith("#/")):
+            break
+        cur = api
+        for part in obj["$ref"][2:].split("/"):
+            part = part.replace("~1", "/").replace("~0", "~")
+            cur = cur.get(part) if isinstance(cur, dict) else None
+        obj = cur if isinstance(cur, dict) else {}
+    return obj
+
+
+def _json_schema(holder, api=None):
+    """requestBody / response object -> its application/json schema (else the first content type's), or {}."""
     try:
-        return ((holder or {}).get("content") or {}).get("application/json", {}).get("schema") or {}
+        if api is not None:
+            holder = _deref(api, holder)
+        content = (holder or {}).get("content") or {}
+        sch = content.get("application/json", {}).get("schema")
+        if not sch:
+            for v in content.values():
+                if isinstance(v, dict) and v.get("schema"):
+                    sch = v["schema"]
+                    break
+        sch = sch or {}
+        return _deref(api, sch) if api is not None else sch
     except AttributeError:
         return {}
 
 
-def _norm_props(schema):
+def _type_of(fs):
+    t = fs.get("type", "string")
+    if isinstance(t, list):                       # OpenAPI 3.1: ["string", "null"]
+        t = next((x for x in t if x != "null"), "string")
+    return t
+
+
+def _norm_props(schema, api=None):
     req = list(schema.get("required") or [])
     out = {}
     for fname, fs in (schema.get("properties") or {}).items():
         fs = fs if isinstance(fs, dict) else {}
-        out[fname] = {"type": fs.get("type", "string"), "description": fs.get("description", ""),
+        if api is not None:
+            fs = _deref(api, fs)
+        out[fname] = {"type": _type_of(fs), "description": fs.get("description", ""),
                       "enum": list(fs.get("enum") or []), "required": fname in req}
     return out, req
 
 
-def tool_spec(api, name):
-    """The request and response schema of tool <name>, read from paths["/<name>"]["post"].
+_TR = str.maketrans({"ı": "i", "İ": "I", "ş": "s", "Ş": "S", "ğ": "g", "Ğ": "G", "ç": "c", "Ç": "C", "ö": "o",
+                     "Ö": "O", "ü": "u", "Ü": "U"})
 
-    Returns {"fields": {field: {type, description, enum, required}}, "required": [ordered spec list],
-             "summary": str, "response_props": {prop: {type, description, enum, required}}}.
+
+def tool_name_of(text):
+    """A valid platform function / variable name from an operationId or a path segment: ASCII letters, digits and
+    '_' (result variables are named after the tool: ^[a-zA-Z_][a-zA-Z0-9_]*$), at most 64 characters."""
+    import unicodedata
+    s = unicodedata.normalize("NFKD", str(text).translate(_TR)).encode("ascii", "ignore").decode()
+    s = re.sub(r"_+", "_", re.sub(r"[^A-Za-z0-9_]", "_", s)).strip("_")
+    if not s or s[0].isdigit():
+        s = "op_" + s
+    return s[:64]
+
+
+def _last_segment(path):
+    segs = [s for s in str(path).strip("/").split("/") if s and not (s.startswith("{") and s.endswith("}"))]
+    return segs[-1] if segs else "root"
+
+
+def operations(api):
+    """[(name, method, path, op, path_item)] for every operation of the API file, in file order. The name is the
+    operationId (made a valid function name), else <name> for POST /<name> (the kit), else the last path segment
+    that is not a parameter; a repeated name gets the method in front (get_cards), then a number."""
+    out, used = [], set()
+    for path, item in (api.get("paths") or {}).items():
+        if not isinstance(item, dict):
+            continue
+        for method, op in item.items():
+            if method.lower() not in _OP_METHODS or not isinstance(op, dict):
+                continue
+            if op.get("operationId"):
+                name = tool_name_of(op["operationId"])
+            elif method.lower() == "post" and re.fullmatch(r"/[A-Za-z_]\w*", path):
+                name = path[1:]
+            else:
+                name = tool_name_of(_last_segment(path))
+            if name in used:
+                cand, i = tool_name_of(method.lower() + "_" + name), 2
+                while cand in used:
+                    cand, i = tool_name_of("%s_%s_%d" % (method.lower(), name, i)), i + 1
+                name = cand
+            used.add(name)
+            out.append((name, method.lower(), path, op, item))
+    return out
+
+
+def _find_op(api, name):
+    """(method, path, op, path_item) of tool <name>: POST /<name> (the kit), else operationId == name, else the
+    name operations() gives, else the last non-parameter path segment == name (any HTTP method, file order)."""
+    item = (api.get("paths") or {}).get("/" + name)
+    if isinstance(item, dict) and isinstance(item.get("post"), dict):
+        return "post", "/" + name, item["post"], item
+    ops = operations(api)
+    tests = (lambda o: o[3].get("operationId") == name,
+             lambda o: o[0] == name,
+             lambda o: name in (_last_segment(o[2]), tool_name_of(_last_segment(o[2]))),
+             lambda o: name.lower() in (o[0].lower(), str(o[3].get("operationId") or "").lower(),
+                                        _last_segment(o[2]).lower()))
+    for test in tests:
+        for o in ops:
+            if test(o):
+                return o[1], o[2], o[3], o[4]
+    raise KeyError("tool %r: the API file has no POST /%s, no operationId %r and no path ending in /%s (operations: %s)"
+                   % (name, name, name, name, ", ".join("%s=%s %s" % (o[0], o[1].upper(), o[2]) for o in ops)))
+
+
+def _params(api, op, item):
+    """{"path"|"query"|"header": {name: {type, description, enum, required}}} from the path item's and the
+    operation's parameters (the operation's own win)."""
+    merged = {}
+    for p in list((item or {}).get("parameters") or []) + list(op.get("parameters") or []):
+        p = _deref(api, p)
+        if isinstance(p, dict) and p.get("name"):
+            merged[(p.get("in"), p["name"])] = p
+    out = {"path": {}, "query": {}, "header": {}}
+    for (loc, pname), p in merged.items():
+        if loc not in out:
+            continue
+        sch = _deref(api, p.get("schema") or {})
+        out[loc][pname] = {"type": _type_of(sch), "description": p.get("description") or sch.get("description", ""),
+                           "enum": list(sch.get("enum") or []), "required": bool(p.get("required")) or loc == "path"}
+    return out
+
+
+def tool_spec(api, name):
+    """The request and response schema of tool <name> (see _find_op for how the operation is found: the kit's
+    POST /<name>, an operationId, or a path's last segment, any HTTP method).
+
+    Returns {"fields": {field: {type, description, enum, required}} (the JSON request body), "required": [ordered
+             spec list], "summary": str, "response_props": {prop: {type, description, enum, required}},
+             "method": "GET"|"POST"|..., "path": "/cards/{clientRef}", "path_params", "query_params",
+             "header_params": {param: {type, description, enum, required}}, "has_body": bool,
+             "operation_id": str}.
     Missing description -> "", missing enum -> [] (never None)."""
-    op = ((api.get("paths") or {}).get("/" + name) or {}).get("post")
-    if op is None:
-        raise KeyError("tool %r: the API file has no POST /%s" % (name, name))
-    fields, req = _norm_props(_json_schema(op.get("requestBody")))
-    resp, _ = _norm_props(_json_schema(((op.get("responses") or {}).get("200"))))
-    return {"fields": fields, "required": req, "summary": op.get("summary", ""), "response_props": resp}
+    method, path, op, item = _find_op(api, name)
+    fields, req = _norm_props(_json_schema(op.get("requestBody"), api), api)
+    responses = op.get("responses") or {}
+    rkey = "200" if "200" in responses else next((k for k in responses if str(k).startswith("2")),
+                                                 "default" if "default" in responses else "200")
+    resp, _ = _norm_props(_json_schema(responses.get(rkey), api), api)
+    prm = _params(api, op, item)
+    return {"fields": fields, "required": req, "summary": op.get("summary", ""), "response_props": resp,
+            "method": method.upper(), "path": path, "path_params": prm["path"], "query_params": prm["query"],
+            "header_params": prm["header"], "has_body": bool(op.get("requestBody")),
+            "operation_id": str(op.get("operationId") or "")}
 
 
 def tool_names(api):
-    """Every tool name in the API file, in file order."""
-    return [p.lstrip("/") for p, item in (api.get("paths") or {}).items() if "post" in (item or {})]
+    """Every tool name in the API file, in file order (see operations(): operationId, else the kit's POST /<name>,
+    else the last path segment). Every name is a valid function name and tool_spec(api, name) finds it."""
+    return [o[0] for o in operations(api)]
 
 
 # ----------------------------------------------------------------------------------------------- tools
+# A pre-hook that moves model-filled path/query parameters (declared as body leaves so that the model sees their
+# description and enum) from the body into the url, and drops the body of a call whose operation has none (GET).
+# Values are percent-encoded without imports. Placeholders: __PATH__, __QUERY__, __DROP__, __NOBODY__.
+_ROUTE_PRE = """try:
+    def _pq(s):
+        return ''.join(c if (c.isascii() and (c.isalnum() or c in '-_.~')) else ''.join('%' + ('%02X' % x) for x in c.encode('utf-8')) for c in s)
+    _b = config.get('body')
+    _b = _b if isinstance(_b, dict) else {}
+    _u = str(config.get('url') or '')
+    for _k in __PATH__:
+        _v = _b.get(_k)
+        _u = _u.replace('{' + _k + '}', _pq('' if _v is None else str(_v).strip()))
+    _q = []
+    for _k in __QUERY__:
+        _v = _b.get(_k)
+        if _v is not None and str(_v).strip() != '':
+            _v = str(_v).strip()
+            _q.append(_pq(_k) + '=' + _pq(_v.lower() if _v in ('True', 'False') else _v))
+    if _q:
+        _u = _u + ('&' if '?' in _u else '?') + '&'.join(_q)
+    config['url'] = _u
+    for _k in __DROP__:
+        _b.pop(_k, None)
+    if __NOBODY__:
+        config.pop('body', None)
+except Exception:
+    pass
+"""
+
+
+def _url_value(v):
+    """A baked path/query value: a '{{var}}' template is kept (the engine resolves it), a literal is percent-encoded."""
+    if isinstance(v, str) and "{{" in v:
+        return v
+    if isinstance(v, bool):
+        v = "true" if v else "false"
+    out = []
+    for c in str(v):
+        out.append(c if (c.isascii() and (c.isalnum() or c in "-_.~")) else "".join("%%%02X" % x for x in c.encode("utf-8")))
+    return "".join(out)
+
+
 def api_tool(api, name, baked=None, description="", required=None, retries=0, pre=None, post=None, mapping=None,
              field_descriptions=None, omit=None, var_map=None, timeout_ms=DEFAULT_TIMEOUT_MS):
-    """The api_call tool for tool <name>, built from the OpenAPI request schema.
+    """The api_call tool for tool <name>, built from the OpenAPI operation (tool_spec: the kit's POST /<name>, an
+    operationId or a path's last segment; any HTTP method).
 
-    url, method and headers are baked. body.properties holds every field of the spec, each as a leaf:
-    - customer_id is always baked from the call variable: {"type": "string", "default": "{{customer_id}}"};
+    url, method and headers are baked: url = base_url + the operation's path, method from the file.
+    body.properties holds every field of the JSON request body, each as a leaf:
+    - a field named after a call variable (CALL_VARS: customer_id, plus what the generator adds, e.g.
+      fl.CALL_VARS.add("clientRef")) is baked from that variable: {"type": ..., "default": "{{<name>}}"}.
+      For the kit's POST /<name> operations customer_id is always sent, as before;
     - a field in `baked` gets that literal default (field="date_of_birth", queue="support"). It is hidden from
       the model, so it carries no description or enum. A literal is checked against the spec's enum. The value may
       also be "{{var}}" to bake the field from a variable that an earlier node ALWAYS sets (product_id from the
@@ -125,38 +309,98 @@ def api_tool(api, name, baked=None, description="", required=None, retries=0, pr
       field must not share its name with a variable that exists when the node is entered, or the engine bakes the
       variable's value and the model never sees the parameter. `var_map` {field: var} reads a model-visible field
       from another variable name instead (used by the lifecycle close_call tool).
-    `required` defaults to the spec's required list minus customer_id minus baked/omitted fields. `omit` drops
-    optional spec fields the model should not see. `post` defaults to STRIP_HEADER; pass "" for no post hook.
+    Path and query parameters (GET /cards/{clientRef}?period=...) follow the same three cases: a call variable
+    or a `baked` value is written into the url ('{{clientRef}}' is resolved by the engine, a literal is
+    percent-encoded); a model-filled one is declared as a body leaf (so the model sees its description and enum)
+    and a pre-hook moves it into the url before the request is sent. A GET/DELETE without a request body in the file
+    sends no body. Header parameters are sent only when baked or named after a call variable.
+    `required` defaults to the spec's required list minus call variables minus baked/omitted fields (plus required
+    model-filled parameters). `omit` drops optional spec fields/query parameters the model should not see. `post`
+    defaults to STRIP_HEADER; pass "" for no post hook. `pre` runs before the parameter hook.
     `mapping` is a tool-level response_mapping (for tools in a conversation node's `tools`)."""
     spec = tool_spec(api, name)
     baked = dict(baked or {})
     field_descriptions = dict(field_descriptions or {})
     var_map = dict(var_map or {})
     omit = set(omit or [])
-    unknown = (set(baked) | set(field_descriptions) | set(var_map) | omit) - set(spec["fields"])
+    pparams, qparams, hparams = spec["path_params"], spec["query_params"], spec["header_params"]
+    known = set(spec["fields"]) | set(pparams) | set(qparams) | set(hparams)
+    unknown = (set(baked) | set(field_descriptions) | set(var_map) | omit) - known
     if unknown:
         raise KeyError("tool %r: fields %s are not in the API file (it has %s)"
-                       % (name, sorted(unknown), sorted(spec["fields"])))
-    props = {CUSTOMER_ID: {"type": "string", "default": "{{%s}}" % CUSTOMER_ID}}
+                       % (name, sorted(unknown), sorted(known)))
+    kit_op = spec["method"] == "POST" and spec["path"] == "/" + name
+    props = {}
+    if kit_op:
+        props[CUSTOMER_ID] = {"type": "string", "default": "{{%s}}" % CUSTOMER_ID}
     for fname, fs in spec["fields"].items():
-        if fname == CUSTOMER_ID or fname in omit:
+        if fname in CALL_VARS and fname not in baked and fname not in props:
+            props[fname] = {"type": fs["type"], "default": "{{%s}}" % fname}
+
+    def model_leaf(fname, fs):
+        leaf = {"type": fs["type"], "default": "{{%s}}" % var_map.get(fname, fname)}
+        desc = field_descriptions.get(fname, fs["description"])
+        if desc:
+            leaf["description"] = desc
+        if fs["enum"]:
+            leaf["enum"] = list(fs["enum"])
+        return leaf
+
+    for fname, fs in spec["fields"].items():
+        if fname in props or fname in omit:
             continue
-        leaf = {"type": fs["type"]}
         if fname in baked:
             val = baked[fname]
             if fs["enum"] and isinstance(val, str) and "{{" not in val and val not in fs["enum"]:
                 raise ValueError("tool %r: baked %s=%r is not one of %s" % (name, fname, val, fs["enum"]))
-            leaf["default"] = val
+            props[fname] = {"type": fs["type"], "default": val}
         else:
-            leaf["default"] = "{{%s}}" % var_map.get(fname, fname)
-            desc = field_descriptions.get(fname, fs["description"])
-            if desc:
-                leaf["description"] = desc
-            if fs["enum"]:
-                leaf["enum"] = list(fs["enum"])
-        props[fname] = leaf
+            props[fname] = model_leaf(fname, fs)
+    # path / query parameters
+    path = spec["path"]
+    query, moved_path, moved_query, extra_req = [], [], [], []
+    for loc, params in (("path", pparams), ("query", qparams)):
+        for pname, ps in params.items():
+            if loc == "query" and pname in omit and pname not in baked:
+                continue
+            if pname in baked:
+                val = baked[pname]
+                if ps["enum"] and isinstance(val, str) and "{{" not in val and val not in ps["enum"]:
+                    raise ValueError("tool %r: baked %s=%r is not one of %s" % (name, pname, val, ps["enum"]))
+                val = _url_value(val)
+            elif pname in CALL_VARS:
+                val = "{{%s}}" % pname
+            else:
+                val = None
+            if val is not None:
+                if loc == "path":
+                    path = path.replace("{%s}" % pname, val)
+                else:
+                    query.append("%s=%s" % (_url_value(pname), val))
+                continue
+            (moved_path if loc == "path" else moved_query).append(pname)
+            if pname not in props:
+                props[pname] = model_leaf(pname, ps)
+            if ps["required"]:
+                extra_req.append(pname)
+    url = base_url(api) + path + ("?" + "&".join(query) if query else "")
+    headers = json.loads(json.dumps(HEADERS))
+    for hname, hs in hparams.items():
+        if hname in baked:
+            headers["properties"][hname] = {"type": "string", "default": str(baked[hname])}
+        elif hname in CALL_VARS:
+            headers["properties"][hname] = {"type": "string", "default": "{{%s}}" % hname}
     if required is None:
-        required = [f for f in spec["required"] if f != CUSTOMER_ID and f not in baked and f not in omit]
+        required = [f for f in spec["required"] if f not in CALL_VARS and f not in baked and f not in omit]
+        required += [f for f in extra_req if f not in required]
+    no_body = spec["method"] in ("GET", "HEAD", "DELETE") and not spec["has_body"]
+    parameters = {"type": "object", "properties": {
+        "url": {"type": "string", "default": url},
+        "method": {"type": "string", "default": spec["method"]},
+        "headers": headers,
+    }}
+    if props or not no_body:
+        parameters["properties"]["body"] = {"type": "object", "required": list(required), "properties": props}
     t = {
         "type": "function",
         "config": {"timeoutMs": timeout_ms, "maxRetries": retries},
@@ -164,14 +408,18 @@ def api_tool(api, name, baked=None, description="", required=None, retries=0, pr
             "name": name,
             "handler": "__function__:api_call",
             "description": description,
-            "parameters": {"type": "object", "properties": {
-                "url": {"type": "string", "default": "%s/%s" % (base_url(api), name)},
-                "method": {"type": "string", "default": "POST"},
-                "headers": json.loads(json.dumps(HEADERS)),
-                "body": {"type": "object", "required": list(required), "properties": props},
-            }},
+            "parameters": parameters,
         },
     }
+    route_pre = ""
+    if moved_path or moved_query or (no_body and props):
+        drop = [f for f in moved_path + moved_query if f not in spec["fields"]]
+        route_pre = (_ROUTE_PRE.replace("__PATH__", repr(moved_path)).replace("__QUERY__", repr(moved_query))
+                     .replace("__DROP__", repr(drop)).replace("__NOBODY__", repr(no_body)))
+    if pre and route_pre:
+        pre = pre + ("" if pre.endswith("\n") else "\n") + route_pre
+    else:
+        pre = pre or route_pre
     post = STRIP_HEADER if post is None else post
     if post:
         t["post_process_code"] = post
@@ -1249,7 +1497,7 @@ def _model_fields(tool):
     for f, leaf in props.items():
         d = leaf.get("default") if isinstance(leaf, dict) else None
         m = re.fullmatch(r"\{\{(\w+)\}\}", str(d)) if isinstance(d, str) else None
-        if m and f != CUSTOMER_ID:
+        if m and f not in CALL_VARS:
             out.append((f, m.group(1)))
     return out
 
