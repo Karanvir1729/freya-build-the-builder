@@ -1455,10 +1455,15 @@ def finalize(V):
         key = fk['paid']
     else:
         key = fk['default']
-        for s in sts:
-            if s != 'paid':
-                key = fk.get(s) or fk['default']
-                break
+        pri = [x for x in (P.get('fin_priority') or []) if x in sts]
+        if pri:
+            # the brief ranks the notes ('the code of the most serious note on the call, in this order: ...')
+            key = fk.get(pri[0]) or fk['default']
+        else:
+            for s in sts:   # the first product, in get_account order, whose state is not paid
+                if s != 'paid':
+                    key = fk.get(s) or fk['default']
+                    break
     V['final_route'] = key
     V['route'] = 'fin'
 def ev_wrap_human(V):
@@ -1736,14 +1741,18 @@ class Policy:
         says record the full amount and say so: straight to the read-back with the brief's sentence first).
     promise_reasons: {'full': <reason>, 'partial': <reason>} when the brief's promise ending has a reason that depends
         on whether every recorded amount equals the full amount; written to reason_var and 'promise_reason' when the
-        promise is recorded (so a hang-up in the wrap-up closes right). Use ending_code() for the fin nodes."""
+        promise is recorded (so a hang-up in the wrap-up closes right). Use ending_code() for the fin nodes.
+    fin_priority: with no promise and not every product paid, the ending is the first product's (get_account order) state
+        that is not paid (default); a list of states, most serious first (e.g. ['service_error', 'hardship', 'dispute',
+        'refused']), when the brief ranks them instead ('the most serious note on the call')."""
 
 
     def __init__(self, holidays, texts=None, multi=False, notes=False, note_reasons=None, fin_keys=None,
                  fail_max=2, max_checks=8, human_limit=2, notalk_limit=2, wrap_turns=2, closed_day_move="after",
                  business_weekdays=fl.BUSINESS_WEEKDAYS, ordinals=("first", "second", "third"), targets=None,
                  outcome_var="outcome", reason_var="reason", promise_outcome="promise", now_var="now", asides=None,
-                 weekday_rule="this_week", notes_on_transfer=True, vague_again="deadline", above_full="ask", promise_reasons=None):
+                 weekday_rule="this_week", notes_on_transfer=True, vague_again="deadline", above_full="ask", promise_reasons=None,
+                 fin_priority=None):
         missing = [k for k in REQUIRED_TEXTS + (REQUIRED_TEXTS_MULTI if multi else ()) if k not in (texts or {})]
         if missing and not (texts or {}).get("_allow_defaults"):
             raise ValueError("Policy texts must come from the brief; missing: %s (pass texts={'_allow_defaults': True} only in tests)" % ", ".join(missing))
@@ -1788,7 +1797,8 @@ class Policy:
                   "clear_enums": dict(CLEAR_ENUMS), "clear_values": dict(CLEAR_VALUES),
                   "outcome_var": outcome_var, "reason_var": reason_var, "promise_outcome": promise_outcome,
                   "now_var": now_var, "after_recorded": bool(t.get("after_recorded")),
-                  "vague_again": vague_again, "above_full": above_full, "promise_reasons": pr}
+                  "vague_again": vague_again, "above_full": above_full, "promise_reasons": pr,
+                  "fin_priority": [str(x) for x in (fin_priority or [])]}
 
     # ------------------------------------------------------------------ sources
     def core(self):

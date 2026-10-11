@@ -1453,5 +1453,22 @@ def test_products_resolved_by_the_customers_names():
     exec(P.core() + "\nr = (product_by_name(vars, 'the loan'), product_by_name(vars, 'car loan'), only_product_named(vars, 'my loan'))\n", G)
     assert G["r"] == ("", "p3", ""), G["r"]
 
+@test
+def test_fin_priority_ranks_the_notes():
+    """Kestrel audit R109: 'close no_promise with the code of the most serious note on the call, in this order:
+    service_error, hardship, dispute, refused'. Default (Brief B): the first product in get_account order not paid."""
+    def ending(**kw):
+        P, V = start([CARD, LOAN, CAR], multi=True, notes=True) if not kw else (None, None)
+        if kw:
+            P = mk(True, True, **kw)
+            V = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD, LOAN, CAR])}
+            run(P.prepare_code(BODY, "statement"), V)
+        V["state_p1"], V["state_p2"], V["state_p3"] = "refused", "paid", "dispute"
+        G = {"vars": V}
+        exec(P.core() + "\nfinalize(vars)\n", G)
+        return V["final_route"]
+    assert ending() == "refused"
+    assert ending(fin_priority=["service_error", "hardship", "dispute", "refused"]) == "dispute"
+
 if __name__ == "__main__":
     sys.exit(main())
