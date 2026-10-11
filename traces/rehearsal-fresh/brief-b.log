@@ -1,0 +1,120 @@
+[23:41:40 +    0s] build start 2026-10-10T23:41:40-0400 | briefs=['briefs/brief-a.md', 'briefs/brief-b.md'] tool_api=tools/openapi.json slot=brief-b | cases=/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/public-test-set.json runner=sim budget=29 min | builder model=claude-fable-5-1 (effort high, fallback claude-opus-5-5) | phone agent model=experimental-5
+[23:41:40 +    0s] step rules: /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/.venv/bin/python3 builder/rules.py briefs/brief-a.md briefs/brief-b.md --api tools/openapi.json --out out/brief-b.rules.json
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: extract the rule inventory from brief-a.md, brief-b.md, sample A (documents in forward order), parts 1,2,3,4,5,6,7,8,9,10
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: extract the rule inventory from brief-a.md, brief-b.md, sample A (documents in forward order), parts 11,12,13,14,15,16
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: extract the rule inventory from brief-a.md, brief-b.md, sample B (documents in reverse order), parts 1,2,3,4,5,6,7,8,9,10
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: extract the rule inventory from brief-a.md, brief-b.md, sample B (documents in reverse order), parts 11,12,13,14,15,16
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: extract the rule inventory from brief-a.md, brief-b.md, sample C (documents in latest-dated first order), parts 1,2,3,4,5,6,7,8,9,10
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: extract the rule inventory from brief-a.md, brief-b.md, sample C (documents in latest-dated first order), parts 11,12,13,14,15,16
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: merge 3 sampled inventories (self-consistency union, flag minority rules and differing values)
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: resolve 11 dated-decision block(s) (which candidate is in force, deciding quote, effective date)
+[23:44:44 +  184s] model call: claude-fable-5-1 | purpose: chain-of-verification: quote the sentences that set 19 value(s) (fresh context, brief only)
+[23:44:44 +  184s] step rules: exit 0 | rules: 81 (73 in force, 13 low confidence) -> out/brief-b.rules.json + brief-b.rules.md + brief-b.spec.json + brief-b.rules.conflicts.md | 18 conflict item(s), 
+[23:44:45 +  185s] model call: claude-fable-5-1 | purpose: build, test and fix the phone agent from the brief | prompt: Use the build-phone-agent skill to build a phone agent. Brief file(s): briefs/brief-a.md briefs/brief-b.md. Tool API file: tools/openapi.json. Slot name: brief-b. The rule inventory is at out/brief-b.rules.json (and .md); resolve out/brief-b.rules.conflicts.md first; the structured values are in out/brief-b.spec.json. Practice cases: /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/public-test-set.json --brief B. Test runner: sim (python3 builder/sim.py <slot> --cases <file> --brief B --concurrency 3 (the chat route answers 504 above that)). Time budget: 18 minutes from now (stop by 00:03:41 local time; check `date` before starting a test round) for everything, including your own tests; save a working agent early and improve it. A step you decide on is something to run now, not to announce: do not end your turn before step 10's finish line or the deadline.
+[23:44:47 +  187s] model call: claude-fable-5-1 | tool Skill | 
+[23:44:51 +  191s] model call: claude-fable-5-1 | tool Bash | date; ls out/ | head -50; ls out/brief-b* 2>/dev/null
+[23:44:55 +  195s] model call: claude-fable-5-1 | tool Bash | ls -la out/gen_brief-b*.py out/gen_brief-a*.py; wc -l out/gen_brief-b_v3.py; cat out/brief-b.rules.conflicts.md | head -120
+[23:44:55 +  195s] test/tool result: - **R76** (_openapi.json /get_account_, samples B): `get_account` (requires `customer_id`) is refused until both security questions are passed; it returns produ
+[23:45:01 +  201s] model call: claude-fable-5-1 | tool Bash | diff out/gen_brief-b_v3.py out/gen_brief-b.py | head -40; echo ---; head -30 out/gen_brief-b.py; echo ---; grep -n "spec.json\|json.load" out/gen_brief-b.py | head; echo ---; cat .freya-agents.json 2>/dev/null | python3 
+[23:45:01 +  201s] test/tool result: {"at": "2026-10-10 23:33:13", "runner": "sim", "workflow_id": "fcf0db4a-c89a-4116-94a5-d8fa1dc6d4ce", "agent_id": "9b1d171f-80ba-4b72-9329-5e229dc374ca", "brief | {"at": "2026-10-10 23:40:14", "runner": "sim", "workflow_id": "fcf0db4a-c89a-4116-94a5-d8fa1dc6d4ce", "agent_id": "9b1d171f-80ba-4b72-9329-5e229dc374ca", "brief
+[23:45:08 +  208s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 out/gen_brief-b.py tools/openapi.json 2>&1 | tail -3; python3 builder/lint.py out/brief-b.workflow.json --api tools/openapi.json --call-vars customer_id,fir
+[23:45:09 +  209s] test/tool result: WARN nodes.setup.pre_actions[code_exec].code: code has statements outside try/except (Assign, If); wrap the whole body | WARN $.system_prompt: system prompt (in force before verification) mentions forbidden word 'payment' outside a 'never say' clause: 'at a security question repea | WARN nodes.negotiate.extraction_schema: 11 extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate | WARN nodes.confirm.extraction_schema: 8 extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate | WARN nodes.hardship.extraction_schema: 8 extraction variables (> 4): one extraction call per turn fills them all, slow and less accurate
+[23:45:13 +  213s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 -c " import json; s=json.load(open('out/brief-b.spec.json')); print(list(s.keys())); import re; txt=json.dumps(s); print(sorted(set(re.findall(r'20\d\d-\d\d
+[23:45:15 +  215s] model call: claude-fable-5-1 | says: Holidays match the brief. Now saving to Freya, then the opening smoke (sequentially, each depends on the previous).
+[23:45:17 +  217s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 -c "import freya,json,sys; wf=json.load(open(sys.argv[2])); freya.validate_workflow(sys.argv[1], wf); print(json.dumps(freya.save_workflow(sys.argv[1], wf))
+[23:45:21 +  221s] test/tool result: {"workflow_id": "6c38e31a-eee0-45ae-80cd-e86a41a980a7", "agent_id": "bd48e284-d33f-4e6e-9b2d-faa8789b5ec6"}
+[23:45:27 +  227s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/smoke.py brief-b --script builder/smoke_scripts/opening.json 2>&1 | tail -8; date; python3 builder/sim.py brief-b --cases public-test-set.json --bri
+[23:50:09 +  509s] test/tool result: PASS turn 2 tool verify_identity not called | PASS turn 2 tool get_account not called | PASS turn 2 tool create_promise not called | PASS turn 2 tool schedule_callback not called | PASS turn 2 tool add_note not called | PASS turn 2 tool transfer_to_agent not called | PASS turn 2 tool close_call not called | RESULT: PASS | 32/32 checks passed | call 141e4b7b-4240-4fed-a6d8-9b5d218257b5 | PASS PUB-11 medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call | PASS PUB-13 hard   Multi-product  | verify > verify > get_account > promise > promise > close_call | PASS PUB-12 hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call | 3 / 3 passed (bank records and conversation checks). Local chat-route simulation, 239 s.
+[23:50:16 +  516s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/audit.py --rules out/brief-b.rules.json --workflow out/brief-b.workflow.json --generator out/gen_brief-b.py --out out/brief-b.audit.json 2>&1 | tail
+[23:50:18 +  518s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/sim.py brief-b --cases public-test-set.json --brief B --concurrency 3 --out results/brief-b-r2.json --transcripts results/brief-b-r2/ 2>&1 | tail -1
+[23:51:59 +  619s] test/tool result: audit: implemented 72, partial 1, missing 0, contradicted 0, superseded 8, total 81 -> out/brief-b.audit.json + brief-b.audit.md | 8 model call(s), 103 s, $8.66
+[23:53:59 +  739s] test/tool result: PASS PUB-13 hard   Multi-product  | verify > verify > get_account > promise > promise > close_call | PASS PUB-11 medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call | PASS PUB-12 hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call | 3 / 3 passed (bank records and conversation checks). Local chat-route simulation, 118 s.
+[23:54:03 +  743s] model call: claude-fable-5-1 | tool Bash | python3 -c " import json; a=json.load(open('out/brief-b.audit.json')) for r in a.get('rules', a.get('results', [])): if r.get('status')=='partial': print(json.dumps(r, indent=1)[:1500]) print(a.get('top_fixes'))" 2>&1 | 
+[23:54:11 +  751s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/smoke.py brief-b --script builder/smoke_scripts/third_party.json 2>&1 | grep -E "FAIL|RESULT" | head -8
+[23:54:12 +  752s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/smoke.py brief-b --script builder/smoke_scripts/wrong_number.json 2>&1 | grep -E "FAIL|RESULT" | head -8; date
+[23:55:24 +  824s] test/tool result: RESULT: PASS | 40/40 checks passed | call 396cd70e-4014-4524-856b-9e07e6a12b91
+[23:56:03 +  863s] test/tool result: RESULT: PASS | 29/29 checks passed | call 1bf0091b-ab8a-47c0-91db-ac1941a5c129
+[23:56:11 +  871s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/smoke.py brief-b --script builder/smoke_scripts/talkative.json --case PUB-11 --practice 2>&1 | grep -E "FAIL|RESULT" | head -8
+[23:56:12 +  872s] model call: claude-fable-5-1 | tool Bash | source env.sh && source .venv/bin/activate 2>/dev/null; python3 builder/smoke.py brief-b --script builder/smoke_scripts/asks_back.json --case PUB-11 --practice 2>&1 | grep -E "FAIL|RESULT" | head -8; date
+[23:57:19 +  940s] test/tool result: RESULT: PASS | 62/62 checks passed | call d45e75e9-61d2-42b3-b1f4-972ba803bbff
+[23:58:35 + 1015s] test/tool result: RESULT: PASS | 32/32 checks passed | call bf057e2a-6ed9-4fe6-a086-10892a2491ff
+[23:58:43 + 1023s] model call: claude-fable-5-1 | says: All checks are done and nothing remains that depends on another result, so I'm finishing within the budget (23:58, deadline 00:03:41).
+[23:58:43 + 1023s] agent run done: 17 turns, 838 s, $0.89, served by claude-fable-5-1
+[23:58:45 + 1025s] published check: newest version 1 is published, agent model experimental-5/experimental-5
+[23:58:45 + 1025s] tested version 1: 6 of 6 case runs passed (3 cases)
+[23:58:45 + 1025s] best tested version: ship version 1 (only the final version 1 was tested)
+[23:58:45 + 1025s] simulator/smoke model calls during the agent run: 59 (one line each below; time | provider model | purpose)
+[23:58:45 + 1025s] model call (test): 23:46:16 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:17 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:18 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:23 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:24 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:26 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:33 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:35 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:36 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:44 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:46 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:48 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:50 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:56 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:56 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:46:59 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:47:06 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:47:17 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:47:17 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:47:19 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:47:27 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:48:27 | openai gpt-5 | sim.py judge: conversation checks of one case
+[23:58:45 + 1025s] model call (test): 23:48:28 | openai gpt-5 | sim.py judge: conversation checks of one case
+[23:58:45 + 1025s] model call (test): 23:48:44 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:49:24 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:50:01 | openai gpt-5 | sim.py judge: conversation checks of one case
+[23:58:45 + 1025s] model call (test): 23:50:17 | claude claude-fable-5-1 | audit rules R01-R13 (batch 1/7)
+[23:58:45 + 1025s] model call (test): 23:50:17 | claude claude-fable-5-1 | audit rules R14-R26 (batch 2/7)
+[23:58:45 + 1025s] model call (test): 23:50:17 | claude claude-fable-5-1 | audit rules R27-R39 (batch 3/7)
+[23:58:45 + 1025s] model call (test): 23:50:46 | claude claude-fable-5-1 | audit rules R40-R55 (batch 4/7)
+[23:58:45 + 1025s] model call (test): 23:50:48 | claude claude-fable-5-1 | audit rules R56-R68 (batch 5/7)
+[23:58:45 + 1025s] model call (test): 23:51:06 | claude claude-fable-5-1 | audit rules R69-R80 (batch 6/7)
+[23:58:45 + 1025s] model call (test): 23:51:18 | claude claude-fable-5-1 | audit rules R81-R81 (batch 7/7)
+[23:58:45 + 1025s] model call (test): 23:51:52 | claude claude-fable-5-1 | rank the 1 gaps into the top 5 fixes
+[23:58:45 + 1025s] model call (test): 23:52:04 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:04 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:06 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:09 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:12 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:13 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:15 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:29 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:29 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:34 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:37 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:39 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:43 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:45 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:47 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:50 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:53 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:55 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:52:57 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:53:04 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:53:10 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:53:18 | openai gpt-5-mini | sim.py simulated customer turn
+[23:58:45 + 1025s] model call (test): 23:53:20 | openai gpt-5 | sim.py judge: conversation checks of one case
+[23:58:45 + 1025s] model call (test): 23:53:24 | openai gpt-5 | sim.py judge: conversation checks of one case
+[23:58:45 + 1025s] model call (test): 23:53:53 | openai gpt-5 | sim.py judge: conversation checks of one case
+[23:58:45 + 1025s] step lint: /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/.venv/bin/python3 builder/lint.py /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/out/brief-b.workflow.json --api tools/openapi.json --rules /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/out/brief-b.rules.json --budget --call-vars customer_id,first_name,last_name,now,title
+[23:58:47 + 1027s] step lint: exit 0 | INFO nodes.hardship.extraction_schema[offer_date]: 'offer_date' is typed date: the platform resolves relative words with the real clock, not the call's `now`; u | INFO rules: forbidden word 'the product' is a description, not a word; not checked | -- 0 error(s), 5 warning(s), 17 info
+[23:58:47 + 1027s] step audit: /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/.venv/bin/python3 builder/audit.py --rules /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/out/brief-b.rules.json --workflow /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/out/brief-b.workflow.json --generator /private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/freshclone/out/gen_brief-b.py --out out/brief-b.audit.json
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R01-R13 (batch 1/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R14-R26 (batch 2/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R27-R39 (batch 3/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R40-R55 (batch 4/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R56-R68 (batch 5/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R69-R80 (batch 6/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: audit rules R81-R81 (batch 7/7)
+[00:00:22 + 1122s] model call: claude-fable-5-1 | purpose: rank the 2 gaps into the top 5 fixes
+[00:00:22 + 1122s] step audit: exit 0 | audit: implemented 71, partial 2, missing 0, contradicted 0, superseded 8, total 81 -> out/brief-b.audit.json + brief-b.audit.md | 8 model call(s), 95 s, $8.64 
+[00:00:23 + 1123s] created on Freya: workflow_id=6c38e31a-eee0-45ae-80cd-e86a41a980a7 agent_id=bd48e284-d33f-4e6e-9b2d-faa8789b5ec6 published_version=1 | 71 steps (setup, qb_dob, wrapup, ask_dob, confirm, opening, prepare, end_paid, fin_paid, finalize, hardship, pol_paid, qb_phone, rec_next, too_much, ask_phone, negotiate, pol_human, rec_after, confirm_no, end_failed, fin_failed, hs_decline, note_after, pol_notalk, wrap_human, check_offer, end_dispute, end_promise, end_refused, end_unclear, fin_dispute, fin_promise, fin_refused, fin_unclear, pol_dispute, record_note, third_party, wrap_change, accept_offer, change_offer, end_callback, end_deceased, end_declined, end_hardship, fin_callback, fin_deceased, fin_declined, fin_hardship, load_account, pol_hardship, xfer_general, xfer_support, count_refusal, opening_retry, record_promise, end_no_callback, fin_no_callback, end_wrong_number, fin_wrong_number, count_decline_dob, end_service_error, fin_service_error, xfer_restructuring, count_decline_phone, end_transferred_human, fin_transferred_human, end_transferred_support, fin_transferred_support, end_transferred_restructuring, fin_transferred_restructuring), 0 global nodes, 6 tools | exported to submission/brief-b.workflow.json
+[00:00:23 + 1123s] builder files: unchanged during this build
+[00:00:23 + 1123s] build end 2026-10-11T00:00:23-0400 | total 1123 s
