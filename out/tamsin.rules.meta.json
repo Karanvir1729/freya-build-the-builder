@@ -1,0 +1,73 @@
+{
+ "model": "claude-opus-5-5",
+ "sample_models": {
+  "A": "claude-opus-5-5",
+  "B": "claude-opus-5-5",
+  "C": "claude-opus-5-5"
+ },
+ "seconds": 168.15796494483948,
+ "cost_usd": 2.2556692,
+ "calls": 11,
+ "self_check": {
+  "missing_numbers": {},
+  "missing_tokens": []
+ },
+ "samples": {
+  "A": 79,
+  "B": 75,
+  "C": 93
+ },
+ "stages": {
+  "extract": {
+   "seconds": 93.52008485794067,
+   "cost_usd": 1.514243,
+   "calls": 6
+  },
+  "merge": {
+   "seconds": 33.9434130191803,
+   "cost_usd": 0.265258,
+   "calls": 1
+  },
+  "gap-fill": {
+   "seconds": 6.261115789413452,
+   "cost_usd": 0.0900642,
+   "calls": 1
+  },
+  "decide": {
+   "seconds": 0.0,
+   "cost_usd": 0.146233,
+   "calls": 1
+  },
+  "verify": {
+   "seconds": 0.0,
+   "cost_usd": 0.239871,
+   "calls": 2
+  },
+  "verify+decide": {
+   "seconds": 34.422593116760254
+  }
+ },
+ "briefs": [
+  "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/2385ec94-4b5a-4024-8146-c84a6fff3e2e/scratchpad/reh2/tamsin.md"
+ ],
+ "api": "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/2385ec94-4b5a-4024-8146-c84a6fff3e2e/scratchpad/reh2/tamsin.openapi.json",
+ "spec": "tamsin.spec.json",
+ "conflicts": "tamsin.rules.conflicts.md",
+ "n_conflicts": 14,
+ "call_date_range": {
+  "earliest": "2026-10-14",
+  "latest": "",
+  "basis": "Go-live: first dialler run on Wednesday 14 October 2026 (minutes item 1). The example `now` is 2026-10-14T11:00. No end date is given."
+ },
+ "n_rules": 106,
+ "n_in_force": 100,
+ "n_low": 30,
+ "n_low_in_force": 29,
+ "verification": {
+  "mismatch": 1,
+  "ok": 38
+ },
+ "decision_blocks": 10,
+ "spec_errors": 0,
+ "spec_warnings": 0
+}

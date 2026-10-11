@@ -1,0 +1,106 @@
+{
+ "model": "claude-opus-5-5",
+ "seconds": 166.9,
+ "cost_usd": 0.942,
+ "calls": 3,
+ "briefs": [
+  "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/2385ec94-4b5a-4024-8146-c84a6fff3e2e/scratchpad/reh2/tamsin.md"
+ ],
+ "api": "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/2385ec94-4b5a-4024-8146-c84a6fff3e2e/scratchpad/reh2/tamsin.openapi.json",
+ "rules": null,
+ "multi_product": true,
+ "outcome_rows": [
+  {
+   "outcome": "promise",
+   "reason": "FULLPTP"
+  },
+  {
+   "outcome": "promise",
+   "reason": "PARTPTP"
+  },
+  {
+   "outcome": "paid",
+   "reason": "CLMPD"
+  },
+  {
+   "outcome": "transferred",
+   "reason": "XRST"
+  },
+  {
+   "outcome": "transferred",
+   "reason": "XGEN"
+  },
+  {
+   "outcome": "transferred",
+   "reason": "XCARE"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "TDN"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "TDN2L"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "HDNX"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "DSPT"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "SYSF"
+  },
+  {
+   "outcome": "not_verified",
+   "reason": "IDNO"
+  },
+  {
+   "outcome": "not_verified",
+   "reason": "IDREF"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "TPCB"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "NOCON"
+  }
+ ],
+ "calendar_notes": [
+  "holidays not found in the brief and dropped: ['2026-11-06']"
+ ],
+ "iso_dates_in_brief": [
+  "2026-10-22",
+  "2026-11-13",
+  "2026-11-24",
+  "2026-12-25",
+  "2026-12-28"
+ ],
+ "dropped": {},
+ "rejected_then_repaired": {},
+ "trimmed_to_20": [
+  "GEN-C-12 Middle-band card: ladder runs out over a closure day, new card floor, second-look time outside the hours once"
+ ],
+ "n_cases": 20,
+ "scenarios": null,
+ "calendar": {
+  "holidays": [
+   "2026-10-22",
+   "2026-11-24",
+   "2026-12-25",
+   "2026-12-28"
+  ],
+  "business_weekdays": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ]
+ }
+}
