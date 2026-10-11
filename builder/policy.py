@@ -438,6 +438,15 @@ def check_one(V, pid, a, d, kind):
         # day was just turned down, so it is never filled in (extended Brief B EXT-B-14); the brief's exact-day
         # question asks for it (the amount is kept in vague_amount for the answer)
         kind = 'vague'
+    if d is None and g(V, 'when_latest') == 'yes':
+        amt0 = pa if a is None or a <= 0 else a
+        if amt0 is not None and floor_of(V, pid) - 0.005 <= amt0 <= full_of(V, pid) + 0.005:
+            # they ask for the latest day: the brief's latest date with the amount (an amount out of range takes the
+            # usual checks below)
+            V['offer_verdict'] = 'latest'
+            set_prop(V, pid, amt0, dl)
+            say(V, join([T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
+            return
     if kind == 'vague' or (a is None and d is None):
         V['offer_verdict'] = 'vague'
         # an amount named with the vague period ('500 next week') is still checked: below the floor -> the brief's line
@@ -723,11 +732,18 @@ def resolve_when(V, text):
                  r'next (few|couple)|beginning of|middle of|start of|mid )', t):
         return None, 'vague'
     return None, 'none'
+# 'what's the latest day I can pay?' / 'the last possible date' / 'as late as possible': the product's latest date, not a
+# vague period (Ashvale PUB-06 on the strict judge: 'I accept 1062.55. I can't pay before my salary; what's the latest day
+# I can have to pay?' was read back for today, twice). Read by check_one through when_latest.
+LATEST_RX = re.compile(r"\b(latest|last)( possible)? (day|date)\b|\bas late as (possible|i can|you can)\b")
 def offer_date_of(V):
     # the customer's words first (offer_when, resolved in code); the extraction's offer_date only as a fallback and
     # never a date before the call's today
     w = g(V, 'offer_when')
     d, kind = resolve_when(V, w)
+    if kind != 'exact' and LATEST_RX.search(w.lower()):
+        V['when_latest'] = 'yes'
+        return None, 'vague'
     prev = g(V, 'when_prev')
     if (kind != 'exact' or cut_off(prev)) and prev and w.strip():
         # a day said in pieces over two turns ('thirty...' / 'October.'; 'Monday the twenty' / 'sixth'): the last
@@ -1006,6 +1022,12 @@ def ev_accept(V):
     if state(V, pid) == 'agreed':
         pset(V, pid, 'state', 'open')
     a, d = prop_of(V, pid)
+    if g(V, 'day_refused') == 'yes' or LATEST_RX.search(g(V, 'offer_when').lower()):
+        # 'I accept 1062.55, but I can't pay before my salary; what's the latest day?': the amount is accepted, the
+        # proposed day is not; a day of their own is checked, else the latest date (when_latest) or the brief's
+        # exact-day question (check_one with day_refused)
+        d2, k2 = offer_date_of(V)
+        d = d2 if k2 == 'exact' and d2 is not None else None
     check_one(V, pid, a, d, 'exact')
 def to_one_by_one(V):
     opn = [x for x in pids(V) if state(V, x) == 'open']
@@ -1519,6 +1541,7 @@ def main(V, ev):
         V['when_cutoff'] = ''
         V['amount_prev'] = g(V, 'pending_amount')   # a whole amount whose cents were cut off last turn, joined once
         V['pending_amount'] = ''
+        V['when_latest'] = ''                       # this turn's 'the latest day' (offer_date_of)
         V['claim_prev'] = g(V, 'claim_repeat')      # last turn's claim that repeated one already settled (ev_settle)
         V['claim_repeat'] = ''
         if ev == 'offer':
@@ -1576,7 +1599,7 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
            "wrap_human", "vague_all", "vague_pending", "vague_prev", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
            "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev",
-           "claim_repeat", "claim_prev")
+           "claim_repeat", "claim_prev", "when_latest")
 
 
 def _declare():

@@ -1376,5 +1376,35 @@ def test_dated_reason_follows_the_call_date():
         exec(code, {"vars": V0})
         assert (V0["outcome"], V0["reason"]) == want, (V0, want)
 
+@test
+def test_accept_with_a_declined_day_and_the_latest_day():
+    """Ashvale PUB-06 (strict judge, 1 of 3): after the lowest-amount offer, 'I accept 1062.55. I can't pay before my
+    salary; what's the latest day I can have to pay?' was read back for today, twice. The amount is accepted, the day
+    is not: 'the latest day' proposes the deadline; a declined day alone gets the exact-day question; a day of their
+    own is checked; a plain yes still agrees to the proposal."""
+    P, V = start([CARD])
+    dl = V["deadline_p1"]
+    ev(P, V, "accept", stance="accept", day_refused="yes", offer_when="what's the latest day I can have to pay")
+    assert V["route"] == "negotiate" and V["prop_date"] == dl and V["say_next"].startswith("The latest date I can record is"), V["say_next"]
+    assert V["state_p1"] == "open", V["state_p1"]
+    ev(P, V, "accept", stance="accept")
+    assert V["state_p1"] == "agreed" and V["readback_line"].endswith("Do you confirm?") and dl[8:].lstrip("0") in V["readback_line"], V["readback_line"]
+    # the latest day asked without a declined day, as an offer turn
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="vague", offer_when="the last possible date", stance="offer")
+    assert V["prop_date"] == V["deadline_p1"] and V["offer_verdict"] == "latest", (V["say_next"], V.get("offer_verdict"))
+    # a declined day only: the exact-day question, never today
+    P, V = start([CARD])
+    ev(P, V, "accept", stance="accept", day_refused="yes", offer_when="")
+    assert V["say_next"] == "Which exact day would that be?" and V["state_p1"] == "open", V["say_next"]
+    # a day of their own with the yes: that day is checked
+    P, V = start([CARD])
+    ev(P, V, "accept", stance="accept", day_refused="yes", offer_when="Monday the 19th")
+    assert V["state_p1"] == "agreed" and "19 October" in V["readback_line"], V.get("readback_line") or V["say_next"]
+    # a plain yes: the proposal, as before
+    P, V = start([CARD])
+    ev(P, V, "accept", stance="accept")
+    assert V["state_p1"] == "agreed" and "today" in V["readback_line"], V["readback_line"]
+
 if __name__ == "__main__":
     sys.exit(main())
