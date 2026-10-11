@@ -819,6 +819,37 @@ def counter_code(counter, limit, route_var, reset=None, over="close", under="ret
     return out
 
 
+# third party: the brief's 'ask once for another time' counted in code (generated Brief B GEN-C-03 on Freya: the prompt
+# said 'ask once', the model asked twice and only then took its own exit to no_callback)
+CB_OFFER_DESC = ("The person's LATEST message against the allowed callback window. Now: {{today_text}}, {{now_time}}. "
+                 "{{callback_text}} inside = they name a day AND a time inside that window; outside = they name a day or a "
+                 "time outside it (a day that is not allowed, a time before or after the hours, earlier than now today, too "
+                 "far ahead); cannot_say = they cannot or will not say when the customer can be reached; none = anything "
+                 "else (no day or time yet, a day without a time, a question, small talk).")
+
+
+def third_party_callback(nodes, task, tools, extraction, transitions, reask_text, no_callback_target, name="third_party",
+                         on_enter=None, reask_limit=1, offer_desc=None):
+    """The third-party node with the callback re-ask as code: cb_offer (none|inside|outside|cannot_say) is extracted
+    every turn; outside -> <name>_count (a counter: up to reask_limit re-asks, then no_callback_target), which goes to
+    <name>_reask, a copy of the node whose entry line is the brief's fixed re-ask sentence (reask_text), so the model
+    never decides how often it asked; cannot_say -> no_callback_target. `transitions` keeps the generator's own exits
+    (schedule_callback ok_true -> the callback ending, deceased, wrong number); do not add a model-chosen exit for 'a
+    second time outside the window'. Brief-agnostic: the window comes from SETUP_CODE's callback_text."""
+    ext_ = list(extraction or []) + [ext("cb_offer", ["none", "inside", "outside", "cannot_say"], offer_desc or CB_OFFER_DESC)]
+    trs = list(transitions or []) + [
+        eq("cb_offer", "outside", name + "_count", "a day or time outside the allowed callback window"),
+        eq("cb_offer", "cannot_say", no_callback_target, "cannot say when the customer can be reached")]
+    nodes[name] = conv(name, task, on_enter=on_enter, tools=tools, extraction=ext_, transitions=trs)
+    nodes[name + "_count"] = code_node(name + "_count", counter_code("cb_outside_count", int(reask_limit) + 1, "cb_route",
+                                                                    reset={"cb_offer": "none"}),
+                                       [eq("cb_route", "close", no_callback_target, "asked for another time already"),
+                                        always(name + "_reask")])
+    nodes[name + "_reask"] = conv(name + "_reask", task, on_enter={"type": "tts", "text": reask_text}, tools=tools,
+                                  extraction=ext_, transitions=trs)
+    return nodes
+
+
 # ----------------------------------------------------------------------------------------------- assembly & checks
 def _no_none(o, path, errors):
     if o is None:

@@ -121,8 +121,9 @@ WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as
 # an amount named by reference instead of a number ('the minimum', 'the whole amount'): the extractor does not know the
 # floor's value, so 'too much, but I can pay the minimum today' arrived with no amount and the guard read back the FULL
 # amount (extended Brief A EXT-A-36). The reference is resolved in code against the product's floor / full amount.
-VAGUE_STANCE_CLAUSE = (" 'I don't know the exact day (yet)', 'not sure which day' or 'sometime next week' is NOT a refusal, "
-                       "also right after a question for the exact day: it is a vague offer (offer_kind vague).")
+VAGUE_STANCE_CLAUSE = (" Exception to anything above: 'I don't know the exact day (yet)', 'not sure which day', 'it varies' or "
+                       "'sometime next week' is NOT a refusal, also right after the question for the exact day: it is a vague "
+                       "offer (offer_kind vague).")
 VAGUE_KIND_CLAUSE = (" After a question for the exact day, 'I don't know the exact day (yet)' or 'not sure which day' is vague.")
 SAID_DESC = ("When the customer gives a reason in their LATEST message (a hardship such as illness, a bereavement or "
              "losing their job; why they dispute the debt; that they already paid, when or how; why they will not pay), "
@@ -423,6 +424,7 @@ def check_one(V, pid, a, d, kind):
             pset(V, pid, 'vague_amount', str(float(amt)))
         if pg(V, pid, 'vague_asked') != 'yes':
             pset(V, pid, 'vague_asked', 'yes')
+            V['vague_pending'] = pid           # the next answer is the answer to 'which exact day?' (see ev_refuse)
             say(V, join([pre, T('vague')]))
             return
         if P.get('vague_again') == 'refuse':   # the brief: no exact day after one ask = a non-answer (one attempt)
@@ -898,6 +900,7 @@ def ev_offer(V):
             V['offer_verdict'] = 'vague'
             if g(V, 'vague_all') != 'yes':
                 V['vague_all'] = 'yes'
+                V['vague_pending'] = 'all'
                 say(V, T('vague'))
                 return
             p = pids(V)[0]
@@ -936,6 +939,21 @@ def to_one_by_one(V):
     V['cur_pid'] = p
     return p, join([T('one_by_one'), T('next_product', words=pg(V, p, 'words'), past_due=fmt(full_of(V, p)))])
 def ev_refuse(V):
+    # the answer to 'which exact day?' still gives no day, and the extractor called it a refusal ('I'm not sure, it
+    # varies'): the brief's second-ask rule applies (propose the deadline), not a persuasion attempt (generated Brief B
+    # GEN-P-06). A brief where no exact day after one ask is a non-answer keeps the refusal (vague_again='refuse').
+    vp = g(V, 'vague_prev')
+    if vp and P.get('vague_again') != 'refuse':
+        if vp == 'all' and multi(V) and g(V, 'stage') == 'all':
+            p = pids(V)[0]
+            pset(V, p, 'vague_asked', 'yes')
+            V['stage'] = 'one'
+            V['cur_pid'] = p
+            check_one(V, p, None, None, 'vague')
+            return
+        if vp == g(V, 'cur_pid') and state(V, vp) == 'open':
+            check_one(V, vp, None, None, 'vague')
+            return
     if multi(V) and g(V, 'stage') == 'all':
         pre0 = settle_claims(V)
         if pre0 and not [x for x in pids(V) if state(V, x) == 'open']:
@@ -1362,6 +1380,8 @@ def main(V, ev):
         V['policy_event'] = ev
         V['offer_verdict'] = ''
         V['when_prev'] = g(V, 'pending_when')   # unresolved day words of the last policy turn, joined once
+        V['vague_prev'] = g(V, 'vague_pending')  # the last spoken line asked for the exact day (ev_refuse)
+        V['vague_pending'] = ''
         V['pending_when'] = ''
         V['when_cutoff'] = ''
         V['amount_prev'] = g(V, 'pending_amount')   # a whole amount whose cents were cut off last turn, joined once
@@ -1419,7 +1439,7 @@ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verd
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok", "note_text",
            "said_last",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
-           "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
+           "wrap_human", "vague_all", "vague_pending", "vague_prev", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
            "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev")
 
 

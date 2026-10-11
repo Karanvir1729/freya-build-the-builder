@@ -115,16 +115,15 @@ cb_tool = fl.api_tool(
                         "time": "Callback time as HH:MM, 24 hour, between 10:00 and 19:00."},
     post=fl.ok_post("Callback booked.", "The booking failed. Try schedule_callback once more with the same values."))
 
-nodes["third_party"] = fl.conv(
-    "third_party",
+fl.third_party_callback(   # the re-ask is counted in code (rule 7: ask once for another time)
+    nodes,
     "You called for {{title}} {{last_name}} ({{first_name}}) but someone else is on the line.\n"
     "STRICT: Never say why you are calling. Never mention the bank account, a product, a debt, an amount, a payment or collections, even if they ask or offer to pay or help. "
     "If they ask what it is about, say you can only discuss it with {{title}} {{last_name}} personally. Do not ask them any security question.\n"
     "Your only job: ask when {{title}} {{last_name}} can be reached, then book a callback.\n"
     "Now: {{today_text}}, {{now_time}}.\n{{callback_text}}\n"
     "- If they give a day and time inside the window, call schedule_callback with date YYYY-MM-DD and time HH:MM. 'Tomorrow morning around eleven' means tomorrow at 11:00. If they give only a day, ask for a time; if only a vague time like 'morning', propose a precise time such as 11:00 and ask if it suits.\n"
-    "- If the day or time is outside the window, say you can only call back today or on the next business day between 10:00 and 19:00, and ask once for another time.\n"
-    "- If the second answer is also outside the window, or they cannot say when, do not book: call transition_to_fin_no_callback.\n"
+    "- If the day or time is outside the window, or they cannot say when: do not book, and do not ask again yourself: the system asks once for another time and then closes.\n"
     "After every tool result, speak or call the next tool.",
     tools=[cb_tool],
     extraction=[fl.ext("tp_status", ["none", "wrong_number", "deceased"],
@@ -133,10 +132,9 @@ nodes["third_party"] = fl.conv(
         fl.ok_true("schedule_callback", "fin_callback", "callback booked"),
         fl.eq("tp_status", "deceased", "fin_deceased", "customer died"),
         fl.eq("tp_status", "wrong_number", "fin_wrong_number", "wrong number"),
-        fl.intent_tool("fin_no_callback",
-                       "No callback can be booked: the person gave a second time outside the allowed window, or cannot say when the customer is reachable.",
-                       "No callback can be booked inside the allowed window"),
-    ])
+    ],
+    reask_text="I can only call back today or on the next business day, between 10:00 and 19:00. Could you give me another time?",
+    no_callback_target="fin_no_callback")
 
 # ---------------------------------------------------------------- identity
 HINTS = {"day_month_swapped": "Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988."}

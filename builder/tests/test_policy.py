@@ -9,6 +9,7 @@ kit's practice calendar (now = Wednesday 14 October 2026); the module itself hol
     python3 builder/tests/test_policy.py
 """
 import pathlib
+import json
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
@@ -468,6 +469,46 @@ def vague_period_with_an_amount_below_the_floor():         # generated Brief A G
     names = {e["name"]: e["description"] for e in P.negotiate_node("t", [fl.ext("stance", ["none", "refuse"], "a refusal"),
                                                                      fl.ext("offer_kind", ["none", "exact", "vague"], "kind")], [])["extraction_schema"]}
     assert "NOT a refusal" in names["stance"] and "is vague" in names["offer_kind"], names
+
+
+@test
+def no_day_after_the_exact_day_question_proposes_the_deadline():   # generated Brief B GEN-P-06
+    P, V = start([LOAN])
+    ev(P, V, "offer", offer_kind="vague", offer_when="when my salary comes")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+    ev(P, V, "refuse", stance="refuse")                    # 'I'm not sure, it varies', labelled a refusal
+    assert "Friday 23 October" in V["say_next"] and V.get("attempts_used_p1", "0") in ("0", ""), (V["say_next"], V.get("attempts_used_p1"))
+    ev(P, V, "refuse", stance="refuse")                    # a refusal of the deadline is a refusal: attempt 1
+    assert V["attempts_used_p1"] == "1", V.get("attempts_used_p1")
+    P, V = start([LOAN])                                   # a refusal that does not follow the question: unchanged
+    ev(P, V, "refuse", stance="refuse")
+    assert V["attempts_used_p1"] == "1", V.get("attempts_used_p1")
+    P2 = mk(vague_again="refuse")                          # a brief where no exact day after one ask is a refusal
+    import json
+    V2 = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([LOAN])}
+    run(P2.prepare_code(BODY, "statement"), V2)
+    ev(P2, V2, "offer", offer_kind="vague")
+    ev(P2, V2, "refuse", stance="refuse")
+    assert V2["attempts_used_p1"] == "1", V2.get("attempts_used_p1")
+
+
+@test
+def third_party_reask_is_counted_in_code():                 # generated Brief B GEN-C-03: rule 7 'ask once'
+    nodes = {}
+    fl.third_party_callback(nodes, "task", [], [fl.ext("tp_status", ["none", "deceased"], "d")],
+                            [fl.eq("tp_status", "deceased", "fin_deceased", "died")], "Could you give me another time?", "fin_no_callback")
+    assert set(nodes) == {"third_party", "third_party_count", "third_party_reask"}
+    code = nodes["third_party_count"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
+    V = {"cb_offer": "outside"}
+    run(code, V)
+    assert V["cb_route"] == "retry" and V["cb_offer"] == "none"            # first time outside: the fixed re-ask
+    V["cb_offer"] = "outside"
+    run(code, V)
+    assert V["cb_route"] == "close"                                          # second time: no callback, no model choice
+    trs = {(t["target_node"]) for t in nodes["third_party_reask"]["transitions"]}
+    assert {"third_party_count", "fin_no_callback", "fin_deceased"} <= trs, trs
+    assert nodes["third_party_reask"]["on_enter"] == {"type": "tts", "text": "Could you give me another time?"}
+    assert not any("matches_intent" in json.dumps(t) for t in nodes["third_party"]["transitions"])
 
 
 @test
