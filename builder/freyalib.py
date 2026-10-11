@@ -883,7 +883,8 @@ CB_OFFER_DESC = ("The person's LATEST message against the allowed callback windo
                  "else (no day or time yet, a day without a time, a question, small talk). A time equal to the closing time "
                  "is inside when the list says 'included'.")
 CB_AT_DESC = ("The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour "
-              "time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = "
+              "time). Today is {{today_text}} ({{today_iso}}), now {{now_time}}. {{callback_text}} Read the date off that "
+              "list (the year and month too, never another year: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = "
               "tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = "
               "19:00). Empty when they do not name both a day (or a word for today) and a time.")
 # a slot the model judged outside is checked in code against the window SETUP_CODE wrote (cb_window): extended Brief A
@@ -896,7 +897,14 @@ _CB_CHECK = r'''try:
     vars['cb_route'] = ''
     if _m:
         _d, _t = _m.group(1), '%02d:%s' % (int(_m.group(2)), _m.group(3))
-        for _w in json.loads(str(vars.get('cb_window') or '[]')):
+        _ws = json.loads(str(vars.get('cb_window') or '[]'))
+        if _ws and _d not in [_w[0] for _w in _ws]:
+            # the extractor guessed the year or month ('2025-05-14' on 14 October 2026, EXT-A-39): the window day with
+            # that day of the month
+            _same = [_w[0] for _w in _ws if _w[0][8:] == _d[8:]]
+            if len(_same) == 1:
+                _d = _same[0]
+        for _w in _ws:
             if _d == _w[0] and ((_t > _w[1]) if _w[3] else (_t >= _w[1])) and _t <= _w[2]:
                 vars['cb_route'] = 'inside'
                 vars['cb_offer'] = 'none'

@@ -1984,7 +1984,7 @@
     {
      "name": "cb_at",
      "type": "string",
-     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
+     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time). Today is {{today_text}} ({{today_iso}}), now {{now_time}}. {{callback_text}} Read the date off that list (the year and month too, never another year: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
      "min_confidence": 0.5
     }
    ],
@@ -2049,7 +2049,7 @@
        "properties": {
         "code": {
          "type": "string",
-         "default": "try:\n    try:\n        import json, re\n        _at = str(vars.get('cb_at') or '').strip()\n        _m = re.match(r'(\\d{4}-\\d{2}-\\d{2})[ T](\\d{1,2}):(\\d{2})', _at)\n        vars['cb_route'] = ''\n        if _m:\n            _d, _t = _m.group(1), '%02d:%s' % (int(_m.group(2)), _m.group(3))\n            for _w in json.loads(str(vars.get('cb_window') or '[]')):\n                if _d == _w[0] and ((_t > _w[1]) if _w[3] else (_t >= _w[1])) and _t <= _w[2]:\n                    vars['cb_route'] = 'inside'\n                    vars['cb_offer'] = 'none'\n                    vars['cb_slot_text'] = _d + ' ' + _t\n    except Exception:\n        vars['cb_route'] = ''\n    if vars.get('cb_route') != 'inside':\n        try:\n            n = int(float(vars.get('cb_outside_count') or 0)) + 1\n            vars['cb_outside_count'] = n\n            vars['cb_offer'] = 'none'\n            vars['cb_route'] = 'close' if n >= 2 else 'retry'\n        except Exception:\n            vars['cb_route'] = 'retry'\nexcept Exception:\n    vars['cb_route'] = 'retry'\n"
+         "default": "try:\n    try:\n        import json, re\n        _at = str(vars.get('cb_at') or '').strip()\n        _m = re.match(r'(\\d{4}-\\d{2}-\\d{2})[ T](\\d{1,2}):(\\d{2})', _at)\n        vars['cb_route'] = ''\n        if _m:\n            _d, _t = _m.group(1), '%02d:%s' % (int(_m.group(2)), _m.group(3))\n            _ws = json.loads(str(vars.get('cb_window') or '[]'))\n            if _ws and _d not in [_w[0] for _w in _ws]:\n                # the extractor guessed the year or month ('2025-05-14' on 14 October 2026, EXT-A-39): the window day with\n                # that day of the month\n                _same = [_w[0] for _w in _ws if _w[0][8:] == _d[8:]]\n                if len(_same) == 1:\n                    _d = _same[0]\n            for _w in _ws:\n                if _d == _w[0] and ((_t > _w[1]) if _w[3] else (_t >= _w[1])) and _t <= _w[2]:\n                    vars['cb_route'] = 'inside'\n                    vars['cb_offer'] = 'none'\n                    vars['cb_slot_text'] = _d + ' ' + _t\n    except Exception:\n        vars['cb_route'] = ''\n    if vars.get('cb_route') != 'inside':\n        try:\n            n = int(float(vars.get('cb_outside_count') or 0)) + 1\n            vars['cb_outside_count'] = n\n            vars['cb_offer'] = 'none'\n            vars['cb_route'] = 'close' if n >= 2 else 'retry'\n        except Exception:\n            vars['cb_route'] = 'retry'\nexcept Exception:\n    vars['cb_route'] = 'retry'\n"
         },
         "timeout_ms": {
          "type": "number",
@@ -2236,7 +2236,7 @@
     {
      "name": "cb_at",
      "type": "string",
-     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
+     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time). Today is {{today_text}} ({{today_iso}}), now {{now_time}}. {{callback_text}} Read the date off that list (the year and month too, never another year: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
      "min_confidence": 0.5
     }
    ],
@@ -2416,7 +2416,7 @@
     {
      "name": "cb_at",
      "type": "string",
-     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time; the date read off the list of days above: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
+     "description": "The day and time the person names in their LATEST message for the callback, as 'YYYY-MM-DD HH:MM' (24-hour time). Today is {{today_text}} ({{today_iso}}), now {{now_time}}. {{callback_text}} Read the date off that list (the year and month too, never another year: 'tonight' / 'this afternoon' / 'later' = today, 'tomorrow' = tomorrow's date; 'seven tonight' = 19:00, 'ten in the morning' = 10:00, a bare 'at seven' in the evening = 19:00). Empty when they do not name both a day (or a word for today) and a time.",
      "min_confidence": 0.5
     }
    ],

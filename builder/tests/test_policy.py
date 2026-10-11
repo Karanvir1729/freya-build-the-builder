@@ -551,12 +551,13 @@ def third_party_reask_is_counted_in_code():                 # generated Brief B 
     assert json.loads(W["cb_window"]) == [["2026-10-14", "18:30", "19:00", 1], ["2026-10-15", "10:00", "19:00", 0]], W["cb_window"]
     assert "up to 19:00 included" in W["callback_text"], W["callback_text"]
     for at, want in (("2026-10-14 19:00", "inside"), ("2026-10-14 18:30", "retry"), ("2026-10-14 20:00", "retry"),
-                     ("2026-10-15 10:00", "inside"), ("2026-10-15 9:59", "retry"), ("2026-10-16 11:00", "retry"), ("", "retry")):
+                     ("2026-10-15 10:00", "inside"), ("2026-10-15 9:59", "retry"), ("2026-10-16 11:00", "retry"), ("", "retry"),
+                     ("2025-05-14 19:00", "inside"), ("2025-05-16 11:00", "retry")):
         V = {"cb_offer": "outside", "cb_at": at, "cb_window": W["cb_window"]}
         run(code, V)
         assert V["cb_route"] == want, (at, V)
         if want == "inside":
-            assert V["cb_offer"] == "none" and V["cb_slot_text"] == at.replace(" 9:", " 09:") and "cb_outside_count" not in V, V
+            assert V["cb_offer"] == "none" and V["cb_slot_text"] == at.replace(" 9:", " 09:").replace("2025-05-", "2026-10-") and "cb_outside_count" not in V, V
     trs = [(t["target_node"], (t["condition"].get("conditions") or [{}])[0].get("operand")) for t in nodes["third_party_count"]["transitions"]]
     assert trs[0] == ("third_party_book", "inside"), trs
     assert "{{cb_slot_text}}" in nodes["third_party_book"]["task_message"]
