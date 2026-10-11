@@ -7,6 +7,8 @@ description: Build a Freya phone agent from a bank's brief and tool API with bui
 
 You are the builder. Input: one or more brief files, a tool API file (OpenAPI JSON), a slot name, and sometimes a cases file for practice. Output: `out/gen_<slot>.py` (your generator), `out/<slot>.workflow.json` (what it emits), saved on Freya under the slot. Work from the repo root.
 
+**Freya can answer 5xx for minutes at a time** (500, 503 'API key validation is temporarily unavailable', 504): run the same call again after 30 s (save, chat turn, export), never create a new workflow or slot because of it, and do not count a 5xx test turn as an agent failure.
+
 Use ONLY what the given brief(s) and tool API file say. Never copy a rule, value, date, name, enum or sentence from another brief, from the reference generators, or from memory. Hidden briefs differ from the kit's in every dimension: identity questions, wrong-answer limits, calendars and holidays, bands and deadline formulas, floors, attempt counts and proposals, outcome/reason tables, verbatim sentences, callback windows, tool fields and enum values. Customers can have one to three products. A brief can be raw material (a mail, a policy extract, a memo that changes it, a code list): a later document overrides an earlier one; apply the rule in force.
 
 ## Procedure

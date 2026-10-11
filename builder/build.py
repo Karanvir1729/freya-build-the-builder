@@ -269,7 +269,7 @@ def check_version(slot, trace, t0):
     wid = state[slot]["workflow_id"]
     state_file = ROOT / ".freya-agents.json"
     try:
-        version, note = buildguard.ensure_published(freya, wid)
+        version, note = buildguard.retry5xx(lambda: buildguard.ensure_published(freya, wid), log=trace.line)
         trace.line("published check: " + note)
         buildguard.write_state_version(state_file, slot, version)
     except Exception as e:
@@ -282,7 +282,7 @@ def check_version(slot, trace, t0):
     trace.line("best tested version: ship version %d (%s)" % (ship, why))
     if ship == version:
         return False
-    new_v, wf = buildguard.restore_version(freya, slot, wid, ship)
+    new_v, wf = buildguard.retry5xx(lambda: buildguard.restore_version(freya, slot, wid, ship), log=trace.line)
     wf_path = ROOT / "out" / ("%s.workflow.json" % slot)
     if wf_path.exists():
         wf_path.replace(wf_path.with_name("%s.workflow.agent-final.json" % slot))
@@ -301,7 +301,7 @@ def export(slot, trace):
         trace.line("ERROR: no workflow saved for slot %r (not in .freya-agents.json). Nothing exported." % slot); return None
     wid, aid = state[slot]["workflow_id"], state[slot]["agent_id"]
     out = ROOT / "submission" / (slot + ".workflow.json"); out.parent.mkdir(exist_ok=True)
-    freya.export_workflow(wid, str(out))
+    buildguard.retry5xx(lambda: freya.export_workflow(wid, str(out)), log=trace.line)
     wf = json.loads(out.read_text())["workflow"]
     nodes = wf.get("nodes") or {}
     n_tools = sum(len(n.get("tools") or []) for n in nodes.values()) + len(wf.get("tools") or [])

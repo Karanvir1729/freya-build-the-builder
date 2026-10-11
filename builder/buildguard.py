@@ -283,6 +283,21 @@ def _strip(obj):
     return obj
 
 
+def retry5xx(fn, tries=10, wait=20, log=None):
+    """fn() again after a 5xx from Freya (the platform answered 500/503/504 for an hour on 11 Oct: 'API key validation is
+    temporarily unavailable', gateway time-outs). Any other error, or the last try, raises."""
+    import re, time
+    for i in range(tries):
+        try:
+            return fn()
+        except RuntimeError as e:
+            if not re.search(r"-> 5\d\d", str(e)) or i == tries - 1:
+                raise
+            if log:
+                log("Freya answered %s; retrying in %d s" % (str(e)[:90], wait))
+            time.sleep(wait)
+
+
 def ensure_published(freya, wid):
     """Returns (published version number, note). The newest version must be published and the agent must run on
     freya.AGENT_LLM; otherwise the kit's calls fix it (update_workflow re-saves the same definition, sets the model
