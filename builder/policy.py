@@ -553,6 +553,12 @@ def offer_target(V):
     f = g(V, 'offer_for')
     ids = pids(V)
     order = P['ordinals']
+    if multi(V):
+        # the customer's own words naming exactly one product win over the extractor's position ('I never had a car loan'
+        # came back offer_for=second, the personal loan: extended Brief B EXT-B-12)
+        n = only_product_named(V, g(V, 'customer_said'))
+        if n:
+            return n
     if f in order:
         i = order.index(f)
         if i < len(ids):
@@ -789,21 +795,76 @@ def spoken_prefix(V, pre):
         return
     key = {'confirm': 'readback_line', 'wrapup': 'wrap_line'}.get(g(V, 'route'), 'say_next')
     V[key] = join([pre, g(V, key)])
+NAME_STOP = {'your', 'my', 'the', 'ending', 'in', 'on', 'a', 'an', 'of', 'account', 'one', 'with', 'number', 'and', 'for', 'that', 'this'}
+def _toks(text):
+    return [t for t in re.findall(r'[a-z]+|[0-9]+', str(text or '').lower()) if t not in NAME_STOP]
+def name_scores(V, text):
+    # {pid: score} for the products the words name: a token only that product has counts 2, a shared one 1 ('car loan' ->
+    # the car loan 3, the personal loan 1); also {pid: has a token of its own in the text}
+    ids = pids(V)
+    toks = {p: set(_toks(pg(V, p, 'words'))) for p in ids}
+    said = set(_toks(text))
+    sc, own = {}, {}
+    for p in ids:
+        others = set().union(*[toks[q] for q in ids if q != p]) if len(ids) > 1 else set()
+        sc[p] = sum(2 if t not in others else 1 for t in toks[p] & said)
+        own[p] = bool((toks[p] - others) & said)
+    return sc, own
+def product_by_name(V, text):
+    # the one product a short name points to ('credit card', 'card 2288', 'car loan'); '' when none or a tie ('the loan'
+    # with two loans: never guessed)
+    sc, _ = name_scores(V, text)
+    best = max(sc.values()) if sc else 0
+    top = [p for p, v in sc.items() if v == best]
+    return top[0] if best > 0 and len(top) == 1 else ''
+def only_product_named(V, text):
+    # the product a sentence names when it names exactly one by a word of its own ('I never had a car loan'); ''
+    # otherwise ('I paid the card and never had a car loan' names two)
+    _, own = name_scores(V, text)
+    hit = [p for p, v in own.items() if v]
+    return hit[0] if len(hit) == 1 else ''
+def named_in_order(V, text):
+    # the products a sentence names by a word of their own, in the order it names them
+    _, own = name_scores(V, text)
+    toks = _toks(text)
+    ids = pids(V)
+    pos = {}
+    for p in [x for x in ids if own.get(x)]:
+        mine = set(_toks(pg(V, p, 'words'))) - set().union(*[set(_toks(pg(V, q, 'words'))) for q in ids if q != p])
+        pos[p] = min(i for i, t in enumerate(toks) if t in mine)
+    return sorted(pos, key=lambda p: pos[p])
 def claims(V, words=False):
     # per_product: 'first=dispute;second=paid;third=pay@monday the 26th' (one extraction string, parsed here) ->
     # {pid: claim} or, with words=True, {pid: the customer's words for that product's day ('' when none)}
     out = {}
     ids = pids(V)
     order = P['ordinals']
-    for part in g(V, 'per_product').lower().split(';'):
+    parts = [x for x in g(V, 'per_product').lower().split(';') if '=' in x]
+    keys = [x.split('=', 1)[0].strip() for x in parts]
+    named = named_in_order(V, g(V, 'customer_said'))
+    if parts and all(k in order for k in keys) and len(named) == len(parts) and \
+            set(ids[order.index(k)] for k in keys if order.index(k) < len(ids)) != set(named):
+        # positions counted in the message, not in the agent's list: the customer's own words name the same number of
+        # products, so the pairs follow the order the customer named them
+        parts = [named[i] + '=' + parts[i].split('=', 1)[1] for i in range(len(parts))]
+    for part in parts:
         if '=' not in part:
             continue
         k, v = [x.strip() for x in part.split('=', 1)]
         w = ''
         if '@' in v:
             v, w = [x.strip() for x in v.split('@', 1)]
-        if k in order and order.index(k) < len(ids):
+        if k in ids:
+            out[k] = w if words else v
+        elif k in order and order.index(k) < len(ids):
             out[ids[order.index(k)]] = w if words else v
+        else:
+            # the product as the customer named it (extended Brief B EXT-B-12, talkative: 'I paid the credit card yesterday
+            # and I never had a car loan' came back 'first=paid;second=dispute', positions counted in the message, and the
+            # personal loan was noted as a dispute)
+            p = product_by_name(V, k)
+            if p:
+                out[p] = w if words else v
     return out
 def settle_claims(V):
     # one turn about several products ('the card is not mine, I paid the loan, the car loan today'): the paid and
@@ -1839,12 +1900,14 @@ class Policy:
             return []
         o = self.P["ordinals"]
         desc = ("Only when the customer's LATEST message says DIFFERENT things about DIFFERENT products: one pair per product "
-                "it mentions, '<position>=<claim>' separated by ';', where position is the product's place in the order the "
-                "agent listed them (" + ", ".join(o) + ") and claim is one of: dispute (not theirs, never had it, closed or paid "
+                "it mentions, '<product>=<claim>' separated by ';', where product is the product AS THE CUSTOMER NAMES IT, in "
+                "their words ('credit card', 'card 2288', 'car loan', 'personal loan'), or its position in the order the agent "
+                "listed them (" + ", ".join(o) + ") ONLY when the customer names it by position ('the first one'), and claim "
+                "is one of: dispute (not theirs, never had it, closed or paid "
                 "off in the past), paid (already paid it), pay (will pay it: accepts, or names a day or an amount for it; "
                 "add '@' and the customer's OWN WORDS for that product's day when they name one), "
-                "refuse (will not or cannot pay it). Example: '" + o[0] + "=dispute;" + o[min(1, len(o) - 1)] + "=pay@today;" +
-                o[min(2, len(o) - 1)] + "=pay@monday the 26th'. Empty when the message is about all products together "
+                "refuse (will not or cannot pay it). Example: 'credit card=paid;car loan=dispute', or '" + o[0] + "=dispute;" + o[min(1, len(o) - 1)] + "=pay@today;" +
+                o[min(2, len(o) - 1)] + "=pay@monday the 26th' when they say 'the first one ...'. Empty when the message is about all products together "
                 "in one answer or about one product only. A pair only for a product the message NAMES (its type, its "
                 "card digits or its position): words cut off before the product's name ('and I never had a') name no "
                 "product, so leave that claim out, never guess which product it was." + POSITION_CLAUSE)

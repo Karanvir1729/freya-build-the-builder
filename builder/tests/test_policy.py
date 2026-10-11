@@ -1429,5 +1429,29 @@ def test_reroute_not_customer_at_the_security_questions():
     except ValueError:
         pass
 
+@test
+def test_products_resolved_by_the_customers_names():
+    """EXT-B-12 (talkative, Freya, 2 of 3): 'I paid the credit card yesterday and I never had a car loan' came back
+    per_product='first=paid;second=dispute' (positions counted in the message) and the personal loan was noted as a
+    dispute. Names resolve in code; positions that contradict the customer's own words follow the order they named."""
+    for pp in ("first=paid;second=dispute", "credit card=paid;car loan=dispute", "card 4821=paid;car loan=dispute"):
+        P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+        ev(P, V, "dispute", topic="dispute", offer_for="first", per_product=pp,
+           customer_said="paid the credit card yesterday and I never had a car loan")
+        assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("paid", "open", "dispute"), (pp, V["state_p1"], V["state_p2"], V["state_p3"])
+        assert V["cur_pid"] == "p2", V["cur_pid"]
+    # positions that agree with the words stay as they are
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", per_product="first=paid;third=dispute", customer_said="paid the card and never had the car loan")
+    assert (V["state_p1"], V["state_p2"], V["state_p3"]) == ("paid", "open", "dispute")
+    # one claim: the product the words name wins over offer_for
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "dispute", topic="dispute", offer_for="second", customer_said="I never had a car loan")
+    assert (V["state_p2"], V["state_p3"]) == ("open", "dispute"), (V["state_p2"], V["state_p3"])
+    # never guessed: 'the loan' with two loans names nothing by itself
+    G = {"vars": dict(V)}
+    exec(P.core() + "\nr = (product_by_name(vars, 'the loan'), product_by_name(vars, 'car loan'), only_product_named(vars, 'my loan'))\n", G)
+    assert G["r"] == ("", "p3", ""), G["r"]
+
 if __name__ == "__main__":
     sys.exit(main())
