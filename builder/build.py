@@ -34,7 +34,8 @@ One run, with no manual step:
                earlier version is saved again and shipped; every change to builder/, .claude/skills/, tools/ or
                freya.py during the run goes to out/<slot>-<stamp>.builder-edits.patch, and the ones the building agent
                made are put back (not when --keep-builder-edits is given, git HEAD moved, or another build runs from
-               the same checkout; changes nobody can tie to the agent are reported and left alone)
+               the same checkout; changes nobody can tie to the agent are reported and left alone); TURN_TAKING=1 sets a longer
+               turn-taking wait after the last save (off by default: slower turns cost more than the fewer cut-offs gained)
 
 Needs FREYA_API_KEY and FREYA_BANK_TEAM_KEY (env.sh), a Claude login or ANTHROPIC_API_KEY; OPENAI_API_KEY for the
 local simulator's customer/judge models (otherwise it falls back to the Claude CLI).
@@ -293,6 +294,28 @@ def check_version(slot, trace, t0):
     return True
 
 
+def tune_turn_taking(slot, briefs, trace):
+    """Opt-in (TURN_TAKING=1), after the last save: longer wait, smart turn off, the brief's language; published
+    (buildguard). Off by default: on Brief A talkative (11 Oct) it cut fewer customer messages off (74% -> 50%) but
+    every turn took ~4 s longer, the median slowest turn went 4.2 -> 13 s, PUB-07 ran past the 420 s call limit
+    (45 messages in 424 s against 74 in 280 s) and the score went 9/10 -> 8/10."""
+    import freya
+    if os.environ.get("TURN_TAKING", "0") != "1":
+        trace.line("turn-taking: platform defaults (TURN_TAKING=1 sets a longer wait)"); return
+    state = load_state()
+    if slot not in state:
+        return
+    try:
+        files = [f for b in map(pathlib.Path, briefs) for f in (sorted(b.rglob("*")) if b.is_dir() else [b]) if f.is_file()]
+        lang = buildguard.brief_language("\n".join(f.read_text(errors="ignore") for f in files))
+        version, note = buildguard.retry5xx(lambda: buildguard.tune_turn_taking(freya, state[slot]["workflow_id"], lang), log=trace.line)
+        trace.line("turn-taking: " + note)
+        if version:
+            buildguard.write_state_version(ROOT / ".freya-agents.json", slot, version)
+    except Exception as e:
+        trace.line("turn-taking not set, the platform defaults stay: %r" % (e,))
+
+
 def export(slot, trace):
     """Export the phone agent exactly as it is on Freya. This file is what gets scored."""
     import freya
@@ -473,6 +496,7 @@ async def build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags,
         restored = check_version(slot, trace, trace.t0)
     except Exception as e:
         trace.line("version check failed, the final version stays: %r" % (e,)); restored = False
+    tune_turn_taking(slot, briefs, trace)
     os.environ.pop("BUILD_MODEL_LOG", None)
     try:
         calls = [x for x in model_log.read_text().splitlines() if x.strip()]

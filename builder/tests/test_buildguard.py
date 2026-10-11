@@ -288,6 +288,11 @@ class FakeFreya:
             return {"versions": self.versions}
         if method == "GET" and path.startswith("/api/v2/workflow/"):
             return {"workflow": {"workflow": self.workflow}}
+        if method == "PUT" and path.startswith("/api/v2/workflow/"):
+            self.workflow = body["workflow"]
+            n = max(v["versionNumber"] for v in self.versions) + 1
+            self.versions.append({"id": "v%d" % n, "versionNumber": n, "isPublished": False})
+            return {}
         if method == "POST" and path.endswith("/publish"):
             for v in self.versions:
                 v["isPublished"] = v["id"] == body["versionId"]
@@ -332,6 +337,30 @@ def test_restore_version():
     assert new_v == 3 and d == {"initial_node": "a", "nodes": {"a": {"node_type": "conversation"}}}, (new_v, d)
     kinds = [c[0] for c in f.calls]
     assert kinds.index("validate") < kinds.index("update"), kinds      # dry run before the save
+
+
+def test_brief_language():
+    assert bg.brief_language("Call the customer. Speak German at all times.") == "de"
+    assert bg.brief_language("The language of the call is French.") == "fr"
+    assert bg.brief_language("Collections brief. The customer may mention a holiday in Spain.") == "en"
+    assert bg.brief_language("") == "en"
+
+
+def test_tune_turn_taking():
+    w = wf(); w["agent_config"].update({"ttsConfig": {"language": "tr", "startSpeakingPlan": {"waitSeconds": 0.5}},
+                                        "sttConfig": {"language": "tr", "additionalSettings": {"smartTurnEnabled": True}}})
+    f = FakeFreya([{"id": "v1", "versionNumber": 1, "isPublished": True}], w)
+    v, note = bg.tune_turn_taking(f, "w", "en", wait=4.0)
+    ac = f.workflow["agent_config"]
+    assert v == 2 and f.versions[1]["isPublished"] and "read-back" not in note, (v, note, f.versions)
+    assert ac["ttsConfig"]["startSpeakingPlan"]["waitSeconds"] == 4.0 and ac["sttConfig"]["additionalSettings"]["smartTurnEnabled"] is False
+    assert ac["ttsConfig"]["language"] == ac["sttConfig"]["language"] == "en" and ac["llmConfig"]["model"] == "experimental-5"
+    assert f.workflow["nodes"] == wf()["nodes"]                          # the definition itself is unchanged
+    v, note = bg.tune_turn_taking(f, "w", "en", wait=4.0)                 # already set: no new version
+    assert v is None and "already" in note and len(f.versions) == 2, (v, note)
+    f = FakeFreya([{"id": "v1", "versionNumber": 1, "isPublished": True}], {"initial_node": "a", "nodes": {}})
+    v, note = bg.tune_turn_taking(f, "w", "en", wait=4.0)                 # no agent_config: nothing sent
+    assert v is None and not [c for c in f.calls if c[0] != "GET"], f.calls
 
 
 if __name__ == "__main__":

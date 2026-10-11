@@ -317,6 +317,52 @@ def ensure_published(freya, wid):
     return newest["versionNumber"], "newest version %d is published, agent model %s/%s" % ((newest["versionNumber"],) + want)
 
 
+LANG_CODES = {"english": "en", "german": "de", "french": "fr", "spanish": "es", "italian": "it", "dutch": "nl",
+              "turkish": "tr", "portuguese": "pt", "polish": "pl", "swedish": "sv", "danish": "da"}
+
+
+def brief_language(text):
+    """The language the agent speaks: the one the brief names after speak/language, else English (the briefs' own)."""
+    import re
+    names = "|".join(LANG_CODES)
+    m = re.search(r"\b(?:speaks?|speaking|spoken|language(?: of the call)?(?: is|:)?)\s+(?:only\s+|in\s+)?(%s)\b" % names,
+                  text or "", re.I)
+    return LANG_CODES[m.group(1).lower()] if m else "en"
+
+
+def tune_turn_taking(freya, wid, language="en", wait=None):
+    """Returns (published version number or None, note). The platform's turn-taking defaults (start speaking 0.5 s after
+    the caller pauses, smart turn on) cut a talkative customer off mid-sentence: 74% of customer messages in Brief A
+    talkative (11 Oct), 2-4% in the other styles. The agent then answers a fragment. Every save drops agent_config, so
+    this runs after the last save: wait longer, smart turn off, speech language of the brief (the default is Turkish).
+    The model (llmConfig) is left as it is."""
+    import os
+    wait = float(wait if wait is not None else os.environ.get("TURN_WAIT_SECONDS", "4.0"))
+    w = freya.api("GET", "/api/v2/workflow/%s" % wid, workspaceId=freya.workspace_id())["workflow"]["workflow"]
+    ac = w.get("agent_config")
+    if not isinstance(ac, dict) or not ac:
+        return None, "no agent_config on the platform: turn-taking left as it is"
+    tts, stt = ac.setdefault("ttsConfig", {}), ac.setdefault("sttConfig", {})
+    want = [(tts.setdefault("startSpeakingPlan", {}), "waitSeconds", wait),
+            (stt.setdefault("additionalSettings", {}), "smartTurnEnabled", False),
+            (tts, "language", language), (stt, "language", language)]
+    if all(d.get(k) == v for d, k, v in want):
+        return None, "turn-taking already set (wait %.1f s, smart turn off, language %s)" % (wait, language)
+    for d, k, v in want:
+        d[k] = v
+    freya.api("PUT", "/api/v2/workflow/%s" % wid, {"workflow": {**w, "agent_config": ac}})
+    newest = max(_versions(freya, wid), key=lambda v: v["versionNumber"])
+    if not newest.get("isPublished"):
+        freya.api("POST", "/api/v2/versions/workflow/%s/publish" % wid, {"versionId": newest["id"]})
+    got = freya.api("GET", "/api/v2/workflow/%s" % wid, workspaceId=freya.workspace_id())["workflow"]["workflow"]
+    gac = got.get("agent_config") or {}
+    llm = gac.get("llmConfig") or {}
+    ok = ((gac.get("ttsConfig") or {}).get("startSpeakingPlan") or {}).get("waitSeconds") == wait \
+        and (llm.get("provider"), llm.get("model")) == (freya.AGENT_LLM["provider"], freya.AGENT_LLM["model"])
+    return newest["versionNumber"], "turn-taking set (wait %.1f s, smart turn off, language %s), version %d published%s" % (
+        wait, language, newest["versionNumber"], "" if ok else " BUT the read-back differs")
+
+
 # ------------------------------------------------------------------------------------------- 3. best tested version
 # failures builder/sim.py gives that are not the agent's: the harness, the mock bank, the judge, the chat route
 INFRA_PREFIXES = ("harness", "mock bank: could not open", "mock bank: no ledger", "mock bank: the ledger could not be scored",
