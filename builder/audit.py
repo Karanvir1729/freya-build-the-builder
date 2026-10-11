@@ -23,7 +23,7 @@ code and terminals. The rules are audited in batches (--batch, default 12 rules)
 each batch is one model call with the same context. One more small call ranks the gaps into top_fixes.
 --workflow may be the export format ({"workflow": {...}}) or the plain workflow. --generator is optional (--generator "").
 
-Needs a Claude login (or ANTHROPIC_API_KEY). AUDIT_MODEL overrides the model (default claude-opus-5-5).
+Needs a Claude login (or ANTHROPIC_API_KEY). AUDIT_MODEL overrides the model (default $BUILDER_MODEL, else claude-fable-5-1).
 Progress and every model call go to stderr ("model call: <model> | purpose: ..."); the one-line summary goes to stdout.
 """
 import argparse, asyncio, difflib, json, os, pathlib, re, sys, time
@@ -32,7 +32,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from rules import ask_json_async  # noqa: E402  (same folder; the Claude call helper)
 
-DEFAULT_MODEL = "claude-opus-5-5"
+DEFAULT_MODEL = os.environ.get("BUILDER_MODEL") or "claude-fable-5-1"
+# effort of the audit's calls ("" = the model's default); AUDIT_EFFORT overrides. The final audit has about 4 minutes
+EFFORT = os.environ.get("AUDIT_EFFORT", "medium") or None   # Anthropic's most capable model; BUILDER_MODEL sets every step
 STATUSES = ["implemented", "partial", "missing", "contradicted"]
 
 AUDIT_SCHEMA = {
@@ -332,7 +334,7 @@ async def _audit_batch(batch, system_prompt, model, log, sem, idx, nb):
         len(batch), batch[0]["id"], batch[-1]["id"], "\n".join(_rule_block(r) for r in batch)))
     async with sem:
         obj, info = await ask_json_async(prompt, system_prompt, AUDIT_SCHEMA, "audit rules %s-%s (batch %d/%d)" % (
-            batch[0]["id"], batch[-1]["id"], idx, nb), model=model, log=log)
+            batch[0]["id"], batch[-1]["id"], idx, nb), model=model, log=log, effort=EFFORT)
     got = {str(x.get("id")): x for x in (obj.get("rules") if isinstance(obj, dict) else obj) or [] if isinstance(x, dict)}
     out = []
     for r in batch:
@@ -392,7 +394,7 @@ async def audit_async(rules_path, workflow_path, generator_path, out_path, model
               "terminal message) and the text or logic to add or change. Return at most 5, most important first.\n\nGAPS:\n%s" % "\n\n".join(
                   "%s [%s]\n   rule: %s\n   where: %s\n   evidence: %s\n   fix_hint: %s" % (
                       j["id"], j["status"], _rule_block(by_id[j["id"]]), j["where"], j["evidence"], j["fix_hint"]) for j in gaps))
-        obj, info = await ask_json_async(gp, PRIMER, FIXES_SCHEMA, "rank the %d gaps into the top 5 fixes" % len(gaps), model=model, log=log)
+        obj, info = await ask_json_async(gp, PRIMER, FIXES_SCHEMA, "rank the %d gaps into the top 5 fixes" % len(gaps), model=model, log=log, effort=EFFORT)
         cost += info["cost_usd"]; calls += info["attempts"]
         for x in (obj.get("top_fixes") if isinstance(obj, dict) else obj) or []:
             if isinstance(x, dict) and str(x.get("id")) in by_id:

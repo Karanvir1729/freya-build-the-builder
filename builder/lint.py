@@ -55,7 +55,6 @@ NO_TOOL_RE = re.compile(
     r"|do not use (?:any |a )?tools?\b"
     r"|no tools? (?:is |are )?(?:allowed|available|permitted))", re.I)
 BOOL_OPERAND_RE = re.compile(r"^(true|false)$", re.I)
-DATE_NAME_RE = re.compile(r"(^|_)(date|dob|birthday|birth_date|day|deadline)(_\w+)?$|_on$|^(date|dob)_")
 
 
 class _Linter:
@@ -1071,8 +1070,14 @@ class _Linter:
                 mc = e["min_confidence"]
                 if not isinstance(mc, (int, float)) or isinstance(mc, bool) or not 0 <= mc <= 1:
                     self.err(ew, "min_confidence must be a number from 0.0 to 1.0")
-            if name and t == "string" and ev is None and DATE_NAME_RE.search(name):
-                self.warn(ew, f"'{name}' looks like a date but is typed string: use type date so the extractor gets today's date and relative-date rules")
+            if name and t in ("date", "datetime"):
+                # the platform resolves relative words ('tomorrow', 'next Friday') against the REAL clock, not the call's
+                # `now` (seen: 'tomorrow' became 11 October on a call set on 14 October)
+                words = [x.get("name") for x in es if isinstance(x, dict) and x.get("type") == "string" and x.get("enum_values") is None and x.get("name")]
+                if words:
+                    self.info(ew, f"'{name}' is typed {t}: the platform resolves relative words with the real clock, not the call's `now`; use it only as a fallback behind the customer's words resolved in code ({', '.join(words)} here)")
+                else:
+                    self.warn(ew, f"'{name}' is typed {t}: the platform resolves relative words ('tomorrow', 'next Friday') with the real clock, not the call's `now`. Extract the customer's words as a string and resolve them in code against `now` (builder/policy.py offer_when + resolve_when)")
             ep = e.get("extraction_prompt")
             if isinstance(ep, str) and ep.strip():
                 missing = [p for p in EXTRACTION_PROMPT_PLACEHOLDERS if p not in ep]

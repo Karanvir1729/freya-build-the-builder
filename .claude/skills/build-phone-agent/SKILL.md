@@ -72,6 +72,8 @@ Use ONLY what the given brief(s) and tool API file say. Never copy a rule, value
 ## Rules
 
 - Never edit the agent on the platform by hand. Change the generator and save.
+- `build.py` guards the last repair: `builder/sim.py` records the workflow version each case ran on, and when your final version, re-tested, passed 2 or more fewer of the cases it shares with the version tested before it and none more, that earlier version is saved again after you finish. Test only what is saved (save, then run), never an unsaved file.
+- Edits you make to `builder/`, `.claude/skills/` or `tools/` during a build are written to a patch in `out/` and reverted after the export (the saved agent is unaffected). Put everything brief-specific in `out/gen_<slot>.py`; extend the library only brief-agnostically.
 - When a tool call fails, the agent must say so. It must never tell the customer something is recorded when it is not.
 - A customer that passes once can fail the next time. Prefer rules in routes and code over rules in prompts.
 - Keep tool definitions faithful to the API file: a field or enum value the brief mentions but the API lacks does not exist; one the API has but the brief does not mention still must be filled correctly.

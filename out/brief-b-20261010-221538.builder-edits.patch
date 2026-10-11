@@ -1,0 +1,135 @@
+diff --git a/builder/policy.py b/builder/policy.py
+--- a/builder/policy.py
++++ b/builder/policy.py
+@@ -119,6 +119,10 @@
+ # an amount named by reference instead of a number ('the minimum', 'the whole amount'): the extractor does not know the
+ # floor's value, so 'too much, but I can pay the minimum today' arrived with no amount and the guard read back the FULL
+ # amount (extended Brief A EXT-A-36). The reference is resolved in code against the product's floor / full amount.
++SAID_DESC = ("When the customer gives a reason in their LATEST message (a hardship such as illness, a bereavement or "
++             "losing their job; why they dispute the debt; that they already paid, when or how; why they will not pay), "
++             "that reason in a few of their own words, e.g. 'lost my job last month' or 'paid on Monday by bank transfer'. "
++             "Empty when the message gives no reason.")
+ REF_DESC = ("Whether the customer's LATEST message names the payment amount BY REFERENCE instead of as a number. "
+             "floor = the lowest amount the agent can accept, however they call it ('the minimum', 'the lowest amount', 'the "
+             "lowest you can take', or the name the agent used for it). full = the whole past-due amount ('all of it', "
+@@ -621,6 +625,8 @@
+                 delta = (wd - today.weekday()) % 7 or 7
+             else:   # that weekday in the following calendar week
+                 delta = (7 - today.weekday()) + wd
++        elif m.group(1) == 'this' and P.get('weekday_rule', 'this_week') == 'this_week':
++            delta = wd - today.weekday()   # 'this X' = X of the current calendar week, also when already past (the guard says so)
+         else:
+             delta = (wd - today.weekday()) % 7
+         return today + D(delta), 'exact'
+@@ -1132,8 +1138,11 @@
+     # the note's free text (when the API's note tool has one): what a reviewer needs per reason
+     try:
+         w = pg(V, p, 'words')
+-        said = str(g(V, 'customer_said') or '').strip()
+-        if said.lower() in ('', 'none', 'null'):
++        said = ''
++        for k in ('said_' + st, 'said_last', 'customer_said'):
++            said = str(g(V, k) or '').strip()
++            if said.lower() not in ('', 'none', 'null'):
++                break
+             said = ''
+         if st == 'refused':
+             a, d = prop_of(V, p)
+@@ -1298,8 +1307,25 @@
+     _clear_enums(V)
+     _clear_values(V)
+     state_line(V)
++def keep_said(V, ev):
++    # the customer's words for a reason (customer_said, extracted on the turn) survive later turns that extract nothing:
++    # one sticky copy per note kind, read by note_text
++    s = str(g(V, 'customer_said') or '').strip()
++    if s.lower() in ('', 'none', 'null'):
++        return
++    V['said_last'] = s
++    kind = {'hardship': 'hardship', 'hs_decline': 'hardship', 'paid': 'paid', 'dispute': 'dispute', 'refuse': 'refused'}.get(ev)
++    if kind:
++        # the first reason stays (the turn that disclosed it: 'lost my job'); a later, different one is added
++        # ('no money'), so a follow-up turn never replaces the reason the note must name
++        old = str(g(V, 'said_' + kind) or '').strip()
++        if not old or old.lower() in ('none', 'null'):
++            V['said_' + kind] = s
++        elif s.lower() not in old.lower():
++            V['said_' + kind] = (old + '; ' + s)[:240]
+ def main(V, ev):
+     try:
++        keep_said(V, ev)
+         V['policy_event'] = ev
+         V['offer_verdict'] = ''
+         V['when_prev'] = g(V, 'pending_when')   # unresolved day words of the last policy turn, joined once
+@@ -1358,6 +1384,7 @@
+ WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verdict", "next_offer_text", "route",
+            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
+            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok", "note_text",
++           "said_last", "said_hardship", "said_paid", "said_dispute", "said_refused",
+            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
+            "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
+            "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev")
+@@ -1559,6 +1586,11 @@
+                 "; none = no such question. Pick it even when the message also contains an answer, an offer or a refusal.")
+         return [fl.ext("aside", ["none"] + list(self.asides), desc, conf)]
+ 
++    def said_extraction(self, conf=0.5):
++        """`customer_said` (only when the brief keeps notes): the customer's own words for a hardship, a dispute, a
++        payment already made or a refusal, kept by code per note kind and written into the note's free text."""
++        return [{"name": "customer_said", "type": "string", "description": SAID_DESC, "min_confidence": conf}] if self.notes else []
++
+     def claims_extraction(self, conf=0.5):
+         """Multi-product only: `per_product`, what the customer's LATEST message says about each product when it says
+         different things about different products, as 'first=dispute;second=paid;third=pay' (parsed in code:
+@@ -1628,7 +1660,8 @@
+         state_line first in its prompt, no tools (every write happens in the record nodes)."""
+         name = name or self.targets["negotiate"]
+         return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
+-                       extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction()), transitions=transitions)
++                       extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction() + self.said_extraction()),
++                       transitions=transitions)
+ 
+     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
+                      name=None, conf=0.5, ref_desc=None):
+@@ -1734,7 +1767,7 @@
+                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
+                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]
+         return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
+-                       extraction=fl.with_cutoff(ext + self.aside_extraction(conf)), transitions=trs)
++                       extraction=fl.with_cutoff(ext + self.aside_extraction(conf) + self.said_extraction(conf)), transitions=trs)
+ 
+     def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):
+         """After a recorded promise (on_enter tts {{wrap_line}}: the recorded sentence, the brief's sentence after
+diff --git a/builder/tests/test_policy.py b/builder/tests/test_policy.py
+--- a/builder/tests/test_policy.py
++++ b/builder/tests/test_policy.py
+@@ -394,6 +394,29 @@
+         V["note_ok"] = "true"
+         ev(P, V, "note_after")
+     assert V["route"] == "fin" and V["final_route"] == "dispute", V.get("final_route")
++
++
++@test
++def note_text_carries_the_customers_reason():               # Brief F PUB-05: the note must name the job loss
++    P, V = start([CARD, LOAN], multi=True, notes=True)
++    ev(P, V, "hardship", topic="hardship", customer_said="I lost my job last month")
++    V["customer_said"] = "have no money right now"          # a later turn gives another reason: both are kept
++    ev(P, V, "hs_decline", hs_answer="support_no")
++    assert V["route"] == "note" and "lost my job last month; have no money right now" in V["note_text"], V.get("note_text")
++    P, V = start([CARD, LOAN], multi=True, notes=True)
++    ev(P, V, "hardship", topic="hardship", customer_said="I lost my job last month")
++    V["customer_said"] = ""                                 # a later turn extracts nothing: the reason stays
++    ev(P, V, "hs_decline", hs_answer="support_no")
++    assert V["route"] == "note" and "lost my job last month" in V["note_text"], V.get("note_text")
++    P, V = start([CARD], notes=True)
++    ev(P, V, "dispute", topic="dispute", customer_said="the card was stolen in August")
++    assert V["route"] == "note" and "the card was stolen in August" in V["note_text"], V.get("note_text")
++    P, V = start([CARD], notes=True)                        # no reason given: the note still says what happened
++    ev(P, V, "dispute", topic="dispute")
++    assert V["route"] == "note" and "disputes" in V["note_text"], V.get("note_text")
++    # the extraction exists only when the brief keeps notes
++    names = lambda pol_: [e["name"] for e in pol_.negotiate_node("t", [], [])["extraction_schema"]]
++    assert "customer_said" in names(mk(True, True)) and "customer_said" not in names(mk(False, False))
+ 
+ 
+ @test

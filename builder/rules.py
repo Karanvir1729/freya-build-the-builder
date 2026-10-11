@@ -39,7 +39,7 @@ Output: <out> is a JSON list of rules
    "effective_until", "not_policy", "verification"}
 plus <out .md> (Markdown), <out .conflicts.md>, <out .meta.json> and <slot>.spec.json next to it.
 
-Needs a Claude login (or ANTHROPIC_API_KEY). RULES_MODEL overrides the model (default claude-opus-5-5).
+Needs a Claude login (or ANTHROPIC_API_KEY). RULES_MODEL overrides the model (default $BUILDER_MODEL, else claude-fable-5-1).
 Progress and every model call go to stderr ("model call: <model> | purpose: ..."); the one-line summary goes to stdout.
 """
 import argparse, asyncio, copy, datetime, json, os, pathlib, re, sys, time
@@ -48,7 +48,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import spec_check  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_MODEL = "claude-opus-5-5"
+DEFAULT_MODEL = os.environ.get("BUILDER_MODEL") or "claude-fable-5-1"   # Anthropic's most capable model; BUILDER_MODEL sets every step
 # extraction, merge and verification write long structured answers: output tokens dominate the wall time, and low effort
 # halves the thinking without losing rules (measured on Brief D: 91-105 rules either way). The dated-decision call keeps
 # the model's default effort. RULES_EFFORT overrides (low | medium | high | "" for the default).
@@ -57,7 +57,8 @@ FAST_EFFORT = os.environ.get("RULES_EFFORT", "low") or None
 # inventory. Measured on Brief D: Sonnet for B and C was not cheaper (longer answers) and doubled the low-confidence
 # rules (the samples agree less), so all three use the main model by default.
 SAMPLE_MODELS = os.environ.get("RULES_SAMPLE_MODELS", "")
-MAX_BUDGET_USD_PER_CALL = 6.0
+MAX_BUDGET_USD_PER_CALL = 15.0     # a stop for a runaway call (claude-fable-5-1 costs 2.5x claude-opus-5-5 per token)
+FALLBACK_MODEL = "claude-opus-5-5"  # when the main model is overloaded (the Claude CLI's --fallback-model)
 
 CATEGORIES = ["opening", "third_party", "identity", "disclosure", "dates", "amounts", "persuasion", "hardship",
               "confirmation", "recording", "special", "multi_product", "closing", "wording", "other"]
@@ -248,7 +249,8 @@ async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max
         t0 = time.time()
         log("model call: %s | purpose: %s%s" % (model, purpose, " (retry after invalid JSON)" if attempt else ""))
         options = ClaudeAgentOptions(
-            cwd=str(ROOT), model=model, tools=[], allowed_tools=[], permission_mode="dontAsk", max_turns=4,
+            cwd=str(ROOT), model=model, fallback_model=FALLBACK_MODEL if model != FALLBACK_MODEL else None,
+            tools=[], allowed_tools=[], permission_mode="dontAsk", max_turns=4,
             setting_sources=[], system_prompt=_system_prompt_arg(system_prompt), max_budget_usd=max_budget_usd,
             output_format={"type": "json_schema", "schema": schema}, effort=effort)
         p = prompt if not attempt else (prompt + "\n\nYour previous answer was not valid JSON for the schema (%s). "
@@ -265,6 +267,10 @@ async def ask_json_async(prompt, system_prompt, schema, purpose, model=None, max
                 info["cost_usd"] += m.total_cost_usd or 0.0
                 info["turns"] += m.num_turns or 0
                 info["usage"] = m.usage or {}
+                served = sorted((m.model_usage or {}).keys())
+                if served and served != [model]:          # the fallback model answered (the trace names who did)
+                    info["served_by"] = served
+                    log("model call: served by %s (requested %s) | purpose: %s" % (", ".join(served), model, purpose))
         info["seconds"] += time.time() - t0
         if result is not None and result.is_error:
             last_err = "result error: %s %s" % (result.subtype, (result.errors or [result.result])[:1])

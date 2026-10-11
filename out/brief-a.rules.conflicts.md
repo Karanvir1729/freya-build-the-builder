@@ -4,11 +4,6 @@ Resolve these FIRST, before writing the generator: re-read the quoted source sen
 
 ## Rules found by only one extraction sample (confidence low)
 
-- **R22** (_openapi.json /verify_identity_, samples C): An unreadable `answer` is rejected with ok=false and not counted as a wrong answer; `phone_last4` must be four digits.
-
-## Dated decisions (which statement is in force)
-
-- **T1** topic `call_variables`: Both candidates come from the same section 2 table in the single undated brief and say the same thing. Nothing conflicts with them and nothing replaces them, so both apply together.
-  - R02: in_force -- "Every call starts with these. Nothing else is known before the tools are called."
-  - R03: in_force -- "| `customer_id` | `c_4f2a...` | Pass it to every tool call. |"
+- **R31** (_openapi.json /verify_identity_, samples C): `verify_identity` requires `customer_id`, `field` (`date_of_birth` or `phone_last4`) and `answer`; `phone_last4` answer is four digits; an unreadable value returns `ok=false` and is not counted as a wrong answer.
+- **R32** (_openapi.json /schedule_callback_, samples C): `schedule_callback` requires `customer_id`, `date` (format date) and `time` as `HH:MM`.
 

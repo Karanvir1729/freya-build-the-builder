@@ -1,45 +1,40 @@
 {
- "model": "claude-opus-5-5",
+ "model": "claude-fable-5-1",
  "sample_models": {
-  "A": "claude-opus-5-5",
-  "B": "claude-opus-5-5",
-  "C": "claude-opus-5-5"
+  "A": "claude-fable-5-1",
+  "B": "claude-fable-5-1",
+  "C": "claude-fable-5-1"
  },
- "seconds": 77.93197751045227,
- "cost_usd": 0.9614872,
- "calls": 9,
+ "seconds": 116.80620121955872,
+ "cost_usd": 3.2197099999999996,
+ "calls": 8,
  "self_check": {
   "missing_numbers": {},
   "missing_tokens": []
  },
  "samples": {
-  "A": 58,
+  "A": 59,
   "B": 56,
-  "C": 59
+  "C": 61
  },
  "stages": {
   "extract": {
-   "seconds": 38.026636838912964,
-   "cost_usd": 0.5900322,
+   "seconds": 53.58731698989868,
+   "cost_usd": 2.4978575,
    "calls": 6
   },
   "merge": {
-   "seconds": 19.245793342590332,
-   "cost_usd": 0.2109725,
-   "calls": 1
-  },
-  "decide": {
-   "seconds": 0.0,
-   "cost_usd": 0.0494139,
+   "seconds": 27.084742069244385,
+   "cost_usd": 0.42186999999999997,
    "calls": 1
   },
   "verify": {
    "seconds": 0.0,
-   "cost_usd": 0.1110686,
+   "cost_usd": 0.2999825,
    "calls": 1
   },
   "verify+decide": {
-   "seconds": 20.646599292755127
+   "seconds": 36.12507224082947
   }
  },
  "briefs": [
@@ -48,20 +43,20 @@
  "api": "tools/openapi.json",
  "spec": "brief-a.spec.json",
  "conflicts": "brief-a.rules.conflicts.md",
- "n_conflicts": 1,
+ "n_conflicts": 2,
  "call_date_range": {
-  "earliest": "2026-10-14",
-  "latest": "2027-01-01",
-  "basis": "example `now` 2026-10-14T11:00; bank holiday list runs to 2027-01-01"
+  "earliest": "",
+  "latest": "",
+  "basis": ""
  },
- "n_rules": 60,
- "n_in_force": 60,
+ "n_rules": 61,
+ "n_in_force": 61,
  "n_low": 2,
  "n_low_in_force": 2,
  "verification": {
   "ok": 21
  },
- "decision_blocks": 1,
+ "decision_blocks": 0,
  "spec_errors": 0,
  "spec_warnings": 0
 }

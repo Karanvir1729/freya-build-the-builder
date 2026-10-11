@@ -1,7 +1,7 @@
 # Rule inventory and coverage audit
 
 Two Claude-powered helpers for the builder. Both run on the Claude Agent SDK in `.venv` (no tools, structured JSON output,
-model `claude-opus-5-5`), work as a CLI and as a function, write their output file plus a Markdown rendering next to it,
+model `$BUILDER_MODEL`, default `claude-fable-5-1`), work as a CLI and as a function, write their output file plus a Markdown rendering next to it,
 and print a one-line summary on stdout. Progress and every model call go to stderr as
 `model call: <model> | purpose: ...`, so a caller can copy them into a trace.
 
@@ -16,7 +16,7 @@ python3 builder/rules.py <brief.md> [<brief2.md> ...] --api <tool_api.json> --ou
 python3 builder/rules.py briefs/brief-a.md --api tools/openapi.json --out out/brief-a.rules.json
 python3 builder/rules.py briefs/brief-a.md briefs/brief-b.md --api tools/openapi.json --out out/brief-ab.rules.json
 options: --samples 1|2|3 (default 3)   --split N (parallel calls per sample, default 2)   --no-verify (skip T14/T15)   --model
-env:     RULES_MODEL (default claude-opus-5-5), RULES_EFFORT (default low for extraction/merge/verification),
+env:     RULES_MODEL (default $BUILDER_MODEL, else claude-fable-5-1), RULES_EFFORT (default low for extraction/merge/verification),
          RULES_SAMPLE_MODELS ("m_A,m_B,m_C"; default: the main model for all three)
 ```
 

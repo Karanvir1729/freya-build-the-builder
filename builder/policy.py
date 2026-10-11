@@ -119,6 +119,10 @@ WHEN_DESC = ("The customer's OWN WORDS for WHEN they will pay, copied exactly as
 # an amount named by reference instead of a number ('the minimum', 'the whole amount'): the extractor does not know the
 # floor's value, so 'too much, but I can pay the minimum today' arrived with no amount and the guard read back the FULL
 # amount (extended Brief A EXT-A-36). The reference is resolved in code against the product's floor / full amount.
+SAID_DESC = ("When the customer gives a reason in their LATEST message (a hardship such as illness, a bereavement or "
+             "losing their job; why they dispute the debt; that they already paid, when or how; why they will not pay), "
+             "that reason in a few of their own words, e.g. 'lost my job last month' or 'paid on Monday by bank transfer'. "
+             "Empty when the message gives no reason.")
 REF_DESC = ("Whether the customer's LATEST message names the payment amount BY REFERENCE instead of as a number. "
             "floor = the lowest amount the agent can accept, however they call it ('the minimum', 'the lowest amount', 'the "
             "lowest you can take', or the name the agent used for it). full = the whole past-due amount ('all of it', "
@@ -611,6 +615,10 @@ def resolve_when(V, text):
         wd = WDN.index(m.group(2))
         if P.get('weekday_rule') == 'first_after' and m.group(1) in ('this', 'next', 'coming'):
             delta = (wd - today.weekday()) % 7 or 7   # the first such weekday AFTER today, also when said on that weekday
+        elif P.get('weekday_rule') == 'first_after_plus7':
+            delta = (wd - today.weekday()) % 7 or 7   # bare / 'this X' = the first X after today; 'next X' = seven days later
+            if m.group(1) == 'next':
+                delta += 7
         elif m.group(1) == 'next':
 
             if P.get('weekday_rule') == 'first_after':
@@ -1128,8 +1136,11 @@ def note_text(V, p, st):
     # the note's free text (when the API's note tool has one): what a reviewer needs per reason
     try:
         w = pg(V, p, 'words')
-        said = str(g(V, 'customer_said') or '').strip()
-        if said.lower() in ('', 'none', 'null'):
+        said = ''
+        for k in ('said_' + st, 'said_last', 'customer_said'):
+            said = str(g(V, k) or '').strip()
+            if said.lower() not in ('', 'none', 'null'):
+                break
             said = ''
         if st == 'refused':
             a, d = prop_of(V, p)
@@ -1294,8 +1305,25 @@ def finish_turn(V):
     _clear_enums(V)
     _clear_values(V)
     state_line(V)
+def keep_said(V, ev):
+    # the customer's words for a reason (customer_said, extracted on the turn) survive later turns that extract nothing:
+    # one sticky copy per note kind, read by note_text
+    s = str(g(V, 'customer_said') or '').strip()
+    if s.lower() in ('', 'none', 'null'):
+        return
+    V['said_last'] = s
+    kind = {'hardship': 'hardship', 'hs_decline': 'hardship', 'paid': 'paid', 'dispute': 'dispute', 'refuse': 'refused'}.get(ev)
+    if kind:
+        # the first reason stays (the turn that disclosed it: 'lost my job'); a later, different one is added
+        # ('no money'), so a follow-up turn never replaces the reason the note must name
+        old = str(g(V, 'said_' + kind) or '').strip()
+        if not old or old.lower() in ('none', 'null'):
+            V['said_' + kind] = s
+        elif s.lower() not in old.lower():
+            V['said_' + kind] = (old + '; ' + s)[:240]
 def main(V, ev):
     try:
+        keep_said(V, ev)
         V['policy_event'] = ev
         V['offer_verdict'] = ''
         V['when_prev'] = g(V, 'pending_when')   # unresolved day words of the last policy turn, joined once
@@ -1354,6 +1382,7 @@ def main(V, ev):
 WRITTEN = ("say_next", "state_line", "offer_question", "offer_text", "offer_verdict", "next_offer_text", "route",
            "final_route", "readback_line", "wrap_line", "prop_pid", "prop_amount", "prop_date", "ok_pid", "ok_amount",
            "ok_date", "rec_pid", "rec_amount", "rec_date", "rec_ok", "note_pid", "note_reason", "note_ok", "note_text",
+           "said_last", "said_hardship", "said_paid", "said_dispute", "said_refused",
            "recorded_pids", "pids_csv", "cur_pid", "stage", "mode", "human_count", "notalk_count", "wrap_count",
            "wrap_human", "vague_all", "hs_offer", "hs_date", "hs_amount", "policy_state", "policy_event", "same_change", "wrap_done",
            "promise_reason", "pending_when", "when_prev", "when_cutoff", "cutoff_count", "small_amount_asked", "pending_amount", "amount_prev")
@@ -1555,6 +1584,11 @@ class Policy:
                 "; none = no such question. Pick it even when the message also contains an answer, an offer or a refusal.")
         return [fl.ext("aside", ["none"] + list(self.asides), desc, conf)]
 
+    def said_extraction(self, conf=0.5):
+        """`customer_said` (only when the brief keeps notes): the customer's own words for a hardship, a dispute, a
+        payment already made or a refusal, kept by code per note kind and written into the note's free text."""
+        return [{"name": "customer_said", "type": "string", "description": SAID_DESC, "min_confidence": conf}] if self.notes else []
+
     def claims_extraction(self, conf=0.5):
         """Multi-product only: `per_product`, what the customer's LATEST message says about each product when it says
         different things about different products, as 'first=dispute;second=paid;third=pay' (parsed in code:
@@ -1624,7 +1658,8 @@ class Policy:
         state_line first in its prompt, no tools (every write happens in the record nodes)."""
         name = name or self.targets["negotiate"]
         return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction()), transitions=transitions)
+                       extraction=fl.with_cutoff(list(extraction) + self.claims_extraction() + self.aside_extraction() + self.said_extraction()),
+                       transitions=transitions)
 
     def confirm_node(self, task, confirm_desc, date_desc, amount_desc, topic_entry=None, topic_trs=None,
                      name=None, conf=0.5, ref_desc=None):
@@ -1730,7 +1765,7 @@ class Policy:
                fl.eq("hs_answer", "accept_offer", "accept_offer", "the customer accepts the corrected offer"),
                fl.eq("hs_answer", "support_no", "hs_decline", "the customer declines the support team")]
         return fl.conv(name, self.state_first(task) + ONCE_RULE, on_enter={"type": "tts", "text": "{{say_next}}"},
-                       extraction=fl.with_cutoff(ext + self.aside_extraction(conf)), transitions=trs)
+                       extraction=fl.with_cutoff(ext + self.aside_extraction(conf) + self.said_extraction(conf)), transitions=trs)
 
     def wrapup_node(self, task, wrap_desc, name=None, conf=0.5, max_turns=3):
         """After a recorded promise (on_enter tts {{wrap_line}}: the recorded sentence, the brief's sentence after

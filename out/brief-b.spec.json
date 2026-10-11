@@ -1,0 +1,330 @@
+{
+ "schema": "rules-v2/spec-1",
+ "call_date_range": {
+  "earliest": "2026-10-14",
+  "latest": "2027-01-01",
+  "basis": "example `now` 2026-10-14T11:00 in Brief A; holiday calendar runs to 2027-01-01; no go-live or campaign dates given"
+ },
+ "spec": {
+  "callback": {
+   "text": "date format date, time HH:MM",
+   "open": "10:00",
+   "close": "19:00",
+   "same_day": true,
+   "later_than_now": true,
+   "days_ahead_business": 1
+  },
+  "max_wrong_answers": 3,
+  "calendar": {
+   "business_weekdays": [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri"
+   ],
+   "holidays": [
+    {
+     "date": "2026-10-26",
+     "name": ""
+    },
+    {
+     "date": "2026-11-11",
+     "name": ""
+    },
+    {
+     "date": "2026-11-26",
+     "name": ""
+    },
+    {
+     "date": "2026-12-25",
+     "name": ""
+    },
+    {
+     "date": "2027-01-01",
+     "name": ""
+    }
+   ]
+  },
+  "bands": [
+   {
+    "name": "early",
+    "min_days": 1,
+    "max_days": 7,
+    "deadline_rule": {
+     "type": "business_days_after",
+     "n": 12,
+     "adjust": "none"
+    },
+    "attempts": 1
+   },
+   {
+    "name": "late",
+    "min_days": 8,
+    "max_days": 45,
+    "deadline_rule": {
+     "type": "business_days_after",
+     "n": 7,
+     "adjust": "none"
+    },
+    "attempts": 2
+   }
+  ],
+  "floors": [
+   {
+    "product_types": [
+     "credit_card"
+    ],
+    "rule": {
+     "type": "field",
+     "field": "minimum_payment"
+    }
+   },
+   {
+    "product_types": [
+     "personal_loan",
+     "car_loan"
+    ],
+    "rule": {
+     "type": "field",
+     "field": "instalment_amount"
+    }
+   }
+  ],
+  "attempt_ladder": [
+   {
+    "attempt": 1,
+    "bands": [],
+    "amount": "in_play",
+    "date_rule": "the last business day of this week; if today is that day, the last business day of next week",
+    "text": ""
+   },
+   {
+    "attempt": 2,
+    "bands": [
+     "late"
+    ],
+    "amount": "floor",
+    "date_rule": "the deadline",
+    "text": ""
+   }
+  ],
+  "identity": [
+   {
+    "field": "date_of_birth",
+    "order": 1,
+    "hint_values": [
+     "day_month_swapped"
+    ],
+    "retry_rule": "ask to say the month as a word; retry not counted as a wrong answer"
+   },
+   {
+    "field": "phone_last4",
+    "order": 2,
+    "retry_rule": "a wrong answer may be asked again"
+   }
+  ],
+  "outcomes": [
+   {
+    "outcome": "not_reached",
+    "reason": "unclear",
+    "when": "still unclear whether the customer is on the line after the second ask; rule 3"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "callback",
+    "when": "callback scheduled; rule 6"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "no_callback",
+    "when": "second offered callback time also outside the window; rule 7"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "wrong_number",
+    "when": "number does not belong to the customer; rule 8"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "deceased",
+    "when": "person says the customer has died; rule 9"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "failed",
+    "when": "three wrong answers; rule 14"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "declined",
+    "when": "second refusal or second 'what is this about' instead of answering; unverified customer says twice they do not want to talk; rule 15"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "refused",
+    "when": "persuasion attempts used up; verified customer says twice they do not want to talk; rules 31 and 45"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "support",
+    "when": "hardship and customer accepts support transfer; rule 32"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "hardship",
+    "when": "hardship and customer declines transfer; rule 32"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "restructuring",
+    "when": "customer asks for a new payment plan or lower instalments; rule 41; restructuring request, even after recorded promises; rule 41 / Brief B rule 10"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "human",
+    "when": "customer insists on a human after being asked once if the agent can help; rule 42"
+   },
+   {
+    "outcome": "promise",
+    "reason": "",
+    "when": "at least one promise was recorded; at least one promise was recorded (except a transfer under Brief B rule 10)"
+   },
+   {
+    "outcome": "paid",
+    "reason": "",
+    "when": "rule 39; no promise recorded and every product is noted paid"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "dispute",
+    "when": "rule 40"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "service_error",
+    "when": "rule 37"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "that transfer's reason",
+    "when": "a transfer follows a recorded promise"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "reason of the first product in get_account order whose note is not paid",
+    "when": "no promise recorded and not every product noted paid"
+   }
+  ],
+  "note_reasons": [
+   {
+    "reason": "refused",
+    "when": "product refused without a promise"
+   },
+   {
+    "reason": "hardship",
+    "when": "product ended without a promise due to hardship"
+   },
+   {
+    "reason": "dispute",
+    "when": "one product is disputed"
+   },
+   {
+    "reason": "paid",
+    "when": "customer says one product is already paid"
+   },
+   {
+    "reason": "service_error",
+    "when": "create_promise failed twice for that product"
+   }
+  ],
+  "verbatim": [
+   {
+    "text": "Am I speaking with {title} {last_name}?",
+    "when": "R11: After the first sentence ask \"Am I speaking with {title} {last_name}?\"."
+   },
+   {
+    "text": "I am sorry for your loss.",
+    "when": "R19: If the person says the customer has died, say \"I am sorry for your loss.\", ask nothing else, and close `not_reached` / `deceased`."
+   },
+   {
+    "text": "You will receive a text message confirming this promise.",
+    "when": "R49: After a recorded promise, say word for word: \"You will receive a text message confirming this promise.\""
+   },
+   {
+    "text": "Do you confirm?",
+    "when": "R69: Replaces Brief A rule 34 for several products: read all promises back together (product, amount, date) and ask for one confirmation \"Do you confirm?\". After a c"
+   }
+  ],
+  "forbidden_words_before_verification": [
+   "collections",
+   "debt",
+   "payment",
+   "the product"
+  ]
+ },
+ "sources": {
+  "identity": [
+   "R02",
+   "R21",
+   "R23"
+  ],
+  "callback": [
+   "R03",
+   "R16"
+  ],
+  "forbidden_words_before_verification": [
+   "R10"
+  ],
+  "verbatim": [
+   "R11",
+   "R19",
+   "R49",
+   "R69"
+  ],
+  "outcomes": [
+   "R12",
+   "R16",
+   "R17",
+   "R18",
+   "R19",
+   "R24",
+   "R25",
+   "R42",
+   "R43",
+   "R52",
+   "R53",
+   "R56",
+   "R58",
+   "R59",
+   "R73",
+   "R76"
+  ],
+  "max_wrong_answers": [
+   "R22"
+  ],
+  "calendar": [
+   "R28"
+  ],
+  "bands": [
+   "R29"
+  ],
+  "floors": [
+   "R36"
+  ],
+  "attempt_ladder": [
+   "R41"
+  ],
+  "note_reasons": [
+   "R70",
+   "R71",
+   "R72",
+   "R75"
+  ]
+ },
+ "notes": [
+  "R05: customer_id: pass to every tool call; first_name/last_name: the person to ask for; title: Mr or Ms; now: current date and time",
+  "R21: service rejects anything it cannot read as a date"
+ ],
+ "merge_conflicts": []
+}

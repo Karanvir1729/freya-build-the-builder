@@ -1,0 +1,9 @@
+audit: 79 rules (71 in force) | workflow digest 181102 chars, generator 36131 chars | model claude-fable-5-1 | batches of 12, 3 in parallel
+model call: claude-fable-5-1 | purpose: audit rules R01-R13 (batch 1/6)
+model call: claude-fable-5-1 | purpose: audit rules R14-R25 (batch 2/6)
+model call: claude-fable-5-1 | purpose: audit rules R26-R38 (batch 3/6)
+model call: claude-fable-5-1 | purpose: audit rules R40-R55 (batch 4/6)
+model call: claude-fable-5-1 | purpose: audit rules R56-R68 (batch 5/6)
+model call: claude-fable-5-1 | purpose: audit rules R69-R79 (batch 6/6)
+model call: claude-fable-5-1 | purpose: rank the 2 gaps into the top 5 fixes
+audit: implemented 69, partial 2, missing 0, contradicted 0, superseded 8, total 79 -> out/brief-b.audit.json + brief-b.audit.md | 7 model call(s), 109 s, $7.57 | evidence not found verbatim: 0 | top fixes: R33, R61

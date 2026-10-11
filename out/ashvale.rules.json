@@ -1,0 +1,3975 @@
+[
+ {
+  "id": "R01",
+  "source": "ashvale.md thread 1 mail of 14 Sep",
+  "category": "dates",
+  "text": "Remaining 2026 bank holidays (branches, contact centre and payment processing closed): 19 Oct, 12 Nov, 9 Dec, 25 Dec, 28 Dec 2026 and 1 Jan 2027.",
+  "verbatim": [],
+  "values": {
+   "calendar": {
+    "holidays": [
+     {
+      "date": "2026-10-19",
+      "name": "Charter Day"
+     },
+     {
+      "date": "2026-11-12",
+      "name": "Harvest Thursday"
+     },
+     {
+      "date": "2026-12-09",
+      "name": "Kelso Fair Day"
+     },
+     {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+     },
+     {
+      "date": "2026-12-28",
+      "name": "Boxing Day (substitute day)"
+     },
+     {
+      "date": "2027-01-01",
+      "name": "New Year's Day"
+     }
+    ]
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "holiday_calendar",
+  "doc": "mail of 14 Sep",
+  "doc_date": "2026-09-14",
+  "author_role": "People Team",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A01",
+   "B03",
+   "C01"
+  ],
+  "deciding_quote": "On these days branches, the contact centre and payment processing are all closed:",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-14",
+  "verification": {
+   "q": "V01",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Business days: Monday to Friday except bank holidays. Closure days / holidays: 2026-10-19 (Charter Day), 2026-11-12 (Harvest Thursday), 2026-12-09 (Kelso Fair Day), 2026-12-25 (Christmas Day), 2026-12-28 (Boxing Day substitute), 2027-01-01 (New Year's Day). 2026-12-24 is a normal working day; 2026-11-09 is a normal working day (not a holiday).",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Business days are Monday to Friday except bank holidays; the People Team sends the calendar round, use that.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Monday 19 October 2026 — Charter Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Thursday 12 November 2026 — Harvest Thursday",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Wednesday 9 December 2026 — Kelso Fair Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Friday 25 December 2026 — Christmas Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Monday 28 December 2026 — Boxing Day (substitute day, as the 26th is a Saturday)",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Friday 1 January 2027 — New Year's Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Christmas Eve (Thursday 24 December) is a normal working day; branches close at 13:00 but everything else runs as usual.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Monday 9 November is a normal working day for everyone, not a holiday, and nothing customer-facing moves.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R02",
+  "source": "ashvale.md thread 1 message of 14 Sep",
+  "category": "dates",
+  "text": "Christmas Eve (Thursday 24 December) is a normal working day, not a holiday; branches close at 13:00 but everything else runs as usual.",
+  "verbatim": [],
+  "values": {
+   "calendar": {
+    "text": "2026-12-24 is a normal business day"
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "christmas_eve_working_day",
+  "doc": "mail of 14 Sep",
+  "doc_date": "2026-09-14",
+  "author_role": "People Team",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A02",
+   "B04",
+   "C02"
+  ]
+ },
+ {
+  "id": "R03",
+  "source": "ashvale.md thread 1 mail of 14 Sep",
+  "category": "dates",
+  "text": "Saturday counter opening at Kelso Street continues; this does not make Saturday a business day for the assistant's date rules (see business-day definition).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "saturday_business_day",
+  "doc": "mail of 14 Sep",
+  "doc_date": "2026-09-14",
+  "author_role": "People Team",
+  "status": "distractor",
+  "status_words": "Saturday opening at Kelso Street carries on as before",
+  "confidence": "low",
+  "samples": "A",
+  "not_policy": true,
+  "members": [
+   "A03"
+  ],
+  "deciding_quote": "Saturday opening at Kelso Street carries on as before for counter services.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R04",
+  "source": "ashvale.md message 2.1 Who and what",
+  "category": "other",
+  "text": "Calls are to personal customers 1 to 45 days behind on one, two or three products (credit cards, personal loans, car loans); the dialler supplies `customer_id`, `first_name`, `last_name`, `title` (Mr or Ms) and `now` (e.g. `2026-10-14T11:00`).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "call_scope_and_variables",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A04",
+   "B05",
+   "C03"
+  ]
+ },
+ {
+  "id": "R05",
+  "source": "ashvale.md message 2.1 Who and what",
+  "category": "other",
+  "text": "The dialler supplies `customer_id`, `first_name`, `last_name`, `title` (Mr or Ms) and `now` (e.g. `2026-10-14T11:00`); every date rule is worked from `now`, never the server clock; `customer_id` goes into every tool call; the assistant enforces the rules itself.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "call_variables",
+  "doc": "mail of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A05",
+   "B06",
+   "C04"
+  ]
+ },
+ {
+  "id": "R06",
+  "source": "ashvale.md message 2.1 Who and what",
+  "category": "other",
+  "text": "`customer_id` goes into every tool call. The bank's systems record anything (a promise on a Sunday included), so the assistant must enforce the rules itself.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_id_every_call",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AB",
+  "members": [
+   "A06",
+   "B07"
+  ]
+ },
+ {
+  "id": "R07",
+  "source": "ashvale.md message 2.1 'Opening'",
+  "category": "opening",
+  "text": "First sentence of every call as written, then ask for the customer by title and last name.",
+  "verbatim": [
+   "Hello, this is the automated assistant from Ashvale Bank. This call is recorded for quality and security.",
+   "May I speak with {title} {last_name}, please?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "opening_sentence",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A07",
+   "B08",
+   "C05"
+  ]
+ },
+ {
+  "id": "R08",
+  "source": "ashvale.md message 2.1 'Opening'",
+  "category": "opening",
+  "text": "Only a yes, 'speaking', 'that's me' or the person giving their own name confirms it is the customer; 'Hello', 'who's calling?', 'what's it about?' do not.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "person_confirmation",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A08",
+   "B09",
+   "C06"
+  ]
+ },
+ {
+  "id": "R09",
+  "source": "ashvale.md message 2.1 Opening",
+  "category": "opening",
+  "text": "If unclear, ask the same question once more; still unclear after the second ask, close as not reached, could not tell who answered (`not_reached`/UNK). If they ask something first, answer then ask again; that ask counts as the second.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "UNK",
+     "when": "still unclear who answered after the second ask"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "unclear_who_answered",
+  "doc": "mail of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A09",
+   "B10",
+   "C07"
+  ],
+  "verification": {
+   "q": "V02",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Could not establish who answered (still unclear after 2 asks): outcome=not_reached, reason=UNK",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If it's unclear, ask the same question once more; if it is still unclear after the second ask, close it as not reached (could not tell who answered).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| could not establish who answered | not_reached | UNK |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R10",
+  "source": "ashvale.md message 2.1 'Opening'",
+  "category": "opening",
+  "text": "If the person asks something first, answer it and then ask the 'May I speak with' question again; that ask counts as the second one.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "question_before_confirmation",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A10"
+  ]
+ },
+ {
+  "id": "R11",
+  "source": "ashvale.md message 2.1 'Opening'",
+  "category": "special",
+  "text": "Asked if it is a robot, the assistant says the sentence as written and carries on.",
+  "verbatim": [
+   "Yes, I'm Ashvale Bank's automated assistant."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "robot_question",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A11",
+   "B11",
+   "C08"
+  ]
+ },
+ {
+  "id": "R12",
+  "source": "ashvale.md message 2.1 'Opening'",
+  "category": "special",
+  "text": "Asked if it is a scam: tell them they can hang up and ring the number on the back of their card or on their statement, and carry on.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "scam_question",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A12",
+   "B12",
+   "C09"
+  ]
+ },
+ {
+  "id": "R13",
+  "source": "ashvale.md message 2.1 Opening",
+  "category": "disclosure",
+  "text": "Until the security questions are passed nobody (customer or anyone else who picks up) hears the words arrears, overdue, owe, debt, payment or collections, or the name of a product.",
+  "verbatim": [],
+  "values": {
+   "forbidden_words_before_verification": [
+    "arrears",
+    "overdue",
+    "owe",
+    "debt",
+    "payment",
+    "collections",
+    "the name of a product"
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "forbidden_words_before_verification",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A13",
+   "B13",
+   "C10"
+  ]
+ },
+ {
+  "id": "R14",
+  "source": "ashvale.md message 2.1 Someone else answers",
+  "category": "third_party",
+  "text": "When someone else answers, say the private-matter sentence and ask when the customer can be reached, nothing more. A relative cannot answer security questions, be told anything or pay; if they offer, thank them, decline, and ask again when the customer is in.",
+  "verbatim": [
+   "I'm calling about a private matter for {title} {last_name}."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "third_party_script",
+  "doc": "mail of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A14",
+   "B14",
+   "C11"
+  ]
+ },
+ {
+  "id": "R15",
+  "source": "ashvale.md message 2.1 'Someone else answers'",
+  "category": "third_party",
+  "text": "A relative cannot answer security questions, be told anything, or pay on this call; if they offer, thank them, say no and go back to asking when the customer is in.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "third_party_cannot_act",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AB",
+  "members": [
+   "A15",
+   "B15"
+  ]
+ },
+ {
+  "id": "R16",
+  "source": "ashvale.md message 2.1 Someone else answers",
+  "category": "third_party",
+  "text": "Callback: today (later than `now`) or the next business day, between 09:00 and 19:00 both ends included. If it fits, call `schedule_callback` with date and time HH:MM and close as not reached, callback booked (CBB).",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "09:00",
+    "close": "19:00",
+    "same_day": true,
+    "later_than_now": true,
+    "days_ahead_business": 1
+   },
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "CBB",
+     "when": "someone else answered; callback booked"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R76",
+  "topic": "callback_window",
+  "doc": "mail of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "ABC",
+  "members": [
+   "A16",
+   "B16",
+   "C12"
+  ],
+  "deciding_quote": "Callbacks are booked for today (later than `now`) or either of the next two business days, between 08:30 and 17:00, both ends included.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07",
+  "verification": {
+   "q": "V03",
+   "status": "mismatch",
+   "missing": [
+    "09:00",
+    "19:00"
+   ],
+   "verifier_value": "Callback window: today (later than now) or either of the next 2 business days, 08:30 to 17:00 both ends included. Callback booked: outcome=not_reached, reason=CBB. No callback inside the hours (after 1 further ask): outcome=not_reached, reason=CBX.",
+   "earlier_value": "today (later than now) or the next business day, 09:00 to 19:00 both ends included",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "For the callback: today (later than `now`) or the next business day, between 09:00 and 19:00, both ends included.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "Callbacks are booked for today (later than `now`) or either of the next two business days, between 08:30 and 17:00, both ends included.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "If what they offer fits, call `schedule_callback` with the date and the time as HH:MM and close as not reached, callback booked. If it doesn't fit, say what the hours are and ask once for another time; if the second time doesn't fit either, book nothing and close as not reached, no callback.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered; callback booked | not_reached | CBB |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered; no callback inside the hours | not_reached | CBX |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R17",
+  "source": "ashvale.md message 2.1 'Someone else answers'",
+  "category": "third_party",
+  "text": "If the offered time fits the window, call `schedule_callback` with the date and time as HH:MM and close as not reached, callback booked (`not_reached` / CBB).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "CBB",
+     "when": "someone else answered; callback booked"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_booking",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AB",
+  "members": [
+   "A17",
+   "B17"
+  ],
+  "verification": {
+   "q": "V04",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Someone else answered, callback booked: outcome=not_reached, reason=CBB",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If what they offer fits, call `schedule_callback` with the date and the time as HH:MM and close as not reached, callback booked.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered; callback booked | not_reached | CBB |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R18",
+  "source": "ashvale.md message 2.1 'Someone else answers'",
+  "category": "third_party",
+  "text": "If the time does not fit, say what the hours are and ask once for another time; if the second does not fit either, book nothing and close as not reached, no callback (`not_reached` / CBX).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "CBX",
+     "when": "someone else answered; no callback inside the hours after two offers"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_outside_hours",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A18",
+   "B18",
+   "C13"
+  ],
+  "verification": {
+   "q": "V05",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Someone else answered, no callback inside the hours: outcome=not_reached, reason=CBX",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If it doesn't fit, say what the hours are and ask once for another time; if the second time doesn't fit either, book nothing and close as not reached, no callback.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered; no callback inside the hours | not_reached | CBX |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R19",
+  "source": "ashvale.md message 2.1 'Someone else answers'",
+  "category": "third_party",
+  "text": "If they say it is not the customer's number, close as not reached, wrong number (`not_reached` / WRN).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "WRN",
+     "when": "not the customer's number"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "wrong_number",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A19",
+   "B19",
+   "C14"
+  ],
+  "verification": {
+   "q": "V06",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Not the customer's number: outcome=not_reached, reason=WRN",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If they say it isn't the customer's number, close as not reached, wrong number.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| not the customer's number | not_reached | WRN |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R20",
+  "source": "ashvale.md message 2.1 'Someone else answers'",
+  "category": "hardship",
+  "text": "If told the customer has died, say the sentence as written, nothing else, and close as not reached, deceased (`not_reached` / DCD).",
+  "verbatim": [
+   "I'm very sorry for your loss."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "DCD",
+     "when": "customer deceased"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "deceased_customer",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A20",
+   "B20",
+   "C15"
+  ],
+  "verification": {
+   "q": "V07",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Customer deceased: outcome=not_reached, reason=DCD",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If they say the customer has died: \"I'm very sorry for your loss.\", nothing else, close as not reached, deceased.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer deceased | not_reached | DCD |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R21",
+  "source": "ashvale.md message 2.1 Security",
+  "category": "identity",
+  "text": "Ask date of birth first, then the last four digits of the phone number held, one question at a time, calling `verify_identity` after each answer.",
+  "verbatim": [],
+  "values": {
+   "identity": [
+    {
+     "order": 1,
+     "field": "date_of_birth",
+     "hint_values": [
+      "day_month_swapped"
+     ],
+     "retry_rule": "on hint day_month_swapped ask for the month as a word, not a wrong answer; a wrong answer can be asked again"
+    },
+    {
+     "order": 2,
+     "field": "phone_last4",
+     "hint_values": [],
+     "retry_rule": "a wrong answer can be asked again"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "security_question_order",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A21",
+   "B21",
+   "C16"
+  ],
+  "deciding_quote": "Date of birth first, then the last four digits of the phone number we hold, one question at a time, `verify_identity` after each answer.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R22",
+  "source": "ashvale.md message 2.1 'Security'",
+  "category": "identity",
+  "text": "Dates of birth go to the service as YYYY-MM-DD however the customer says them; a date given only in numbers is read as day, month, year.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "dob_format",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A22",
+   "B22",
+   "C17"
+  ]
+ },
+ {
+  "id": "R23",
+  "source": "ashvale.md message 2.1 Security",
+  "category": "identity",
+  "text": "If `verify_identity` returns hint `day_month_swapped`, ask them to say the month as a word; that retry is not a wrong answer.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "day_month_swapped_retry",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A23",
+   "B23",
+   "C18"
+  ]
+ },
+ {
+  "id": "R24",
+  "source": "ashvale.md message 2.1 'Security'",
+  "category": "identity",
+  "text": "A wrong answer can be asked again; the service allows three wrong answers in total and reports `wrong_answers_left`; follow it, and when none are left the check has failed.",
+  "verbatim": [],
+  "values": {
+   "max_wrong_answers": 3
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R80",
+  "topic": "wrong_answer_limit",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "ABC",
+  "members": [
+   "A24",
+   "B24",
+   "C19"
+  ],
+  "deciding_quote": "On the dialler, the second wrong answer in total, whichever question it was on, ends the check, whatever `wrong_answers_left` says.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07",
+  "verification": {
+   "q": "V08",
+   "status": "mismatch",
+   "missing": [
+    "3"
+   ],
+   "verifier_value": "2 wrong answers in total (on either question) end the identity check, regardless of wrong_answers_left",
+   "earlier_value": "3 wrong answers in total (go with wrong_answers_left from the service)",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "The identity service allows three wrong answers in total and tells you how many are left (`wrong_answers_left`); go with that, and when it says none are left the check has failed.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "On the dialler, the second wrong answer in total, whichever question it was on, ends the check, whatever `wrong_answers_left` says.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R25",
+  "source": "ashvale.md message 2.1 'Security'",
+  "category": "identity",
+  "text": "Failed check: do not say what the call was about, tell them they can use the Ashvale mobile app or come into a branch, close as not verified, failed (`not_verified` / NVF).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "NVF",
+     "when": "security check failed"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "failed_check_close",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A25",
+   "B25",
+   "C20"
+  ],
+  "verification": {
+   "q": "V09",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Security check failed: outcome=not_verified, reason=NVF",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Failed check: don't say what the call was about, tell them they can use the Ashvale mobile app or come into a branch, close as not verified (failed).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| security check failed | not_verified | NVF |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R26",
+  "source": "ashvale.md message 2.1 'Security'",
+  "category": "identity",
+  "text": "If they won't answer, explain once that the questions protect their account; if they still won't, or ask again what it's about instead of answering, close as not verified, declined (`not_verified` / NVD).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "NVD",
+     "when": "customer declined the security questions after one explanation"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "declined_security",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A26",
+   "B26",
+   "C21"
+  ],
+  "verification": {
+   "q": "V10",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Customer declined the security questions (or would not talk before them): outcome=not_verified, reason=NVD",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If they won't answer, explain once that the questions are there to protect their account; if they still won't, or they ask again what it's about instead of answering, close as not verified (declined).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer declined the security questions, or would not talk before them | not_verified | NVD |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R27",
+  "source": "ashvale.md message 2.1 The balance",
+  "category": "disclosure",
+  "text": "Only when both questions have passed call `get_account`; then say it is calling from Ashvale's Customer Payments team about an overdue balance and give every product one sentence (product in words, overdue amount, days overdue) before asking for anything.",
+  "verbatim": [],
+  "values": {
+   "text": "product wording examples: \"your credit card ending 4821\", \"your personal loan\", \"your car loan\""
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "balance_disclosure",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A27",
+   "B27",
+   "C22"
+  ]
+ },
+ {
+  "id": "R28",
+  "source": "ashvale.md message 2.1 'The balance'",
+  "category": "disclosure",
+  "text": "After `get_account`, say it is calling from Ashvale's Customer Payments team about an overdue balance, then one sentence per product (product in words e.g. 'your credit card ending 4821', overdue amount, days overdue), all before asking for anything.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "balance_statement",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A28"
+  ]
+ },
+ {
+  "id": "R29",
+  "source": "ashvale.md message 2.1 'Asking'",
+  "category": "amounts",
+  "text": "The first ask is as written; with several products use the all-of-these variant.",
+  "verbatim": [
+   "Would you be able to pay the full overdue balance today?",
+   "Would you be able to pay all of these in full today?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "first_ask_wording",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A29",
+   "B28",
+   "C23"
+  ]
+ },
+ {
+  "id": "R30",
+  "source": "ashvale.md message 2.1 'Asking'",
+  "category": "persuasion",
+  "text": "Always go for the full overdue amount first; the assistant never asks how much the customer can pay, in any wording, it proposes every amount. A customer's own date or amount is never a refusal: check it against the rules and carry on.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "never_ask_how_much",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A30",
+   "B29",
+   "C24"
+  ]
+ },
+ {
+  "id": "R31",
+  "source": "ashvale.md message 2.1 Asking",
+  "category": "persuasion",
+  "text": "A date or an amount the customer comes up with is never a refusal: check it against the date and amount rules and carry on.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_offer_not_refusal",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B30"
+  ]
+ },
+ {
+  "id": "R32",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "Per product on `days_late`: early '1' to '9' days, latest date 18 calendar days after call date (next business day if not a business day), one proposal; late '10' to '45', 9th business day after call date, two proposals; over 45 treated as late.",
+  "verbatim": [],
+  "values": {
+   "bands": [
+    {
+     "name": "early",
+     "min_days": 1,
+     "max_days": 9,
+     "attempts": 1,
+     "deadline_rule": {
+      "type": "calendar_days_after",
+      "n": 18,
+      "adjust": "next_business_day"
+     }
+    },
+    {
+     "name": "late",
+     "min_days": 10,
+     "max_days": 45,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 9,
+      "adjust": "none"
+     }
+    },
+    {
+     "name": "over_45",
+     "min_days": 46,
+     "max_days": null,
+     "same_as": "late"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R69",
+  "topic": "band_deadline",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A31",
+   "B31",
+   "C25"
+  ],
+  "deciding_quote": "So, from Monday 12 October: late band (10 days and over), the latest date we log is the 5th business day after the call date.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R33",
+  "source": "ashvale.md message 2.1 Bands and latest dates",
+  "category": "dates",
+  "text": "Business days are Monday to Friday except bank holidays; use the People Team calendar (see R03).",
+  "verbatim": [],
+  "values": {
+   "calendar": {
+    "business_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri"
+    ],
+    "holidays": [
+     {
+      "date": "2026-10-19",
+      "name": "Charter Day"
+     },
+     {
+      "date": "2026-11-12",
+      "name": "Harvest Thursday"
+     },
+     {
+      "date": "2026-12-09",
+      "name": "Kelso Fair Day"
+     },
+     {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+     },
+     {
+      "date": "2026-12-28",
+      "name": "Boxing Day (substitute day)"
+     },
+     {
+      "date": "2027-01-01",
+      "name": "New Year's Day"
+     }
+    ]
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "business_days_definition",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A32",
+   "B32",
+   "C26"
+  ],
+  "deciding_quote": "Business days are Monday to Friday except bank holidays; the People Team sends the calendar round, use that.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07",
+  "verification": {
+   "q": "V11",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Business days: Monday to Friday except bank holidays. Bank holidays: 2026-10-19, 2026-11-12, 2026-12-09, 2026-12-25, 2026-12-28, 2027-01-01. 2026-12-24 and 2026-11-09 are normal working days.",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Business days are Monday to Friday except bank holidays; the People Team sends the calendar round, use that.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Monday 19 October 2026 — Charter Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Thursday 12 November 2026 — Harvest Thursday",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Wednesday 9 December 2026 — Kelso Fair Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Friday 25 December 2026 — Christmas Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Monday 28 December 2026 — Boxing Day (substitute day, as the 26th is a Saturday)",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- Friday 1 January 2027 — New Year's Day",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Christmas Eve (Thursday 24 December) is a normal working day; branches close at 13:00 but everything else runs as usual.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R34",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "A promise date must be today or later, a business day, and not after the product's latest date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "promise_date_validity",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A33",
+   "B33",
+   "C27"
+  ],
+  "deciding_quote": "A promise date has to be today or later, a business day, and not after the product's latest date.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R35",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "If they name a Saturday, Sunday or bank holiday not after the latest date, offer the next business day after it (or the latest date if that next business day would be past it).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "non_business_day_named",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A34",
+   "B34",
+   "C28"
+  ]
+ },
+ {
+  "id": "R36",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "If they name a day after the latest date, say the latest date is the last day we can log and offer it; turning the latest date down is a flat refusal.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "date_after_latest",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A35",
+   "B35",
+   "C29"
+  ]
+ },
+ {
+  "id": "R37",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "If they name a day in the past, ask for a day from today onwards.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "past_date_named",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A36",
+   "B36",
+   "C30"
+  ]
+ },
+ {
+  "id": "R38",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "A vague period ('next week', 'end of the month', 'payday') is not a refusal: ask once for the exact day; if they still won't give one, propose the latest date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "vague_period",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A37",
+   "B37",
+   "C31"
+  ]
+ },
+ {
+  "id": "R39",
+  "source": "ashvale.md message 2.1 'Bands and latest dates'",
+  "category": "dates",
+  "text": "'Friday' or 'this Friday' means the first Friday after today; 'next Friday' is the Friday after that, seven days later; same for other weekdays.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "weekday_words",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A38",
+   "B38",
+   "C32"
+  ]
+ },
+ {
+  "id": "R40",
+  "source": "ashvale.md message 2.1 'Amounts'",
+  "category": "amounts",
+  "text": "Any amount from the floor up to the full overdue amount, both included, is accepted as proposed; more than the full amount: log the full amount.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "accepted_amount_range",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A39",
+   "B39",
+   "C33"
+  ]
+ },
+ {
+  "id": "R41",
+  "source": "ashvale.md message 2.1 'Amounts'",
+  "category": "amounts",
+  "text": "Less than the floor: say we can't log that and offer the floor once; if they won't take it, flat refusal.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "below_floor",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A40",
+   "B40",
+   "C34"
+  ]
+ },
+ {
+  "id": "R42",
+  "source": "ashvale.md message 2.1 'Amounts'",
+  "category": "amounts",
+  "text": "If they say the full amount is too much, offer the floor once and say the sentence as written; if they won't take the floor, flat refusal.",
+  "verbatim": [
+   "The rest of the balance stays overdue."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "full_too_much",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A41",
+   "B41",
+   "C35"
+  ]
+ },
+ {
+  "id": "R43",
+  "source": "ashvale.md message 2.1 'Amounts'",
+  "category": "amounts",
+  "text": "The floor is the `minimum_payment` on a credit card and the `instalment_amount` on a personal loan or a car loan.",
+  "verbatim": [],
+  "values": {
+   "floors": [
+    {
+     "product_types": [
+      "credit_card"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "minimum_payment"
+     }
+    },
+    {
+     "product_types": [
+      "personal_loan",
+      "car_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R68",
+  "topic": "card_floor",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A42",
+   "B42",
+   "C36"
+  ],
+  "deciding_quote": "From Monday 21 September, the smallest promise we take on a credit card is half the overdue balance, or the minimum payment where that's higher.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R44",
+  "source": "ashvale.md message 2.1 'Proposals'",
+  "category": "persuasion",
+  "text": "After a no to today with no date or amount: proposal 1 is the amount in play on the 2nd business day after the call date; late band only, if flatly refused or unanswered, proposal 2 is the floor on the product's latest date.",
+  "verbatim": [],
+  "values": {
+   "attempt_ladder": [
+    {
+     "attempt": 1,
+     "bands": [],
+     "amount": "in_play",
+     "date_rule": "the 2nd business day after the call date",
+     "text": ""
+    },
+    {
+     "attempt": 2,
+     "bands": [
+      "late"
+     ],
+     "amount": "floor",
+     "date_rule": "the product's latest date",
+     "text": ""
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R70",
+  "topic": "proposal_ladder",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A43",
+   "B43",
+   "C37"
+  ],
+  "deciding_quote": "Proposal 2 goes out on that date too.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R45",
+  "source": "ashvale.md message 2.1 'Proposals'",
+  "category": "persuasion",
+  "text": "When the band's proposals are used up, stop: never repeat a refused offer, note the product `refused` and, if nothing else applies, close as no promise, refused (`no_promise` / RTP).",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "refused",
+     "when": "proposals used up or flat refusal",
+     "text_must_contain": ""
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "RTP",
+     "when": "refused, proposals used up, nothing else applies"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "proposals_exhausted",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A44",
+   "B44",
+   "C38"
+  ],
+  "verification": {
+   "q": "V12",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Proposals used up: add_note reason=refused with one line of text saying what happened; close outcome=no_promise, reason=RTP (if nothing else applies)",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "When the proposals for the band are used up, stop: no repeating an offer they've turned down, note the product as refused and, if nothing else applies, close as no promise, refused.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Every product that ends the call without a promise gets an `add_note` (`refused`, `hardship`, `dispute`, `paid` or `service_error`, with a line of text saying what happened), single-product calls included.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| refused, proposals used up, or will not talk after security | no_promise | RTP |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R46",
+  "source": "ashvale.md message 2.1 'Hardship'",
+  "category": "hardship",
+  "text": "On illness, bereavement, job loss: say the sentence, make no proposal, offer once a transfer to Customer Support (`support`); yes → `transfer_to_agent` `support`, close transferred; no → note `hardship`, close no promise, hardship (HDS). A date or amount they name is logged as normal.",
+  "verbatim": [
+   "I'm sorry you're going through that."
+  ],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "hardship",
+     "when": "hardship disclosed and transfer declined",
+     "text_must_contain": ""
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "",
+     "when": "customer accepts transfer to support"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "HDS",
+     "when": "hardship, transfer declined"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R81",
+  "topic": "hardship_handling",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A45",
+   "B45",
+   "C39"
+  ],
+  "deciding_quote": "From Monday, hardship calls stay with the assistant.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R47",
+  "source": "ashvale.md message 2.1 Hardship",
+  "category": "hardship",
+  "text": "If a hardship customer names a date or an amount themselves anyway, log it as normal.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "hardship_self_named_offer",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B46"
+  ]
+ },
+ {
+  "id": "R48",
+  "source": "ashvale.md message 2.1 'Hardship'",
+  "category": "persuasion",
+  "text": "Nothing else is on offer to anyone: no discount, no waiver, no payment holiday, no plan, no freezing interest.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "nothing_else_on_offer",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A46",
+   "B47",
+   "C40"
+  ]
+ },
+ {
+  "id": "R49",
+  "source": "ashvale.md message 2.1 'Read-back and logging'",
+  "category": "confirmation",
+  "text": "Read back product, amount and date and ask the confirm question as written; `create_promise` only after a clear yes; if they change date or amount, check it again and read it back again.",
+  "verbatim": [
+   "Shall I go ahead and log that?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "read_back",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A47",
+   "B48",
+   "C41"
+  ],
+  "deciding_quote": "Read back the product, the amount and the date and ask \"Shall I go ahead and log that?\".",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R50",
+  "source": "ashvale.md message 2.1 Read-back and logging",
+  "category": "confirmation",
+  "text": "If they change the date or the amount at read-back, check it again against the rules and read it back again.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "change_at_read_back",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B49"
+  ]
+ },
+ {
+  "id": "R51",
+  "source": "ashvale.md message 2.1 'Read-back and logging'",
+  "category": "recording",
+  "text": "One promise per product; once logged it cannot be changed or cancelled on the call; if asked, say they can change it in the mobile app.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "one_promise_per_product",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A48",
+   "B50",
+   "C42"
+  ]
+ },
+ {
+  "id": "R52",
+  "source": "ashvale.md message 2.1 'Read-back and logging'",
+  "category": "recording",
+  "text": "Say it is logged only after `create_promise` returns `ok: true`; on failure try once more; if that fails too, tell the customer, note the product `service_error` and close as no promise, service failure (`no_promise` / SYS).",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "service_error",
+     "when": "create_promise failed twice",
+     "text_must_contain": ""
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "SYS",
+     "when": "create_promise failed after retry"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R78",
+  "topic": "create_promise_retry",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A49",
+   "B51",
+   "C43"
+  ],
+  "deciding_quote": "`create_promise` gets one try.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07",
+  "verification": {
+   "q": "V13",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "create_promise gets 1 try, no retry. On error or ok: false: add_note reason=service_error with a line of text saying what happened; close outcome=no_promise, reason=SYS (with several products, carry on with the others; promises already logged stay)",
+   "earlier_value": "try once more (2 attempts); if the retry fails too, note service_error and close no_promise SYS",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "If it fails, try once more; if that fails too, tell the customer, note the product `service_error` and close as no promise, service failure.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "`create_promise` gets one try. If it errors or comes back `ok: false`, the assistant does not try again. It says \"I'm sorry, I couldn't confirm that arrangement on this call. Our team will be in touch with you about it.\", notes the product `service_error`, and closes as no promise, service failure (with several products: carry on with the others, the promises already logged stay).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| a bank service failed (`create_promise`, or another tool after security) | no_promise | SYS |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R53",
+  "source": "ashvale.md message 2.1 'Read-back and logging'",
+  "category": "recording",
+  "text": "After the last promise is logged, say once per call the text-message sentence as written.",
+  "verbatim": [
+   "You'll receive a text message confirming this arrangement today."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "sms_confirmation_sentence",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A50",
+   "B52",
+   "C44"
+  ]
+ },
+ {
+  "id": "R54",
+  "source": "ashvale.md message 2.1 'Other things people say'",
+  "category": "special",
+  "text": "'I've already paid': say the sentence as written, no promise on that product, note it `paid`, close as paid (`paid` / CLP).",
+  "verbatim": [
+   "Payments can take up to two business days to show on your account with us."
+  ],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "paid",
+     "when": "customer says already paid",
+     "text_must_contain": ""
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "paid",
+     "reason": "CLP",
+     "when": "every product noted paid"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "already_paid",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "alternatives": [
+   {
+    "id": "B53",
+    "text": "\"I've already paid\": say the two-business-days sentence, no promise on that product, note it `paid`, close as paid.",
+    "values": {
+     "outcomes": [
+      {
+       "outcome": "paid",
+       "reason": "",
+       "when": "every product noted paid"
+      }
+     ],
+     "note_reasons": [
+      {
+       "reason": "paid",
+       "when": "customer says already paid",
+       "text_must_contain": ""
+      }
+     ]
+    },
+    "verbatim": [
+     "Payments can take up to two business days to show on your account with us."
+    ]
+   }
+  ],
+  "value_difference": "Paid close code: A51 and C45 give reason CLP; B53 gives reason \"\" (no code).",
+  "members": [
+   "A51",
+   "B53",
+   "C45"
+  ],
+  "verification": {
+   "q": "V14",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Already paid: add_note reason=paid with a line of text saying what happened; when every product is noted paid, close outcome=paid, reason=CLP",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "\"I've already paid\": \"Payments can take up to two business days to show on your account with us.\", no promise on that product, note it paid, close as paid.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer says it is already paid; every product noted `paid` | paid | CLP |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  },
+  "value_difference_resolved": true
+ },
+ {
+  "id": "R55",
+  "source": "ashvale.md message 2.1 'Other things people say'",
+  "category": "special",
+  "text": "'It's not mine' / 'I never had that': don't argue, no promise on that product, note it `dispute`, close as no promise, dispute (`no_promise` / DIS).",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "dispute",
+     "when": "customer disputes the product or balance",
+     "text_must_contain": ""
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "DIS",
+     "when": "customer disputes"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "dispute",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A52",
+   "B54",
+   "C46"
+  ],
+  "verification": {
+   "q": "V15",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Dispute: add_note reason=dispute with a line of text saying what happened; close outcome=no_promise, reason=DIS",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "\"It's not mine\" / \"I never had that\": don't argue, no promise on that product, note it dispute, close as no promise, dispute.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer disputes the balance or the product | no_promise | DIS |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R56",
+  "source": "ashvale.md message 2.1 'Other things people say'",
+  "category": "special",
+  "text": "Asking for a plan, lower instalments or more time in general: describe nothing, `transfer_to_agent` with `restructuring`, close as transferred (XRS).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XRS",
+     "when": "asks for a plan / lower instalments / more time"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "restructuring_request",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A53",
+   "B55",
+   "C47"
+  ],
+  "verification": {
+   "q": "V16",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Restructuring request: transfer_to_agent queue=restructuring; close outcome=transferred, reason=XRS",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Asking for a plan, lower instalments, more time in general: describe nothing, `transfer_to_agent` with `restructuring`, close as transferred.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| transferred to restructuring (queue `restructuring`) | transferred | XRS |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R57",
+  "source": "ashvale.md message 2.1 'Other things people say'",
+  "category": "special",
+  "text": "Asking for a person: ask once whether the assistant can help first; if they insist, `transfer_to_agent` with `general`, close as transferred (XHM).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XHM",
+     "when": "customer insists on a person"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "human_request",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A54",
+   "B56",
+   "C48"
+  ],
+  "verification": {
+   "q": "V17",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Request for a person (after asking once whether the assistant can help): transfer_to_agent queue=general; close outcome=transferred, reason=XHM",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Asking for a person: ask once whether the assistant can help first; if they insist, `transfer_to_agent` with `general`, close as transferred.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| transferred to a person at the customer's request (queue `general`) | transferred | XHM |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R58",
+  "source": "ashvale.md message 2.1 'Other things people say'",
+  "category": "special",
+  "text": "Says twice they don't want to talk: before security close not verified, declined (NVD); after security, no promise, refused (RTP) with a `refused` note on every product.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "NVD",
+     "when": "won't talk, said twice, before security"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "RTP",
+     "when": "won't talk, said twice, after security"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "does_not_want_to_talk",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A55",
+   "B57",
+   "C49"
+  ],
+  "verification": {
+   "q": "V18",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Says 2 times they don't want to talk: before security -> outcome=not_verified, reason=NVD; after security -> add_note refused on every product, outcome=no_promise, reason=RTP",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Says twice they don't want to talk: before security that's not verified (declined); after it, no promise, refused, with a refused note on every product.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| refused, proposals used up, or will not talk after security | no_promise | RTP |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer declined the security questions, or would not talk before them | not_verified | NVD |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R59",
+  "source": "ashvale.md message 2.1 'Other things people say'",
+  "category": "special",
+  "text": "Anything it cannot answer from the tools: say the sentence as written.",
+  "verbatim": [
+   "I'm afraid I don't have that information."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "unanswerable_question",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A56",
+   "B58",
+   "C50"
+  ]
+ },
+ {
+  "id": "R60",
+  "source": "ashvale.md message 2.1 'Several products'",
+  "category": "multi_product",
+  "text": "Band and latest date per product; state all, ask the all-of-these-today question once, then handle products one at a time in `get_account` order without asking about today again; proposals counted per product, each starting at proposal 1.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "multi_product_sequence",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A57",
+   "B59",
+   "C51"
+  ]
+ },
+ {
+  "id": "R61",
+  "source": "ashvale.md message 2.1 'Several products'",
+  "category": "multi_product",
+  "text": "If one date is given for everything, check it per product: a product with an earlier latest date goes on its own latest date and the assistant says so in the read-back; the others keep the customer's date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "one_date_for_all",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A58",
+   "B60",
+   "C52"
+  ]
+ },
+ {
+  "id": "R62",
+  "source": "ashvale.md message 2.1 'Several products'",
+  "category": "multi_product",
+  "text": "One read-back for everything, one 'Shall I go ahead and log that?', then `create_promise` once per product in order.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "multi_product_read_back",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A59",
+   "B61",
+   "C53"
+  ]
+ },
+ {
+  "id": "R63",
+  "source": "ashvale.md message 2.1 'Several products'",
+  "category": "recording",
+  "text": "Every product ending the call without a promise gets an `add_note` (`refused`, `hardship`, `dispute`, `paid` or `service_error`) with a line of text saying what happened, single-product calls included.",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "refused",
+     "when": "product ends without promise after refusal",
+     "text_must_contain": ""
+    },
+    {
+     "reason": "hardship",
+     "when": "hardship",
+     "text_must_contain": ""
+    },
+    {
+     "reason": "dispute",
+     "when": "dispute",
+     "text_must_contain": ""
+    },
+    {
+     "reason": "paid",
+     "when": "already paid",
+     "text_must_contain": ""
+    },
+    {
+     "reason": "service_error",
+     "when": "create_promise failure",
+     "text_must_contain": ""
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "note_every_unpromised_product",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A60",
+   "B62",
+   "C54"
+  ],
+  "verification": {
+   "q": "V19",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Every product ending without a promise gets add_note with text = one line in plain words saying what happened. Reasons: refused (refused / proposals used up / won't talk after security), hardship (hardship disclosed, text with what the customer said), dispute (not mine / never had it), paid (already paid), service_error (create_promise failed). No notes if get_account never reached, and none on a transferred call.",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Every product that ends the call without a promise gets an `add_note` (`refused`, `hardship`, `dispute`, `paid` or `service_error`, with a line of text saying what happened), single-product calls included. No notes if we never got as far as `get_account`, and none at all on a call that's transferred: promises already logged stay, anything agreed but not logged is dropped, and the close is the transfer.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Notes (`add_note`): `reason` is one of `refused`, `hardship`, `dispute`, `paid`, `service_error`; `text` is one line in plain words.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R64",
+  "source": "ashvale.md message 2.1 'Several products'",
+  "category": "recording",
+  "text": "No notes if `get_account` was never reached, and none on a transferred call: promises already logged stay, anything agreed but not logged is dropped, and the close is the transfer.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "no_notes_before_account_or_on_transfer",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A61",
+   "B63",
+   "C55"
+  ]
+ },
+ {
+  "id": "R65",
+  "source": "ashvale.md message 2.1 Closing",
+  "category": "closing",
+  "text": "Thank them and say goodbye, then exactly one `close_call`, always the last tool call; a promise close carries no code.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "promise",
+     "reason": "",
+     "when": "at least one promise logged, no transfer afterwards"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_last",
+  "doc": "mail of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A62",
+   "B64",
+   "C56"
+  ],
+  "deciding_quote": "Thank them and say goodbye, then exactly one `close_call`, always the last tool call.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-07"
+ },
+ {
+  "id": "R66",
+  "source": "ashvale.md message 2.1 'Closing'",
+  "category": "closing",
+  "text": "A promise close carries no code and applies when a promise was logged unless transferred afterwards; nothing promised: all products noted paid → paid, otherwise no promise with the code of the first product in `get_account` order whose note isn't paid.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "promise",
+     "reason": "",
+     "when": "at least one promise logged, no transfer afterwards"
+    },
+    {
+     "outcome": "paid",
+     "reason": "",
+     "when": "no promise and every product noted paid"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "code of first non-paid product in get_account order",
+     "when": "no promise, not all paid"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_outcome_selection",
+  "doc": "message 2.1 of 7 Sep",
+  "doc_date": "2026-09-07",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "ABC",
+  "members": [
+   "A63",
+   "B65",
+   "C57"
+  ],
+  "verification": {
+   "q": "V20",
+   "status": "mismatch",
+   "missing": [
+    "code of first non-paid product in get_account order"
+   ],
+   "verifier_value": "1) At least 1 promise logged and no transfer afterwards: outcome=promise, reason empty. 2) Nothing promised and every product noted paid: outcome=paid, reason=CLP. 3) Nothing promised otherwise: outcome=no_promise with the reason code for the first product in get_account order whose note isn't paid (refused=RTP, hardship=VUL, dispute=DIS, service_error=SYS).",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Thank them and say goodbye, then exactly one `close_call`, always the last tool call. A promise close carries no code. If nothing was promised: every product noted paid means close as paid; otherwise no promise with the code for the first product, in `get_account` order, whose note isn't paid. A promise logged on the call means a promise close, unless the call was transferred afterwards.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| at least one promise logged, no transfer afterwards | promise | leave empty (the dialler stamps it) |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer says it is already paid; every product noted `paid` | paid | CLP |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R67",
+  "source": "ashvale.md message 2.2",
+  "category": "dates",
+  "text": "Question whether the assistant may log a Saturday counter payment (branch open 9 till 12); not decided, Saturday remains a non-business day for promises.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "promise_date_validity",
+  "doc": "message 2.2 of 9 Sep",
+  "doc_date": "2026-09-09",
+  "author_role": "Branch Manager",
+  "status": "discussion",
+  "status_words": "can the assistant log that?",
+  "confidence": "high",
+  "samples": "ABC",
+  "not_policy": true,
+  "members": [
+   "A64",
+   "B66",
+   "C58"
+  ],
+  "deciding_quote": "Quick one — if a customer says they'll come in and pay at the counter on a Saturday morning (we open 9 till 12), can the assistant log that?",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R68",
+  "source": "ashvale.md message 2.3",
+  "category": "amounts",
+  "text": "From Monday '21 September' the credit-card floor is half the overdue balance (`past_due`) or the `minimum_payment` where higher; personal loans and car loans stay at `instalment_amount`. Replaces R42.",
+  "verbatim": [],
+  "values": {
+   "floors": [
+    {
+     "product_types": [
+      "credit_card"
+     ],
+     "rule": {
+      "type": "other",
+      "text": "the higher of 50% of past_due and minimum_payment"
+     }
+    },
+    {
+     "product_types": [
+      "personal_loan",
+      "car_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    }
+   ]
+  },
+  "overrides": "R43",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "card_floor",
+  "doc": "message 2.3 of 18 Sep",
+  "doc_date": "2026-09-21",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "From Monday 21 September",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A65",
+   "B67",
+   "C59"
+  ],
+  "deciding_quote": "From Monday 21 September, the smallest promise we take on a credit card is half the overdue balance, or the minimum payment where that's higher.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-21",
+  "verification": {
+   "q": "V21",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "credit_card: floor = max(past_due / 2, minimum_payment); personal_loan: instalment_amount; car_loan: instalment_amount. Cap: the full overdue amount (past_due); more than that logs the full amount.",
+   "earlier_value": "credit_card: minimum_payment; personal_loan and car_loan: instalment_amount",
+   "effective_from": "2026-09-21",
+   "quotes": [
+    {
+     "quote": "The floor is the `minimum_payment` on a credit card and the `instalment_amount` on a personal loan or a car loan.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "From Monday 21 September, the smallest promise we take on a credit card is half the overdue balance, or the minimum payment where that's higher. Personal loans and car loans stay at the instalment amount.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R69",
+  "source": "ashvale.md message 2.4",
+  "category": "dates",
+  "text": "From Monday 12 October 2026 the late band (10 days and over) latest date is the 5th business day after the call date (was 9th); proposal 2 goes out on that date; early band unchanged (18 calendar days, next business day if closed, 1 proposal).",
+  "verbatim": [],
+  "values": {
+   "bands": [
+    {
+     "name": "early",
+     "min_days": 1,
+     "max_days": 9,
+     "attempts": 1,
+     "deadline_rule": {
+      "type": "calendar_days_after",
+      "n": 18,
+      "adjust": "next_business_day"
+     }
+    },
+    {
+     "name": "late",
+     "min_days": 10,
+     "max_days": 45,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 5,
+      "adjust": "none"
+     }
+    },
+    {
+     "name": "over_45",
+     "min_days": 46,
+     "max_days": null,
+     "same_as": "late"
+    }
+   ],
+   "attempt_ladder": [
+    {
+     "attempt": 1,
+     "bands": [],
+     "amount": "in_play",
+     "date_rule": "the 2nd business day after the call date",
+     "text": ""
+    },
+    {
+     "attempt": 2,
+     "bands": [
+      "late"
+     ],
+     "amount": "floor",
+     "date_rule": "the product's latest date (5th business day after the call date)",
+     "text": ""
+    }
+   ]
+  },
+  "overrides": "R32",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "band_deadline",
+  "doc": "message 2.4 of 7 Oct",
+  "doc_date": "2026-10-12",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "from Monday 12 October",
+  "confidence": "low",
+  "samples": "ABC",
+  "members": [
+   "A66",
+   "B68",
+   "C60"
+  ],
+  "deciding_quote": "So, from Monday 12 October: late band (10 days and over), the latest date we log is the 5th business day after the call date.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-12",
+  "verification": {
+   "q": "V22",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "early: days_late 1-9, latest date = call date + 18 calendar days (next business day if not a business day), 1 proposal: amount in play (full overdue or the floor if full is too much) on the 2nd business day after the call date. late: days_late 10-45, latest date = 5th business day after the call date, 2 proposals: proposal 1 = amount in play on the 2nd business day after the call date; proposal 2 = floor on the latest date (5th business day). over_45: treated as late band (same latest date 5th business day, 2 proposals).",
+   "earlier_value": "late band and over_45: latest date = 9th business day after the call date; proposal 2 = floor on the 9th business day",
+   "effective_from": "2026-10-12",
+   "quotes": [
+    {
+     "quote": "- early band, 1 to 9 days: the latest date we can log is 18 calendar days after the call date; if that day isn't a business day, the next business day after it. One proposal.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "- late band, 10 to 45 days: the latest date is the 9th business day after the call date (the first business day after the call date is number 1). Two proposals. Anything over 45 that comes through is treated as late band.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "So, from Monday 12 October: late band (10 days and over), the latest date we log is the 5th business day after the call date. Proposal 2 goes out on that date too. Early band stays as it is.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "When the customer says no to today without giving a date or an amount, the assistant makes proposal 1: the amount in play (the full overdue amount, or the floor if they've said the full amount is too much) on the 2nd business day after the call date. Late band only, if proposal 1 is turned down flatly or gets no answer: proposal 2, the floor on the product's latest date.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  },
+  "stale_values": [
+   "1"
+  ]
+ },
+ {
+  "id": "R70",
+  "source": "ashvale.md message 2.4",
+  "category": "persuasion",
+  "text": "From '12 October' proposal 2 (late band only, floor) goes out on the new latest date, the 5th business day after the call date; proposal 1 unchanged (amount in play on the 2nd business day). Replaces R43.",
+  "verbatim": [],
+  "values": {
+   "attempt_ladder": [
+    {
+     "attempt": 1,
+     "bands": [],
+     "amount": "in_play",
+     "date_rule": "the 2nd business day after the call date",
+     "text": ""
+    },
+    {
+     "attempt": 2,
+     "bands": [
+      "late"
+     ],
+     "amount": "floor",
+     "date_rule": "the product's latest date, the 5th business day after the call date",
+     "text": ""
+    }
+   ]
+  },
+  "overrides": "R44",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "proposal_ladder",
+  "doc": "message 2.4 of 7 Oct",
+  "doc_date": "2026-10-12",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "from Monday 12 October",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A67",
+   "C61"
+  ],
+  "deciding_quote": "Proposal 2 goes out on that date too.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-12"
+ },
+ {
+  "id": "R71",
+  "source": "ashvale.md message 2.4",
+  "category": "dates",
+  "text": "Imogen asks whether anyone answered Tomasz's Saturday counter-payment question; still undecided.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "promise_date_validity",
+  "doc": "mail of 7 Oct",
+  "doc_date": "2026-10-07",
+  "author_role": "Head of Collections Operations",
+  "status": "discussion",
+  "status_words": "did anyone come back to you on the Saturday question?",
+  "confidence": "low",
+  "samples": "C",
+  "not_policy": true,
+  "members": [
+   "C62"
+  ],
+  "deciding_quote": "@Tomasz did anyone come back to you on the Saturday question?",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R72",
+  "source": "ashvale.md thread 3 message 3.1 item 2",
+  "category": "dates",
+  "text": "Cutover weekend Saturday 7 to Sunday 8 November; Monday 9 November is a normal working day, not a holiday, nothing customer-facing moves. Confirms 9 November is a business day; no change to the calendar.",
+  "verbatim": [],
+  "values": {
+   "text": "2026-11-09 is a normal working day, not a holiday"
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "bank_holidays",
+  "doc": "message 3.1 of 8 Oct",
+  "doc_date": "2026-10-08",
+  "author_role": "Programme Manager, Core Banking Migration",
+  "status": "distractor",
+  "status_words": "not a holiday, and nothing customer-facing moves",
+  "confidence": "high",
+  "samples": "ABC",
+  "not_policy": true,
+  "members": [
+   "A68",
+   "B69",
+   "C63"
+  ],
+  "deciding_quote": "Monday 9 November is a normal working day for everyone, not a holiday, and nothing customer-facing moves.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R73",
+  "source": "ashvale.md thread 4 message 4.1 evening pool",
+  "category": "third_party",
+  "text": "Vendor notice: from Monday 5 October automated calls are placed only 08:30 to 17:00 Monday to Friday; bookings outside are not dialled; scheduler 3.8 allows callbacks up to two business days ahead (was one). Decided for the assistant in message 4.2.",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "08:30",
+    "close": "17:00",
+    "days_ahead_business": 2,
+    "text": "vendor statement; see message 4.2 for the assistant's rule"
+   }
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "callback_window",
+  "doc": "message 4.1 of 2 Oct",
+  "doc_date": "2026-10-02",
+  "author_role": "Account Manager, Callwright Dialler Services (vendor)",
+  "status": "discussion",
+  "status_words": "our evening pool closes from Monday 5 October",
+  "confidence": "high",
+  "samples": "ABC",
+  "not_policy": true,
+  "members": [
+   "A69",
+   "B70",
+   "C64"
+  ],
+  "deciding_quote": "As flagged in the quarterly review, our evening pool closes from Monday 5 October.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R74",
+  "source": "ashvale.md message 4.1 Evening pool",
+  "category": "third_party",
+  "text": "Vendor states scheduler 3.8 now allows callbacks to be booked up to two business days ahead (previously one).",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "days_ahead_business": 2
+   }
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "callback_window",
+  "doc": "message 4.1",
+  "doc_date": "2026-10-02",
+  "author_role": "Account Manager, Callwright Dialler Services",
+  "status": "discussion",
+  "status_words": "callbacks can now be booked up to two business days ahead (it was one)",
+  "confidence": "low",
+  "samples": "B",
+  "not_policy": true,
+  "members": [
+   "B71"
+  ],
+  "deciding_quote": "On the plus side, scheduler 3.8 went live on Wednesday, so callbacks can now be booked up to two business days ahead (it was one).",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R75",
+  "source": "ashvale.md message 4.1 Timeouts on 1 October",
+  "category": "recording",
+  "text": "Vendor report: `create_promise` gateway timeouts (HTTP 504) on 1 October; in 37 calls the retry wrote a second promise and sent two texts. Background to the one-try rule decided in message 4.2 (see R05).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "create_promise_retry",
+  "doc": "message 4.1 of 2 Oct",
+  "doc_date": "2026-10-02",
+  "author_role": "dialler vendor account manager",
+  "status": "discussion",
+  "status_words": "Root cause is on our side ... we're working on it",
+  "confidence": "low",
+  "samples": "A",
+  "not_policy": true,
+  "members": [
+   "A70"
+  ],
+  "deciding_quote": "Root cause is on our side (gateway timeout shorter than the write); we're working on it.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R76",
+  "source": "ashvale.md message 4.2 Callbacks",
+  "category": "third_party",
+  "text": "From 5 October callbacks are booked for today (later than `now`) or either of the next two business days, between 08:30 and 17:00 both ends included (was next business day only, 09:00–19:00). Nothing after five; if they want the evening, say the hours and ask once for another time, same as before.",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "08:30",
+    "close": "17:00",
+    "same_day": true,
+    "later_than_now": true,
+    "days_ahead_business": 2,
+    "text": "if the second offered time does not fit, book nothing and close as not reached, no callback (CBX)"
+   }
+  },
+  "overrides": "R88",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_window",
+  "doc": "message 4.2 of 5 Oct",
+  "doc_date": "2026-10-05",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "Right. From today:",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A71",
+   "B72",
+   "C65"
+  ],
+  "deciding_quote": "Callbacks are booked for today (later than `now`) or either of the next two business days, between 08:30 and 17:00, both ends included.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-05",
+  "verification": {
+   "q": "V23",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Today (later than now) or either of the next 2 business days; earliest 08:30, latest 17:00, both ends included",
+   "earlier_value": "today (later than now) or the next business day, 09:00 to 19:00",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "Callbacks are booked for today (later than `now`) or either of the next two business days, between 08:30 and 17:00, both ends included. Nothing after five; if they want the evening, say what the hours are and ask once for another time, same as before.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "For the callback: today (later than `now`) or the next business day, between 09:00 and 19:00, both ends included.",
+     "in_force": false,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R77",
+  "source": "ashvale.md message 4.2 Callbacks",
+  "category": "third_party",
+  "text": "Nothing is booked after 17:00; if the person wants an evening slot, state the hours and ask once for another time, as before (second unsuitable time: book nothing, close not reached, no callback).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_out_of_hours",
+  "doc": "message 4.2",
+  "doc_date": "2026-10-05",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "From today",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B73",
+   "C66"
+  ]
+ },
+ {
+  "id": "R78",
+  "source": "ashvale.md message 4.2 create_promise",
+  "category": "recording",
+  "text": "From 5 October `create_promise` gets one try (was: try once more). If it errors or returns `ok: false`, do not retry; say the sentence, note the product `service_error`, close as no promise, service failure (SYS); with several products carry on with the others, promises already logged stay.",
+  "verbatim": [
+   "I'm sorry, I couldn't confirm that arrangement on this call. Our team will be in touch with you about it."
+  ],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "service_error",
+     "when": "create_promise errors or returns ok: false",
+     "text_must_contain": ""
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "SYS",
+     "when": "create_promise failed on the single try and nothing else applies"
+    }
+   ]
+  },
+  "overrides": "R49",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "create_promise_retry",
+  "doc": "message 4.2 of 5 Oct",
+  "doc_date": "2026-10-05",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "Right. From today:",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A72",
+   "B74",
+   "C67"
+  ],
+  "deciding_quote": "`create_promise` gets one try.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-05",
+  "verification": {
+   "q": "V24",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "1 try, no retry. On error or ok: false: add_note reason=service_error with a line of text saying what happened; close outcome=no_promise, reason=SYS (with several products carry on with the others; logged promises stay)",
+   "earlier_value": "retry once (2 attempts) before noting service_error and closing no_promise SYS",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "`create_promise` gets one try. If it errors or comes back `ok: false`, the assistant does not try again. It says \"I'm sorry, I couldn't confirm that arrangement on this call. Our team will be in touch with you about it.\", notes the product `service_error`, and closes as no promise, service failure (with several products: carry on with the others, the promises already logged stay).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "If it fails, try once more; if that fails too, tell the customer, note the product `service_error` and close as no promise, service failure.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "| a bank service failed (`create_promise`, or another tool after security) | no_promise | SYS |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R79",
+  "source": "ashvale.md thread 4 message 4.2 create_promise",
+  "category": "multi_product",
+  "text": "With several products, after a `create_promise` failure carry on with the other products; the promises already logged stay.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "create_promise_failure_multi_product",
+  "doc": "message 4.2 of 5 Oct",
+  "doc_date": "2026-10-05",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "From today",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C68"
+  ]
+ },
+ {
+  "id": "R80",
+  "source": "ashvale.md message 5.1 item 1",
+  "category": "identity",
+  "text": "From Monday 5 October the second wrong answer in total, whichever question, ends the check, whatever `wrong_answers_left` says (was: go with the service's three). Order (date of birth then phone last four), the month-as-a-word retry, the app-or-branch message and the close as not verified (failed) stay as in message 2.1.",
+  "verbatim": [],
+  "values": {
+   "max_wrong_answers": 2,
+   "identity": [
+    {
+     "order": 1,
+     "field": "date_of_birth",
+     "hint_values": [
+      "day_month_swapped"
+     ],
+     "retry_rule": "hint day_month_swapped: ask for the month as a word, not a wrong answer; a wrong answer can be asked again"
+    },
+    {
+     "order": 2,
+     "field": "phone_last4",
+     "hint_values": [],
+     "retry_rule": "a wrong answer can be asked again"
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "NVF",
+     "when": "second wrong answer in total"
+    }
+   ]
+  },
+  "overrides": "R21",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "wrong_answer_limit",
+  "doc": "message 5.1 of 1 Oct",
+  "doc_date": "2026-10-05",
+  "author_role": "Compliance Monitoring Lead",
+  "status": "decided",
+  "status_words": "both to be live on Monday 5 October",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A73",
+   "B75",
+   "C69"
+  ],
+  "deciding_quote": "On the dialler, the second wrong answer in total, whichever question it was on, ends the check, whatever `wrong_answers_left` says.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-05",
+  "verification": {
+   "q": "V25",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "2 wrong answers in total (on either question) end the check, whatever wrong_answers_left says. Questions in order: 1) date_of_birth (sent as YYYY-MM-DD; numeric dates read as day, month, year), 2) phone_last4; verify_identity after each answer. Hint day_month_swapped: ask them to say the month as a word; that retry is not a wrong answer. A wrong answer can be asked again. Failed check: outcome=not_verified, reason=NVF; declined: outcome=not_verified, reason=NVD.",
+   "earlier_value": "3 wrong answers in total (follow wrong_answers_left)",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "On the dialler, the second wrong answer in total, whichever question it was on, ends the check, whatever `wrong_answers_left` says. Everything else about the check (order, the month-as-a-word retry, the app-or-branch message, the close) is as Imogen wrote.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "The identity service allows three wrong answers in total and tells you how many are left (`wrong_answers_left`); go with that, and when it says none are left the check has failed.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "Date of birth first, then the last four digits of the phone number we hold, one question at a time, `verify_identity` after each answer. Dates of birth go to the service as YYYY-MM-DD whatever way the customer says them; a date given only in numbers is day, month, year. If the service comes back with the hint `day_month_swapped`, ask them to say the month as a word; that retry is not a wrong answer. A wrong answer can be asked again.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| security check failed | not_verified | NVF |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer declined the security questions, or would not talk before them | not_verified | NVD |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R81",
+  "source": "ashvale.md message 5.1 item 2",
+  "category": "hardship",
+  "text": "From Monday 5 October hardship calls stay with the assistant: say the sorry sentence, make no proposal, say the Financial Support sentence, note every product `hardship` with what the customer said, close no promise code VUL. No transfer to `support` (was: offer support transfer, HDS). A date or amount the customer names is still logged as normal.",
+  "verbatim": [
+   "I'm sorry you're going through that.",
+   "Our Financial Support team will write to you within five working days."
+  ],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "hardship",
+     "when": "customer discloses illness, bereavement, job loss etc.",
+     "text_must_contain": "what the customer said"
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "VUL",
+     "when": "hardship disclosed and no promise logged"
+    }
+   ]
+  },
+  "overrides": "R46",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "hardship_handling",
+  "doc": "message 5.1 of 1 Oct",
+  "doc_date": "2026-10-05",
+  "author_role": "Compliance Monitoring Lead",
+  "status": "decided",
+  "status_words": "both to be live on Monday 5 October",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A74",
+   "B76",
+   "C70"
+  ],
+  "deciding_quote": "From Monday, hardship calls stay with the assistant.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-05",
+  "verification": {
+   "q": "V26",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Hardship: no proposal, no transfer offer; add_note reason=hardship on every product with what the customer said in the text; close outcome=no_promise, reason=VUL. If the customer names a date or amount themselves it is logged as normal.",
+   "earlier_value": "offer transfer to support queue once: yes -> transfer_to_agent support, close transferred; no -> note hardship, close no_promise HDS",
+   "effective_from": "2026-10-05",
+   "quotes": [
+    {
+     "quote": "Illness, a bereavement, losing their job, that kind of thing: the assistant says \"I'm sorry you're going through that.\" and makes no proposal at all. It offers once to put them through to Customer Support (the `support` queue). If they say yes, `transfer_to_agent` with `support` and close as transferred. If they say no, note the product as hardship and close as no promise, hardship (HDS).",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "From Monday, hardship calls stay with the assistant. It says \"I'm sorry you're going through that.\", makes no proposal, and then says: \"Our Financial Support team will write to you within five working days.\" It notes every product as `hardship`, with what the customer said in the text, and closes as no promise with code VUL (Kofi is adding it to the list). If the customer still names a date or an amount themselves, it is logged as normal.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| hardship disclosed (Financial Support letter) | no_promise | VUL |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R82",
+  "source": "ashvale.md message 5.1 item 2",
+  "category": "hardship",
+  "text": "In a hardship call, a date or amount the customer names themselves is logged as normal; a request for a person is handled like any other request for a person (ask once if the assistant can help, then `general`).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "hardship_customer_offer",
+  "doc": "message 5.1",
+  "doc_date": "2026-10-01",
+  "author_role": "Compliance Monitoring Lead",
+  "status": "decided",
+  "status_words": "both to be live on Monday 5 October",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B77",
+   "C71"
+  ]
+ },
+ {
+  "id": "R83",
+  "source": "ashvale.md thread 5 message 5.1 item 2",
+  "category": "hardship",
+  "text": "In a hardship call, a request for a person is handled like any other request for a person (ask once if the assistant can help; if they insist, `transfer_to_agent` queue `general`, close transferred XHM).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XHM",
+     "when": "hardship customer insists on a person"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "hardship_request_for_person",
+  "doc": "message 5.1 of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Compliance Monitoring Lead",
+  "status": "decided",
+  "status_words": "both to be live on Monday 5 October",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A75",
+   "C72"
+  ],
+  "verification": {
+   "q": "V27",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Hardship customer asks for a person: handled like any request for a person: ask once whether the assistant can help; if they insist, transfer_to_agent queue=general; close outcome=transferred, reason=XHM (no notes on a transferred call)",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If they ask for a person, that is a request for a person like any other.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Asking for a person: ask once whether the assistant can help first; if they insist, `transfer_to_agent` with `general`, close as transferred.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| transferred to a person at the customer's request (queue `general`) | transferred | XHM |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R84",
+  "source": "ashvale.md thread 5 message 5.2",
+  "category": "other",
+  "text": "Imogen agrees both Compliance decisions (two-wrong-answer limit, hardship stays with assistant) live Monday 5 October; VUL to be added to the dialler code list.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "compliance_changes_effective_date",
+  "doc": "message 5.2 of 2 Oct",
+  "doc_date": "2026-10-02",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "status_words": "Agreed, both live Monday 5th",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A76",
+   "C73"
+  ]
+ },
+ {
+  "id": "R85",
+  "source": "ashvale.md desk card v2 Bands",
+  "category": "dates",
+  "text": "Per product on `days_late`: Early 1–9 days, latest date = call date + 18 calendar days (if closed, next business day), 1 proposal; Late 10–45 days, latest date = 9th business day after call date, 2 proposals. Restates message 2.1; late band changed by message 2.4 from 12 October.",
+  "verbatim": [],
+  "values": {
+   "bands": [
+    {
+     "name": "early",
+     "min_days": 1,
+     "max_days": 9,
+     "attempts": 1,
+     "deadline_rule": {
+      "type": "calendar_days_after",
+      "n": 18,
+      "adjust": "next_business_day"
+     }
+    },
+    {
+     "name": "late",
+     "min_days": 10,
+     "max_days": 45,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 9,
+      "adjust": "none"
+     }
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R69",
+  "topic": "band_deadline",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "status": "decided",
+  "status_words": "v2 · revised 21/09/2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A77",
+   "B78",
+   "C74"
+  ],
+  "deciding_quote": "So, from Monday 12 October: late band (10 days and over), the latest date we log is the 5th business day after the call date.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-21",
+  "verification": {
+   "q": "V28",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "early: days_late 1-9, latest date = call date + 18 calendar days (next business day if closed), 1 proposal. late: days_late 10-45 (and over 45 treated as late), latest date = 5th business day after the call date, 2 proposals.",
+   "earlier_value": "late: latest date = 9th business day after the call date",
+   "effective_from": "2026-10-12",
+   "quotes": [
+    {
+     "quote": "> - Early, 1–9 days: latest date = call date + 18 calendar days (if closed, next business day). 1 proposal.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "> - Late, 10–45 days: latest date = 9th business day after the call date. 2 proposals.",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "So, from Monday 12 October: late band (10 days and over), the latest date we log is the 5th business day after the call date. Proposal 2 goes out on that date too. Early band stays as it is.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R86",
+  "source": "ashvale.md desk card v2 Proposals",
+  "category": "persuasion",
+  "text": "Proposals only after a no to today with no date and no amount: 1. amount in play on the 2nd business day after the call date; 2. late band only, floor on the latest date. Restates message 2.1.",
+  "verbatim": [],
+  "values": {
+   "attempt_ladder": [
+    {
+     "attempt": 1,
+     "bands": [],
+     "amount": "in_play",
+     "date_rule": "the 2nd business day after the call date",
+     "text": ""
+    },
+    {
+     "attempt": 2,
+     "bands": [
+      "late"
+     ],
+     "amount": "floor",
+     "date_rule": "the product's latest date",
+     "text": ""
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R70",
+  "topic": "proposal_ladder",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "status": "decided",
+  "status_words": "v2 · revised 21/09/2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A78",
+   "B79",
+   "C75"
+  ],
+  "deciding_quote": "Proposal 2 goes out on that date too.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-21"
+ },
+ {
+  "id": "R87",
+  "source": "ashvale.md desk card v2 Floors",
+  "category": "amounts",
+  "text": "Floors: credit card = half the overdue balance, or the minimum payment if higher; personal loan / car loan = instalment amount. Restates message 2.3 (in force from 21 September).",
+  "verbatim": [],
+  "values": {
+   "floors": [
+    {
+     "product_types": [
+      "credit_card"
+     ],
+     "rule": {
+      "type": "other",
+      "text": "half of past_due, or minimum_payment where that is higher"
+     }
+    },
+    {
+     "product_types": [
+      "personal_loan",
+      "car_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "floor_amount",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "status": "decided",
+  "status_words": "v2 · revised 21/09/2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A79",
+   "B80",
+   "C76"
+  ],
+  "deciding_quote": "- Credit card: half the overdue balance, or the minimum payment if higher.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-21",
+  "verification": {
+   "q": "V29",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "credit_card: max(past_due / 2, minimum_payment); personal_loan: instalment_amount; car_loan: instalment_amount. Cap: the full overdue amount (more than that logs the full amount).",
+   "earlier_value": "credit_card: minimum_payment",
+   "effective_from": "2026-09-21",
+   "quotes": [
+    {
+     "quote": "> - Credit card: half the overdue balance, or the minimum payment if higher.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "> - Personal loan / car loan: instalment amount.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "The floor is the `minimum_payment` on a credit card and the `instalment_amount` on a personal loan or a car loan.",
+     "in_force": false,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R88",
+  "source": "ashvale.md desk card v2 Callbacks",
+  "category": "third_party",
+  "text": "Callbacks: today (after now) or the next business day, 09:00–19:00. Restates message 2.1; replaced from 5 October by message 4.2 (R04).",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "09:00",
+    "close": "19:00",
+    "same_day": true,
+    "later_than_now": true,
+    "days_ahead_business": 1
+   }
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R76",
+  "topic": "callback_window",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "status": "decided",
+  "status_words": "v2 · revised 21/09/2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A80",
+   "B81",
+   "C77"
+  ],
+  "deciding_quote": "Callbacks are booked for today (later than `now`) or either of the next two business days, between 08:30 and 17:00, both ends included.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-09-21"
+ },
+ {
+  "id": "R89",
+  "source": "ashvale.md desk card v2 Say it as written",
+  "category": "wording",
+  "text": "Four sentences said word for word: the first ask for today, the log confirm question, the text-message sentence after the last promise (once per call), and the already-paid sentence.",
+  "verbatim": [
+   "Would you be able to pay the full overdue balance today?",
+   "Shall I go ahead and log that?",
+   "You'll receive a text message confirming this arrangement today.",
+   "Payments can take up to two business days to show on your account with us."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "mandatory_sentences",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "status": "decided",
+  "status_words": "v2 · revised 21/09/2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A81",
+   "B82",
+   "C78"
+  ]
+ },
+ {
+  "id": "R90",
+  "source": "ashvale.md desk card v2 say it as written",
+  "category": "confirmation",
+  "text": "Say as written, the confirm question after the read-back, before `create_promise`.",
+  "verbatim": [
+   "Shall I go ahead and log that?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "confirm_question_sentence",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C79"
+  ]
+ },
+ {
+  "id": "R91",
+  "source": "ashvale.md desk card v2 say it as written",
+  "category": "recording",
+  "text": "Say as written, once per call after the last promise is logged.",
+  "verbatim": [
+   "You'll receive a text message confirming this arrangement today."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "text_confirmation_sentence",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C80"
+  ]
+ },
+ {
+  "id": "R92",
+  "source": "ashvale.md desk card v2 say it as written",
+  "category": "special",
+  "text": "Say as written when the customer says they have already paid.",
+  "verbatim": [
+   "Payments can take up to two business days to show on your account with us."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "already_paid_sentence",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "author_role": "Head of Collections Operations",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C81"
+  ]
+ },
+ {
+  "id": "R93",
+  "source": "ashvale.md desk card v2 footer",
+  "category": "other",
+  "text": "Holidays come from the People Team calendar (thread 1); outcome codes from the dialler list kept by Kofi (code list v5).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "reference_sources",
+  "doc": "desk card v2 of 21 Sep",
+  "doc_date": "2026-09-21",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A82",
+   "B83",
+   "C82"
+  ]
+ },
+ {
+  "id": "R94",
+  "source": "ashvale.md code list v5 intro",
+  "category": "closing",
+  "text": "Every `close_call` carries one `outcome` from the fixed list and, except a promise close, one code in `reason` (so a paid close carries CLP even though the API makes reason optional for paid).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_reason_required",
+  "doc": "code list v5 of 6 Oct",
+  "doc_date": "2026-10-06",
+  "author_role": "Dialler Operations",
+  "status": "decided",
+  "status_words": "List v5, issued Tuesday 6 October 2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A83",
+   "B84",
+   "C83"
+  ],
+  "deciding_quote": "Every `close_call` carries one `outcome` from the dialler's fixed list and, except a promise close, one code in `reason`.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-06"
+ },
+ {
+  "id": "R95",
+  "source": "ashvale.md code list v5 table",
+  "category": "closing",
+  "text": "Outcome/code table: each end-of-call situation maps to one `outcome` and one `reason` code; the promise close leaves reason empty (the dialler stamps it). VUL added for hardship; HDS from message 2.1 is not on the list.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "promise",
+     "reason": "",
+     "when": "at least one promise logged, no transfer afterwards"
+    },
+    {
+     "outcome": "paid",
+     "reason": "CLP",
+     "when": "customer says it is already paid; every product noted paid"
+    },
+    {
+     "outcome": "transferred",
+     "reason": "XRS",
+     "when": "transferred to restructuring (queue restructuring)"
+    },
+    {
+     "outcome": "transferred",
+     "reason": "XHM",
+     "when": "transferred to a person at the customer's request (queue general)"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "RTP",
+     "when": "refused, proposals used up, or will not talk after security"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "VUL",
+     "when": "hardship disclosed (Financial Support letter)"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "DIS",
+     "when": "customer disputes the balance or the product"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "SYS",
+     "when": "a bank service failed (create_promise, or another tool after security)"
+    },
+    {
+     "outcome": "not_verified",
+     "reason": "NVF",
+     "when": "security check failed"
+    },
+    {
+     "outcome": "not_verified",
+     "reason": "NVD",
+     "when": "customer declined the security questions, or would not talk before them"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "CBB",
+     "when": "someone else answered; callback booked"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "CBX",
+     "when": "someone else answered; no callback inside the hours"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "WRN",
+     "when": "not the customer's number"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "DCD",
+     "when": "customer deceased"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "UNK",
+     "when": "could not establish who answered"
+    }
+   ]
+  },
+  "overrides": "R65",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "outcome_code_table",
+  "doc": "code list v5 of 6 Oct",
+  "doc_date": "2026-10-06",
+  "author_role": "Dialler Operations",
+  "status": "decided",
+  "status_words": "List v5, issued Tuesday 6 October 2026",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A84",
+   "B85",
+   "C84"
+  ],
+  "deciding_quote": "Every `close_call` carries one `outcome` from the dialler's fixed list and, except a promise close, one code in `reason`.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-06",
+  "verification": {
+   "q": "V30",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "1 promise logged, no transfer afterwards: promise / reason empty; 2 already paid, every product noted paid: paid / CLP; 3 transferred to restructuring queue: transferred / XRS; 4 transferred to a person (general queue): transferred / XHM; 5 refused, proposals used up, or won't talk after security: no_promise / RTP; 6 hardship disclosed: no_promise / VUL; 7 dispute: no_promise / DIS; 8 bank service failed (create_promise or another tool after security): no_promise / SYS; 9 security check failed: not_verified / NVF; 10 declined security or won't talk before it: not_verified / NVD; 11 someone else answered, callback booked: not_reached / CBB; 12 someone else answered, no callback inside hours: not_reached / CBX; 13 not the customer's number: not_reached / WRN; 14 customer deceased: not_reached / DCD; 15 could not establish who answered: not_reached / UNK",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| at least one promise logged, no transfer afterwards | promise | leave empty (the dialler stamps it) |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer says it is already paid; every product noted `paid` | paid | CLP |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| transferred to restructuring (queue `restructuring`) | transferred | XRS |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| transferred to a person at the customer's request (queue `general`) | transferred | XHM |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| refused, proposals used up, or will not talk after security | no_promise | RTP |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| hardship disclosed (Financial Support letter) | no_promise | VUL |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer disputes the balance or the product | no_promise | DIS |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| a bank service failed (`create_promise`, or another tool after security) | no_promise | SYS |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| security check failed | not_verified | NVF |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer declined the security questions, or would not talk before them | not_verified | NVD |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered; callback booked | not_reached | CBB |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered; no callback inside the hours | not_reached | CBX |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| not the customer's number | not_reached | WRN |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer deceased | not_reached | DCD |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| could not establish who answered | not_reached | UNK |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R96",
+  "source": "ashvale.md code list v5 Notes",
+  "category": "recording",
+  "text": "`add_note` `reason` is one of `refused`, `hardship`, `dispute`, `paid`, `service_error`; `text` is one line in plain words (required by policy though optional in the API).",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "refused",
+     "when": "product refused / proposals used up / will not talk after security",
+     "text_must_contain": "one line in plain words"
+    },
+    {
+     "reason": "hardship",
+     "when": "hardship disclosed",
+     "text_must_contain": "one line in plain words"
+    },
+    {
+     "reason": "dispute",
+     "when": "customer disputes the balance or product",
+     "text_must_contain": "one line in plain words"
+    },
+    {
+     "reason": "paid",
+     "when": "customer says already paid",
+     "text_must_contain": "one line in plain words"
+    },
+    {
+     "reason": "service_error",
+     "when": "create_promise failed",
+     "text_must_contain": "one line in plain words"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "note_reasons",
+  "doc": "code list v5 of 6 Oct",
+  "doc_date": "2026-10-06",
+  "author_role": "Dialler Operations",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A85",
+   "B86",
+   "C85"
+  ],
+  "verification": {
+   "q": "V31",
+   "status": "no_answer"
+  }
+ },
+ {
+  "id": "R97",
+  "source": "openapi.json /verify_identity",
+  "category": "identity",
+  "text": "`verify_identity` rejects an unreadable `answer` with `ok=false` and does not count it as a wrong answer; `date_of_birth` must be YYYY-MM-DD, `phone_last4` four digits.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "unreadable_answer_not_counted",
+  "doc": "openapi.json",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A86",
+   "B01",
+   "C86"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R98",
+  "source": "openapi.json /close_call",
+  "category": "closing",
+  "text": "`close_call` `reason` is required for every `outcome` except `promise` and `paid`; `outcome` is one of `promise`, `paid`, `transferred`, `no_promise`, `not_verified`, `not_reached`.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_reason_required",
+  "doc": "openapi.json",
+  "doc_date": "2026-10-09",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B02"
+  ],
+  "deciding_quote": "| customer says it is already paid; every product noted `paid` | paid | CLP |",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R99",
+  "source": "openapi.json /schedule_callback",
+  "category": "third_party",
+  "text": "`schedule_callback` requires `customer_id`, `date` (format date, YYYY-MM-DD) and `time` as HH:MM.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_format",
+  "doc": "openapi.json",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A87"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R100",
+  "source": "ashvale.md thread 3 message 3.1 item 3",
+  "category": "other",
+  "text": "Harrowgate branch opens Monday '2 November' with standard branch hours (staff soft opening the Friday before); a diary note only, it changes nothing for the assistant's calendar, business days or call rules.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "calendar",
+  "doc": "thread 3 message 3.1",
+  "doc_date": "2026-10-08",
+  "author_role": "Programme Manager, Core Banking Migration",
+  "status": "distractor",
+  "status_words": "dates for your diaries",
+  "confidence": "medium",
+  "origin": "gap-fill",
+  "not_policy": true,
+  "deciding_quote": "Opening hours as per the standard branch pattern.",
+  "deciding_quote_found": true
+ }
+]

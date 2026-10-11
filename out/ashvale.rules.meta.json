@@ -1,0 +1,74 @@
+{
+ "model": "claude-fable-5-1",
+ "sample_models": {
+  "A": "claude-fable-5-1",
+  "B": "claude-fable-5-1",
+  "C": "claude-fable-5-1"
+ },
+ "seconds": 325.84764289855957,
+ "cost_usd": 7.508859,
+ "calls": 11,
+ "self_check": {
+  "missing_numbers": {},
+  "missing_tokens": []
+ },
+ "samples": {
+  "A": 87,
+  "B": 86,
+  "C": 86
+ },
+ "stages": {
+  "extract": {
+   "seconds": 167.99766206741333,
+   "cost_usd": 5.02547,
+   "calls": 6
+  },
+  "merge": {
+   "seconds": 49.39659094810486,
+   "cost_usd": 0.759395,
+   "calls": 1
+  },
+  "gap-fill": {
+   "seconds": 10.036764860153198,
+   "cost_usd": 0.263859,
+   "calls": 1
+  },
+  "decide": {
+   "seconds": 0.0,
+   "cost_usd": 0.5507700000000001,
+   "calls": 1
+  },
+  "verify": {
+   "seconds": 0.0,
+   "cost_usd": 0.909365,
+   "calls": 2
+  },
+  "verify+decide": {
+   "seconds": 98.40616798400879
+  }
+ },
+ "briefs": [
+  "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/reh/ashvale.md"
+ ],
+ "api": "tools/openapi.json",
+ "spec": "ashvale.spec.json",
+ "conflicts": "ashvale.rules.conflicts.md",
+ "n_conflicts": 15,
+ "call_date_range": {
+  "earliest": "2026-10-12",
+  "latest": "2027-01-01",
+  "basis": "mailbox exported 9 Oct 2026 for the build; last rule change effective Monday 12 Oct; example now 2026-10-14T11:00; holiday calendar runs to 1 Jan 2027"
+ },
+ "n_rules": 100,
+ "n_in_force": 82,
+ "n_low": 19,
+ "n_low_in_force": 13,
+ "verification": {
+  "mismatch": 3,
+  "no_answer": 1,
+  "ok": 27
+ },
+ "decision_blocks": 13,
+ "spec_errors": 0,
+ "spec_warnings": 0
+}

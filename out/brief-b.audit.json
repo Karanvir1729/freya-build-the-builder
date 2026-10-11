@@ -1,0 +1,650 @@
+{
+ "rules": [
+  {
+   "id": "R01",
+   "status": "implemented",
+   "where": "prepare code: single-product statement branch; whole workflow",
+   "evidence": "if len(items) == 1:",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R02",
+   "status": "implemented",
+   "where": "tools verify_identity / verify_identity#2: baked field, answer description, post_process_code",
+   "evidence": "d['what_to_do_next'] = 'The answer could not be read. It does not count as wrong. Ask again: What are the last four digits of the phone number on file?'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R03",
+   "status": "implemented",
+   "where": "tool schedule_callback body fields",
+   "evidence": "body.time* (string): default \"{{time}}\"; Callback time as HH:MM, 24 hour, between 10:00 and 19:00.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R04",
+   "status": "superseded",
+   "where": "superseded by R63",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R05",
+   "status": "implemented",
+   "where": "setup code (now), system prompt (title/last_name), every tool body (customer_id); assemble without test_variables",
+   "evidence": "raw = str(vars.get('now') or '').strip()",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R06",
+   "status": "implemented",
+   "where": "all tool definitions body.customer_id (schedule_callback, verify_identity, transfer_to_agent, get_account, create_promise, add_note, close_call)",
+   "evidence": "body.customer_id (string): default \"{{customer_id}}\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R07",
+   "status": "implemented",
+   "where": "system prompt",
+   "evidence": "Address the customer as {{title}} {{last_name}}.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R08",
+   "status": "implemented",
+   "where": "setup code: today derived from vars['now']; prepare code resolve_when comment",
+   "evidence": "nowdt = datetime.datetime.fromisoformat(raw[:16])",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R09",
+   "status": "implemented",
+   "where": "opening on_enter tts (first line for every answerer)",
+   "evidence": "on_enter tts: \"Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with {{title}} {{last_name}}?\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R10",
+   "status": "implemented",
+   "where": "opening_retry.task_message, third_party.task_message STRICT line, ask_dob/ask_phone ID_COMMON rule 1",
+   "evidence": "- Do not mention the reason for the call, collections, a debt, a payment, a product or an amount. If asked what the call is about or how much they owe, say you can explain right after the security questions.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R11",
+   "status": "implemented",
+   "where": "opening on_enter tts; opening_retry.task_message 'ask exactly'",
+   "evidence": "Then ask exactly: \"Am I speaking with {{title}} {{last_name}}?\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R12",
+   "status": "implemented",
+   "where": "opening extract who1 (WHO_DESC) -> setup route 5 -> opening_retry; opening_retry transition 6 -> fin_unclear",
+   "evidence": "6. -> fin_unclear  if always  [\"always\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R13",
+   "status": "implemented",
+   "where": "opening_retry.task_message",
+   "evidence": "If the person asked a question, answer it briefly first: who you are -> you are Freya Bank's digital assistant; a robot or AI -> 'Yes, I am Freya Bank's digital assistant.';",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R14",
+   "status": "implemented",
+   "where": "system_prompt 'Always' bullet 1; negotiate/confirm/hardship/wrapup task_message COMMON; opening_retry task_message; policy asides 'robot'",
+   "evidence": "- If asked whether you are a robot or an AI: say \"Yes, I am Freya Bank's digital assistant.\", then continue.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R15",
+   "status": "implemented",
+   "where": "third_party task_message STRICT line and 'Your only job' line",
+   "evidence": "Your only job: ask when {{title}} {{last_name}} can be reached, then book a callback.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R16",
+   "status": "implemented",
+   "where": "setup code: callback_text (today after now up to 19:00, next business day 10:00-19:00); third_party tool schedule_callback; transition -> fin_callback (not_reached/callback)",
+   "evidence": "start = '10:00' if cur < '10:00' else 'after ' + cur",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R17",
+   "status": "implemented",
+   "where": "third_party task_message bullets 2-3; transition 4 transition_to_fin_no_callback -> fin_no_callback (not_reached/no_callback)",
+   "evidence": "- If the second answer is also outside the window, or they cannot say when, do not book: call transition_to_fin_no_callback.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R18",
+   "status": "implemented",
+   "where": "third_party transition 3 (tp_status wrong_number) and setup/opening_retry routes -> fin_wrong_number; fin_wrong_number code",
+   "evidence": "3. -> fin_wrong_number  if (tp_status equals \"wrong_number\")  [\"wrong number\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R19",
+   "status": "implemented",
+   "where": "setup/opening_retry/third_party routes on deceased -> fin_deceased (not_reached/deceased); end_deceased terminal spoken_message",
+   "evidence": "terminal: endedReason=not_reached_deceased, spoken_message=\"I am sorry for your loss. Thank you for your time, goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R20",
+   "status": "implemented",
+   "where": "third_party task_message STRICT line",
+   "evidence": "Never mention the bank account, a product, a debt, an amount, a payment or collections, even if they ask or offer to pay or help. If they ask what it is about, say you can only discuss it with {{title}} {{last_name}} personally. Do not ask them any security question.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R21",
+   "status": "implemented",
+   "where": "ask_dob task_message + tool verify_identity (field date_of_birth baked); ask_phone task_message + tool verify_identity#2 (field phone_last4); transition ask_dob -> ask_phone on verified",
+   "evidence": "When they give it, call verify_identity with answer = the date as YYYY-MM-DD, whatever way they said it. A date said only as numbers is day, then month, then year (05/03/1990 = 1990-03-05).",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R22",
+   "status": "implemented",
+   "where": "ask_dob transition 1 and ask_phone transition 2 on wrong_answers_left == 0 -> fin_failed; verify_identity post_process_code 'Wrong answer... ask again'",
+   "evidence": "1. -> fin_failed  if (verify_identity_response.data.wrong_answers_left equals \"0\")  [\"three wrong answers\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R23",
+   "status": "implemented",
+   "where": "tool verify_identity post_process_code hint branch (HINTS day_month_swapped)",
+   "evidence": "d['what_to_do_next'] = 'Day and month look swapped. This is NOT a wrong answer. Ask the customer to say the date of birth again with the month as a word, for example 14 March 1988.'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R24",
+   "status": "implemented",
+   "where": "verify_identity post_process_code MAX_WRONG line; routes -> fin_failed (not_verified/failed); end_failed terminal spoken_message",
+   "evidence": "spoken_message=\"I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R25",
+   "status": "implemented",
+   "where": "ask_dob/ask_phone task_message ID_COMMON refusal line; count_decline_dob/phone code (decline_count >= 2 -> fin_declined); qb_dob/qb_phone code (question_count >= 2 -> fin_declined); fin_declined code not_verified/declined",
+   "evidence": "vars['decline_route'] = 'close' if n >= 2 else 'retry'",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R26",
+   "status": "implemented",
+   "where": "ask_phone transition 1 -> load_account (api_node get_account)",
+   "evidence": "1. -> load_account  if (verify_identity_response.data.all_verified equals \"true\" OR verify_identity_response.data.all_verified equals \"True\")  [\"identity verified\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R27",
+   "status": "superseded",
+   "where": "superseded by R64",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R28",
+   "status": "implemented",
+   "where": "setup / prepare code: HOL, BWD, isbd",
+   "evidence": "HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R29",
+   "status": "implemented",
+   "where": "setup code: early_deadline/late_deadline; prepare code: days_late band and rungs",
+   "evidence": "vars['early_deadline'] = addbd(today, 12).isoformat()",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R30",
+   "status": "implemented",
+   "where": "check_offer code: check_one (before_today / after_deadline / weekend_or_holiday issues)",
+   "evidence": "issues.append(('before_today', T('before_today', named=txt_short(nd))))",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R31",
+   "status": "implemented",
+   "where": "check_offer code: check_one elif not isbd(nd) -> next_bd, after nd > dl check; texts weekend_or_holiday",
+   "evidence": "\"weekend_or_holiday\": \"[named] is not a business day, so I cannot record it. The next business day is [date].\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R32",
+   "status": "implemented",
+   "where": "check_offer code: check_one vague branch (vague_asked once, then set_prop(pa, dl) + vague_deadline); texts vague",
+   "evidence": "set_prop(V, pid, pa, dl)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R33",
+   "status": "implemented",
+   "where": "check_offer code: resolve_when weekday branch (WDRULE this_week); negotiate extraction offer_date description",
+   "evidence": "delta = (7 - today.weekday()) + wd",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R34",
+   "status": "implemented",
+   "where": "check_offer code: check_one nd > dl -> after_deadline text + offer_question at deadline; refuse -> count_refusal -> refuse()",
+   "evidence": "\"after_deadline\": \"The latest date I can record for your [words] is [deadline].\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R35",
+   "status": "implemented",
+   "where": "prepare code: statement asks full past-due today; rungs full_or_floor; negotiate.task_message",
+   "evidence": "- Never propose, compute or change an amount or a date yourself, and never ask how much they can pay. The only offer you may make is the current offer in STATE, word for word.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R36",
+   "status": "implemented",
+   "where": "prepare code: floor per product type",
+   "evidence": "floor = p.get('minimum_payment')",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R37",
+   "status": "implemented",
+   "where": "check_offer code: too_much() (offered_floor once, else refuse); ladder rung 2 ('floor', deadline); texts too_much_floor",
+   "evidence": "\"too_much_floor\": \"I understand. The lowest amount I can accept is [floor], the [floor_name]. The rest stays overdue.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R38",
+   "status": "implemented",
+   "where": "check_offer code: check_one below_floor branch (offered_floor once, then refuse) and agree() when no issues",
+   "evidence": "\"below_floor\": \"I cannot record [named]. The lowest amount I can record is [floor], your [floor_name].\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R39",
+   "status": "superseded",
+   "where": "superseded by R66",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R40",
+   "status": "implemented",
+   "where": "negotiate extraction stance (STANCE_DESC) + negotiate transition 7 check_offer before 10 count_refusal",
+   "evidence": "offer = names their own date, amount or period: a date or an amount the customer proposes is NEVER a refusal.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R41",
+   "status": "implemented",
+   "where": "setup code attempt1_date / late_deadline; prepare code rungs + policy refuse()/rung()",
+   "evidence": "rungs = [('full_or_floor', a1), ('floor', deadline)]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R42",
+   "status": "implemented",
+   "where": "policy refuse(): refused_offers skip + state refused -> finalize -> fin_refused",
+   "evidence": "if k >= len(L):\n                pset(V, pid, 'state', 'refused')",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R43",
+   "status": "implemented",
+   "where": "negotiate transition 1 -> pol_hardship; ev_hardship text; hardship node transitions -> xfer_support / hs_decline -> fin_hardship",
+   "evidence": "\"hardship\": \"I am sorry to hear that. Would you like me to connect you with our customer support team?\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R44",
+   "status": "implemented",
+   "where": "system prompt + COMMON in negotiate/confirm/hardship/wrapup task_message",
+   "evidence": "- Never offer a discount, a waiver, a payment plan or any term that is not in STATE. If asked, say you cannot offer that.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R45",
+   "status": "superseded",
+   "where": "superseded by R69",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R46",
+   "status": "implemented",
+   "where": "confirm transition 1 -> change_offer; policy ev_change -> check_one -> agree -> advance (readback)",
+   "evidence": "1. -> change_offer  if (confirm equals \"change\")  [\"the customer changes the date or the amount\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R47",
+   "status": "implemented",
+   "where": "policy rec_next (one create_promise per agreed product), recorded_guard, ev_wrap_change wrap_change text",
+   "evidence": "\"wrap_change\": \"A recorded promise cannot be changed or cancelled on this call, but you can change it in the Freya Bank mobile app.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R48",
+   "status": "superseded",
+   "where": "superseded by R75",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R49",
+   "status": "implemented",
+   "where": "policy enter_wrapup (after_recorded appended to wrap_line, spoken by wrapup on_enter tts)",
+   "evidence": "\"after_recorded\": \"You will receive a text message confirming this promise.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R50",
+   "status": "superseded",
+   "where": "superseded by R72",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R51",
+   "status": "superseded",
+   "where": "superseded by R71",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R52",
+   "status": "implemented",
+   "where": "negotiate/confirm/wrapup transition topic new_plan -> xfer_restructuring (transfer_to_agent#2 queue restructuring) -> fin_transferred_restructuring",
+   "evidence": "2. -> xfer_restructuring  if (topic equals \"new_plan\")  [\"topic new_plan\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R53",
+   "status": "implemented",
+   "where": "policy ev_human (human_first then xfer_general on 2nd) + ask_dob/ask_phone ID_COMMON with transfer_to_agent queue general -> fin_transferred_human",
+   "evidence": "\"human_first\": \"I can help you with most things myself. Is there anything I can help you with before I transfer you?\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R54",
+   "status": "implemented",
+   "where": "system prompt scam line; negotiate/confirm/hardship aside 'scam' in finish_turn; opening_retry task_message",
+   "evidence": "- If asked whether this is a scam: say they can verify this call by phoning Freya Bank's customer service number, then continue.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R55",
+   "status": "implemented",
+   "where": "system prompt + COMMON in negotiate/confirm/hardship/wrapup task_message",
+   "evidence": "- A question these facts do not answer: say you do not have that information.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R56",
+   "status": "implemented",
+   "where": "prepare/pol_notalk code: ev_notalk (notalk_limit 2 -> refused -> fin_refused); count_decline_dob/phone -> fin_declined; opening_retry transition 5 -> fin_declined",
+   "evidence": "if c >= int(P['notalk_limit']):",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R57",
+   "status": "implemented",
+   "where": "tool close_call config alwaysRunsAt end_of_call; pre_process_code drops empty reason",
+   "evidence": "config: {\"maxRetries\": 0, \"alwaysRunsAt\": [\"end_of_call\"]}",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R58",
+   "status": "implemented",
+   "where": "fin_* code nodes (FINS table) + finalize(): recorded->promise, all paid->paid, else first non-paid state; close_call body outcome/reason",
+   "evidence": "\"service_error\": (\"no_promise\", \"service_error\", \"I am sorry, I could not record your promise because of a technical problem. Thank you for your time, {{title}} {{last_name}}. Goodbye.\"),",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R59",
+   "status": "implemented",
+   "where": "wrapup transitions -> wrap_human -> xfer_general -> fin_transferred_human; wrapup -> xfer_restructuring -> fin_transferred_restructuring (fin code overwrites outcome set by enter_wrapup)",
+   "evidence": "3. -> xfer_restructuring  if (wrap equals \"new_plan\")  [\"asks for a new plan\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R60",
+   "status": "superseded",
+   "where": "superseded by R70",
+   "evidence": "",
+   "fix_hint": ""
+  },
+  {
+   "id": "R61",
+   "status": "implemented",
+   "where": "every end_* terminal spoken_message (thanks + Goodbye), close_call runs at end_of_call afterwards",
+   "evidence": "terminal: endedReason=promise, spoken_message=\"Thank you for your time, {{title}} {{last_name}}. Goodbye.\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R62",
+   "status": "implemented",
+   "where": "whole workflow: Brief A flow (opening, third_party, identity, negotiate ladder, closings) with multi=True policy for 1-3 products",
+   "evidence": "\"\"\"Brief B generator, v3: Brief A + Brief B (one to three products) on builder/policy.py.",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R63",
+   "status": "implemented",
+   "where": "load_account response_mapping data.products -> prepare code loop register_product per product (own past_due, days_late, floor)",
+   "evidence": "register_product(vars, pid, words, past_due, floor, floor_name, deadline, rungs)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R64",
+   "status": "implemented",
+   "where": "prepare code: statement (one sentence per product) -> negotiate on_enter tts {{say_next}}",
+   "evidence": "statement += 'Your ' + w + ' has ' + fmt(pd) + ' past due, ' + str(dl_) + ' days late. '",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R65",
+   "status": "implemented",
+   "where": "prepare code: per-product deadline from days_late (<=7 early_deadline = 12 bd, else late_deadline = 7 bd)",
+   "evidence": "if days_late <= 7:",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R66",
+   "status": "implemented",
+   "where": "prepare code: statement ends 'Can you pay all of them today?'; ev_refuse stage all -> to_one_by_one -> refuse() offers rung 0 (full on attempt1_date) with attempts_used 1, products in pids order",
+   "evidence": "\"one_by_one\": \"Let us go through them one by one.\",",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R67",
+   "status": "implemented",
+   "where": "policy code: per-pid vars attempts_used_<pid>, refused_offers_<pid>, checks_<pid> (register_product, refuse, rung)",
+   "evidence": "pset(V, pid, 'attempts_used', k + 1)",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R68",
+   "status": "implemented",
+   "where": "policy code: all_offer -> fit_day caps at the product's deadline with tag 'dl'; readback appends own_deadline text",
+   "evidence": "\"own_deadline\": \", which is the latest date I can record for it\",",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R69",
+   "status": "implemented",
+   "where": "prepare code: readback() + confirm transition 2 -> rec_next; rec_next/ev_rec_after loop record_promise once per agreed product",
+   "evidence": "\"readback_tail\": \". Do you confirm?\",",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R70",
+   "status": "implemented",
+   "where": "prepare code: note_next() with P['note_reasons'] {refused,hardship,dispute,paid,service_error}; record_note node (add_note with note_pid/note_reason); advance() -> note_next when nothing agreed",
+   "evidence": "if st in P['note_reasons'] and pg(V, p, 'noted') == 'no':",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R71",
+   "status": "implemented",
+   "where": "negotiate transition 6 -> pol_dispute; prepare code: ev_settle('dispute') sets state dispute, advance() continues with next open product; note_next adds add_note reason dispute",
+   "evidence": "\"dispute\": \"Thank you for telling me. I will not take a promise for your [words].\",",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R72",
+   "status": "implemented",
+   "where": "negotiate transition 5 -> pol_paid; prepare code: ev_settle('paid') text 'paid', advance() continues; note_next adds add_note reason paid",
+   "evidence": "\"paid\": \"Thank you for letting me know. Payments can take one business day to appear, so I will not take a promise for your [words].\",",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R73",
+   "status": "implemented",
+   "where": "negotiate/confirm/wrapup transitions topic new_plan -> xfer_restructuring (transfer_to_agent#2 queue restructuring) -> fin_transferred_restructuring; no record/note on that path",
+   "evidence": "2. -> xfer_restructuring  if (topic equals \"new_plan\")  [\"topic new_plan\"]",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R74",
+   "status": "implemented",
+   "where": "prepare code: rec_next() defer_notes -> enter_wrapup before note_next; xfer_* nodes go straight to fin_transferred_*; notes_on_transfer=False",
+   "evidence": "# notes wait until the wrap-up has decided the ending: a transfer from the wrap-up adds no notes at all",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R75",
+   "status": "implemented",
+   "where": "prepare code: ev_rec_after() fail_max=2 re-routes to record once, then state service_error -> note_next add_note service_error; enter_wrapup says recorded only for state recorded; negotiate/confirm 'Never say that a promise is recorded.'",
+   "evidence": "if f < int(P['fail_max']):",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R76",
+   "status": "implemented",
+   "where": "prepare code: finalize() -> fin_keys; check_offer-family transitions 1-6 to fin_promise/fin_paid/fin_hardship/fin_dispute/fin_service_error/fin_refused; xfer_* -> fin_transferred_*; identity/opening fin_* nodes",
+   "evidence": "elif sts and all(s == 'paid' for s in sts):",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R77",
+   "status": "implemented",
+   "where": "tool create_promise body defaults + pre_process_code (float amount, date[:10]); rec_next sets rec_pid/rec_amount/rec_date per product",
+   "evidence": "body.amount (number): default \"{{rec_amount}}\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R78",
+   "status": "implemented",
+   "where": "tool add_note body (customer_id, product_id {{note_pid}}, reason {{note_reason}}, text {{note_text}}); note_reasons restricted to NOTE_ENUM in generator",
+   "evidence": "body.reason (string): default \"{{note_reason}}\"",
+   "fix_hint": "",
+   "evidence_found": true
+  },
+  {
+   "id": "R79",
+   "status": "implemented",
+   "where": "tool close_call: outcome enum, lifecycle alwaysRunsAt end_of_call, pre_process_code drops reason for promise/paid; fin_* nodes set reason for every other outcome",
+   "evidence": "if b.get('outcome') in ('promise', 'paid') or not b.get('reason'):",
+   "fix_hint": "",
+   "evidence_found": true
+  }
+ ],
+ "summary": {
+  "implemented": 71,
+  "partial": 0,
+  "missing": 0,
+  "contradicted": 0,
+  "superseded": 8,
+  "total": 79,
+  "evidence_unverified": 0
+ },
+ "top_fixes": [],
+ "meta": {
+  "model": "claude-fable-5-1",
+  "seconds": 86.5,
+  "cost_usd": 7.4803,
+  "calls": 6,
+  "batches": 6,
+  "rules": "/Users/karanvirkhanna/freya-bb-fixes/out/brief-b.rules.json",
+  "workflow": "/Users/karanvirkhanna/freya-bb-fixes/out/brief-b.workflow.json",
+  "generator": "/Users/karanvirkhanna/freya-bb-fixes/out/gen_brief-b.py",
+  "digest_chars": 181363,
+  "generator_chars": 36156
+ }
+}

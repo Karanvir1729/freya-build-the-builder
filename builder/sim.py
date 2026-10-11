@@ -23,6 +23,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "tools"))
 import freya                                      # noqa: E402  stdlib client (FREYA_API_KEY, FREYA_API_URL)
 from score import http, score_ledger              # noqa: E402  the mock bank + the ledger check
+import buildguard                                  # noqa: E402  per-case version ledger (builder/buildguard.py)
 from run_cases import STYLES, persona_for         # noqa: E402  the organisers' persona text (PERSONA template inside)
 
 # Extra ways of talking, in the organisers' STYLES format (one "HOW YOU TALK:" paragraph appended to the PERSONA; the
@@ -705,6 +706,8 @@ def finish(ctx, case, rep, row, chat, ledger):
     if call:
         lines, tools, var_table, slowest = transcript_from_call(call)
         row["ended"] = call.get("endedReason")
+        # the workflow version this call ran on (build.py's best-tested-version guard compares versions case by case)
+        row["version"], row["version_id"] = call.get("entityVersionNumber"), call.get("entityVersionId")
         # The chat route sometimes resumes a turn from an OLDER message (event conversation_resumed, isBranch true): the
         # engine then routes the customer's line from a node the call had already left (Brief C v3 PUB-07 round 2: after
         # 504s the payment answer was routed from the date-of-birth question). Not the agent's doing: flag it.
@@ -755,6 +758,8 @@ def finish(ctx, case, rep, row, chat, ledger):
     if ctx.first_node[1] and var_table is not None:
         row["first_node_vars_missing"] = [k for k in ctx.first_node[2] if k not in var_table]
     row["transcript"] = write_transcript(ctx, case, rep, row, chat, ledger, lines, tools)
+    buildguard.record_result(ROOT / "results" / "versions" / ("%s.jsonl" % ctx.workflow_id), row, case["id"], rep + 1,
+                             ctx.workflow_id, getattr(ctx, "cases_file", None))
     with _print_lock:
         print(("PASS" if row["pass"] else "FAIL"), case["id"], f"{case['level']:<6}", f"{case['family']:<14}", "|",
               " > ".join(x.replace("verify_identity", "verify").replace("create_promise", "promise") for x in row["tools"]) or "(no tool calls)", flush=True)
@@ -829,6 +834,7 @@ def main():
     ctx.judge_model = a.judge_model or DEFAULTS[ctx.provider.kind]["judge"]
     ctx.style, ctx.max_turns, ctx.opening, ctx.verbose, ctx.reps = a.style, a.max_turns, a.opening, a.verbose, a.reps
     ctx.close_from_args = a.close_from_args
+    ctx.cases_file = a.cases
     ctx.transcripts = pathlib.Path(a.transcripts) if a.transcripts else None
     cases = [c for c in json.load(open(a.cases)) if (not a.brief or c["brief"] == a.brief) and (not a.only or c["id"] in a.only.split(","))]
     if not cases:

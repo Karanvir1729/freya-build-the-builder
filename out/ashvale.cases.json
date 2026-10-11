@@ -1,0 +1,1153 @@
+[
+ {
+  "id": "GEN-C-01",
+  "mock_case": "PUB-01",
+  "brief": "ashvale",
+  "family": "opening",
+  "level": "medium",
+  "title": "Unclear who answered after two asks (a question counts as the second ask) -> UNK",
+  "variables": {
+   "first_name": "Daniel",
+   "last_name": "Reyes",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1988-03-14",
+   "phone_last4": "4471"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "4821",
+    "past_due": 420.0,
+    "days_late": 6,
+    "minimum_payment": 126.0
+   }
+  ],
+  "script": "You answer the phone but never confirm who you are. When the assistant asks 'May I speak with Mr Reyes, please?', say exactly: 'Hello? Who's calling?' When it answers and asks for Mr Reyes again, say exactly: 'What's it about?' If it asks a third time, say 'What's it about?' again. Never say 'yes', 'speaking', 'that's me' or your name. Do not answer any security question; if one is asked, say 'What's it about?'. If the assistant says goodbye, say 'Bye.'",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "UNK",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The call opens with the exact sentences 'Hello, this is the automated assistant from Ashvale Bank. This call is recorded for quality and security.' followed by 'May I speak with Mr Reyes, please?'.",
+   "The assistant answers 'Who's calling?' and asks for Mr Reyes once more, and asks that question no more than twice in total.",
+   "The assistant never says arrears, overdue, owe, debt, payment, collections or 'credit card' on the call.",
+   "No verify_identity, get_account or add_note call is made; close_call is the only tool call, with outcome not_reached and reason UNK."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Opening",
+   "ashvale.md message 2.1 pre-security disclosure ban",
+   "Dialler outcome codes table (not_reached / UNK)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-02",
+  "mock_case": "PUB-04",
+  "brief": "ashvale",
+  "family": "third_party",
+  "level": "hard",
+  "title": "Husband offers to pay, then gives Friday 08:30 (2nd business day, start of new window) -> CBB",
+  "variables": {
+   "first_name": "Lena",
+   "last_name": "Hoffmann",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1984-01-30",
+   "phone_last4": "2219"
+  },
+  "products": [
+   {
+    "type": "car_loan",
+    "past_due": 1250.0,
+    "days_late": 14,
+    "instalment_amount": 400.0
+   }
+  ],
+  "third_party": true,
+  "script": "You are Peter, Ms Lena Hoffmann's husband; she is not at home. When the assistant asks for Ms Hoffmann, say exactly: 'No, she's at work. I'm her husband. What's this about?' When it says it is a private matter and asks when she can be reached, say exactly: 'If it's a bill I can just pay it for her now, whatever it is.' When it declines and asks again when she can be reached, say exactly: 'Call her on Friday 16 October 2026 at half past eight in the morning.' If it confirms that time, say 'Fine, thanks, bye.' If it says that time does not fit and asks for another, say exactly: 'No, that's the only time. Goodbye.' Never give a date of birth or phone digits; if asked, say 'I'm not her.'",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "CBB",
+   "promises": [],
+   "notes": [],
+   "callbacks": [
+    {
+     "date": "2026-10-16",
+     "time": "08:30"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says 'I'm calling about a private matter for Ms Hoffmann.' and never mentions arrears, overdue, owe, debt, payment, collections or the car loan to the husband.",
+   "The assistant thanks the husband, declines his offer to pay without saying what it is for, and asks again when Ms Hoffmann can be reached.",
+   "schedule_callback is called once with the Friday date and time 08:30, with no second request for another time.",
+   "The last tool call is close_call with outcome not_reached and reason CBB."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Someone else answers",
+   "ashvale.md message 4.2 callback window (today or next two business days, 08:30-17:00 both ends included)",
+   "ashvale.md message 2.1 pre-security disclosure ban",
+   "Dialler outcome codes table (not_reached / CBB)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-03",
+  "mock_case": "PUB-07",
+  "brief": "ashvale",
+  "family": "third_party",
+  "level": "hard",
+  "title": "Friday call: flatmate offers 19:00 then Charter Day Monday, both outside the window -> CBX",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-10-16T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "third_party": true,
+  "script": "You are Jake, Mr Samuel Ortiz's flatmate; he is out. When the assistant asks for Mr Ortiz, say exactly: 'He's out, I'm his flatmate. Who's calling?' When it says it is a private matter and asks when he can be reached, say exactly: 'Try him this evening, about seven o'clock.' When it says what the hours are and asks for another time, say exactly: 'Then Monday 19 October 2026 at ten in the morning.' If it says that does not work either and ends the call, say 'Okay, bye.' If it asks for a third time, say 'No, those are the only times I know. Bye.' If it says it has booked either time, just say 'Okay.' Never give a date of birth or phone digits.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "CBX",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After 'this evening, about seven o'clock' the assistant states the callback hours (08:30 to 17:00) and asks once for another time.",
+   "schedule_callback is never called (neither for 19:00 today nor for Monday 19 October, a bank holiday).",
+   "The assistant never mentions arrears, overdue, owe, debt, payment, collections or the personal loan to the flatmate.",
+   "The last tool call is close_call with outcome not_reached and reason CBX."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Someone else answers",
+   "ashvale.md message 4.2 callback window",
+   "ashvale.md Thread 1 holidays (Monday 19 October Charter Day)",
+   "Dialler outcome codes table (not_reached / CBX)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-04",
+  "mock_case": "PUB-02",
+  "brief": "ashvale",
+  "family": "third_party",
+  "level": "easy",
+  "title": "Stranger says it is the wrong number -> WRN",
+  "variables": {
+   "first_name": "Maria",
+   "last_name": "Costa",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1979-11-02",
+   "phone_last4": "0358"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 310.5,
+    "days_late": 11,
+    "instalment_amount": 103.5
+   }
+  ],
+  "third_party": true,
+  "script": "You are a stranger who does not know Ms Costa. When the assistant asks for Ms Costa, say exactly: 'No, there's no Maria Costa here. You've got the wrong number.' If it asks when she can be reached or anything else, say: 'I don't know her, this isn't her number. Goodbye.' Never give any personal details.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "WRN",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant does not say arrears, overdue, owe, debt, payment, collections or 'personal loan' at any point.",
+   "No schedule_callback, verify_identity or get_account call is made.",
+   "close_call is the only tool call, with outcome not_reached and reason WRN."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Someone else answers (wrong number)",
+   "Dialler outcome codes table (not_reached / WRN)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-05",
+  "mock_case": "PUB-09",
+  "brief": "ashvale",
+  "family": "third_party",
+  "level": "easy",
+  "title": "Daughter says the customer has died -> condolence sentence only, DCD",
+  "variables": {
+   "first_name": "Victor",
+   "last_name": "Ionescu",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1981-08-11",
+   "phone_last4": "5560"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 2100.0,
+    "days_late": 28,
+    "instalment_amount": 700.0
+   }
+  ],
+  "third_party": true,
+  "script": "You are Mr Victor Ionescu's daughter. When the assistant asks for Mr Ionescu, say exactly: 'This is his daughter. I'm afraid my dad died three weeks ago.' If the assistant asks when he can be reached, asks for a callback time, or asks anything else, say exactly: 'Please don't call this number again.' Do not give any personal details. If it says goodbye, say 'Goodbye.'",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "DCD",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says exactly 'I'm very sorry for your loss.' and adds nothing else about the matter.",
+   "The assistant does not ask when Mr Ionescu can be reached and does not call schedule_callback.",
+   "The assistant never says arrears, overdue, owe, debt, payment, collections or 'personal loan'.",
+   "close_call is the only tool call, with outcome not_reached and reason DCD."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Someone else answers (deceased)",
+   "Dialler outcome codes table (not_reached / DCD)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-06",
+  "mock_case": "PUB-05",
+  "brief": "ashvale",
+  "family": "identity",
+  "level": "hard",
+  "title": "One wrong DOB then one wrong phone: second wrong answer in total ends the check -> NVF",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "script": "You are Mr Tomas Novak. When asked for Mr Novak, say 'Speaking.' When first asked your date of birth, give a wrong year on purpose: say exactly 'The ninth of September, nineteen ninety-one.' If asked your date of birth again, give the correct one: 'The ninth of September, nineteen ninety.' When asked for the last four digits of your phone number, give a wrong answer on purpose: say exactly 'Eight, eight, six, four.' If the assistant asks for the phone digits again, or any further security question, answer correctly ('Eight, eight, four, six'); then, if it goes on to talk about a balance, say you will pay the full amount today and say 'Yes' when asked to log it. If it tells you to use the app or a branch, say 'Alright, bye.' Do not ask what the call is about.",
+  "expected": {
+   "outcome": "not_verified",
+   "reason": "NVF",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the wrong phone answer (the second wrong answer in total) the assistant asks no further security question, even though the service reports wrong answers still left.",
+   "The assistant tells the customer they can use the Ashvale mobile app or come into a branch, and does not say what the call was about (no arrears, overdue, owe, debt, payment, collections or 'personal loan').",
+   "get_account, create_promise and add_note are never called.",
+   "The last tool call is close_call with outcome not_verified and reason NVF."
+  ],
+  "rule_ids": [
+   "ashvale.md message 5.1 item 1 (second wrong answer in total ends the check, whatever wrong_answers_left says)",
+   "ashvale.md message 2.1 Security (order, failed-check message)",
+   "Dialler outcome codes table (not_verified / NVF)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-07",
+  "mock_case": "PUB-08",
+  "brief": "ashvale",
+  "family": "identity",
+  "level": "medium",
+  "title": "Customer deflects the DOB question twice asking what it is about -> NVD",
+  "variables": {
+   "first_name": "Hannah",
+   "last_name": "Schmidt",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1993-04-28",
+   "phone_last4": "3317"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "5512",
+    "past_due": 180.0,
+    "days_late": 5,
+    "minimum_payment": 54.0
+   }
+  ],
+  "script": "You are Ms Hannah Schmidt. When asked for Ms Schmidt, say 'Yes, that's me.' When first asked your date of birth, do not answer; say exactly: 'Why do you need that? What's this call about?' When the assistant explains and asks again, still do not answer; say exactly: 'No. Tell me what it's about first, then I'll answer.' If it asks a third time or explains again, repeat: 'Tell me what it's about first.' Never give your date of birth or phone digits. If it says goodbye, say 'Bye.'",
+  "expected": {
+   "outcome": "not_verified",
+   "reason": "NVD",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the first deflection the assistant explains once that the questions are there to protect the account, without saying what the call is about.",
+   "The assistant never says arrears, overdue, owe, debt, payment, collections or 'credit card' before closing.",
+   "get_account is never called and no add_note is made.",
+   "The last tool call is close_call with outcome not_verified and reason NVD."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Security (won't answer: explain once; asks again what it's about -> declined)",
+   "ashvale.md message 2.1 pre-security disclosure ban",
+   "Dialler outcome codes table (not_verified / NVD)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-08",
+  "mock_case": "PUB-11",
+  "brief": "ashvale",
+  "family": "special_topic",
+  "level": "hard",
+  "title": "Numeric DOB with day/month swapped hint, then 'already paid' on all three products -> paid CLP",
+  "variables": {
+   "first_name": "Sofia",
+   "last_name": "Almeida",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1987-06-03",
+   "phone_last4": "2288"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "2288",
+    "past_due": 220.0,
+    "days_late": 9,
+    "minimum_payment": 66.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 640.0,
+    "days_late": 9,
+    "instalment_amount": 213.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 75.0,
+    "days_late": 3,
+    "instalment_amount": 25.0
+   }
+  ],
+  "script": "You are Ms Sofia Almeida. When asked for Ms Almeida, say 'That's me.' When first asked your date of birth, give it only in numbers, month first as you are used to: say exactly 'Oh six, oh three, nineteen eighty-seven.' If the assistant then asks you to say the month as a word, or simply asks your date of birth again, say exactly: 'The third of June, nineteen eighty-seven.' When asked for the last four digits of your phone number, say 'Two, two, eight, eight.' Listen to the three balances. When asked whether you can pay all of these in full today, say exactly: 'I already paid all three of them in full on Monday through the app. It should all be cleared.' If the assistant asks about any product separately, or proposes any amount or date, say: 'No, that one is paid too, on Monday.' Do not agree to log anything. If it says goodbye, say 'Thanks, bye.'",
+  "expected": {
+   "outcome": "paid",
+   "reason": "CLP",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "paid"
+    },
+    {
+     "product_id": "p2",
+     "reason": "paid"
+    },
+    {
+     "product_id": "p3",
+     "reason": "paid"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the numeric date of birth the assistant asks the customer to say the month as a word (it does not treat the first date as a failed check) and then moves on to the phone question.",
+   "After the customer says it is already paid, the assistant says exactly 'Payments can take up to two business days to show on your account with us.'",
+   "Before asking about payment the assistant states all three products (credit card ending 2288, personal loan, car loan) with overdue amount and days overdue.",
+   "create_promise is never called; add_note with reason paid is made for p1, p2 and p3, and the last tool call is close_call with outcome paid and reason CLP."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Security (numeric date = day month year; day_month_swapped retry is not a wrong answer)",
+   "ashvale.md message 2.1 Other things people say (already paid)",
+   "ashvale.md message 2.1 Several products / Closing (every product noted paid -> paid)",
+   "Dialler outcome codes table (paid / CLP)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-09",
+  "mock_case": "PUB-13",
+  "brief": "ashvale",
+  "family": "special_topic",
+  "level": "hard",
+  "title": "Scam question at opening, then card disputed and loan 'already paid': close code from the first non-paid product -> DIS",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "script": "You are Ms Elena Rossi. When the assistant first asks for Ms Rossi, do not confirm yet; say exactly: 'Is this a scam call?' When it answers and asks for Ms Rossi again, say 'Yes, speaking.' Answer security correctly: date of birth 'The eighth of January, nineteen ninety-one', phone digits 'Six, six, oh, four.' Listen to both balances. When asked whether you can pay all of these in full today, say exactly: 'That credit card isn't mine. I've never had a credit card with Ashvale.' If the assistant argues or asks anything more about the card, repeat: 'It isn't mine, I never had it.' When the assistant turns to the personal loan, say exactly: 'I paid that loan instalment yesterday, it's done.' If it proposes any amount or date for either product, say 'No' and repeat the matching line. Do not agree to log anything. If it says goodbye, say 'Bye.'",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "DIS",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "dispute"
+    },
+    {
+     "product_id": "p2",
+     "reason": "paid"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "In reply to the scam question the assistant tells the customer they can hang up and ring the number on the back of their card or on their statement, and then carries on with the call without naming any product or saying overdue/arrears/payment before security is passed.",
+   "The assistant does not argue about the credit card and makes no proposal on it.",
+   "After the loan is said to be paid the assistant says exactly 'Payments can take up to two business days to show on your account with us.'",
+   "create_promise is never called; add_note dispute for p1 and add_note paid for p2 are made, and the last tool call is close_call with outcome no_promise and reason DIS (not CLP)."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Opening (asked if it's a scam)",
+   "ashvale.md message 2.1 Other things people say (dispute; already paid)",
+   "ashvale.md message 2.1 Closing (code for the first product in get_account order whose note isn't paid)",
+   "Dialler outcome codes table (no_promise / DIS)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-11",
+  "mock_case": "PUB-03",
+  "brief": "ashvale",
+  "family": "special_topic",
+  "level": "hard",
+  "title": "Hardship disclosed, then customer insists on a person -> general transfer XHM (not support), no notes",
+  "variables": {
+   "first_name": "Owen",
+   "last_name": "Park",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1992-07-21",
+   "phone_last4": "6630"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "0377",
+    "past_due": 95.0,
+    "days_late": 4,
+    "minimum_payment": 28.5
+   }
+  ],
+  "script": "You are Mr Owen Park. When asked for Mr Park, say 'Speaking.' Answer security correctly: date of birth 'The twenty-first of July, nineteen ninety-two', phone digits 'Six, six, three, oh.' Listen to the balance. When asked whether you can pay the full overdue balance today, say exactly: 'I've been off work sick for two months and I'm only getting statutory sick pay. I can't deal with this right now.' As soon as the assistant has said it is sorry, say exactly: 'Can I speak to a real person about this, please?' If it asks whether it can help you itself first, say exactly: 'No, I'd rather talk to a human.' If it offers to put you through to Customer Support before you have asked for a person, say 'No, thank you.' and then ask for a real person as above. If it proposes any amount or date, say: 'No, I want to speak to a person.' Never give a date or an amount. If it says it is putting you through, say 'Thank you.'",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XHM",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "general"
+    }
+   ]
+  },
+  "checks": [
+   "After the hardship disclosure the assistant says exactly 'I'm sorry you're going through that.' and makes no proposal of any amount or date.",
+   "The assistant asks once whether it can help first, then calls transfer_to_agent with queue general (not support).",
+   "No add_note and no create_promise call is made on the call.",
+   "The last tool call is close_call with outcome transferred and reason XHM."
+  ],
+  "rule_ids": [
+   "ashvale.md message 5.1 item 2 (hardship stays with the assistant; a request for a person is a request for a person like any other)",
+   "ashvale.md message 2.1 Other things people say (asking for a person: ask once, then general)",
+   "ashvale.md message 2.1 Several products (no notes at all on a transferred call)",
+   "Dialler outcome codes table (transferred / XHM)"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-12",
+  "mock_case": "PUB-13",
+  "brief": "ashvale",
+  "family": "special_topic",
+  "level": "hard",
+  "title": "Bereavement hardship on two products, no transfer offer, customer declines any transfer -> VUL with hardship notes on both",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "script": "You are Ms Elena Rossi. When asked for Ms Rossi, say 'Speaking.' Answer security correctly: date of birth 'The eighth of January, nineteen ninety-one', phone digits 'Six, six, oh, four.' Listen to both balances. When asked whether you can pay all of these in full today, say exactly: 'My husband died last month and I just can't cope with any of this at the moment.' If the assistant offers to put you through to Customer Support or any team, say exactly: 'No, thank you.' If it proposes any amount or date, or asks when or how much you could pay, say exactly: 'I can't commit to anything right now.' Never name a date or an amount and never ask for a person. If it says someone will write to you, say 'Okay.' If it says goodbye, say 'Bye.'",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "VUL",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "hardship"
+    },
+    {
+     "product_id": "p2",
+     "reason": "hardship"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says exactly 'I'm sorry you're going through that.' and exactly 'Our Financial Support team will write to you within five working days.'",
+   "The assistant makes no proposal of any amount or date on either product and does not call transfer_to_agent.",
+   "add_note with reason hardship is made for p1 and for p2, and create_promise is never called.",
+   "The last tool call is close_call with outcome no_promise and reason VUL."
+  ],
+  "rule_ids": [
+   "ashvale.md message 5.1 item 2 (hardship: two fixed sentences, no proposal, note every product hardship, close VUL)",
+   "ashvale.md message 2.1 Hardship (nothing else on offer; date or amount named by the customer is logged as normal)",
+   "Dialler outcome codes table (no_promise / VUL)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-01",
+  "mock_case": "PUB-07",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "easy",
+  "title": "Early band: no to today, no date, accepts proposal 1 (full amount on 2nd business day)",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "script": "You are Mr Samuel Ortiz. When the assistant asks for Mr Ortiz, say 'Speaking.' Answer both security questions correctly (your date of birth, then the last four digits of your phone number). When the assistant asks whether you can pay the full overdue balance today, say exactly: 'No, I can't pay today.' Do not give any date or any amount. If the assistant asks how much or when you could pay, say 'I don't know, what can you offer?' Accept the first amount and date the assistant proposes: 'Yes, that works for me.' When it reads back and asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' Then say 'Thanks, bye.' Ask for nothing else.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 540.0,
+     "date": "2026-10-16"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The call opens with exactly 'Hello, this is the automated assistant from Ashvale Bank. This call is recorded for quality and security.' and nothing about overdue, payment or the loan is said before both security questions pass.",
+   "The first ask is exactly 'Would you be able to pay the full overdue balance today?' and the assistant never asks the customer how much or when they could pay.",
+   "Proposal 1 is the full overdue amount 540 on the 2nd business day after the call date, and 'Shall I go ahead and log that?' is asked before create_promise.",
+   "After create_promise returns ok the assistant says 'You'll receive a text message confirming this arrangement today.' and close_call is the last tool call."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Opening",
+   "ashvale.md message 2.1 Asking",
+   "ashvale.md message 2.1 Bands and latest dates (early band)",
+   "ashvale.md message 2.1 Proposals",
+   "ashvale.md message 2.1 Read-back and logging",
+   "ashvale.md Dialler outcome codes table (promise)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-02",
+  "mock_case": "PUB-01",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "medium",
+  "title": "Customer names more than owed on a Saturday whose next business day is Charter Day: full amount on the Tuesday",
+  "variables": {
+   "first_name": "Daniel",
+   "last_name": "Reyes",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1988-03-14",
+   "phone_last4": "4471"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "4821",
+    "past_due": 420.0,
+    "days_late": 6,
+    "minimum_payment": 126.0
+   }
+  ],
+  "script": "You are Mr Daniel Reyes. Say 'Speaking.' when asked for Mr Reyes and answer both security questions correctly. When asked whether you can pay the full overdue balance today, say exactly: 'Not today, but I can pay 500 pounds on Saturday 17 October 2026.' If the assistant says that day is a Saturday or closed and offers another day, accept the first alternative day it offers: 'Fine, that day then.' If it says it will log the overdue amount rather than 500, say 'OK.' If it asks for anything else, say 'No, just that.' When it reads back and asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' Then say 'Thanks, goodbye.'",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 420.0,
+     "date": "2026-10-19"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant logs the full overdue amount 420, not 500, and reads back 420.",
+   "The assistant does not offer Monday 19 October (Charter Day bank holiday) nor Saturday 17 October; the date offered and read back is the next business day after the Saturday, Tuesday 20 October 2026.",
+   "The assistant does not make proposal 1 (2nd business day) because the customer named a date and an amount.",
+   "create_promise is called once, after a clear yes to 'Shall I go ahead and log that?'."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Amounts (more than the full amount)",
+   "ashvale.md message 2.1 Bands and latest dates (weekend/holiday moved to next business day)",
+   "ashvale.md Thread 1 holidays (Charter Day 19 Oct)",
+   "ashvale.md message 2.1 Read-back and logging"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-03",
+  "mock_case": "PUB-02",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "medium",
+  "title": "Late band: refuses today, proposal 1 and proposal 2 (floor on the 5th business day) -> refused, RTP",
+  "variables": {
+   "first_name": "Maria",
+   "last_name": "Costa",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1979-11-02",
+   "phone_last4": "0358"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 310.5,
+    "days_late": 11,
+    "instalment_amount": 103.5
+   }
+  ],
+  "script": "You are Ms Maria Costa. Say 'Speaking.' when asked for Ms Costa and answer both security questions correctly. When asked whether you can pay the full overdue balance today, say exactly: 'No, I can't.' Give no date and no amount. To the first proposal the assistant makes, say exactly: 'No, that's no good for me.' To the second proposal, say exactly: 'No. I'm not agreeing to anything.' If the assistant makes any further proposal or asks how much or when you could pay, say 'I'd rather not say. No.' Never suggest a date or an amount yourself. When the assistant says goodbye, say 'Bye.'",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "RTP",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "Proposal 1 is the full overdue amount 310.50 on the 2nd business day after the call date; proposal 2 is the instalment amount 103.50 on the product's latest date, the 5th business day after the call date (Charter Day 19 October is not counted), not the 9th.",
+   "After proposal 2 is refused the assistant makes no third proposal and does not repeat a refused offer.",
+   "The assistant never asks the customer how much or when they could pay, in any wording.",
+   "add_note with reason refused is recorded for p1 before close_call, and create_promise is never called."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.4 (late band latest date = 5th business day, proposal 2 on it)",
+   "ashvale.md message 2.1 Proposals",
+   "ashvale.md message 2.1 Asking (never ask how much)",
+   "ashvale.md message 2.1 Several products / notes (refused note)",
+   "ashvale.md Dialler outcome codes table (no_promise RTP)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-04",
+  "mock_case": "PUB-06",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "hard",
+  "title": "Credit card: full amount too much -> floor is half the balance; 'next Friday' is after the late-band latest date -> latest date offered",
+  "variables": {
+   "first_name": "Priya",
+   "last_name": "Nair",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1986-05-17",
+   "phone_last4": "1502"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "1903",
+    "past_due": 2125.1,
+    "days_late": 12,
+    "minimum_payment": 637.5
+   }
+  ],
+  "script": "You are Ms Priya Nair. Say 'Speaking.' when asked for Ms Nair and answer both security questions correctly. When asked whether you can pay the full overdue balance today, say exactly: 'No, the full amount is too much for me.' Give no date and no amount of your own. When the assistant offers a smaller amount, say exactly: 'I can manage that amount, but not until next Friday.' If asked which Friday you mean, say 'Not this coming Friday, the one after.' If the assistant says that day is past the last day it can log and offers a different day, accept it: 'All right, that day then.' Accept whatever amount the assistant reads back. When it asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' Then say 'Thank you, bye.' Do not ask for a plan or a person.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 1062.55,
+     "date": "2026-10-21"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The amount offered after 'too much' is 1062.55 (half of 2125.10), not the minimum payment 637.50, and the assistant says 'The rest of the balance stays overdue.'",
+   "The assistant treats 'next Friday' as Friday 23 October 2026, says the latest date is the last day it can log and offers that latest date (the 5th business day after the call date); it does not log Friday 16 October.",
+   "No lower amount than the floor and no third proposal is offered; the floor is offered once.",
+   "create_promise is called once after a clear yes to 'Shall I go ahead and log that?'."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.3 (credit card floor = half the overdue balance or minimum payment if higher)",
+   "ashvale.md message 2.1 Amounts (full amount too much -> floor once, 'The rest of the balance stays overdue.')",
+   "ashvale.md message 2.1 Bands and latest dates ('next Friday' definition; day after the latest date)",
+   "ashvale.md message 2.4 (late band latest = 5th business day)"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-05",
+  "mock_case": "PUB-05",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "hard",
+  "title": "Loan: amount below the floor on a past date -> floor offered once, day from today onwards asked; 'this Thursday' accepted",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "script": "You are Mr Tomas Novak. Say 'Speaking.' when asked for Mr Novak and answer both security questions correctly. When asked whether you can pay the full overdue balance today, say exactly: 'No. I could pay 200 pounds on Monday 12 October 2026.' When the assistant says it can't log 200 and offers a higher amount, accept it: 'All right, that amount then.' When the assistant says that day has passed and asks for a day from today onwards, say exactly: 'This Thursday.' If it handles both points in one go, answer both in one line: 'All right, that amount, this Thursday.' If asked which Thursday, say 'The one this week, tomorrow.' Accept whatever the assistant reads back; when it asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' Then say 'Thanks, bye.' Do not suggest any other amount or date.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 260.0,
+     "date": "2026-10-15"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says it can't log 200 and offers the instalment amount 260 exactly once; it does not log 200 and does not offer any amount lower than 260.",
+   "The assistant tells the customer the named day is in the past and asks for a day from today onwards; it does not log a past date.",
+   "The read-back is 260 on Thursday 15 October 2026 (the first Thursday after the call date), followed by 'Shall I go ahead and log that?'.",
+   "The assistant never asks the customer how much they can pay."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Amounts (less than the floor -> can't log, offer the floor once)",
+   "ashvale.md message 2.1 Bands and latest dates (a day in the past; 'this <weekday>' = first one after today)",
+   "ashvale.md message 2.3 (loan floor = instalment amount)",
+   "ashvale.md message 2.1 Read-back and logging"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-06",
+  "mock_case": "PUB-10",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "medium",
+  "title": "Vague period ('end of the month') -> latest date proposed (18 days lands on a Sunday); create_promise fails once -> one try only, SYS",
+  "variables": {
+   "first_name": "Grace",
+   "last_name": "Lin",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1989-02-23",
+   "phone_last4": "9904"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "7740",
+    "past_due": 365.0,
+    "days_late": 8,
+    "minimum_payment": 109.5
+   }
+  ],
+  "faults": [
+   {
+    "tool": "create_promise",
+    "fail_first_n": 1
+   }
+  ],
+  "script": "You are Ms Grace Lin. Say 'Speaking.' when asked for Ms Lin and answer both security questions correctly. When asked whether you can pay the full overdue balance today, say exactly: 'Not today. I'll pay it at the end of the month.' When the assistant asks for the exact day, say exactly: 'I can't say exactly, it depends when my money comes in.' Then accept the first amount and date the assistant proposes: 'Yes, that's fine.' When it reads back and asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' If the assistant says it couldn't confirm the arrangement, say 'OK, understood.' and do not ask it to try again. Then say 'Bye.'",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "SYS",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "service_error"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the customer still gives no exact day, the assistant proposes the product's latest date, Monday 2 November 2026 (18 calendar days after the call date falls on Sunday 1 November, moved to the next business day), with the full overdue amount 365; it does not treat 'end of the month' as a refusal.",
+   "create_promise is called exactly once; after it fails the assistant does not retry.",
+   "The assistant says exactly 'I'm sorry, I couldn't confirm that arrangement on this call. Our team will be in touch with you about it.' and never says the promise is logged nor 'You'll receive a text message confirming this arrangement today.'",
+   "add_note with reason service_error is recorded for p1 and close_call is the last tool call with outcome no_promise and reason SYS."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Bands and latest dates (vague period: ask once, then propose the latest date; early band latest moved to next business day)",
+   "ashvale.md message 4.2 (create_promise gets one try; failure sentence; service_error note; no promise, service failure)",
+   "ashvale.md Dialler outcome codes table (no_promise SYS)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-07",
+  "mock_case": "PUB-12",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "hard",
+  "title": "Three products: promise on the card changed at the read-back to Charter Day (moved to Tuesday), loan disputed, car loan refused",
+  "variables": {
+   "first_name": "Marcus",
+   "last_name": "Bell",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1983-10-19",
+   "phone_last4": "4410"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "9015",
+    "past_due": 510.0,
+    "days_late": 16,
+    "minimum_payment": 153.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 1320.0,
+    "days_late": 16,
+    "instalment_amount": 440.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 140.0,
+    "days_late": 7,
+    "instalment_amount": 46.0
+   }
+  ],
+  "script": "You are Mr Marcus Bell. Say 'Speaking.' when asked for Mr Bell and answer both security questions correctly. After the assistant has listed all three products and asks whether you can pay all of these in full today, say exactly: 'No, not today.' Give no date and no amount. Then, product by product: for the credit card, accept the first amount and date the assistant proposes: 'Yes, fine for the card.' For the personal loan, say exactly: 'I've never had a personal loan with you. That's not mine.' and do not discuss it further ('I'm not paying something that isn't mine.' if pressed). For the car loan, refuse the first proposal with exactly: 'No, I'm not paying anything on the car loan.' and say 'No.' to anything else about it; never give a date or amount for it. When the assistant reads everything back and asks 'Shall I go ahead and log that?', say exactly: 'Can we make the card payment Monday 19 October 2026 instead?' If the assistant says that day is a bank holiday or closed and offers another day, accept it: 'Yes, that day is fine.' When it reads back again and asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' Then say 'Thanks, bye.'",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 510.0,
+     "date": "2026-10-20"
+    }
+   ],
+   "notes": [
+    {
+     "product_id": "p2",
+     "reason": "dispute"
+    },
+    {
+     "product_id": "p3",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant states all three products (card ending 9015, personal loan, car loan, each with amount and days overdue) before asking exactly 'Would you be able to pay all of these in full today?', and does not ask about paying today again per product.",
+   "When the customer asks for Monday 19 October at the read-back, the assistant says it is a bank holiday / not a business day, offers Tuesday 20 October 2026, and reads the card promise back again before calling create_promise.",
+   "The assistant does not argue about the personal loan and makes no proposal on it; for the car loan it makes exactly one proposal and no second one.",
+   "create_promise is called once (p1 only); add_note dispute for p2 and refused for p3 are recorded; close_call is last with outcome promise."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Several products (all stated, one all-of-these question, one at a time, one read-back, create_promise per product)",
+   "ashvale.md message 2.1 Read-back and logging (change at the read-back -> check again, read back again)",
+   "ashvale.md message 2.1 Bands and latest dates (bank holiday -> next business day after it)",
+   "ashvale.md message 2.1 Other things people say (not mine -> dispute note)",
+   "ashvale.md message 2.1 Proposals (early band: one proposal, then refused)",
+   "ashvale.md message 2.1 Closing (promise logged -> promise close)"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-08",
+  "mock_case": "PUB-13",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "hard",
+  "title": "Hardship (job loss) under the Compliance rule: no proposal, no transfer, Financial Support letter; customer still names floor amount and a date on the card",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "script": "You are Ms Elena Rossi. Say 'Speaking.' when asked for Ms Rossi and answer both security questions correctly. After the assistant lists both products and asks whether you can pay all of these in full today, say exactly: 'No. I lost my job last month and I can't pay all that today.' If the assistant offers to put you through to anyone, say 'No, I don't want to be transferred.' Do not ask for a person or a plan. After the assistant has responded to your situation, say exactly: 'But I can pay 150 pounds on the credit card on Friday 16 October 2026.' Say nothing about the personal loan; if asked about it, say 'I can't commit to anything on the loan right now.' with no date or amount. When the assistant reads back the card payment and asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' Then say 'Thank you, bye.'",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 150.0,
+     "date": "2026-10-16"
+    }
+   ],
+   "notes": [
+    {
+     "product_id": "p2",
+     "reason": "hardship"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the job-loss disclosure the assistant says exactly 'I'm sorry you're going through that.' and 'Our Financial Support team will write to you within five working days.'",
+   "The assistant does not offer a transfer to Customer Support, never calls transfer_to_agent, and proposes no amount or date for either product (no 2nd-business-day proposal, no floor-on-latest-date proposal).",
+   "The customer's own 150 on Friday 16 October 2026 for the card is accepted (150 is the card floor, half of 300), read back with 'Shall I go ahead and log that?', and create_promise is called once for p1 only.",
+   "add_note with reason hardship is recorded for p2 and close_call is the last call with outcome promise."
+  ],
+  "rule_ids": [
+   "ashvale.md message 5.1 Hardship (in force from 5 Oct: no proposal, letter sentence, hardship notes, VUL, named date/amount logged as normal)",
+   "ashvale.md message 5.2",
+   "ashvale.md message 2.3 (credit card floor = half the overdue balance)",
+   "ashvale.md message 2.1 Closing (promise logged -> promise close)",
+   "ashvale.md message 2.1 Several products (notes on products without a promise)"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-09",
+  "mock_case": "PUB-04",
+  "brief": "ashvale",
+  "family": "promise",
+  "level": "hard",
+  "title": "Friday call before Charter Day: proposal 1 on the 2nd business day (Wednesday) logged, then a payment-plan request -> restructuring transfer, promise stays",
+  "variables": {
+   "first_name": "Lena",
+   "last_name": "Hoffmann",
+   "title": "Ms",
+   "now": "2026-10-16T16:30"
+  },
+  "identity": {
+   "date_of_birth": "1984-01-30",
+   "phone_last4": "2219"
+  },
+  "products": [
+   {
+    "type": "car_loan",
+    "past_due": 1250.0,
+    "days_late": 14,
+    "instalment_amount": 400.0
+   }
+  ],
+  "script": "You are Ms Lena Hoffmann. Say 'Speaking.' when asked for Ms Hoffmann and answer both security questions correctly. When asked whether you can pay the full overdue balance today, say exactly: 'No, not today.' Give no date and no amount. Accept the first amount and date the assistant proposes: 'Yes, I can do that.' When it reads back and asks 'Shall I go ahead and log that?', say 'Yes, go ahead.' After the assistant confirms it is logged (and mentions the text message), say exactly: 'Before you go, can I set up a payment plan with lower monthly instalments for the rest of what I owe?' If the assistant asks anything about it or whether it can help first, say 'I want a proper payment plan, lower instalments.' Do not accept any description or any other offer; if transferred, say 'OK, thank you.'",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XRS",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 1250.0,
+     "date": "2026-10-20"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "restructuring"
+    }
+   ]
+  },
+  "checks": [
+   "Proposal 1 is the full overdue amount 1250 on Wednesday 21 October 2026, the 2nd business day after the Friday call (the weekend and Charter Day, Monday 19 October, are not business days); it is not offered on Monday 19 or Tuesday 20 October.",
+   "create_promise is called once and the assistant says 'You'll receive a text message confirming this arrangement today.' only after it returns ok.",
+   "On the payment-plan request the assistant describes no plan or instalment change and calls transfer_to_agent with queue restructuring.",
+   "No add_note is recorded; close_call is the last tool call with outcome transferred and reason XRS, after transfer_to_agent."
+  ],
+  "rule_ids": [
+   "ashvale.md message 2.1 Proposals (2nd business day after the call date)",
+   "ashvale.md Thread 1 holidays (Charter Day 19 Oct)",
+   "ashvale.md message 2.4 (late band latest = 5th business day)",
+   "ashvale.md message 2.1 Other things people say (asking for a plan -> restructuring transfer, describe nothing)",
+   "ashvale.md message 2.1 Several products / Closing (transferred call: no notes, logged promises stay, close is the transfer)",
+   "ashvale.md Dialler outcome codes table (transferred XRS)"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ }
+]

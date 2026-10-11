@@ -47,7 +47,20 @@ def slowest_turn(call):
     return round(worst, 1)
 
 
-def run_chunk(agent_id, cases, ids):
+def close_from_args(led):
+    """--close-from-args: the organisers' mock checks close_call reasons against the KIT briefs' table, so a synthetic brief
+    with its own codes gets ok:false and an empty ledger outcome. Score the outcome/reason the agent SENT in its last
+    close_call instead (as builder/sim.py does). Only when the ledger outcome is empty."""
+    if led.get("outcome"):
+        return led, None
+    closes = [c for c in led.get("calls") or [] if c.get("tool") == "close_call"]
+    if not closes:
+        return led, None
+    args = closes[-1].get("args") or {}
+    return dict(led, outcome=args.get("outcome"), reason=args.get("reason")), args
+
+
+def run_chunk(agent_id, cases, ids, from_args=False):
     sessions = {c["id"]: session(c) for c in cases}
     t0 = time.time()
     sim_id, it_id, status = freya.run_simulation(agent_id, f"ext {time.strftime('%H:%M:%S')}", {ids[c["id"]]: sessions[c["id"]] for c in cases})
@@ -56,12 +69,15 @@ def run_chunk(agent_id, cases, ids):
     rows = []
     for c in cases:
         led = http("/v1/practice/ledger/" + sessions[c["id"]]["customer_id"])
+        sent = None
+        if from_args:
+            led, sent = close_from_args(led)
         r = score_ledger(c, led)
         j = judge.get(ids[c["id"]], {})
         if j.get("outcome") != "pass": r["failed"].append("conversation: " + " ".join(str(j.get("reason") or "no verdict").split())[:400])
         row = {"id": c["id"], "mock_case": c.get("mock_case"), "level": c["level"], "family": c["family"], "pass": not r["failed"], "failed": r["failed"],
                "call_id": j.get("callId"), "tools": [x["tool"] for x in led["calls"]], "customer_id": sessions[c["id"]]["customer_id"],
-               "now": sessions[c["id"]].get("now"), "simulation_id": sim_id}
+               "now": sessions[c["id"]].get("now"), "simulation_id": sim_id, "close_from_args": sent}
         if row["call_id"]:
             try:
                 call = freya.get_call(row["call_id"]); row["slowest_turn_s"] = slowest_turn(call); row["ended"] = call.get("endedReason")
@@ -79,6 +95,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("agent_id"); ap.add_argument("--cases", required=True); ap.add_argument("--chunk", type=int, default=14)
     ap.add_argument("--style", choices=sorted(STYLES)); ap.add_argument("--only"); ap.add_argument("--reps", type=int, default=1); ap.add_argument("--out")
+    ap.add_argument("--close-from-args", action="store_true", help="score the outcome/reason sent in close_call when the mock rejected it (synthetic briefs with their own codes)")
     a = ap.parse_args()
     cases = [c for c in json.load(open(a.cases)) if not a.only or c["id"] in a.only.split(",")]
     if not cases: sys.exit("no cases")
@@ -87,7 +104,7 @@ def main():
     for rep in range(a.reps):
         rows = []
         for k in range(0, len(cases), a.chunk):
-            r, took = run_chunk(a.agent_id, cases[k:k + a.chunk], ids); rows += r; total += took
+            r, took = run_chunk(a.agent_id, cases[k:k + a.chunk], ids, a.close_from_args); rows += r; total += took
         reps.append(rows)
         if a.reps > 1: print(f"-- run {rep + 1} of {a.reps}: {sum(r['pass'] for r in rows)} / {len(rows)} passed\n")
     final = [{"id": c["id"], "family": c["family"], "passes": sum(r[k]["pass"] for r in reps), "runs": a.reps, "pass": all(r[k]["pass"] for r in reps)} for k, c in enumerate(cases)]

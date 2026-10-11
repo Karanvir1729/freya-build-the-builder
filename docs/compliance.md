@@ -78,7 +78,7 @@ Required (build.py:192-193 refuses to start without the first two):
 |---|---|
 | `FREYA_API_KEY` | their workspace's key (freya.py:10) |
 | `FREYA_BANK_TEAM_KEY` | any string of 16+ characters they make up (env.example:3; tools/score.py:12 sends it as `x-team-key`); used by the practice runners, by the mock bank, and checked at start |
-| `ANTHROPIC_API_KEY` **or** a `claude login` in the runner's home | the builder's own model calls (build.py:30, rules.py:42, cases.py:35, audit.py:26); the key must have access to `claude-opus-5-5` (build.py:40, rules.py:51) |
+| `ANTHROPIC_API_KEY` **or** a `claude login` in the runner's home | the builder's own model calls (build.py:30, rules.py:42, cases.py:35, audit.py:26); the key must have access to `claude-fable-5-1` (the default builder model; `claude-opus-5-5` takes over when it is overloaded) or set `BUILDER_MODEL` |
 
 Optional, with defaults:
 
@@ -88,9 +88,10 @@ Optional, with defaults:
 | `FREYA_WORKSPACE_ID` | first workspace of the key | freya.py:28 |
 | `OPENAI_API_KEY`, `OPENAI_BASE_URL` | when set, sim.py plays the customer/judge with OpenAI; otherwise the Claude CLI | sim.py:28, :155, :172 |
 | `CLAUDE_CLI` | `~/.local/bin/claude` (see row 18) | sim.py:30 |
-| `BUILDER_MODEL` | `claude-opus-5-5` | build.py:40, :108 |
+| `BUILDER_MODEL` | `claude-fable-5-1`, for every step (build agent, rules, cases, audit) | build.py, rules.py, cases.py, audit.py |
+| `BUILDER_EFFORT` | the model's default; the building agent's effort | build.py |
 | `RULES_MODEL`, `RULES_EFFORT` (`low`), `RULES_SAMPLE_MODELS` | rules.py:51-59 | |
-| `CASES_MODEL`, `AUDIT_MODEL` | `claude-opus-5-5` | cases.py:697, audit.py:330 |
+| `CASES_MODEL`, `AUDIT_MODEL` | `$BUILDER_MODEL`, else `claude-fable-5-1` | cases.py, audit.py |
 | `FREYA_AGENT_PROVIDER`, `FREYA_AGENT_MODEL`, `FREYA_SIM_CONCURRENCY`, `FREYA_BANK_HOST` | kit variables (organisers' own) | freya.py:84, :87; tools/score.py:7 |
 
 Also: Python 3.10+, `pip install -r requirements.txt` (one package, ~100 MB wheel that bundles the Claude Code CLI),

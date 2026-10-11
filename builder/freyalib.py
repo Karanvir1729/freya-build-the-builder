@@ -647,8 +647,16 @@ def weekday_table_first_after(today):
         a = today + datetime.timedelta(days=k)
         tab.append('"this ' + WD[a.weekday()] + '" = "next ' + WD[a.weekday()] + '" = ' + txt(a))
     return '\n'.join(tab)
+def weekday_table_first_after_plus7(today):
+    tab = []
+    for k in range(1, 8):
+        a = today + datetime.timedelta(days=k)
+        tab.append('"' + WD[a.weekday()] + '" = "this ' + WD[a.weekday()] + '" = ' + txt(a) + '; "next ' + WD[a.weekday()] + '" = ' + txt(a + datetime.timedelta(days=7)))
+    return '\n'.join(tab)
 if WDRULE == 'first_after':
     weekday_table = weekday_table_first_after
+if WDRULE == 'first_after_plus7':
+    weekday_table = weekday_table_first_after_plus7
 def calendar_text(today, deadline, extra_days=10):
     cal = []
     d = today
@@ -687,8 +695,8 @@ def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS, weekday_rule="thi
     next business day); fmt(x) '420.5' / '420' / '420.25'. Also imports datetime, json, re. No '{{' or '}}'.
     `weekday_rule`: "this_week" ("this X" = X of the current week, "next X" = a week later) or "first_after"
     (both "this X" and "next X" = the first X after today), as the brief defines the words."""
-    if weekday_rule not in ("this_week", "first_after"):
-        raise ValueError("weekday_rule must be 'this_week' or 'first_after', got %r" % weekday_rule)
+    if weekday_rule not in ("this_week", "first_after", "first_after_plus7"):
+        raise ValueError("weekday_rule must be 'this_week', 'first_after' or 'first_after_plus7', got %r" % weekday_rule)
     hol = sorted(set(str(h)[:10] for h in holidays or []))
     return _CAL_HELPERS.replace("__HOLIDAYS__", repr(hol)).replace("__BWD__", repr(sorted(set(int(x) for x in business_weekdays)))) \
                        .replace("__WDRULE__", repr(weekday_rule))

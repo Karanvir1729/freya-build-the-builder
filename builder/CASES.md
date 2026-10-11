@@ -26,7 +26,7 @@ Outputs:
 
 ## How it works
 
-1. **Two model calls in parallel** (`CASES_MODEL`, default `claude-opus-5-5`, no tools, JSON schema output; this
+1. **Two model calls in parallel** (`CASES_MODEL`, default `$BUILDER_MODEL`, else `claude-fable-5-1`, no tools, JSON schema output; this
    reuses `rules.py`'s `ask_json_async`). One call writes the conversation-control branches: opening, third party,
    identity failures, special topics, and **one case per non-promise outcome/reason row**. The other writes the
    promise branches: date classes, amount classes, persuasion per band, read-back changes, the promise-service fault,

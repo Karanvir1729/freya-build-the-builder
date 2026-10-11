@@ -1,0 +1,406 @@
+{
+ "schema": "rules-v2/spec-1",
+ "call_date_range": {
+  "earliest": "2026-10-12",
+  "latest": "2027-01-01",
+  "basis": "mailbox exported 9 Oct 2026 for the build; last rule change effective Monday 12 Oct; example now 2026-10-14T11:00; holiday calendar runs to 1 Jan 2027"
+ },
+ "spec": {
+  "calendar": {
+   "holidays": [
+    {
+     "date": "2026-10-19",
+     "name": "Charter Day"
+    },
+    {
+     "date": "2026-11-12",
+     "name": "Harvest Thursday"
+    },
+    {
+     "date": "2026-12-09",
+     "name": "Kelso Fair Day"
+    },
+    {
+     "date": "2026-12-25",
+     "name": "Christmas Day"
+    },
+    {
+     "date": "2026-12-28",
+     "name": "Boxing Day (substitute day)"
+    },
+    {
+     "date": "2027-01-01",
+     "name": "New Year's Day"
+    }
+   ],
+   "text": "2026-12-24 is a normal business day",
+   "business_weekdays": [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri"
+   ]
+  },
+  "callback": {
+   "open": "08:30",
+   "close": "17:00",
+   "same_day": true,
+   "later_than_now": true,
+   "days_ahead_business": 2,
+   "text": "if the second offered time does not fit, book nothing and close as not reached, no callback (CBX)"
+  },
+  "max_wrong_answers": 2,
+  "bands": [
+   {
+    "name": "early",
+    "min_days": 1,
+    "max_days": 9,
+    "deadline_rule": {
+     "type": "calendar_days_after",
+     "n": 18,
+     "adjust": "next_business_day"
+    },
+    "attempts": 1
+   },
+   {
+    "name": "late",
+    "min_days": 10,
+    "max_days": 45,
+    "deadline_rule": {
+     "type": "business_days_after",
+     "n": 5,
+     "adjust": "none"
+    },
+    "attempts": 2
+   },
+   {
+    "name": "over_45",
+    "min_days": 46,
+    "max_days": null,
+    "same_as": "late"
+   }
+  ],
+  "floors": [
+   {
+    "product_types": [
+     "credit_card"
+    ],
+    "rule": {
+     "type": "other",
+     "text": "half of past_due, or minimum_payment where that is higher"
+    }
+   },
+   {
+    "product_types": [
+     "personal_loan",
+     "car_loan"
+    ],
+    "rule": {
+     "type": "field",
+     "field": "instalment_amount"
+    }
+   }
+  ],
+  "attempt_ladder": [
+   {
+    "attempt": 1,
+    "bands": [],
+    "amount": "in_play",
+    "date_rule": "the 2nd business day after the call date",
+    "text": ""
+   },
+   {
+    "attempt": 2,
+    "bands": [
+     "late"
+    ],
+    "amount": "floor",
+    "date_rule": "the product's latest date, the 5th business day after the call date",
+    "text": ""
+   }
+  ],
+  "identity": [
+   {
+    "order": 1,
+    "field": "date_of_birth",
+    "hint_values": [
+     "day_month_swapped"
+    ],
+    "retry_rule": "hint day_month_swapped: ask for the month as a word, not a wrong answer; a wrong answer can be asked again"
+   },
+   {
+    "order": 2,
+    "field": "phone_last4",
+    "retry_rule": "a wrong answer can be asked again"
+   }
+  ],
+  "outcomes": [
+   {
+    "outcome": "not_reached",
+    "reason": "UNK",
+    "when": "still unclear who answered after the second ask; could not establish who answered"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "CBB",
+    "when": "someone else answered; callback booked"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "CBX",
+    "when": "someone else answered; no callback inside the hours after two offers"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "WRN",
+    "when": "not the customer's number"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "DCD",
+    "when": "customer deceased"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "NVF",
+    "when": "security check failed; second wrong answer in total"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "NVD",
+    "when": "customer declined the security questions after one explanation; won't talk, said twice, before security; customer declined the security questions, or would not talk before them"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "RTP",
+    "when": "refused, proposals used up, nothing else applies; won't talk, said twice, after security; refused, proposals used up, or will not talk after security"
+   },
+   {
+    "outcome": "paid",
+    "reason": "CLP",
+    "when": "every product noted paid; customer says it is already paid; every product noted paid"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "DIS",
+    "when": "customer disputes; customer disputes the balance or the product"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "XRS",
+    "when": "asks for a plan / lower instalments / more time; transferred to restructuring (queue restructuring)"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "XHM",
+    "when": "customer insists on a person; hardship customer insists on a person; transferred to a person at the customer's request (queue general)"
+   },
+   {
+    "outcome": "promise",
+    "reason": "",
+    "when": "at least one promise logged, no transfer afterwards"
+   },
+   {
+    "outcome": "paid",
+    "reason": "",
+    "when": "no promise and every product noted paid"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "code of first non-paid product in get_account order",
+    "when": "no promise, not all paid"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "SYS",
+    "when": "create_promise failed on the single try and nothing else applies; a bank service failed (create_promise, or another tool after security)"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "VUL",
+    "when": "hardship disclosed and no promise logged; hardship disclosed (Financial Support letter)"
+   }
+  ],
+  "note_reasons": [
+   {
+    "reason": "refused",
+    "when": "product refused / proposals used up / will not talk after security",
+    "text_must_contain": "one line in plain words"
+   },
+   {
+    "reason": "paid",
+    "when": "customer says already paid",
+    "text_must_contain": "one line in plain words"
+   },
+   {
+    "reason": "dispute",
+    "when": "customer disputes the balance or product",
+    "text_must_contain": "one line in plain words"
+   },
+   {
+    "reason": "hardship",
+    "when": "hardship disclosed",
+    "text_must_contain": "one line in plain words"
+   },
+   {
+    "reason": "service_error",
+    "when": "create_promise failed",
+    "text_must_contain": "one line in plain words"
+   }
+  ],
+  "verbatim": [
+   {
+    "text": "Hello, this is the automated assistant from Ashvale Bank. This call is recorded for quality and security.",
+    "when": "R07: First sentence of every call as written, then ask for the customer by title and last name."
+   },
+   {
+    "text": "May I speak with {title} {last_name}, please?",
+    "when": "R07: First sentence of every call as written, then ask for the customer by title and last name."
+   },
+   {
+    "text": "Yes, I'm Ashvale Bank's automated assistant.",
+    "when": "R11: Asked if it is a robot, the assistant says the sentence as written and carries on."
+   },
+   {
+    "text": "I'm calling about a private matter for {title} {last_name}.",
+    "when": "R14: When someone else answers, say the private-matter sentence and ask when the customer can be reached, nothing more. A relative cannot answer security questions, "
+   },
+   {
+    "text": "I'm very sorry for your loss.",
+    "when": "R20: If told the customer has died, say the sentence as written, nothing else, and close as not reached, deceased (`not_reached` / DCD)."
+   },
+   {
+    "text": "Would you be able to pay the full overdue balance today?",
+    "when": "R29: The first ask is as written; with several products use the all-of-these variant."
+   },
+   {
+    "text": "Would you be able to pay all of these in full today?",
+    "when": "R29: The first ask is as written; with several products use the all-of-these variant."
+   },
+   {
+    "text": "The rest of the balance stays overdue.",
+    "when": "R42: If they say the full amount is too much, offer the floor once and say the sentence as written; if they won't take the floor, flat refusal."
+   },
+   {
+    "text": "Shall I go ahead and log that?",
+    "when": "R49: Read back product, amount and date and ask the confirm question as written; `create_promise` only after a clear yes; if they change date or amount, check it aga"
+   },
+   {
+    "text": "You'll receive a text message confirming this arrangement today.",
+    "when": "R53: After the last promise is logged, say once per call the text-message sentence as written."
+   },
+   {
+    "text": "Payments can take up to two business days to show on your account with us.",
+    "when": "R54: 'I've already paid': say the sentence as written, no promise on that product, note it `paid`, close as paid (`paid` / CLP)."
+   },
+   {
+    "text": "I'm afraid I don't have that information.",
+    "when": "R59: Anything it cannot answer from the tools: say the sentence as written."
+   },
+   {
+    "text": "I'm sorry, I couldn't confirm that arrangement on this call. Our team will be in touch with you about it.",
+    "when": "R78: From 5 October `create_promise` gets one try (was: try once more). If it errors or returns `ok: false`, do not retry; say the sentence, note the product `servic"
+   },
+   {
+    "text": "I'm sorry you're going through that.",
+    "when": "R81: From Monday 5 October hardship calls stay with the assistant: say the sorry sentence, make no proposal, say the Financial Support sentence, note every product `"
+   },
+   {
+    "text": "Our Financial Support team will write to you within five working days.",
+    "when": "R81: From Monday 5 October hardship calls stay with the assistant: say the sorry sentence, make no proposal, say the Financial Support sentence, note every product `"
+   }
+  ],
+  "forbidden_words_before_verification": [
+   "arrears",
+   "overdue",
+   "owe",
+   "debt",
+   "payment",
+   "collections",
+   "the name of a product"
+  ]
+ },
+ "sources": {
+  "calendar": [
+   "R01",
+   "R02",
+   "R33"
+  ],
+  "verbatim": [
+   "R07",
+   "R11",
+   "R14",
+   "R20",
+   "R29",
+   "R42",
+   "R49",
+   "R53",
+   "R54",
+   "R59",
+   "R78",
+   "R81"
+  ],
+  "outcomes": [
+   "R09",
+   "R17",
+   "R18",
+   "R19",
+   "R20",
+   "R25",
+   "R26",
+   "R45",
+   "R54",
+   "R55",
+   "R56",
+   "R57",
+   "R58",
+   "R65",
+   "R66",
+   "R78",
+   "R80",
+   "R81",
+   "R83",
+   "R95"
+  ],
+  "forbidden_words_before_verification": [
+   "R13"
+  ],
+  "identity": [
+   "R21",
+   "R80"
+  ],
+  "note_reasons": [
+   "R45",
+   "R54",
+   "R55",
+   "R63",
+   "R78",
+   "R81",
+   "R96"
+  ],
+  "floors": [
+   "R68",
+   "R87"
+  ],
+  "bands": [
+   "R69"
+  ],
+  "attempt_ladder": [
+   "R69",
+   "R70"
+  ],
+  "callback": [
+   "R76"
+  ],
+  "max_wrong_answers": [
+   "R80"
+  ]
+ },
+ "notes": [
+  "R27: product wording examples: \"your credit card ending 4821\", \"your personal loan\", \"your car loan\""
+ ],
+ "merge_conflicts": [
+  "floors[credit_card]: {\"type\": \"other\", \"text\": \"the higher of 50% of past_due and minimum_payment\"} (R68) -> {\"type\": \"other\", \"text\": \"half of past_due, or minimum_payment where that is higher\"} (R87)"
+ ]
+}

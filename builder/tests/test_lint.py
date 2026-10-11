@@ -255,6 +255,24 @@ def test_empty_variable_in_spoken_text():
     assert not has(f, WARN, "nodes.bye.terminal.spoken_message", "{{full}}"), f
 
 
+def test_date_typed_extraction():
+    # a date-typed extraction resolves 'tomorrow' with the platform's real clock: WARN alone, INFO behind the words
+    wf = minimal()
+    ex = wf["nodes"]["greet"]["extraction_schema"]
+    ex.append({"name": "pay_date", "type": "date", "description": "Payment day", "min_confidence": 0.5})
+    f = lint(wf)
+    assert has(f, WARN, "greet.extraction_schema[pay_date]", "real clock"), f
+    ex.append({"name": "pay_when", "type": "string", "description": "The customer's words for the day", "min_confidence": 0.5})
+    f = lint(wf)
+    assert not has(f, WARN, "greet.extraction_schema[pay_date]", "real clock"), f
+    assert has(f, INFO, "greet.extraction_schema[pay_date]", "pay_when"), f
+    # a date-like name typed string is the recommended form: no finding about its type
+    wf = minimal()
+    wf["nodes"]["greet"]["extraction_schema"].append({"name": "payment_date", "type": "string", "description": "Words", "min_confidence": 0.5})
+    f = lint(wf)
+    assert not any("payment_date" in x["where"] and "date" in x["message"] for x in f), f
+
+
 def test_lifecycle_and_hooks():
     wf = minimal()
     t = api_tool("close_call", {"customer_id": {"type": "string", "default": "{{customer_id}}"},
@@ -316,9 +334,14 @@ def test_openapi_checks():
 
 
 def test_reference_workflows():
-    brief_a = json.load(open(ROOT / "out" / "brief-a.workflow.json"))
-    f = lint(brief_a, API)
-    assert [x for x in f if x["level"] in (ERROR, WARN)] == [], f
+    # the builder's own Brief A output ships no test_variables: lint it with the call variables every call carries.
+    # The one known WARN is the setup node's calendar helpers defined outside try (CAL_HELPERS, by design).
+    calls = ["customer_id", "first_name", "last_name", "title", "now"]
+    for name in ("brief-a.workflow.json", "brief-a_v3.workflow.json"):
+        f = lint(json.load(open(ROOT / "out" / name)), API, calls)
+        bad = [x for x in f if x["level"] == ERROR or (x["level"] == WARN and not (
+            x["where"].startswith("nodes.setup.pre_actions") and "outside try/except" in x["message"]))]
+        assert bad == [], (name, bad)
     base = json.load(open(ROOT / "examples" / "base-agent.json"))
     f = errors(base, API)
     assert has(f, ERROR, "$.nodes.identity.max_turn_transition", "null"), f

@@ -397,6 +397,29 @@ def multi_no_promise_closing_order():
 
 
 @test
+def note_text_carries_the_customers_reason():               # Brief F PUB-05: the note must name the job loss
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "hardship", topic="hardship", customer_said="I lost my job last month")
+    V["customer_said"] = "have no money right now"          # a later turn gives another reason: both are kept
+    ev(P, V, "hs_decline", hs_answer="support_no")
+    assert V["route"] == "note" and "lost my job last month; have no money right now" in V["note_text"], V.get("note_text")
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "hardship", topic="hardship", customer_said="I lost my job last month")
+    V["customer_said"] = ""                                 # a later turn extracts nothing: the reason stays
+    ev(P, V, "hs_decline", hs_answer="support_no")
+    assert V["route"] == "note" and "lost my job last month" in V["note_text"], V.get("note_text")
+    P, V = start([CARD], notes=True)
+    ev(P, V, "dispute", topic="dispute", customer_said="the card was stolen in August")
+    assert V["route"] == "note" and "the card was stolen in August" in V["note_text"], V.get("note_text")
+    P, V = start([CARD], notes=True)                        # no reason given: the note still says what happened
+    ev(P, V, "dispute", topic="dispute")
+    assert V["route"] == "note" and "disputes" in V["note_text"], V.get("note_text")
+    # the extraction exists only when the brief keeps notes
+    names = lambda pol_: [e["name"] for e in pol_.negotiate_node("t", [], [])["extraction_schema"]]
+    assert "customer_said" in names(mk(True, True)) and "customer_said" not in names(mk(False, False))
+
+
+@test
 def every_event_survives_empty_vars():
     P = mk(True, True)
     for name, e in pol.EVENT_NODES.items():

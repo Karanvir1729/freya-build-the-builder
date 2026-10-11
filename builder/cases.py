@@ -32,7 +32,7 @@ How:
 title, script; NOT their expected ledgers or checks) and have the case-writer compute the expected ledger for each, so
 it can be compared with a hand-verified set by `--compare`.
 
-Needs a Claude login (or ANTHROPIC_API_KEY). CASES_MODEL overrides the model (default claude-opus-5-5).
+Needs a Claude login (or ANTHROPIC_API_KEY). CASES_MODEL overrides the model (default $BUILDER_MODEL, else claude-fable-5-1).
 Progress and every model call go to stderr ("model call: <model> | purpose: ..."); the one-line summary goes to stdout.
 """
 import argparse, asyncio, datetime, json, math, os, pathlib, re, sys, time
@@ -42,7 +42,10 @@ sys.path.insert(0, str(ROOT / "builder"))
 from rules import api_digest, ask_json_async, read_briefs   # noqa: E402
 from freyalib import CAL_HELPERS                            # noqa: E402
 
-DEFAULT_MODEL = "claude-opus-5-5"
+DEFAULT_MODEL = os.environ.get("BUILDER_MODEL") or "claude-fable-5-1"
+# effort of the case writer's calls; CASES_EFFORT overrides ("" = the model's default)
+# measured on Fable (Brief F): 235 s at medium against 359-365 s at the model's default (high), 20 cases either way
+EFFORT = os.environ.get("CASES_EFFORT", "medium") or None   # Anthropic's most capable model; BUILDER_MODEL sets every step
 DEFAULT_NOW = "2026-10-14T11:00"
 PUBLIC = ROOT / "public-test-set.json"
 WD = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -325,7 +328,7 @@ async def generate(briefs, api_path, rules_path, model, prefix="GEN"):
              "prefer the branches where an agent is most likely to go wrong (limits, counters, calendar edges, precedence "
              "between rules)." % (what, prefix, g.upper()[:1], prefix, g.upper()[:1]))
         tasks.append(ask_json_async(p, SYSTEM, SCHEMA, "independent case writer: %s branches of %s" % (g, " ".join(pathlib.Path(b).name for b in briefs)),
-                                    model=model, log=log))
+                                    model=model, log=log, effort=EFFORT))
     return await asyncio.gather(*tasks)
 
 
@@ -351,7 +354,7 @@ async def replay(briefs, api_path, rules_path, model, scenarios, batch=12):
                  "write the expected ledger, deadlines, checks, derivation, rule_ids and confidence from the brief. "
                  "Family and level: your own label.\nSCENARIOS:\n%s" % json.dumps(ch, indent=1))
             return await ask_json_async(p, SYSTEM, SCHEMA, "independent case writer: expected ledgers for %d given scenarios (batch %d)" % (len(ch), k + 1),
-                                        model=model, log=log)
+                                        model=model, log=log, effort=EFFORT)
     return await asyncio.gather(*[one(ch, k) for k, ch in enumerate(chunks)]), {c["id"]: c for c in items}
 
 
@@ -518,6 +521,23 @@ def materialise(raw, cal, mocks, enums, slot, scenario=None):
     return case, rat, errs, warns
 
 
+def date_in_text(iso, text):
+    """Whether the brief writes this date: 2026-10-19, '19 October', '19th Oct', 'October 19', or 19/10/2026 and 19.10.2026.
+    Briefs written as raw material give holidays in words ('Monday 19 October 2026 - Charter Day'), not ISO."""
+    if iso in text:
+        return True
+    try:
+        d = datetime.date.fromisoformat(iso)
+    except ValueError:
+        return False
+    mon = MO[d.month - 1]
+    names = "(?:%s|%s\\.?)" % (mon, mon[:3])
+    day = "0?%d(?:st|nd|rd|th)?" % d.day
+    pats = [r"\b%s(?:\s+of)?\s+%s\b" % (day, names), r"\b%s\s+%s\b" % (names, day),
+            r"\b0?%d[/.]0?%d[/.](?:%d|%02d)\b" % (d.day, d.month, d.year, d.year % 100)]
+    return any(re.search(p, text, re.IGNORECASE) for p in pats)
+
+
 def calendar_from(answers, brief_text):
     """Merge the calendars of the calls; keep holidays that appear in the brief; report disagreements."""
     notes = []
@@ -534,7 +554,7 @@ def calendar_from(answers, brief_text):
             if b != bwd:
                 notes.append("calls disagree on business weekdays: %s vs %s (first kept)" % (bwd, b))
     hol, bwd = hol or [], bwd or [0, 1, 2, 3, 4]
-    kept = [h for h in hol if h in brief_text]
+    kept = [h for h in hol if date_in_text(h, brief_text)]
     if len(kept) != len(hol):
         notes.append("holidays not found in the brief and dropped: %s" % sorted(set(hol) - set(kept)))
     found = sorted(set(re.findall(r"\b20\d\d-\d\d-\d\d\b", brief_text)))
@@ -750,7 +770,7 @@ async def run(briefs, api_path, rules_path, out, model=None, scenarios_path=None
              % (cal.bwd, cal.holidays, json.dumps([{"outcome": o, "reason": r} for o, r in missing]),
                 json.dumps([{"case": r, "findings": bad[r["id"]]} for r in fix_in], indent=1)))
         try:
-            ans, info = await ask_json_async(p, SYSTEM, SCHEMA, "independent case writer: repair %d rejected case(s), add %d uncovered outcome row(s)" % (len(fix_in), len(missing)), model=model, log=log)
+            ans, info = await ask_json_async(p, SYSTEM, SCHEMA, "independent case writer: repair %d rejected case(s), add %d uncovered outcome row(s)" % (len(fix_in), len(missing)), model=model, log=log, effort=EFFORT)
             infos.append(info)
             g2, r2, bad2 = build(ans.get("cases") or [])
             have = {c["id"] for c in good}

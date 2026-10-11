@@ -11,7 +11,8 @@ The slot (and the name of every output file) is the file name of the last brief 
 Options: --cases <file> (practice cases to test against; auto-detected for the kit and synthetic briefs, none for
 hidden briefs), --runner sim|freya (local simulator or the organisers' simulation; default sim), --minutes N (budget,
 default 29), --no-rules / --no-audit / --no-gen-cases to skip those steps, --gen-cases to generate rule-branch cases
-even when a cases file exists (they are then an extra set; the given file stays the practice set).
+even when a cases file exists (they are then an extra set; the given file stays the practice set), --keep-builder-edits
+to leave the agent's edits to the builder's own files in place (development only).
 
 One run, with no manual step:
   1. rules:    builder/rules.py extracts the rule inventory of the brief(s) -> out/<slot>.rules.json, .spec.json, .rules.conflicts.md
@@ -27,17 +28,35 @@ One run, with no manual step:
   4. export:   freya.export_workflow -> submission/<slot>.workflow.json (what gets scored)
   5. trace:    traces/<slot>.log (plain text: start/end, every model call, tests, what was created) + traces/<slot>.jsonl
 
+  6. guards:   (builder/buildguard.py) the newest version must be published on the event's agent model; when the final
+               version, re-tested, clearly lost cases against the version tested before it and gained none, that
+               earlier version is saved again and shipped; every change to builder/, .claude/skills/, tools/ or
+               freya.py during the run goes to out/<slot>-<stamp>.builder-edits.patch, and the ones the building agent
+               made are put back (not when --keep-builder-edits is given, git HEAD moved, or another build runs from
+               the same checkout; changes nobody can tie to the agent are reported and left alone)
+
 Needs FREYA_API_KEY and FREYA_BANK_TEAM_KEY (env.sh), a Claude login or ANTHROPIC_API_KEY; OPENAI_API_KEY for the
 local simulator's customer/judge models (otherwise it falls back to the Claude CLI).
-BUILDER_MODEL sets the builder's own model (default claude-opus-5-5). The phone agent's model is fixed in freya.py.
+BUILDER_MODEL sets the builder's own model for every step (default claude-fable-5-1, Anthropic's most capable model;
+claude-opus-5-5 takes over when it is overloaded); BUILDER_EFFORT sets the building agent's effort (default high).
+The phone agent's model is fixed in freya.py.
 """
 import asyncio, dataclasses, json, os, pathlib, re, subprocess, sys, threading, time
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "builder"))
+import buildguard  # noqa: E402
 
 SKILL = "build-phone-agent"
-DEFAULT_BUILDER_MODEL = "claude-opus-5-5"
+DEFAULT_BUILDER_MODEL = "claude-fable-5-1"
+FALLBACK_MODEL = "claude-opus-5-5"      # when the builder model is overloaded (the Claude CLI's --fallback-model)
+# the building agent's effort; the Claude CLI's default for claude-fable-5-1 is high (claude-opus-5-5: medium)
+BUILDER_EFFORT = os.environ.get("BUILDER_EFFORT") or "high"
+# rules and cases run in parallel before the agent: measured on Fable (Brief F, a mailbox) 309 s and 365 s at the default
+# effort, against 173 s and 124 s on claude-opus-5-5
+STEP_TIMEOUT = 540
+AGENT_TOOL_USES = []                    # (tool name, input) of every tool call of the building agent (builder-edit guard)
 PY = sys.executable
 
 
@@ -114,9 +133,10 @@ def detect_cases(briefs):
 async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner, minutes_left, generated=None):
     from claude_agent_sdk import (AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, ToolResultBlock,
                                   ToolUseBlock, UserMessage, query)
-    model = os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL)
+    model = os.environ.get("BUILDER_MODEL") or DEFAULT_BUILDER_MODEL
     options = ClaudeAgentOptions(
-        cwd=str(ROOT), model=model, skills=[SKILL], setting_sources=["project"],
+        cwd=str(ROOT), model=model, fallback_model=FALLBACK_MODEL if model != FALLBACK_MODEL else None,
+        effort=BUILDER_EFFORT, skills=[SKILL], setting_sources=["project"],
         allowed_tools=["Read", "Write", "Edit", "Glob", "Grep", "Bash"], permission_mode="dontAsk", max_turns=200,
         env={"BUILD_MODEL_LOG": os.environ.get("BUILD_MODEL_LOG", ""), "BASH_DEFAULT_TIMEOUT_MS": "900000", "BASH_MAX_TIMEOUT_MS": "1200000", "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS": "1"},
     )
@@ -140,34 +160,92 @@ async def run_claude(briefs, tool_api, slot, trace, cases, brief_filter, runner,
               "The rule inventory is at out/%s.rules.json (and .md); resolve out/%s.rules.conflicts.md first; the structured values "
               "are in out/%s.spec.json. %s%s Time budget: %d minutes from now (stop by %s local "
               "time; check `date` before starting a test round) for everything, including your own tests; save a working "
-              "agent early and improve it." % (SKILL, " ".join(briefs), tool_api, slot, slot, slot, slot, test_line, gen_line, int(minutes_left), deadline))
-    trace.line("model call: %s | purpose: build, test and fix the phone agent from the brief | prompt: %s" % (model, prompt))
-    async for message in query(prompt=prompt, options=options):
-        trace.raw({"type": type(message).__name__, **dataclasses.asdict(message)})
-        if isinstance(message, AssistantMessage):
-            m = getattr(message, "model", None) or model
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    text = block.text.strip(); first = text.splitlines()[0] if text else ""
-                    if first: trace.line("model call: %s | says: %s" % (m, first[:220]))
-                elif isinstance(block, ToolUseBlock):
-                    arg = block.input.get("command") or block.input.get("file_path") or block.input.get("pattern") or ""
-                    trace.line("model call: %s | tool %s | %s" % (m, block.name, " ".join(str(arg).split())[:220]))
-        elif isinstance(message, UserMessage) and isinstance(message.content, list):
-            for block in message.content:
-                if isinstance(block, ToolResultBlock):
-                    text = block.content if isinstance(block.content, str) else json.dumps(block.content, default=str)
-                    hits = [l.strip() for l in text.splitlines() if re.match(r"\s*(PASS|FAIL|RESULT:|ERROR|WARN)\b", l) or " passed" in l or "workflow_id" in l or "implemented" in l]
-                    if hits: trace.line("test/tool result: " + " | ".join(h[:160] for h in hits[:24]))
-        elif isinstance(message, ResultMessage):
-            trace.line("agent run done: %s turns, %.0f s, $%.2f" % (message.num_turns, message.duration_ms / 1000, message.total_cost_usd or 0))
+              "agent early and improve it. A step you decide on is something to run now, not to announce: do not end your "
+              "turn before step 10's finish line or the deadline." % (SKILL, " ".join(briefs), tool_api, slot, slot, slot, slot, test_line, gen_line, int(minutes_left), deadline))
+    t_end = time.time() + minutes_left * 60
+
+    async def consume(p, opts, purpose):
+        trace.line("model call: %s | purpose: %s | prompt: %s" % (model, purpose, p))
+        last_text, result = "", None
+        async for message in query(prompt=p, options=opts):
+            trace.raw({"type": type(message).__name__, **dataclasses.asdict(message)})
+            if isinstance(message, AssistantMessage):
+                m = getattr(message, "model", None) or model
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        text = block.text.strip(); first = text.splitlines()[0] if text else ""
+                        if text: last_text = text
+                        if first: trace.line("model call: %s | says: %s" % (m, first[:220]))
+                    elif isinstance(block, ToolUseBlock):
+                        AGENT_TOOL_USES.append((block.name, dict(block.input or {})))
+                        arg = block.input.get("command") or block.input.get("file_path") or block.input.get("pattern") or ""
+                        trace.line("model call: %s | tool %s | %s" % (m, block.name, " ".join(str(arg).split())[:220]))
+            elif isinstance(message, UserMessage) and isinstance(message.content, list):
+                for block in message.content:
+                    if isinstance(block, ToolResultBlock):
+                        text = block.content if isinstance(block.content, str) else json.dumps(block.content, default=str)
+                        hits = [l.strip() for l in text.splitlines() if re.match(r"\s*(PASS|FAIL|RESULT:|ERROR|WARN)\b", l) or " passed" in l or "workflow_id" in l or "implemented" in l]
+                        if hits: trace.line("test/tool result: " + " | ".join(h[:160] for h in hits[:24]))
+            elif isinstance(message, ResultMessage):
+                result = message
+                served = ", ".join(sorted((message.model_usage or {}).keys())) or model
+                trace.line("agent run done: %s turns, %.0f s, $%.2f, served by %s" % (message.num_turns, message.duration_ms / 1000, message.total_cost_usd or 0, served))
+        return last_text, result
+
+    last_text, result = await consume(prompt, options, "build, test and fix the phone agent from the brief")
+    # a long autonomous run can end on a sentence that announces the next step instead of running it: one continuation
+    # in the same session while 4 minutes or more are left and step 10's finish line (workflow_id ...) was not written
+    done = any(k in last_text.lower() for k in ("workflow_id", "agent_id", "workflow id"))
+    if result is not None and not result.is_error and not done and time.time() < t_end - 240:
+        left = int((t_end - time.time()) / 60)
+        await consume("Continue the build: run the step you announced and the rest of the procedure, then finish with step 10's "
+                      "line. %d minutes are left (stop by %s local time)." % (left, deadline),
+                      dataclasses.replace(options, resume=result.session_id), "continue the build after a turn that ended early")
+
+
+def load_state():
+    f = ROOT / ".freya-agents.json"
+    return json.loads(f.read_text()) if f.exists() else {}
+
+
+def check_version(slot, trace, t0):
+    """After the agent run: the newest version published on the event's model, then the best tested version shipped.
+    Returns True when an earlier version was saved again (out/<slot>.workflow.json is then that definition)."""
+    import freya
+    state = load_state()
+    if slot not in state:
+        trace.line("published check: no workflow saved for slot %r" % slot); return False
+    wid = state[slot]["workflow_id"]
+    state_file = ROOT / ".freya-agents.json"
+    try:
+        version, note = buildguard.ensure_published(freya, wid)
+        trace.line("published check: " + note)
+        buildguard.write_state_version(state_file, slot, version)
+    except Exception as e:
+        trace.line("published check failed: %r" % (e,)); return False
+    results = buildguard.results_by_version(ROOT / "results" / "versions" / ("%s.jsonl" % wid), since=t0)
+    for v in sorted(results):
+        n = sum(len(x) for x in results[v].values()); p = sum(sum(x) for x in results[v].values())
+        trace.line("tested version %d: %d of %d case runs passed (%d cases)" % (v, p, n, len(results[v])))
+    ship, why = buildguard.choose_version(results, version)
+    trace.line("best tested version: ship version %d (%s)" % (ship, why))
+    if ship == version:
+        return False
+    new_v, wf = buildguard.restore_version(freya, slot, wid, ship)
+    wf_path = ROOT / "out" / ("%s.workflow.json" % slot)
+    if wf_path.exists():
+        wf_path.replace(wf_path.with_name("%s.workflow.agent-final.json" % slot))
+    wf_path.write_text(json.dumps(wf, indent=1))
+    buildguard.write_state_version(state_file, slot, new_v)
+    trace.line("restored: version %d saved again as version %d and published; out/%s.workflow.json is now that "
+               "definition (the agent's final one is out/%s.workflow.agent-final.json)" % (ship, new_v, slot, slot))
+    return True
 
 
 def export(slot, trace):
     """Export the phone agent exactly as it is on Freya. This file is what gets scored."""
     import freya
-    f = ROOT / ".freya-agents.json"
-    state = json.loads(f.read_text()) if f.exists() else {}
+    state = load_state()
     if slot not in state:
         trace.line("ERROR: no workflow saved for slot %r (not in .freya-agents.json). Nothing exported." % slot); return None
     wid, aid = state[slot]["workflow_id"], state[slot]["agent_id"]
@@ -177,8 +255,43 @@ def export(slot, trace):
     nodes = wf.get("nodes") or {}
     n_tools = sum(len(n.get("tools") or []) for n in nodes.values()) + len(wf.get("tools") or [])
     trace.line("created on Freya: workflow_id=%s agent_id=%s published_version=%s | %d steps (%s), %d global nodes, %d tools | exported to %s"
-               % (wid, aid, state[slot].get("version", 1), len(nodes), ", ".join(nodes), len(wf.get("global_nodes") or {}), n_tools, out.relative_to(ROOT)))
+               % (wid, aid, state[slot].get("version", "?"), len(nodes), ", ".join(nodes), len(wf.get("global_nodes") or {}), n_tools, out.relative_to(ROOT)))
     return out
+
+
+def guard_builder_edits(slot, trace, guard):
+    """Changes to the builder's own files during this run: all in a patch in out/; the building agent's put back."""
+    try:
+        snapshot = guard["snapshot"]
+        changed, added, deleted = buildguard.builder_edits(snapshot)
+        if not (changed or added or deleted):
+            trace.line("builder files: unchanged during this build"); return
+        stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(trace.t0))
+        patch = ROOT / "out" / ("%s-%s.builder-edits.patch" % (slot, stamp))
+        patch.write_text(buildguard.edits_patch(snapshot, changed, added, deleted))
+        mine = buildguard.agent_touched(AGENT_TOOL_USES, set(changed + added + deleted))
+        theirs = sorted(set(changed + added + deleted) - mine)
+        trace.line("builder files changed during this build: by the building agent %s; not tied to it %s | patch of all: %s"
+                   % (sorted(mine) or "-", theirs or "-", patch.relative_to(ROOT)))
+        if theirs:
+            trace.line("WARNING: left as they are (another session or a person may have changed them): %s" % theirs)
+        if not mine:
+            return
+        others = buildguard.other_builds(guard["lock_dir"], os.getpid())
+        head = buildguard.git_head()
+        why = ("--keep-builder-edits" if guard["keep"] else "another build runs from this checkout: " + ", ".join(others) if others
+               else "git HEAD moved during the build (%s -> %s)" % (guard["head"], head) if head != guard["head"] else None)
+        if why:
+            trace.line("WARNING: the building agent's edits stay in the working tree (%s). Never commit builder/ edits made "
+                       "for a hidden brief." % why)
+            return
+        keep_dir = ROOT / "out" / ("%s-%s.builder-edits" % (slot, stamp))
+        buildguard.restore_builder(snapshot, [k for k in changed if k in mine], [k for k in added if k in mine],
+                                   [k for k in deleted if k in mine], keep_dir)
+        trace.line("builder files the agent changed are back as they were at the start (the exported agent is unchanged; "
+                   "files it added moved to %s; to keep a generic improvement: git apply %s)" % (keep_dir.relative_to(ROOT), patch.relative_to(ROOT)))
+    except Exception as e:
+        trace.line("builder edit check failed: %r" % (e,))
 
 
 async def main(argv):
@@ -188,7 +301,7 @@ async def main(argv):
     while i < len(argv):
         a = argv[i]
         if a in opts and i + 1 < len(argv): opts[a] = argv[i + 1]; i += 2; continue
-        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases"): flags.add(a); i += 1; continue
+        if a in ("--no-rules", "--no-audit", "--no-gen-cases", "--gen-cases", "--keep-builder-edits"): flags.add(a); i += 1; continue
         args.append(a); i += 1
     briefs = [a for a in args if a.lower().endswith(".md")]
     apis = [a for a in args if a.lower().endswith(".json")]
@@ -203,13 +316,50 @@ async def main(argv):
     budget = float(opts["--minutes"]); slot = pathlib.Path(briefs[-1]).stem
     cases, brief_filter = (opts["--cases"], None) if opts["--cases"] else detect_cases(briefs)
     trace = Trace(slot)
+    guard = {"snapshot": buildguard.snapshot_builder(), "head": buildguard.git_head(),   # before any step can edit the builder
+             "keep": "--keep-builder-edits" in flags, "lock_dir": ROOT / "results" / "builds"}
+    guard["lock_dir"].mkdir(parents=True, exist_ok=True)
+    lock = guard["lock_dir"] / ("%d.json" % os.getpid())
+    lock.write_text(json.dumps({"pid": os.getpid(), "slot": slot, "start": time.time()}))
+    rc = 0
+    try:
+        rc = await build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags, budget)
+    except Exception as e:
+        trace.line("ERROR in the build: %r" % (e,)); rc = 1
+    finally:
+        guard_builder_edits(slot, trace, guard)
+        lock.unlink(missing_ok=True)
+        trace.line("build end %s | total %.0f s%s" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), time.time() - trace.t0,
+                                                    " | ABORTED: no Claude credential (steps %s)" % NO_CREDENTIAL if NO_CREDENTIAL else ""))
+        trace.close()
+        # keep every run: traces/<slot>.log is the latest run (what the form points at); a timestamped copy keeps the earlier ones
+        import shutil
+        stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(trace.t0))
+        for ext in ("log", "jsonl"):
+            src = ROOT / "traces" / ("%s.%s" % (slot, ext))
+            if src.exists(): shutil.copy(src, ROOT / "traces" / ("%s-%s.%s" % (slot, stamp, ext)))
+        print("trace: traces/%s.log (copy traces/%s-%s.log)" % (slot, slot, stamp))
+    return rc
+
+
+async def build(trace, briefs, tool_api, slot, cases, brief_filter, opts, flags, budget):
+    """Everything between the start and the end of the trace: rules + cases, the agent run, checks, lint, audit, export."""
     # the simulator's and smoke tests' customer/judge model calls run inside the agent's shell: each one is a line in
     # this file, merged into the trace after the agent run (the trace lists every model call)
     model_log = ROOT / "results" / ("%s.model-calls.log" % slot)
     model_log.parent.mkdir(exist_ok=True); model_log.write_text("")
     os.environ["BUILD_MODEL_LOG"] = str(model_log)
-    trace.line("build start %s | briefs=%s tool_api=%s slot=%s | cases=%s runner=%s budget=%.0f min | builder model=%s | phone agent model=%s"
-               % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), briefs, tool_api, slot, cases, opts["--runner"], budget, os.environ.get("BUILDER_MODEL", DEFAULT_BUILDER_MODEL), os.environ.get("FREYA_AGENT_MODEL", "experimental-5")))
+    builder_model = os.environ.get("BUILDER_MODEL") or DEFAULT_BUILDER_MODEL
+    os.environ["BUILDER_MODEL"] = builder_model        # the same model for rules, cases and audit (their subprocesses read it)
+    trace.line("build start %s | briefs=%s tool_api=%s slot=%s | cases=%s runner=%s budget=%.0f min | builder model=%s (effort %s, fallback %s) | phone agent model=%s"
+               % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), briefs, tool_api, slot, cases, opts["--runner"], budget, builder_model,
+                  BUILDER_EFFORT, FALLBACK_MODEL, os.environ.get("FREYA_AGENT_MODEL", "experimental-5")))
+    dirty = buildguard.git_dirty()
+    if dirty:
+        trace.line("WARNING: the build starts with uncommitted changes to the builder's own files: %s" % "; ".join(dirty[:20]))
+    others = buildguard.other_builds(ROOT / "results" / "builds", os.getpid())
+    if others:
+        trace.line("WARNING: another build runs from this checkout (%s): its library edits are not this build's" % ", ".join(others))
     (ROOT / "out").mkdir(exist_ok=True)
     # rules and generated cases run at the same time (T31); the case writer reads the brief itself (independent reader)
     gen_cases = None
@@ -218,13 +368,13 @@ async def main(argv):
     cases_out = "out/%s.cases.json" % slot
     jobs = []
     if "--no-rules" not in flags:
-        jobs.append(threading.Thread(target=run_step, args=(trace, "rules", [PY, "builder/rules.py", *briefs, "--api", tool_api, "--out", rules_out], 420)))
+        jobs.append(threading.Thread(target=run_step, args=(trace, "rules", [PY, "builder/rules.py", *briefs, "--api", tool_api, "--out", rules_out], STEP_TIMEOUT)))
     if want_cases:
         (ROOT / cases_out).unlink(missing_ok=True)
         cmd = [PY, "builder/cases.py", "--brief", *briefs, "--api", tool_api, "--out", cases_out]
         if "--no-rules" in flags and (ROOT / rules_out).exists():
             cmd += ["--rules", rules_out]
-        jobs.append(threading.Thread(target=run_step, args=(trace, "cases", cmd, 420)))
+        jobs.append(threading.Thread(target=run_step, args=(trace, "cases", cmd, STEP_TIMEOUT)))
     for j in jobs: j.start()
     for j in jobs: j.join()
     if want_cases and (ROOT / cases_out).exists():
@@ -237,8 +387,6 @@ async def main(argv):
     elif want_cases:
         trace.line("cases: no generated cases file; the build runs without practice cases")
     if NO_CREDENTIAL:
-        trace.line("build end %s | ABORTED: no Claude credential (steps %s)" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), NO_CREDENTIAL))
-        trace.close()
         return 2
     try:
         # keep 3 minutes for lint + export and 4 for the final audit (about 2 min: 8 batches, 3 in parallel); the
@@ -249,6 +397,10 @@ async def main(argv):
         trace.line("STOPPED: the build budget was reached. Verifying and exporting whatever is saved on Freya.")
     except Exception as e:
         trace.line("ERROR in the agent run: %r" % (e,))
+    try:
+        restored = check_version(slot, trace, trace.t0)
+    except Exception as e:
+        trace.line("version check failed, the final version stays: %r" % (e,)); restored = False
     try:
         calls = [x for x in model_log.read_text().splitlines() if x.strip()]
         trace.line("simulator/smoke model calls during the agent run: %d (one line each below; time | provider model | purpose)" % len(calls))
@@ -273,8 +425,10 @@ async def main(argv):
         left_min = budget - trace.elapsed_min()
         if "--no-audit" not in flags and rules_file.exists() and left_min > 4.5:
             gen = ROOT / "out" / ("gen_%s.py" % slot)
+            if restored:
+                trace.line("audit: on the restored definition only (the generator belongs to the version that was replaced)")
             run_step(trace, "audit", [PY, "builder/audit.py", "--rules", str(rules_file), "--workflow", str(wf_path),
-                                      "--generator", str(gen) if gen.exists() else "", "--out", "out/%s.audit.json" % slot],
+                                      "--generator", str(gen) if gen.exists() and not restored else "", "--out", "out/%s.audit.json" % slot],
                      timeout=int(min(360, (left_min - 1.5) * 60)))
         elif "--no-audit" not in flags:
             trace.line("audit skipped: %.1f minutes left of the %d-minute budget" % (left_min, budget))
@@ -282,15 +436,7 @@ async def main(argv):
         export(slot, trace)
     except Exception as e:
         trace.line("ERROR exporting the workflow: %r" % (e,))
-    trace.line("build end %s | total %.0f s" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), time.time() - trace.t0))
-    trace.close()
-    # keep every run: traces/<slot>.log is the latest run (what the form points at); a timestamped copy keeps the earlier ones
-    import shutil
-    stamp = time.strftime("%Y%m%d-%H%M%S", time.localtime(trace.t0))
-    for ext in ("log", "jsonl"):
-        src = ROOT / "traces" / ("%s.%s" % (slot, ext))
-        if src.exists(): shutil.copy(src, ROOT / "traces" / ("%s-%s.%s" % (slot, stamp, ext)))
-    print("trace: traces/%s.log (copy traces/%s-%s.log)" % (slot, slot, stamp))
+    return 0
 
 
 if __name__ == "__main__":

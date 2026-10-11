@@ -1,0 +1,97 @@
+{
+ "model": "claude-fable-5-1",
+ "seconds": 364.9,
+ "cost_usd": 3.191,
+ "calls": 2,
+ "briefs": [
+  "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/reh/ashvale.md"
+ ],
+ "api": "tools/openapi.json",
+ "rules": null,
+ "multi_product": true,
+ "outcome_rows": [
+  {
+   "outcome": "promise",
+   "reason": ""
+  },
+  {
+   "outcome": "paid",
+   "reason": "CLP"
+  },
+  {
+   "outcome": "transferred",
+   "reason": "XRS"
+  },
+  {
+   "outcome": "transferred",
+   "reason": "XHM"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "RTP"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "VUL"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "DIS"
+  },
+  {
+   "outcome": "no_promise",
+   "reason": "SYS"
+  },
+  {
+   "outcome": "not_verified",
+   "reason": "NVF"
+  },
+  {
+   "outcome": "not_verified",
+   "reason": "NVD"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "CBB"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "CBX"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "WRN"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "DCD"
+  },
+  {
+   "outcome": "not_reached",
+   "reason": "UNK"
+  }
+ ],
+ "calendar_notes": [
+  "holidays not found in the brief and dropped: ['2026-10-19', '2026-11-12', '2026-12-09', '2026-12-25', '2026-12-28', '2027-01-01']"
+ ],
+ "iso_dates_in_brief": [],
+ "dropped": {},
+ "rejected_then_repaired": {},
+ "trimmed_to_20": [
+  "GEN-C-10 Robot question at opening, then a payment-plan request -> restructuring transfer, XRS, no notes",
+  "GEN-C-13 After security, customer says twice they don't want to talk -> refused note on all three products, RTP",
+  "GEN-C-14 create_promise fails on the single allowed try -> no retry, service_error note, SYS"
+ ],
+ "n_cases": 20,
+ "scenarios": null,
+ "calendar": {
+  "holidays": [],
+  "business_weekdays": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ]
+ }
+}
