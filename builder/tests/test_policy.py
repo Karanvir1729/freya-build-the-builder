@@ -791,11 +791,11 @@ def test_identity_parts_across_turns():
     then 'forty-six' was answered with 'I need the full four digits' 30 times). The node sentence and the conduct line say
     to join across turns and to call the tool once the parts are complete; lint warns on an identity node without it."""
     s = fl.latest_value_note(4)
-    for part in ("across turns", "8846", "call the tool with the joined value", "LAST value"):
+    for part in ("across turns", "8846", "call the tool with the joined value", "LAST value", "ask only for the rest"):
         assert part in s, (part, s)
     d = fl.latest_value_note(what="the date of birth")
     assert "the date of birth" in d and "across turns" in d and "8846" not in d, d
-    assert "across turns" in fl.PERSONA_CONDUCT and "third time" in fl.PERSONA_CONDUCT
+    assert "across turns" in fl.PERSONA_CONDUCT and "third time" in fl.PERSONA_CONDUCT and "ask only for" in fl.PERSONA_CONDUCT
     from lint import lint
     tool = {"type": "function", "function": {"name": "verify_identity", "handler": "__function__:api_call",
                                              "description": "CALL it.", "parameters": {"type": "object", "properties": {}}}}

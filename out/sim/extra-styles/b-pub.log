@@ -1,0 +1,50 @@
+sim | workflow 6e8d8427-cbe5-407f-916c-de2fa5e3107f (slot brief-b-v3-x) | 27 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS PUB-11[rambling_corrects] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[terse] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[impatient] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[pieces_identity] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[volunteer] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[previous_question] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[hangs_up_after_promise] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-11[silent_turn] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-11[final_like] medium Multi-product  | verify > verify > get_account > promise > promise > promise > close_call
+PASS PUB-12[terse] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+FAIL PUB-12[rambling_corrects] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+       - promises [('p1', 510.0, '2026-10-14')], expected [('p1', 510.0, '2026-10-15')]
+FAIL PUB-12[pieces_identity] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+       - conversation: The phone question was asked again more than once: it was repeated after the initial ‘Forty-four’ and again after the wrong verification, whereas the DOB was not repeated. The other criteria (one credit card promise, one refused note each for per
+PASS PUB-12[impatient] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+PASS PUB-12[volunteer] hard   Multi-product  | verify > verify > get_account > promise > add_note > add_note > close_call
+FAIL PUB-12[previous_question] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+       - conversation: The phone last-4 question was asked again twice, not once: after the customer repeated their DOB and again after the wrong 4401 response. All other criteria are met.
+PASS PUB-12[hangs_up_after_promise] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+PASS PUB-12[final_like] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+PASS PUB-12[silent_turn] hard   Multi-product  | verify > verify > verify > get_account > promise > add_note > add_note > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-13[terse] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+FAIL PUB-13[rambling_corrects] hard   Multi-product  | verify > verify > verify > get_account > promise > promise > close_call
+       - promises [('p1', 300.0, '2026-11-02'), ('p2', 900.0, '2026-10-23')], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')]
+       - conversation: The credit card was recorded for 2 November, not 30 October (see create_promise for p1). The loan was recorded on 23 October and the read-back named both dates.
+PASS PUB-13[pieces_identity] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+PASS PUB-13[impatient] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+PASS PUB-13[previous_question] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+PASS PUB-13[volunteer] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+PASS PUB-13[hangs_up_after_promise] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+PASS PUB-13[silent_turn] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-13[final_like] hard   Multi-product  | verify > verify > get_account > promise > promise > close_call
+
+slowest agent turn per call: median 5 s, worst 12 s (chat-route timing, not a simulation's).
+style terse: 3 / 3 passed
+style rambling_corrects: 1 / 3 passed
+style pieces_identity: 2 / 3 passed
+style impatient: 3 / 3 passed
+style previous_question: 2 / 3 passed
+style volunteer: 3 / 3 passed
+style silent_turn: 3 / 3 passed
+style hangs_up_after_promise: 3 / 3 passed
+style final_like: 3 / 3 passed
+
+23 / 27 passed (bank records and conversation checks). Local chat-route simulation, 2140 s.
+cost: 253 chat turns, 253 model calls (226 customer on gpt-5-mini, 27 judge on gpt-5), 253 ledger polls, 81 call fetches.

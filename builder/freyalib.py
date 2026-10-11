@@ -1019,7 +1019,8 @@ PERSONA_CONDUCT = (
     "tool) and answer the question in the same turn. Only what the rules name counts as a refusal.\n"
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
     "order, also across turns (the part said before your last question counts). Once the parts together are complete, use "
-    "the joined value; never ask a third time for a value whose parts you already have. When the customer corrects a "
+    "the joined value; never ask a third time for a value whose parts you already have. While a part is missing, ask only for "
+    "the rest ('And the rest?'), not the whole question again. When the customer corrects a "
     "value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
     "the rules give you.")
@@ -1673,13 +1674,17 @@ def latest_value_note(n_digits=None, what="the digits"):
     """Prompt sentence for identity/promise nodes (T21): parts are joined, the last correction wins.
     The parts may sit in DIFFERENT customer turns: a customer who said 'eighty-eight', was asked for four digits and
     then said 'forty-six' was asked for 'the full four digits' 30 times while the two parts were already 8846
-    (extra-styles run, pieces_identity, 11 Oct): the sentence says to join across turns and to call the tool."""
+    (extra-styles run, pieces_identity, 11 Oct): the sentence says to join across turns and to call the tool. A partial
+    answer answered with the whole question again was judged 'the phone question was asked again more than once'
+    (Brief B PUB-12, pieces_identity): ask only for the rest."""
     n = ("all %d digits" % n_digits) if n_digits else ("all of %s" % what)
     ex = (" (for example 'eighty-eight' and then 'forty-six' is 8846)" if n_digits == 4 else "")
     return ("If the customer gives %s in parts, wait for %s and join them in order, also across turns: the part from "
             "their previous message plus the part from their latest message together are the answer%s. As soon as the "
             "parts together are complete, call the tool with the joined value; never ask again for a value the parts "
-            "already give. If they correct themselves, use the LAST value they gave." % (what, n, ex))
+            "already give. While a part is missing, ask only for the rest in a few words (for example 'And the rest?'): do not "
+            "repeat the whole question, a repeated question counts as asking it again. If they correct themselves, use "
+            "the LAST value they gave." % (what, n, ex))
 
 
 def digit_extraction(name, n_digits, description, conf=0.5, max_retries=2):

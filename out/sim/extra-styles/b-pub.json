@@ -1,0 +1,2001 @@
+{
+ "runner": "sim",
+ "workflow_id": "6e8d8427-cbe5-407f-916c-de2fa5e3107f",
+ "agent_id": "01be3409-fdf0-4700-ab84-189fb4e29d11",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 2140,
+ "passed": 23,
+ "total": 27,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-11[terse]",
+   "family": "Multi-product",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[rambling_corrects]",
+   "family": "Multi-product",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[pieces_identity]",
+   "family": "Multi-product",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[impatient]",
+   "family": "Multi-product",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[previous_question]",
+   "family": "Multi-product",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[volunteer]",
+   "family": "Multi-product",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[silent_turn]",
+   "family": "Multi-product",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[hangs_up_after_promise]",
+   "family": "Multi-product",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-11[final_like]",
+   "family": "Multi-product",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[terse]",
+   "family": "Multi-product",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[rambling_corrects]",
+   "family": "Multi-product",
+   "style": "rambling_corrects",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-12[pieces_identity]",
+   "family": "Multi-product",
+   "style": "pieces_identity",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-12[impatient]",
+   "family": "Multi-product",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[previous_question]",
+   "family": "Multi-product",
+   "style": "previous_question",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-12[volunteer]",
+   "family": "Multi-product",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[silent_turn]",
+   "family": "Multi-product",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[hangs_up_after_promise]",
+   "family": "Multi-product",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[final_like]",
+   "family": "Multi-product",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[terse]",
+   "family": "Multi-product",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[rambling_corrects]",
+   "family": "Multi-product",
+   "style": "rambling_corrects",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-13[pieces_identity]",
+   "family": "Multi-product",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[impatient]",
+   "family": "Multi-product",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[previous_question]",
+   "family": "Multi-product",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[volunteer]",
+   "family": "Multi-product",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[silent_turn]",
+   "family": "Multi-product",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[hangs_up_after_promise]",
+   "family": "Multi-product",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-13[final_like]",
+   "family": "Multi-product",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-11[terse]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "66ffc1de-44b1-4a68-8e52-e89e52bc6054",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_627eb59b-35f",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[terse].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All three products were stated before the first payment ask; there was one consolidated read-back with a single confirmation covering all three; and exactly one create_promise call was made per product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/66ffc1de-44b1-4a68-8e52-e89e52bc6054",
+   "slowest_turn_s": 5.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[rambling_corrects]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "210fd9be-c12d-46ce-b855-ba0403864489",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_18d2cd34-9d8",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[rambling_corrects].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent listed all three products before asking for payment, performed a read-back and got confirmation covering all three, and created exactly one promise per product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/210fd9be-c12d-46ce-b855-ba0403864489",
+   "slowest_turn_s": 3.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[pieces_identity]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "10e3757e-05bd-4787-b581-51e857449159",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_6492a185-146",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[pieces_identity].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent listed all three products before asking for payment; provided one read-back covering all three and received a single confirmation; and created exactly one promise per product (three create_promise calls for p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/10e3757e-05bd-4787-b581-51e857449159",
+   "slowest_turn_s": 3.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[impatient]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "a59c2e9c-2fcd-4967-b8de-31a9887f2f7b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_7215acf5-5b1",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[impatient].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All three products were stated before the payment ask; there was one consolidated read-back covering all three and one customer confirmation; and exactly one create_promise was made per product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/a59c2e9c-2fcd-4967-b8de-31a9887f2f7b",
+   "slowest_turn_s": 3.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[previous_question]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "f9ccb657-93fd-43b3-a484-961d4a17c409",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d5955291-14d",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[previous_question].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All three products were stated before the payment ask; there was a single read-back covering all three and the customer confirmed once; and there was exactly one create_promise per product (three total).",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f9ccb657-93fd-43b3-a484-961d4a17c409",
+   "slowest_turn_s": 5.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[volunteer]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "461dc4bf-5571-4a2c-82fe-d53f746fc144",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a723b861-57d",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[volunteer].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All three products were listed before the payment ask; there was one read-back covering all three and one confirmation; and there was one create_promise per product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/461dc4bf-5571-4a2c-82fe-d53f746fc144",
+   "slowest_turn_s": 5.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[silent_turn]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "027659e1-59a7-4a83-b3b9-6a7d068afe0f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_734be0ee-60a",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[silent_turn].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent listed all three products before asking for payment, did one read-back covering all three and received one confirmation, and the tool calls show exactly one create_promise per product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/027659e1-59a7-4a83-b3b9-6a7d068afe0f",
+   "slowest_turn_s": 4.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "6f9dcfdf-013d-4d63-b5eb-0ef5a5060f71",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_64ae8762-4d6",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[hangs_up_after_promise].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All three products were stated before the payment ask, there was one read-back covering all three and one customer confirmation, and exactly one create_promise was made for each product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/6f9dcfdf-013d-4d63-b5eb-0ef5a5060f71",
+   "slowest_turn_s": 8.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-11[final_like]",
+   "level": "medium",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "5dfbf5c0-8582-4b11-aa73-9a90253afe74",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_03d0910c-4be",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-11[final_like].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All three products were stated before the payment ask; there was a single read-back covering all three and one customer confirmation; and exactly one create_promise was made for each product (p1, p2, p3).",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-11",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5dfbf5c0-8582-4b11-aa73-9a90253afe74",
+   "slowest_turn_s": 5.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[terse]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "2cceda5d-5653-4d0a-81f1-836f55495ced",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_7485cff2-714",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[terse].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Phone last-4 was retried once and DOB not repeated; exactly one promise on the credit card; one refused note each for personal loan and car loan; two attempts on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/2cceda5d-5653-4d0a-81f1-836f55495ced",
+   "slowest_turn_s": 3.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[rambling_corrects]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 510.0, '2026-10-14')], expected [('p1', 510.0, '2026-10-15')]"
+   ],
+   "call_id": "64efa964-a19c-4d21-95f1-c11180f5df11",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_545dc86d-9fd",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[rambling_corrects].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: DOB asked once; phone last-4 asked again exactly once; exactly one promise recorded for the credit card; one 'refused' note each for personal loan (p2) and car loan (p3); two attempts made on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/64efa964-a19c-4d21-95f1-c11180f5df11",
+   "slowest_turn_s": 4.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[pieces_identity]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "conversation: The phone question was asked again more than once: it was repeated after the initial \u2018Forty-four\u2019 and again after the wrong verification, whereas the DOB was not repeated. The other criteria (one credit card promise, one refused note each for personal and car loans, two attempts on personal loan and one on car loan) are satisfied."
+   ],
+   "call_id": "5ebeb57e-95c8-4735-86ba-2177dc0e8962",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_e8bbd1bb-8fc",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[pieces_identity].txt",
+   "turns": 16,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The phone question was asked again more than once: it was repeated after the initial \u2018Forty-four\u2019 and again after the wrong verification, whereas the DOB was not repeated. The other criteria (one credit card promise, one refused note each for personal and car loans, two attempts on personal loan and one on car loan) are satisfied.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5ebeb57e-95c8-4735-86ba-2177dc0e8962",
+   "slowest_turn_s": 6.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[impatient]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "742dc5aa-c8ac-4472-9f0c-f328d70b49e0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_15e9aa42-236",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[impatient].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: DOB asked once and phone re-asked once; exactly one promise created on the credit card; one 'refused' note each for the personal loan and car loan; two attempt offers on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/742dc5aa-c8ac-4472-9f0c-f328d70b49e0",
+   "slowest_turn_s": 12.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[previous_question]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "conversation: The phone last-4 question was asked again twice, not once: after the customer repeated their DOB and again after the wrong 4401 response. All other criteria are met."
+   ],
+   "call_id": "6a58cdb5-05b8-43df-9cc5-6425e06e9513",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_8aa1651b-27f",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[previous_question].txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The phone last-4 question was asked again twice, not once: after the customer repeated their DOB and again after the wrong 4401 response. All other criteria are met.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/6a58cdb5-05b8-43df-9cc5-6425e06e9513",
+   "slowest_turn_s": 2.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[volunteer]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "3fef5fef-0622-4830-b4e2-71b5ab39a00d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_a43b610a-7f4",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[volunteer].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the phone last-4 was asked once after DOB while DOB wasn\u2019t repeated; exactly one promise was recorded on the credit card; one 'refused' note was logged for each of the other two products; two attempts were made on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/3fef5fef-0622-4830-b4e2-71b5ab39a00d",
+   "slowest_turn_s": 2.2,
+   "ended_how": "end_call in the call log after HTTP 504",
+   "close_call_from_ledger": true
+  },
+  {
+   "id": "PUB-12[silent_turn]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "1900a079-0049-4628-982e-dde24040354c",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_5d7863d4-d32",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[silent_turn].txt",
+   "turns": 13,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the phone last-4 question was retried once while DOB was not repeated; exactly one promise was recorded on the credit card; one 'refused' note was added for each of the personal loan and car loan; and there were two attempts on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/1900a079-0049-4628-982e-dde24040354c",
+   "slowest_turn_s": 5.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[hangs_up_after_promise]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "923886b4-1e0f-4fda-acc4-b260167f84fc",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_7ae97d1c-3bf",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[hangs_up_after_promise].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria met: phone digits were retried once while DOB was not; exactly one promise was recorded on the credit card; one refused note each for the personal loan and car loan; two attempts on the personal loan (16 days late) and one on the car loan (7 days late).",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/923886b4-1e0f-4fda-acc4-b260167f84fc",
+   "slowest_turn_s": 3.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[final_like]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "847d917c-1185-46af-ad4c-7af99d653c89",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_159fe79e-2f5",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-12[final_like].txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are satisfied: DOB asked once; phone last-4 asked again exactly once; exactly one promise recorded on the credit card; one 'refused' note each for the personal loan (p2) and car loan (p3); two attempts made on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/847d917c-1185-46af-ad4c-7af99d653c89",
+   "slowest_turn_s": 3.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[terse]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "d5318655-e0c9-4ae6-9968-6d129bb4f92d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d00c51eb-0a7",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[terse].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The credit card promise was recorded for 2026-10-30; the loan promise was recorded for 2026-10-23; and the read-back explicitly named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/d5318655-e0c9-4ae6-9968-6d129bb4f92d",
+   "slowest_turn_s": 4.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[rambling_corrects]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 300.0, '2026-11-02'), ('p2', 900.0, '2026-10-23')], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')]",
+    "conversation: The credit card was recorded for 2 November, not 30 October (see create_promise for p1). The loan was recorded on 23 October and the read-back named both dates."
+   ],
+   "call_id": "d5f17ba7-32de-4283-a4c7-de33e3385519",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_e36f7698-b94",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[rambling_corrects].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The credit card was recorded for 2 November, not 30 October (see create_promise for p1). The loan was recorded on 23 October and the read-back named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/d5f17ba7-32de-4283-a4c7-de33e3385519",
+   "slowest_turn_s": 11.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[pieces_identity]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "ef3d6d29-6520-4b3e-a32b-b6f7adedfa1e",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_2407c81e-766",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[pieces_identity].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Credit card promise was recorded for 30 Oct (p1 on 2026-10-30); loan was recorded for its deadline 23 Oct (p2 on 2026-10-23); the read-back explicitly named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/ef3d6d29-6520-4b3e-a32b-b6f7adedfa1e",
+   "slowest_turn_s": 6.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[impatient]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "23887226-5f52-4120-be8c-b16c4d0d4724",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_dfb7e677-ab6",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[impatient].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Credit card promise was recorded for 30 October (tool call #8); loan promise was recorded for its deadline, 23 October (tool call #10); and the read-back explicitly named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/23887226-5f52-4120-be8c-b16c4d0d4724",
+   "slowest_turn_s": 4.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[previous_question]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "e2b341d7-f2f0-475b-863e-e9173f2ee76d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_becbc708-267",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[previous_question].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the credit card promise was recorded for 30 October (tool call 8), the loan for 23 October (tool call 10), and the agent\u2019s read-back named both dates (confirmation line).",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/e2b341d7-f2f0-475b-863e-e9173f2ee76d",
+   "slowest_turn_s": 11.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[volunteer]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "2464ca7c-d948-40f5-a56f-168246518d74",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_bd292df9-439",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[volunteer].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent recorded the credit card for 30 October and the loan for 23 October (per create_promise calls 8 and 10), and the read-back explicitly named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/2464ca7c-d948-40f5-a56f-168246518d74",
+   "slowest_turn_s": 7.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[silent_turn]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "a4890c4f-55e4-4d53-87ea-82b3a5375490",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_62f7be3d-a7e",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[silent_turn].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Credit card promise was recorded for 30 October (accepted within allowed window), the loan was recorded for its deadline on 23 October, and the read-back named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/a4890c4f-55e4-4d53-87ea-82b3a5375490",
+   "slowest_turn_s": 9.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[hangs_up_after_promise]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "f2a1657f-1f86-45cd-9887-1a8ac1ae0ea0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_75289dc3-685",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[hangs_up_after_promise].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The credit card promise was recorded for 30 October, the loan promise was recorded for its deadline of 23 October, and the read-back explicitly named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f2a1657f-1f86-45cd-9887-1a8ac1ae0ea0",
+   "slowest_turn_s": 6.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-13[final_like]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "955f41ba-0f52-4c93-a7dc-0b20df9f86f3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_06540881-832",
+   "transcript": "out/sim/extra-styles/b-pub/PUB-13[final_like].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The credit card promise was recorded for 30 October (tool call 8), the loan for its deadline 23 October (tool call 10), and the read-back explicitly named both dates.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-13",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/955f41ba-0f52-4c93-a7dc-0b20df9f86f3",
+   "slowest_turn_s": 8.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-11[terse]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "66ffc1de-44b1-4a68-8e52-e89e52bc6054",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_627eb59b-35f",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[terse].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All three products were stated before the first payment ask; there was one consolidated read-back with a single confirmation covering all three; and exactly one create_promise call was made per product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/66ffc1de-44b1-4a68-8e52-e89e52bc6054",
+    "slowest_turn_s": 5.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[rambling_corrects]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "210fd9be-c12d-46ce-b855-ba0403864489",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_18d2cd34-9d8",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[rambling_corrects].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent listed all three products before asking for payment, performed a read-back and got confirmation covering all three, and created exactly one promise per product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/210fd9be-c12d-46ce-b855-ba0403864489",
+    "slowest_turn_s": 3.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[pieces_identity]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "10e3757e-05bd-4787-b581-51e857449159",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_6492a185-146",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[pieces_identity].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent listed all three products before asking for payment; provided one read-back covering all three and received a single confirmation; and created exactly one promise per product (three create_promise calls for p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/10e3757e-05bd-4787-b581-51e857449159",
+    "slowest_turn_s": 3.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[impatient]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "a59c2e9c-2fcd-4967-b8de-31a9887f2f7b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_7215acf5-5b1",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[impatient].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All three products were stated before the payment ask; there was one consolidated read-back covering all three and one customer confirmation; and exactly one create_promise was made per product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/a59c2e9c-2fcd-4967-b8de-31a9887f2f7b",
+    "slowest_turn_s": 3.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[previous_question]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "f9ccb657-93fd-43b3-a484-961d4a17c409",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d5955291-14d",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[previous_question].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All three products were stated before the payment ask; there was a single read-back covering all three and the customer confirmed once; and there was exactly one create_promise per product (three total).",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f9ccb657-93fd-43b3-a484-961d4a17c409",
+    "slowest_turn_s": 5.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[volunteer]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "461dc4bf-5571-4a2c-82fe-d53f746fc144",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a723b861-57d",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[volunteer].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All three products were listed before the payment ask; there was one read-back covering all three and one confirmation; and there was one create_promise per product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/461dc4bf-5571-4a2c-82fe-d53f746fc144",
+    "slowest_turn_s": 5.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[silent_turn]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "027659e1-59a7-4a83-b3b9-6a7d068afe0f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_734be0ee-60a",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[silent_turn].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent listed all three products before asking for payment, did one read-back covering all three and received one confirmation, and the tool calls show exactly one create_promise per product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/027659e1-59a7-4a83-b3b9-6a7d068afe0f",
+    "slowest_turn_s": 4.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "6f9dcfdf-013d-4d63-b5eb-0ef5a5060f71",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_64ae8762-4d6",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[hangs_up_after_promise].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All three products were stated before the payment ask, there was one read-back covering all three and one customer confirmation, and exactly one create_promise was made for each product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/6f9dcfdf-013d-4d63-b5eb-0ef5a5060f71",
+    "slowest_turn_s": 8.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-11[final_like]",
+    "level": "medium",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "5dfbf5c0-8582-4b11-aa73-9a90253afe74",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_03d0910c-4be",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-11[final_like].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All three products were stated before the payment ask; there was a single read-back covering all three and one customer confirmation; and exactly one create_promise was made for each product (p1, p2, p3).",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-11",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5dfbf5c0-8582-4b11-aa73-9a90253afe74",
+    "slowest_turn_s": 5.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[terse]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "2cceda5d-5653-4d0a-81f1-836f55495ced",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_7485cff2-714",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[terse].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Phone last-4 was retried once and DOB not repeated; exactly one promise on the credit card; one refused note each for personal loan and car loan; two attempts on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/2cceda5d-5653-4d0a-81f1-836f55495ced",
+    "slowest_turn_s": 3.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[rambling_corrects]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 510.0, '2026-10-14')], expected [('p1', 510.0, '2026-10-15')]"
+    ],
+    "call_id": "64efa964-a19c-4d21-95f1-c11180f5df11",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_545dc86d-9fd",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[rambling_corrects].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: DOB asked once; phone last-4 asked again exactly once; exactly one promise recorded for the credit card; one 'refused' note each for personal loan (p2) and car loan (p3); two attempts made on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/64efa964-a19c-4d21-95f1-c11180f5df11",
+    "slowest_turn_s": 4.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[pieces_identity]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "conversation: The phone question was asked again more than once: it was repeated after the initial \u2018Forty-four\u2019 and again after the wrong verification, whereas the DOB was not repeated. The other criteria (one credit card promise, one refused note each for personal and car loans, two attempts on personal loan and one on car loan) are satisfied."
+    ],
+    "call_id": "5ebeb57e-95c8-4735-86ba-2177dc0e8962",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_e8bbd1bb-8fc",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[pieces_identity].txt",
+    "turns": 16,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The phone question was asked again more than once: it was repeated after the initial \u2018Forty-four\u2019 and again after the wrong verification, whereas the DOB was not repeated. The other criteria (one credit card promise, one refused note each for personal and car loans, two attempts on personal loan and one on car loan) are satisfied.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5ebeb57e-95c8-4735-86ba-2177dc0e8962",
+    "slowest_turn_s": 6.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[impatient]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "742dc5aa-c8ac-4472-9f0c-f328d70b49e0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_15e9aa42-236",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[impatient].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: DOB asked once and phone re-asked once; exactly one promise created on the credit card; one 'refused' note each for the personal loan and car loan; two attempt offers on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/742dc5aa-c8ac-4472-9f0c-f328d70b49e0",
+    "slowest_turn_s": 12.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[previous_question]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "conversation: The phone last-4 question was asked again twice, not once: after the customer repeated their DOB and again after the wrong 4401 response. All other criteria are met."
+    ],
+    "call_id": "6a58cdb5-05b8-43df-9cc5-6425e06e9513",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_8aa1651b-27f",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[previous_question].txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The phone last-4 question was asked again twice, not once: after the customer repeated their DOB and again after the wrong 4401 response. All other criteria are met.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/6a58cdb5-05b8-43df-9cc5-6425e06e9513",
+    "slowest_turn_s": 2.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[volunteer]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "3fef5fef-0622-4830-b4e2-71b5ab39a00d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_a43b610a-7f4",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[volunteer].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the phone last-4 was asked once after DOB while DOB wasn\u2019t repeated; exactly one promise was recorded on the credit card; one 'refused' note was logged for each of the other two products; two attempts were made on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/3fef5fef-0622-4830-b4e2-71b5ab39a00d",
+    "slowest_turn_s": 2.2,
+    "ended_how": "end_call in the call log after HTTP 504",
+    "close_call_from_ledger": true
+   },
+   {
+    "id": "PUB-12[silent_turn]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "1900a079-0049-4628-982e-dde24040354c",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_5d7863d4-d32",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[silent_turn].txt",
+    "turns": 13,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the phone last-4 question was retried once while DOB was not repeated; exactly one promise was recorded on the credit card; one 'refused' note was added for each of the personal loan and car loan; and there were two attempts on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/1900a079-0049-4628-982e-dde24040354c",
+    "slowest_turn_s": 5.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[hangs_up_after_promise]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "923886b4-1e0f-4fda-acc4-b260167f84fc",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_7ae97d1c-3bf",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[hangs_up_after_promise].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria met: phone digits were retried once while DOB was not; exactly one promise was recorded on the credit card; one refused note each for the personal loan and car loan; two attempts on the personal loan (16 days late) and one on the car loan (7 days late).",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/923886b4-1e0f-4fda-acc4-b260167f84fc",
+    "slowest_turn_s": 3.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[final_like]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "847d917c-1185-46af-ad4c-7af99d653c89",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_159fe79e-2f5",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-12[final_like].txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are satisfied: DOB asked once; phone last-4 asked again exactly once; exactly one promise recorded on the credit card; one 'refused' note each for the personal loan (p2) and car loan (p3); two attempts made on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/847d917c-1185-46af-ad4c-7af99d653c89",
+    "slowest_turn_s": 3.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[terse]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "d5318655-e0c9-4ae6-9968-6d129bb4f92d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d00c51eb-0a7",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[terse].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The credit card promise was recorded for 2026-10-30; the loan promise was recorded for 2026-10-23; and the read-back explicitly named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/d5318655-e0c9-4ae6-9968-6d129bb4f92d",
+    "slowest_turn_s": 4.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[rambling_corrects]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 300.0, '2026-11-02'), ('p2', 900.0, '2026-10-23')], expected [('p1', 300.0, '2026-10-30'), ('p2', 900.0, '2026-10-23')]",
+     "conversation: The credit card was recorded for 2 November, not 30 October (see create_promise for p1). The loan was recorded on 23 October and the read-back named both dates."
+    ],
+    "call_id": "d5f17ba7-32de-4283-a4c7-de33e3385519",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_e36f7698-b94",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[rambling_corrects].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The credit card was recorded for 2 November, not 30 October (see create_promise for p1). The loan was recorded on 23 October and the read-back named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/d5f17ba7-32de-4283-a4c7-de33e3385519",
+    "slowest_turn_s": 11.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[pieces_identity]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "ef3d6d29-6520-4b3e-a32b-b6f7adedfa1e",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_2407c81e-766",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[pieces_identity].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Credit card promise was recorded for 30 Oct (p1 on 2026-10-30); loan was recorded for its deadline 23 Oct (p2 on 2026-10-23); the read-back explicitly named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/ef3d6d29-6520-4b3e-a32b-b6f7adedfa1e",
+    "slowest_turn_s": 6.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[impatient]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "23887226-5f52-4120-be8c-b16c4d0d4724",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_dfb7e677-ab6",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[impatient].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Credit card promise was recorded for 30 October (tool call #8); loan promise was recorded for its deadline, 23 October (tool call #10); and the read-back explicitly named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/23887226-5f52-4120-be8c-b16c4d0d4724",
+    "slowest_turn_s": 4.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[previous_question]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "e2b341d7-f2f0-475b-863e-e9173f2ee76d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_becbc708-267",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[previous_question].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the credit card promise was recorded for 30 October (tool call 8), the loan for 23 October (tool call 10), and the agent\u2019s read-back named both dates (confirmation line).",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/e2b341d7-f2f0-475b-863e-e9173f2ee76d",
+    "slowest_turn_s": 11.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[volunteer]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "2464ca7c-d948-40f5-a56f-168246518d74",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_bd292df9-439",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[volunteer].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent recorded the credit card for 30 October and the loan for 23 October (per create_promise calls 8 and 10), and the read-back explicitly named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/2464ca7c-d948-40f5-a56f-168246518d74",
+    "slowest_turn_s": 7.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[silent_turn]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "a4890c4f-55e4-4d53-87ea-82b3a5375490",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_62f7be3d-a7e",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[silent_turn].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Credit card promise was recorded for 30 October (accepted within allowed window), the loan was recorded for its deadline on 23 October, and the read-back named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/a4890c4f-55e4-4d53-87ea-82b3a5375490",
+    "slowest_turn_s": 9.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[hangs_up_after_promise]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "f2a1657f-1f86-45cd-9887-1a8ac1ae0ea0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_75289dc3-685",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[hangs_up_after_promise].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The credit card promise was recorded for 30 October, the loan promise was recorded for its deadline of 23 October, and the read-back explicitly named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f2a1657f-1f86-45cd-9887-1a8ac1ae0ea0",
+    "slowest_turn_s": 6.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-13[final_like]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "955f41ba-0f52-4c93-a7dc-0b20df9f86f3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_06540881-832",
+    "transcript": "out/sim/extra-styles/b-pub/PUB-13[final_like].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The credit card promise was recorded for 30 October (tool call 8), the loan for its deadline 23 October (tool call 10), and the read-back explicitly named both dates.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-13",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/955f41ba-0f52-4c93-a7dc-0b20df9f86f3",
+    "slowest_turn_s": 8.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 253,
+  "customer_calls": 226,
+  "judge_calls": 27,
+  "judge_retries": 0,
+  "ledger_polls": 253,
+  "ledger_errors": 0,
+  "call_fetches": 81
+ }
+}
