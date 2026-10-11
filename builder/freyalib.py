@@ -2510,7 +2510,7 @@ LANG_PACKS = {
         "months": ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim",
                    "Kasım", "Aralık"],
         "weekdays": ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"],
-        "relative": {"bugün": 0, "yarın": 1, "öbür gün": 2, "ertesi gün": 2, "yarından sonra": 2, "dün": -1,
+        "relative": {"bugün": 0, "yarın": 1, "öbür gün": 2, "ertesi gün": 1, "yarından sonra": 2, "dün": -1,
                      "evvelsi gün": -2},
         "next_week": ["haftaya", "gelecek hafta", "önümüzdeki hafta", "sonraki hafta"],
         "this_week": ["bu hafta"],

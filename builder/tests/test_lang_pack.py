@@ -71,7 +71,7 @@ CASES = [
     ("resolve_day", ("bugün", NOW), "2026-10-14"),
     ("resolve_day", ("yarın ödeyeceğim", NOW), "2026-10-15"),
     ("resolve_day", ("öbür gün", NOW), "2026-10-16"),
-    ("resolve_day", ("ertesi gün", NOW), "2026-10-16"),
+    ("resolve_day", ("ertesi gün", NOW), "2026-10-15"),
     ("resolve_day", ("dün ödedim", NOW), "2026-10-13"),
     ("resolve_day", ("cuma", NOW), "2026-10-16"),
     ("resolve_day", ("cumaya kadar", NOW), "2026-10-16"),
