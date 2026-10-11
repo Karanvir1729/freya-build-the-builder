@@ -208,6 +208,7 @@ POLICY = pol.Policy(
     texts={
         # rule 28 (first ask) is in the statement; every later offer is one of these finished sentences
         "question": "Can you pay [amount] [when]?",
+        "today_when": "today, [date]",                                                                               # 'this Friday' said on a Friday: the day is named (EXT-A-38)
         "tomorrow_when": "tomorrow, [date]",                                                                         # echo 'tomorrow' (A19 dates are checked in code)
         "weekend_or_holiday": "[named] is not a business day, so I cannot record it. The next business day is [date].",   # R20
         "after_deadline": "The latest date I can record is [deadline].",                                               # R23

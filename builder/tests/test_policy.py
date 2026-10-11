@@ -852,6 +852,18 @@ def test_pieces_day_units_and_cents():
 
 
 @test
+def test_today_named_in_readback():
+    """'this Friday' said on a Friday is today; with today_when the read-back names the day (EXT-A-38: a bare 'today'
+    was refused by a customer who did not know the date, and the promise moved to the next Friday)."""
+    import json
+    P = pol.Policy(HOL, texts={**TEXTS, "today_when": "today, [date]"})
+    V = {"today_iso": "2026-10-16", "now": "2026-10-16T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    ev(P, V, "offer", offer_kind="exact", offer_when="this Friday")
+    assert V["route"] == "confirm" and "today, Friday 16 October" in V["readback_line"], V.get("readback_line")
+
+
+@test
 def test_once_only_offers_not_repeated():
     """The floor and the hardship offer are said once by code; the state line and the node prompts forbid the
     dialogue model to repeat them on small talk (Freya talkative PUB-05: support offered 3 times; PUB-06: the

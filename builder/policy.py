@@ -61,6 +61,7 @@ DEFAULT_TEXTS = {
     "today_word": "today",
     "on_date": "on [date]",
     "tomorrow_when": "",
+    "today_when": "",
     "question": "Can you pay [amount] [when]?",
     "question_product": "For your [words], can you pay [amount] [when]?",
     "question_all": "Can you pay all of them today?",
@@ -182,7 +183,9 @@ def today_of(V):
     return d or datetime.date(2000, 1, 1)
 def when(V, d):
     if d == today_of(V):
-        return T('today_word')
+        # optional ('' = off): 'today, Friday 16 October' (a simulated customer who said 'this Friday' on a Friday
+        # heard a bare 'today', said no and the change loop moved the promise to the next Friday, EXT-A-38)
+        return T('today_when', date=txt_short(d)) if T('today_when') else T('today_word')
     # optional ('' = off): 'tomorrow, Thursday 15 October' lets a customer who said 'tomorrow' recognise the day (a
     # simulated customer that does not know the call's date said 'not correct' to the bare date, EXT-A-11)
     if T('tomorrow_when') and d == today_of(V) + datetime.timedelta(days=1):

@@ -203,6 +203,7 @@ POLICY = pol.Policy(
     HOLIDAYS,
     texts={
         "question": "Can you pay [amount] [when]?",
+        "today_when": "today, [date]",                                                                               # 'this Friday' said on a Friday: the day is named (EXT-A-38)
         "tomorrow_when": "tomorrow, [date]",                                                                         # echo 'tomorrow' (A19 dates are checked in code)
         "question_product": "Can you pay [amount] [when] for your [words]?",                                       # B4 one by one
         "question_all": "Can you pay all of them today?",                                                           # B4
