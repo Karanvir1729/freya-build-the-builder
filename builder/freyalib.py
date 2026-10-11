@@ -1693,7 +1693,9 @@ def latest_value_note(n_digits=None, what="the digits"):
     return ("If the customer gives %s in parts, wait for %s and join them; if they correct themselves, use the "
             "LAST value they gave. When only part is in (for example two digits, or a day without the year), do NOT "
             "repeat the question and do not say it is wrong or incomplete: say only 'Thank you, and the rest?' and wait "
-            "(a repeated question counts as asking again)." % (what, n))
+            "(a repeated question counts as asking again). A date with a day, a month and a year IS complete, even when the "
+            "message goes on or stops right after it ('twenty-one July nineteen ninety. This...' is 1990-07-21)%s: call the "
+            "tool at once, never ask for the rest of a complete answer." % (what, n, (", and so are %s once they are all there" % n) if n_digits else ""))
 
 
 def digit_extraction(name, n_digits, description, conf=0.5, max_retries=2):
