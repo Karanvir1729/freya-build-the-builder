@@ -1,0 +1,1201 @@
+[
+ {
+  "id": "GEN-C-01",
+  "mock_case": "PUB-03",
+  "brief": "tamsin",
+  "family": "opening_identity",
+  "level": "medium",
+  "title": "Unclear first answer, then the customer declines the security questions and asks what it is about",
+  "variables": {
+   "first_name": "Owen",
+   "last_name": "Park",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1992-07-21",
+   "phone_last4": "6630"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "0377",
+    "past_due": 95.0,
+    "days_late": 4,
+    "minimum_payment": 28.5
+   }
+  ],
+  "script": "You are Owen Park. When the assistant asks for Owen Park the first time, say only: \"Hello?\" When it asks again, say: \"Yes, speaking.\" When it asks for your date of birth, say: \"I'm not giving my date of birth to a recorded voice.\" When it explains why it asks, say: \"What is this about?\" Do not give any security answer at any point. If it asks anything else, say: \"Just tell me what this is about.\"",
+  "expected": {
+   "outcome": "not_verified",
+   "reason": "IDREF",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant asks 'Could I speak to Owen Park, please?' a second time after 'Hello?' and then goes on to the security questions",
+   "Before closing, the assistant says once that the questions are there to protect personal details, and never says 'account', 'payment', 'missed', 'owe', 'card' or any other banned word",
+   "get_account is never called; the assistant says 'I understand. You can use the Corran Bay app or visit any branch. Goodbye.' before close_call"
+  ],
+  "rule_ids": [
+   "Doc1 Opening",
+   "Doc1 What nobody hears before the security questions",
+   "Doc1 Security questions (refusal)",
+   "Doc4 IDREF row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-02",
+  "mock_case": "PUB-08",
+  "brief": "tamsin",
+  "family": "third_party",
+  "level": "hard",
+  "title": "Flatmate on a Friday names a Saturday slot and turns down the proposed Monday slot",
+  "variables": {
+   "first_name": "Hannah",
+   "last_name": "Schmidt",
+   "title": "Ms",
+   "now": "2026-10-16T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1993-04-28",
+   "phone_last4": "3317"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "5512",
+    "past_due": 180.0,
+    "days_late": 5,
+    "minimum_payment": 54.0
+   }
+  ],
+  "third_party": true,
+  "script": "You are Hannah Schmidt's flatmate, Jess. When the assistant asks for Hannah Schmidt, say: \"No, this is her flatmate. Hannah's out.\" If it asks when she will be available, say: \"Ring her tomorrow at three in the afternoon.\" If it proposes any other day or time, say: \"No, that won't work.\" If it asks again for a time, say: \"I really don't know, sorry.\" Never say you are Hannah, and do not ask what the call is about.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "NOCON",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says only that it has a personal message for Ms Schmidt and does not say what it is about",
+   "The assistant does not accept Saturday; it proposes 15:00 on [[next_bd_after(today)]] once",
+   "No schedule_callback call; the assistant closes with 'Thank you. Goodbye.'"
+  ],
+  "rule_ids": [
+   "Doc1 Someone else picks up",
+   "AHS-5 5.6a",
+   "Doc4 NOCON row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-03",
+  "mock_case": "PUB-01",
+  "brief": "tamsin",
+  "family": "third_party",
+  "level": "hard",
+  "title": "Mother offers to pay; asks for a callback tomorrow, which is a closure day; accepts the next valid slot",
+  "variables": {
+   "first_name": "Daniel",
+   "last_name": "Reyes",
+   "title": "Mr",
+   "now": "2026-10-21T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1988-03-14",
+   "phone_last4": "4471"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "4821",
+    "past_due": 420.0,
+    "days_late": 6,
+    "minimum_payment": 126.0
+   }
+  ],
+  "third_party": true,
+  "script": "You are Daniel Reyes's mother. When the assistant asks for Daniel Reyes, say: \"This is his mother. Daniel isn't in.\" After it says it has a message, say: \"Is it about money? I can pay whatever he owes, just tell me.\" If it asks when Daniel will be available, say: \"Call him tomorrow at two in the afternoon.\" If it proposes a different day at 14:00, say: \"Yes, that's fine.\" Do not offer any other time.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "TPCB",
+   "promises": [],
+   "notes": [],
+   "callbacks": [
+    {
+     "date": "2026-10-23",
+     "time": "14:00"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant thanks the mother, declines her offer to pay and does not say what the call is about or mention any amount",
+   "The assistant does not book tomorrow (a closure day); it proposes 14:00 on [[next_bd_after(today)]]",
+   "The assistant says 'Thank you, we will call back then. Goodbye.' before close_call"
+  ],
+  "rule_ids": [
+   "Doc1 Someone else picks up",
+   "AHS-5 5.6a",
+   "AHS-5 5.1",
+   "Doc4 TPCB row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-04",
+  "mock_case": "PUB-10",
+  "brief": "tamsin",
+  "family": "identity",
+  "level": "hard",
+  "title": "Date of birth wrong twice: the per-question limit ends the check before the service limit",
+  "variables": {
+   "first_name": "Grace",
+   "last_name": "Lin",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1989-02-23",
+   "phone_last4": "9904"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "7740",
+    "past_due": 365.0,
+    "days_late": 8,
+    "minimum_payment": 109.5
+   }
+  ],
+  "faults": [
+   {
+    "tool": "create_promise",
+    "fail_first_n": 1
+   }
+  ],
+  "script": "You are Grace Lin. Confirm with \"Yes, speaking.\" When asked for your date of birth, say: \"The second of March 1989.\" When asked again, say: \"The twenty-third of March 1989.\" If you are asked for anything else after that, give your real phone digits, 9904.",
+  "expected": {
+   "outcome": "not_verified",
+   "reason": "IDNO",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the second wrong date of birth, the assistant does not ask for the phone digits and does not call verify_identity again",
+   "get_account is never called and the purpose of the call is never mentioned",
+   "The assistant says 'For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.' before close_call"
+  ],
+  "rule_ids": [
+   "Doc1 Security questions",
+   "Doc3 item 6",
+   "Doc4 IDNO row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-05",
+  "mock_case": "PUB-07",
+  "brief": "tamsin",
+  "family": "identity_then_dispute",
+  "level": "medium",
+  "title": "Numeric date of birth triggers the day_month_swapped hint, then the customer disputes the loan",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "script": "You are Samuel Ortiz. Confirm with \"Yes, that's me.\" When asked for your date of birth, say exactly: \"Twelve, five, seventy-five.\" If asked again with the month as a word, say: \"The fifth of December 1975.\" Give phone digits 7093. After you hear about the personal loan, when you are asked to pay, say: \"That loan isn't mine. I never took out a personal loan with Corran Bay.\" Keep to that if asked anything more.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "DSPT",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "dispute"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After the swapped date, the assistant asks for the date again with the month as a word and treats it as not a wrong answer (then asks for the phone digits)",
+   "The assistant does not argue and proposes no amount or date after the dispute",
+   "The assistant says 'We will look into this and write to you. Goodbye.' before close_call"
+  ],
+  "rule_ids": [
+   "Doc1 Security questions (day_month_swapped)",
+   "Doc1 Things customers say: not mine",
+   "Doc1 Notes",
+   "Doc4 DSPT row"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-06",
+  "mock_case": "PUB-13",
+  "brief": "tamsin",
+  "family": "already_paid",
+  "level": "medium",
+  "title": "Robot and scam questions, then both products claimed as already paid",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "script": "You are Elena Rossi. When asked for Elena Rossi, say: \"Yes, speaking. Wait, is this a robot?\" After the answer, say: \"How do I know this isn't a scam?\" After the answer, go along with the call and answer the security questions correctly. When asked to pay, say: \"I've already paid both of them. I paid the loan and the card by bank transfer on Monday.\" If asked about either product separately, repeat that it was paid by bank transfer on Monday.",
+  "expected": {
+   "outcome": "paid",
+   "reason": "CLMPD",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p2",
+     "reason": "paid"
+    },
+    {
+     "product_id": "p1",
+     "reason": "paid"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says 'Yes, I am an automated assistant.' and, on the scam question, says she is free to hang up and call the number on the Corran Bay website, then carries on",
+   "The personal loan sentence (20 days) comes before the credit card ending 6604 sentence (4 days)",
+   "The assistant says 'Thank you. A payment can take up to two business days to reach us.' and closes with 'Thank you for letting us know. Goodbye.'"
+  ],
+  "rule_ids": [
+   "Doc1 Opening (robot, scam)",
+   "AHS-5 5.9",
+   "Doc1 Things customers say: already paid",
+   "Doc4 CLMPD row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-07",
+  "mock_case": "PUB-12",
+  "brief": "tamsin",
+  "family": "transfer_restructuring",
+  "level": "hard",
+  "title": "Card paid in full today and recorded, then the customer asks for a payment plan on the loan",
+  "variables": {
+   "first_name": "Marcus",
+   "last_name": "Bell",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1983-10-19",
+   "phone_last4": "4410"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "9015",
+    "past_due": 510.0,
+    "days_late": 16,
+    "minimum_payment": 153.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 1320.0,
+    "days_late": 16,
+    "instalment_amount": 440.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 140.0,
+    "days_late": 7,
+    "instalment_amount": 46.0
+   }
+  ],
+  "script": "You are Marcus Bell. Confirm and answer the security questions correctly. When asked whether you can pay all of these in full today, say: \"I can pay the full amount on the card today, but not the others.\" Confirm the read-back for the card with \"Yes, that's right.\" When the assistant moves to the personal loan, say: \"For the personal loan, can I set up a payment plan with lower monthly amounts?\" Do not discuss the car loan.",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XRST",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 510.0,
+     "date": "2026-10-14"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "restructuring"
+    }
+   ]
+  },
+  "checks": [
+   "The products are presented in the order credit card ending 9015, personal loan, car loan, and the first question is 'Can you pay all of these in full today?'",
+   "The assistant reads back the card arrangement, records it, and only then says 'Your payment arrangement is recorded.'",
+   "The assistant does not describe any plan, makes no add_note, and says 'I am putting you through now. Please stay on the line.' before transfer_to_agent"
+  ],
+  "rule_ids": [
+   "AHS-5 5.9",
+   "Doc1 Read-back",
+   "Doc1 Things customers say: plan",
+   "Doc1 Notes (transfer freezes)",
+   "Doc4 XRST row"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-08",
+  "mock_case": "PUB-04",
+  "brief": "tamsin",
+  "family": "transfer_general",
+  "level": "easy",
+  "title": "Customer wants a person and repeats it after the one check question",
+  "variables": {
+   "first_name": "Lena",
+   "last_name": "Hoffmann",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1984-01-30",
+   "phone_last4": "2219"
+  },
+  "products": [
+   {
+    "type": "car_loan",
+    "past_due": 1250.0,
+    "days_late": 14,
+    "instalment_amount": 400.0
+   }
+  ],
+  "script": "You are Lena Hoffmann. Confirm and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say: \"I'd rather speak to a real person.\" When asked whether you are happy to continue, say: \"No, put me through to a person, please.\"",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XGEN",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "general"
+    }
+   ]
+  },
+  "checks": [
+   "The assistant asks, once, 'I can help you with this now. Are you happy to continue with me?'",
+   "No create_promise and no add_note are called",
+   "The assistant says 'I am putting you through now. Please stay on the line.' before transfer_to_agent with queue general"
+  ],
+  "rule_ids": [
+   "Doc1 Things customers say: wants a person",
+   "Doc4 XGEN row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-09",
+  "mock_case": "PUB-05",
+  "brief": "tamsin",
+  "family": "hardship_transfer",
+  "level": "medium",
+  "title": "Job loss: no attempt, put through to Customer Care",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "script": "You are Tomas Novak. Confirm and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say: \"I lost my job three weeks ago and I'm really struggling.\" When the assistant says it will put you through to Customer Care, say: \"Yes, okay.\"",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XCARE",
+   "promises": [],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "support"
+    }
+   ]
+  },
+  "checks": [
+   "The assistant says 'I'm sorry to hear that.'",
+   "After the job loss is mentioned, the assistant proposes no amount and no date",
+   "The assistant says 'I am putting you through to Customer Care now. Please stay on the line.' before transfer_to_agent with queue support"
+  ],
+  "rule_ids": [
+   "Doc1 Things customers say: hardship",
+   "Doc4 XCARE row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-10",
+  "mock_case": "PUB-11",
+  "brief": "tamsin",
+  "family": "hardship_declined",
+  "level": "hard",
+  "title": "One wrong answer on each security question still passes; bereavement, Customer Care declined, three products",
+  "variables": {
+   "first_name": "Sofia",
+   "last_name": "Almeida",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1987-06-03",
+   "phone_last4": "2288"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "2288",
+    "past_due": 220.0,
+    "days_late": 9,
+    "minimum_payment": 66.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 640.0,
+    "days_late": 9,
+    "instalment_amount": 213.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 75.0,
+    "days_late": 3,
+    "instalment_amount": 25.0
+   }
+  ],
+  "script": "You are Sofia Almeida. Confirm with \"Yes, speaking.\" For your date of birth, first say: \"The third of July 1987.\" When asked again, say: \"The third of June 1987.\" For the phone digits, first say \"2289\"; when asked again, say \"2288\". When asked whether you can pay all of these in full today, say: \"My husband died last month and I can't think about money right now.\" When offered Customer Care, say: \"No, I don't want to be put through to anyone.\" If asked anything else, say: \"No, thank you.\" Never offer an amount or a date.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "HDNX",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "hardship"
+    },
+    {
+     "product_id": "p2",
+     "reason": "hardship"
+    },
+    {
+     "product_id": "p3",
+     "reason": "hardship"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "After one wrong answer on each security question and correct repeats, the assistant continues (calls get_account) instead of closing as not verified",
+   "The assistant says 'I'm sorry to hear that.', proposes no amount or date and does not call transfer_to_agent",
+   "The assistant says 'Thank you for telling me. Take care, Ms Almeida. Goodbye.' before close_call"
+  ],
+  "rule_ids": [
+   "Doc1 Security questions (per question)",
+   "Doc1 Things customers say: hardship",
+   "Doc1 Notes",
+   "Doc4 HDNX row"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-C-11",
+  "mock_case": "PUB-02",
+  "brief": "tamsin",
+  "family": "does_not_want_to_talk",
+  "level": "medium",
+  "title": "Verified customer twice says he does not want to talk: refused note, no second look",
+  "variables": {
+   "first_name": "Maria",
+   "last_name": "Costa",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1979-11-02",
+   "phone_last4": "0358"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 310.5,
+    "days_late": 11,
+    "instalment_amount": 103.5
+   }
+  ],
+  "script": "You are Maria Costa. Confirm and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say exactly: \"I don't want to talk about this now.\" After the assistant answers, say: \"I said I don't want to talk about this now.\" If offered anything else, say: \"No.\"",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "TDN",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says 'This will only take a moment.' exactly once",
+   "No second-look call is offered and schedule_callback is not called",
+   "The assistant says 'Thank you for your time, Ms Costa. Goodbye.' before close_call"
+  ],
+  "rule_ids": [
+   "Doc1 Things customers say: does not want to talk",
+   "Doc1 Second look (not for someone who does not want to talk)",
+   "Doc1 Notes",
+   "Doc4 TDN row"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-01",
+  "mock_case": "PUB-09",
+  "brief": "tamsin",
+  "family": "promise",
+  "level": "hard",
+  "title": "Late band on a Friday: refuse both attempts, then a second-look call booked after one time outside the hours",
+  "variables": {
+   "first_name": "Victor",
+   "last_name": "Ionescu",
+   "title": "Mr",
+   "now": "2026-10-16T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1981-08-11",
+   "phone_last4": "5560"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 2100.0,
+    "days_late": 28,
+    "instalment_amount": 700.0
+   }
+  ],
+  "script": "You are Mr Victor Ionescu and you answer the phone yourself. Confirm who you are and answer the security questions correctly when asked. When asked whether you can pay the overdue amount in full today, say only: \"No.\" When the assistant proposes the full amount on a later date, say only: \"No.\" When it then proposes a smaller amount on a date, say only: \"No.\" Never name an amount or a date for a payment. If you are offered a call back from a colleague to go through it again, say \"Yes.\" When asked what time suits you, say \"Eleven in the morning.\" If the assistant tells you the hours and asks again, say \"Half past five then.\" Then say goodbye.",
+  "expected": {
+   "outcome": "no_promise",
+   "reason": "TDN2L",
+   "promises": [],
+   "notes": [
+    {
+     "product_id": "p1",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [
+    {
+     "date": "2026-10-21",
+     "time": "17:30"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "The first offer after the customer's no is the full 2100 on the next business day after the call date (Monday 19 October), and the second offer is 700 on the part-payment last date (Tuesday 20 October).",
+   "After 'eleven in the morning' the assistant states the 12:00 to 18:00 hours once and asks again, and does not book 11:00.",
+   "The assistant says \"Your second-look call is booked for\" with the day and 17:30, and closes with \"Thank you for your time, Mr Ionescu. Speak to you then. Goodbye.\"",
+   "The assistant never asks how much the customer can pay."
+  ],
+  "rule_ids": [
+   "AHS-5 5.3",
+   "AHS-5 5.4 part-payment last date",
+   "AHS-5 5.5",
+   "AHS-5 5.7",
+   "Doc1 Second look",
+   "Doc1 Notes",
+   "Doc4 TDN2L"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-02",
+  "mock_case": "PUB-07",
+  "brief": "tamsin",
+  "family": "promise",
+  "level": "medium",
+  "title": "Early band: 'this Saturday' moved to the next business day",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "script": "You are Mr Samuel Ortiz and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say exactly: \"No, but I can pay all of it this Saturday.\" When the assistant proposes another day instead, accept it: \"Yes, that's fine.\" At the read-back, say \"Yes, that's right.\" Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "FULLPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 540.0,
+     "date": "2026-10-19"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant does not record or read back a Saturday date; it proposes Monday 19 October instead.",
+   "The read-back \"So that is 540 ... for your personal loan on Monday 19 October. Is that right?\" comes before create_promise.",
+   "\"Your payment arrangement is recorded.\" is said only after create_promise returns ok."
+  ],
+  "rule_ids": [
+   "AHS-5 5.2",
+   "AHS-5 5.6 weekend row",
+   "AHS-5 5.3 Early",
+   "Doc1 Read-back",
+   "Doc4 FULLPTP"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-03",
+  "mock_case": "PUB-04",
+  "brief": "tamsin",
+  "family": "promise",
+  "level": "hard",
+  "title": "Middle band (new 4th-business-day limit): 'next Friday' beyond the last date, refused, then the floor on the part-payment last date",
+  "variables": {
+   "first_name": "Lena",
+   "last_name": "Hoffmann",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1984-01-30",
+   "phone_last4": "2219"
+  },
+  "products": [
+   {
+    "type": "car_loan",
+    "past_due": 1250.0,
+    "days_late": 14,
+    "instalment_amount": 400.0
+   }
+  ],
+  "script": "You are Ms Lena Hoffmann and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say exactly: \"No, but I can pay all of it next Friday.\" When the assistant tells you a latest possible day and offers the full amount on it, say: \"No, I can't do that by then.\" When it next proposes a smaller amount on a date, say: \"Yes, I can do that.\" If asked how much you could pay, say only: \"What can you suggest?\" At the read-back say \"Yes, that's right.\" Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "PARTPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 400.0,
+     "date": "2026-10-16"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says the last date (Tuesday 20 October) is the latest day that can be recorded and offers the full 1250 on it; it does not accept Friday 23 October.",
+   "The next offer is 400 on Friday 16 October, and the assistant says the rest stays overdue and the bank will be in touch.",
+   "Closing sentence is \"Thank you, Ms Hoffmann. The rest of the overdue amount is still due and we will be in touch about it. Goodbye.\""
+  ],
+  "rule_ids": [
+   "Doc3 item 3",
+   "AHS-5 5.2 next weekday",
+   "AHS-5 5.6 later-than-last-date row",
+   "AHS-5 5.5",
+   "AHS-5 5.4",
+   "Doc4 PARTPTP"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-04",
+  "mock_case": "PUB-01",
+  "brief": "tamsin",
+  "family": "amount",
+  "level": "hard",
+  "title": "Card amount between the old minimum payment and the new half-of-overdue floor",
+  "variables": {
+   "first_name": "Daniel",
+   "last_name": "Reyes",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1988-03-14",
+   "phone_last4": "4471"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "4821",
+    "past_due": 420.0,
+    "days_late": 6,
+    "minimum_payment": 126.0
+   }
+  ],
+  "script": "You are Mr Daniel Reyes and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say exactly: \"No, I can pay a hundred and fifty pounds.\" When the assistant says that cannot be recorded and offers another amount, say: \"All right, I can do that.\" When asked for a date, or if it proposes one, say: \"Tomorrow.\" (if it already proposed a date, say \"Can I do it tomorrow instead?\"). At the read-back say \"Yes, that's right.\" Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "PARTPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 210.0,
+     "date": "2026-10-15"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant does not record or read back 150; it says that amount cannot be recorded and offers 210 once.",
+   "The assistant never offers or accepts the old minimum payment of 126.",
+   "The read-back is 210 for the credit card ending 4821 on Thursday 15 October, before create_promise."
+  ],
+  "rule_ids": [
+   "Doc3 item 2",
+   "AHS-5 5.4 less-than-floor row",
+   "AHS-5 5.4 part-payment last date",
+   "AHS-5 5.2 tomorrow",
+   "Doc4 PARTPTP"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-05",
+  "mock_case": "PUB-10",
+  "brief": "tamsin",
+  "family": "service_fault",
+  "level": "medium",
+  "title": "Vague 'end of next week', last date proposed, first create_promise fails and the retry succeeds",
+  "variables": {
+   "first_name": "Grace",
+   "last_name": "Lin",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1989-02-23",
+   "phone_last4": "9904"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "7740",
+    "past_due": 365.0,
+    "days_late": 8,
+    "minimum_payment": 109.5
+   }
+  ],
+  "faults": [
+   {
+    "tool": "create_promise",
+    "fail_first_n": 1
+   }
+  ],
+  "script": "You are Ms Grace Lin and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say exactly: \"No, but I'll pay the full amount at the end of next week.\" If asked for the exact day, say: \"I'm not sure of the exact day.\" When the assistant proposes a day, say: \"Yes, that's fine.\" At the read-back say \"Yes, that's right.\" If the assistant pauses or tries again, wait. Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "FULLPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 365.0,
+     "date": "2026-10-20"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant asks once for the exact day, then proposes the full 365 on Tuesday 20 October.",
+   "create_promise is called exactly twice with the same amount and date; no add_note is made.",
+   "\"Your payment arrangement is recorded.\" is said only after the second create_promise returns ok, and \"I'm sorry, I could not record that.\" is never said."
+  ],
+  "rule_ids": [
+   "AHS-5 5.6 vague row",
+   "Doc3 item 3",
+   "AHS-5 5.8",
+   "Doc1 Read-back",
+   "Doc4 FULLPTP"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-06",
+  "mock_case": "PUB-12",
+  "brief": "tamsin",
+  "family": "multi_product",
+  "level": "hard",
+  "title": "Three products: card too much -> new floor on 'Friday', loan refused on both attempts, car loan full; second look still offered",
+  "variables": {
+   "first_name": "Marcus",
+   "last_name": "Bell",
+   "title": "Mr",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1983-10-19",
+   "phone_last4": "4410"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "9015",
+    "past_due": 510.0,
+    "days_late": 16,
+    "minimum_payment": 153.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 1320.0,
+    "days_late": 16,
+    "instalment_amount": 440.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 140.0,
+    "days_late": 7,
+    "instalment_amount": 46.0
+   }
+  ],
+  "script": "You are Mr Marcus Bell and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay all of these in full today, say: \"No.\" For the credit card: to the first question or proposal about it, say: \"The full amount is too much for me.\" When a smaller amount is offered, say \"Yes, I can do that.\" and when asked for a day, say \"Friday.\" For the personal loan: answer every question or proposal about it with just \"No.\" For the car loan: to whatever the assistant first asks or proposes about it, say exactly: \"I can pay the car loan in full on Wednesday 28 October 2026.\" Say \"Yes, that's right.\" at every read-back. If you are offered a call back from a colleague, say \"Yes, at three in the afternoon.\" Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "PARTPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 255.0,
+     "date": "2026-10-16"
+    },
+    {
+     "product_id": "p3",
+     "amount": 140.0,
+     "date": "2026-10-28"
+    }
+   ],
+   "notes": [
+    {
+     "product_id": "p2",
+     "reason": "refused"
+    }
+   ],
+   "callbacks": [
+    {
+     "date": "2026-10-19",
+     "time": "15:00"
+    }
+   ],
+   "transfers": []
+  },
+  "checks": [
+   "Products are presented and handled in the order card, personal loan, car loan.",
+   "For the card the assistant offers 255 once and says the rest stays overdue and the bank will contact them; it never offers 153.",
+   "Each product is read back and recorded before the next product is discussed.",
+   "The second-look call is offered once, before the goodbye, and booked on Monday 19 October at 15:00."
+  ],
+  "rule_ids": [
+   "AHS-5 5.9",
+   "Doc3 item 2",
+   "Doc3 item 3",
+   "AHS-5 5.4 too-much row",
+   "AHS-5 5.5",
+   "AHS-5 5.2 weekday on its own",
+   "AHS-5 5.7",
+   "Doc1 Second look",
+   "Doc4 PARTPTP"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-07",
+  "mock_case": "PUB-13",
+  "brief": "tamsin",
+  "family": "hardship",
+  "level": "hard",
+  "title": "Hardship, Customer Care declined, then the customer names a date and amount for the card",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "script": "You are Ms Elena Rossi and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay all of these in full today, say exactly: \"I lost my job last month and money is very tight.\" When the assistant offers to put you through to Customer Care, say exactly: \"No, I don't want to be put through. But I can pay the three hundred on the credit card in full on Friday 23 October 2026.\" Do not offer anything for the personal loan; if asked about it, say \"I can't do anything on the loan.\" At the read-back say \"Yes, that's right.\" Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "FULLPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 300.0,
+     "date": "2026-10-23"
+    }
+   ],
+   "notes": [
+    {
+     "product_id": "p2",
+     "reason": "hardship"
+    }
+   ],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says \"I'm sorry to hear that.\" and makes no payment proposal of any kind after the job loss is mentioned.",
+   "The personal loan (20 days late) is presented before the credit card (4 days late).",
+   "The assistant does not call transfer_to_agent and does not offer a second-look call.",
+   "The hardship note for the personal loan contains the customer's words about losing the job."
+  ],
+  "rule_ids": [
+   "Doc1 Things customers say (hardship)",
+   "AHS-5 5.9",
+   "AHS-5 5.3 Early",
+   "Doc1 Notes",
+   "Doc4 FULLPTP"
+  ],
+  "expected_confidence": "medium",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-08",
+  "mock_case": "PUB-11",
+  "brief": "tamsin",
+  "family": "combination",
+  "level": "hard",
+  "title": "Read-back correction to a day beyond the Middle last date, then a restructuring transfer after the recorded promise",
+  "variables": {
+   "first_name": "Sofia",
+   "last_name": "Almeida",
+   "title": "Ms",
+   "now": "2026-10-14T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1987-06-03",
+   "phone_last4": "2288"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "2288",
+    "past_due": 220.0,
+    "days_late": 9,
+    "minimum_payment": 66.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 640.0,
+    "days_late": 9,
+    "instalment_amount": 213.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 75.0,
+    "days_late": 3,
+    "instalment_amount": 25.0
+   }
+  ],
+  "script": "You are Ms Sofia Almeida and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay all of these in full today, say: \"No.\" For the credit card, to the first question or proposal about it, say exactly: \"I can pay the card in full on Monday 19 October 2026.\" At the read-back of that, say exactly: \"Actually, make it Wednesday 21 October 2026 instead.\" When the assistant tells you a latest possible day and offers it, say: \"All right, that day then.\" At the next read-back say \"Yes, that's right.\" For the personal loan, to the first question about it, say exactly: \"For the loan I'd like a plan with lower monthly payments.\" Then wait to be put through.",
+  "expected": {
+   "outcome": "transferred",
+   "reason": "XRST",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 220.0,
+     "date": "2026-10-20"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": [
+    {
+     "queue": "restructuring"
+    }
+   ]
+  },
+  "checks": [
+   "After the correction the assistant does not record Wednesday 21 October; it says the latest day is Tuesday 20 October and reads back 220 on that day before recording.",
+   "create_promise is not called with the Monday 19 October date.",
+   "The assistant does not describe any plan, says \"I am putting you through now. Please stay on the line.\" before transfer_to_agent, and makes no add_note for the loan or the car loan."
+  ],
+  "rule_ids": [
+   "Doc1 Read-back",
+   "AHS-5 5.6 later-than-last-date row",
+   "Doc3 item 3",
+   "AHS-5 5.9",
+   "Doc1 restructuring",
+   "Doc1 Notes (transfer freezes)",
+   "Doc4 XRST"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ },
+ {
+  "id": "GEN-P-09",
+  "mock_case": "PUB-05",
+  "brief": "tamsin",
+  "family": "date",
+  "level": "medium",
+  "title": "Late band: a date before today, then St Corran's Day moved to the next business day",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-20T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "script": "You are Mr Tomas Novak and you answer the phone yourself. Confirm who you are and answer the security questions correctly. When asked whether you can pay the overdue amount in full today, say exactly: \"No, but I can pay all of it on Monday 19 October 2026.\" When the assistant says that cannot be recorded and asks for another day, say exactly: \"Then Thursday 22 October 2026.\" When the assistant proposes another day instead, say: \"Yes, that's fine.\" At the read-back say \"Yes, that's right.\" Then say goodbye.",
+  "expected": {
+   "outcome": "promise",
+   "reason": "FULLPTP",
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 780.0,
+     "date": "2026-10-23"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "checks": [
+   "The assistant says the past date cannot be recorded and asks for a day from today on, without counting it as a refusal or proposing a smaller amount.",
+   "The assistant does not record Thursday 22 October; it proposes Friday 23 October and reads back 780 on that day.",
+   "Closing sentence is \"Thank you, Mr Novak. Your arrangement is in place. Goodbye.\""
+  ],
+  "rule_ids": [
+   "AHS-5 5.6 day-before-today row",
+   "AHS-5 5.6 closure-day row",
+   "AHS-5 5.1",
+   "AHS-5 5.3 Late",
+   "Doc4 FULLPTP"
+  ],
+  "expected_confidence": "high",
+  "generated_by": "builder/cases.py"
+ }
+]

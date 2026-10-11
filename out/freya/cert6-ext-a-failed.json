@@ -1,0 +1,168 @@
+{
+ "agent_id": "7d100f1a-7799-42ef-9d12-ff74aa69ff13",
+ "cases": "tests/cases/brief-a-extended.cases.json",
+ "style": null,
+ "passed": 1,
+ "total": 3,
+ "runs": 1,
+ "seconds": 65,
+ "final": [
+  {
+   "id": "EXT-A-17",
+   "family": "Amounts",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-26",
+   "family": "Persuasion",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "EXT-A-38",
+   "family": "Calendar",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-A-17",
+   "mock_case": "PUB-04",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": false,
+   "failed": [
+    "conversation: The agent failed to meet the success criteria because the instalment amount of 400 was offered twice (Message 8 and Message 12), violating the requirement to offer it only once. Other criteria were met: the agent correctly stated 100 could not be recorded (Message 8), did not record a promise (Message 14 and system events), did not repeat a specific amount-date combination already refused, and did"
+   ],
+   "call_id": "856b1a34-80b3-48b0-8267-ab33da38a52a",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_a332e7cc-c96",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3266198c-40ef-40a6-8457-692869226ada",
+   "slowest_turn_s": 6.0,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-26",
+   "mock_case": "PUB-10",
+   "level": "hard",
+   "family": "Persuasion",
+   "pass": false,
+   "failed": [
+    "conversation: The agent failed to follow the prescribed offer sequence and exceeded the offer limit. The first offer made was for payment 'today' (Message 6), which contradicts the success criterion that 'attempt 1' should be for '365.00 on Friday 16 October'. By making offers in Messages 6, 8, and 10, the agent made a total of three offers, violating the 'no third offer' constraint. Although no promise was rec"
+   ],
+   "call_id": "de8d6815-ab35-4861-ac1b-b7db096e6300",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_f243b2b3-3b2",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "3266198c-40ef-40a6-8457-692869226ada",
+   "slowest_turn_s": 1.6,
+   "ended": "assistant-ended-call"
+  },
+  {
+   "id": "EXT-A-38",
+   "mock_case": "PUB-03",
+   "level": "medium",
+   "family": "Calendar",
+   "pass": true,
+   "failed": [],
+   "call_id": "608d28e1-4a30-4eb6-bab9-c2651ddd27aa",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_aff98848-446",
+   "now": "2026-10-16T11:00",
+   "simulation_id": "3266198c-40ef-40a6-8457-692869226ada",
+   "slowest_turn_s": 9.6,
+   "ended": "assistant-ended-call"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-A-17",
+    "mock_case": "PUB-04",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": false,
+    "failed": [
+     "conversation: The agent failed to meet the success criteria because the instalment amount of 400 was offered twice (Message 8 and Message 12), violating the requirement to offer it only once. Other criteria were met: the agent correctly stated 100 could not be recorded (Message 8), did not record a promise (Message 14 and system events), did not repeat a specific amount-date combination already refused, and did"
+    ],
+    "call_id": "856b1a34-80b3-48b0-8267-ab33da38a52a",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_a332e7cc-c96",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3266198c-40ef-40a6-8457-692869226ada",
+    "slowest_turn_s": 6.0,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-26",
+    "mock_case": "PUB-10",
+    "level": "hard",
+    "family": "Persuasion",
+    "pass": false,
+    "failed": [
+     "conversation: The agent failed to follow the prescribed offer sequence and exceeded the offer limit. The first offer made was for payment 'today' (Message 6), which contradicts the success criterion that 'attempt 1' should be for '365.00 on Friday 16 October'. By making offers in Messages 6, 8, and 10, the agent made a total of three offers, violating the 'no third offer' constraint. Although no promise was rec"
+    ],
+    "call_id": "de8d6815-ab35-4861-ac1b-b7db096e6300",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_f243b2b3-3b2",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "3266198c-40ef-40a6-8457-692869226ada",
+    "slowest_turn_s": 1.6,
+    "ended": "assistant-ended-call"
+   },
+   {
+    "id": "EXT-A-38",
+    "mock_case": "PUB-03",
+    "level": "medium",
+    "family": "Calendar",
+    "pass": true,
+    "failed": [],
+    "call_id": "608d28e1-4a30-4eb6-bab9-c2651ddd27aa",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_aff98848-446",
+    "now": "2026-10-16T11:00",
+    "simulation_id": "3266198c-40ef-40a6-8457-692869226ada",
+    "slowest_turn_s": 9.6,
+    "ended": "assistant-ended-call"
+   }
+  ]
+ ]
+}

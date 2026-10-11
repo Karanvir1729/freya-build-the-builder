@@ -1,0 +1,488 @@
+{
+ "schema": "rules-v2/spec-1",
+ "call_date_range": {
+  "earliest": "2026-10-14",
+  "latest": "",
+  "basis": "Go-live: first dialler run on Wednesday 14 October 2026 (minutes item 1). The example `now` is 2026-10-14T11:00. No end date is given."
+ },
+ "spec": {
+  "callback": {
+   "same_day": false,
+   "open": "12:00",
+   "close": "18:00",
+   "days_ahead_business": 2,
+   "text": "3rd business day after call date only"
+  },
+  "max_wrong_answers": 2,
+  "calendar": {
+   "business_weekdays": [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri"
+   ],
+   "holidays": [
+    {
+     "date": "2026-10-22",
+     "name": "St Corran's Day"
+    },
+    {
+     "date": "2026-11-06",
+     "name": "core banking cut-over"
+    },
+    {
+     "date": "2026-11-24",
+     "name": "Regatta Day"
+    },
+    {
+     "date": "2026-12-25",
+     "name": "Christmas Day"
+    },
+    {
+     "date": "2026-12-28",
+     "name": "Boxing Day (substitute)"
+    }
+   ]
+  },
+  "bands": [
+   {
+    "name": "Early",
+    "min_days": 1,
+    "max_days": 7,
+    "deadline_rule": {
+     "type": "calendar_days_after",
+     "n": 14,
+     "adjust": "next_business_day"
+    },
+    "attempts": 1
+   },
+   {
+    "name": "Middle",
+    "min_days": 8,
+    "max_days": 20,
+    "deadline_rule": {
+     "type": "business_days_after",
+     "n": 4,
+     "adjust": "none"
+    },
+    "attempts": 2
+   },
+   {
+    "name": "Late",
+    "min_days": 21,
+    "max_days": 45,
+    "deadline_rule": {
+     "type": "business_days_after",
+     "n": 3,
+     "adjust": "none"
+    },
+    "attempts": 2
+   },
+   {
+    "name": "over 45",
+    "min_days": 46,
+    "max_days": null,
+    "same_as": "Late"
+   }
+  ],
+  "floors": [
+   {
+    "product_types": [
+     "personal_loan",
+     "car_loan"
+    ],
+    "rule": {
+     "type": "field",
+     "field": "instalment_amount"
+    }
+   },
+   {
+    "product_types": [
+     "credit_card"
+    ],
+    "rule": {
+     "type": "percent",
+     "percent": 50,
+     "field": "past_due",
+     "round": "up to the next multiple of 5",
+     "cap_to_full": true
+    }
+   }
+  ],
+  "attempt_ladder": [
+   {
+    "attempt": 1,
+    "bands": [
+     "Early",
+     "Middle"
+    ],
+    "amount": "full",
+    "date_rule": "the band's last date"
+   },
+   {
+    "attempt": 1,
+    "bands": [
+     "Late"
+    ],
+    "amount": "full",
+    "date_rule": "the next business day after the call date"
+   },
+   {
+    "attempt": 2,
+    "bands": [
+     "Middle",
+     "Late"
+    ],
+    "amount": "floor",
+    "date_rule": "the part-payment last date"
+   }
+  ],
+  "identity": [
+   {
+    "order": 1,
+    "field": "date_of_birth",
+    "hint_values": [
+     "day_month_swapped"
+    ],
+    "retry_rule": "one wrong answer per question may be asked again"
+   },
+   {
+    "order": 2,
+    "field": "phone_last4",
+    "retry_rule": "one wrong answer per question may be asked again"
+   }
+  ],
+  "outcomes": [
+   {
+    "outcome": "no_promise",
+    "reason": "SYSF",
+    "when": "get_account fails; two failed create_promise tries, or get_account failing; system failure"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "NOCON",
+    "when": "identity of person unclear after second ask; wrong number, deceased, unclear who answered; someone else answered, no callback; wrong number; deceased; could not tell who answered; not reached"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "IDNO",
+    "when": "security check failed; security questions failed; failed check"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "IDREF",
+    "when": "declines security questions; before verification; customer would not answer the security questions; declined questions"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "XRST",
+    "when": "restructuring request; transferred to restructuring"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "XGEN",
+    "when": "insists on a person; transferred to a person on request (queue general); general queue"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "XCARE",
+    "when": "hardship transfer; transferred to Customer Care, hardship (queue support); support queue"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "HDNX",
+    "when": "hardship, declined Customer Care; hardship, customer did not want Customer Care; hardship, declined transfer"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "TDN",
+    "when": "after verification; no arrangement; turned down; no second-look booked; or would not continue after security questions; turned down, no second look"
+   },
+   {
+    "outcome": "promise",
+    "reason": "FULLPTP",
+    "when": "at least one arrangement recorded, no transfer after it, every arrangement for the full overdue amount; all arrangements full amount"
+   },
+   {
+    "outcome": "promise",
+    "reason": "PARTPTP",
+    "when": "at least one arrangement recorded, no transfer after it, at least one for less than overdue amount; at least one part arrangement"
+   },
+   {
+    "outcome": "paid",
+    "reason": "CLMPD",
+    "when": "every product claimed as already paid, nothing recorded; every product claimed paid"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "TDN2L",
+    "when": "no arrangement; turned down; second-look call booked; second look booked"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "DSPT",
+    "when": "customer disputes"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "TPCB",
+    "when": "someone else answered, callback booked; third-party callback booked"
+   }
+  ],
+  "note_reasons": [
+   {
+    "reason": "service_error",
+    "when": "create_promise failed twice",
+    "text_must_contain": "\"create_promise\" and the number of tries"
+   },
+   {
+    "reason": "paid",
+    "when": "claims already paid",
+    "text_must_contain": "how and when the customer says they paid"
+   },
+   {
+    "reason": "dispute",
+    "when": "customer disputes",
+    "text_must_contain": "what is disputed"
+   },
+   {
+    "reason": "hardship",
+    "when": "hardship, no transfer",
+    "text_must_contain": "what the customer said, in their words"
+   },
+   {
+    "reason": "refused",
+    "when": "product turned down",
+    "text_must_contain": "number of attempts made and last offer (amount and date)"
+   }
+  ],
+  "verbatim": [
+   {
+    "text": "Hello, this is the automated assistant of Corran Bay Bank. This call may be recorded.",
+    "when": "R11: Every call starts word for word with the greeting, then asks for the customer by first and last name."
+   },
+   {
+    "text": "Could I speak to {first_name} {last_name}, please?",
+    "when": "R11: Every call starts word for word with the greeting, then asks for the customer by first and last name."
+   },
+   {
+    "text": "Yes, I am an automated assistant.",
+    "when": "R14: If asked whether this is a robot, say the sentence and carry on."
+   },
+   {
+    "text": "I am very sorry to hear that.",
+    "when": "R20: Wrong number, customer deceased (say only the sentence), or cannot tell who answered: close not reached (NOCON)."
+   },
+   {
+    "text": "I'm calling from Corran Bay Bank's Payments Support team about a missed payment.",
+    "when": "R26: Call `get_account`, say the sentence, then one sentence per product: product in words (\"your credit card ending 4821\", \"your personal loan\", \"your car loan\"), o"
+   },
+   {
+    "text": "Can you pay the overdue amount in full today?",
+    "when": "R28: First question word for word: one product uses the first sentence, several products the second; then, if not, product by product."
+   },
+   {
+    "text": "Can you pay all of these in full today?",
+    "when": "R28: First question word for word: one product uses the first sentence, several products the second; then, if not, product by product."
+   },
+   {
+    "text": "So that is {amount} for your {product} on {weekday, day month}. Is that right?",
+    "when": "R32: Read back before recording; record only after a clear yes; on change, check and read back again; several products: agree, read back, record each before the next"
+   },
+   {
+    "text": "Your payment arrangement is recorded.",
+    "when": "R34: After each successful `create_promise` (`ok: true`) say the sentence word for word; never before."
+   },
+   {
+    "text": "I'm sorry, I could not record that.",
+    "when": "R35: If `create_promise` fails, try once more; if it fails again, say the sentence, `add_note` reason `service_error`, continue with other products."
+   },
+   {
+    "text": "Your second-look call is booked for {weekday, day month} at {HH:MM}.",
+    "when": "R36: When a product is turned down (ladder ran out or floor refused), offer once per call before goodbye a second-look call (AHS-5 5.7, customer chooses time); if ag"
+   },
+   {
+    "text": "Thank you. A payment can take up to two business days to reach us.",
+    "when": "R39: Already paid: say the sentence; no arrangement on that product; `add_note` reason `paid` with how and when they paid."
+   },
+   {
+    "text": "I can help you with this now. Are you happy to continue with me?",
+    "when": "R42: Wants a person: ask once the sentence; if no or asks again, `transfer_to_agent` queue `general`."
+   },
+   {
+    "text": "I'm sorry to hear that.",
+    "when": "R43: Illness, bereavement, job loss or similar: say the sentence, make no attempt at all, say you will put them through to Customer Care, `transfer_to_agent` queue `"
+   },
+   {
+    "text": "This will only take a moment.",
+    "when": "R45: Say once the sentence; if repeated, close: before security questions declined (IDREF); after, no arrangement (TDN) with a `refused` note on every open product, "
+   },
+   {
+    "text": "I don't have that information.",
+    "when": "R46: Anything not answerable from the tools: say the sentence."
+   },
+   {
+    "text": "Thank you, {title} {last_name}. Your arrangement is in place. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you, {title} {last_name}. The rest of the overdue amount is still due and we will be in touch about it. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you for letting us know. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "I am putting you through now. Please stay on the line.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "I am putting you through to Customer Care now. Please stay on the line.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you for your time, {title} {last_name}. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you for your time, {title} {last_name}. Speak to you then. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you for telling me. Take care, {title} {last_name}. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "We will look into this and write to you. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "I'm sorry, our system is not responding. We will call you again. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "I understand. You can use the Corran Bay app or visit any branch. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you, we will call back then. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   },
+   {
+    "text": "Thank you. Goodbye.",
+    "when": "R88: Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed."
+   }
+  ],
+  "forbidden_words_before_verification": [
+   "overdue",
+   "arrears",
+   "missed",
+   "owe",
+   "debt",
+   "balance",
+   "payment",
+   "account",
+   "card",
+   "credit card",
+   "loan",
+   "car loan"
+  ]
+ },
+ "sources": {
+  "outcomes": [
+   "R77",
+   "R12",
+   "R20",
+   "R24",
+   "R25",
+   "R41",
+   "R42",
+   "R43",
+   "R44",
+   "R45",
+   "R88",
+   "R89",
+   "R90",
+   "R91",
+   "R92",
+   "R93",
+   "R94",
+   "R95",
+   "R96",
+   "R97",
+   "R98",
+   "R99",
+   "R100",
+   "R101",
+   "R102",
+   "R103"
+  ],
+  "verbatim": [
+   "R11",
+   "R14",
+   "R20",
+   "R26",
+   "R28",
+   "R32",
+   "R34",
+   "R35",
+   "R36",
+   "R39",
+   "R42",
+   "R43",
+   "R45",
+   "R46",
+   "R88"
+  ],
+  "forbidden_words_before_verification": [
+   "R16"
+  ],
+  "callback": [
+   "R19",
+   "R72",
+   "R73",
+   "R84"
+  ],
+  "identity": [
+   "R21"
+  ],
+  "max_wrong_answers": [
+   "R23",
+   "R85"
+  ],
+  "note_reasons": [
+   "R35",
+   "R39",
+   "R40",
+   "R44",
+   "R66",
+   "R105"
+  ],
+  "floors": [
+   "R56",
+   "R80"
+  ],
+  "attempt_ladder": [
+   "R65"
+  ],
+  "bands": [
+   "R81"
+  ],
+  "calendar": [
+   "R83"
+  ]
+ },
+ "notes": [
+  "R104: precedence: SYSF > HDNX > DSPT > TDN2L > TDN"
+ ],
+ "merge_conflicts": [
+  "callback.open: \"10:00\" (R72) -> \"12:00\" (R73)",
+  "callback.close: \"16:00\" (R72) -> \"18:00\" (R73)"
+ ]
+}
