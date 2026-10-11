@@ -229,7 +229,9 @@ def tool_spec(api, name):
              "operation_id": str}.
     Missing description -> "", missing enum -> [] (never None)."""
     method, path, op, item = _find_op(api, name)
-    fields, req = _norm_props(_json_schema(op.get("requestBody"), api), api)
+    body_schema = _json_schema(op.get("requestBody"), api)
+    envelope = _envelope_of(body_schema, api)
+    fields, req = _norm_props(_deref(api, (body_schema.get("properties") or {}).get(envelope)) if envelope else body_schema, api)
     responses = op.get("responses") or {}
     rkey = "200" if "200" in responses else next((k for k in responses if str(k).startswith("2")),
                                                  "default" if "default" in responses else "200")
@@ -238,7 +240,22 @@ def tool_spec(api, name):
     return {"fields": fields, "required": req, "summary": op.get("summary", ""), "response_props": resp,
             "method": method.upper(), "path": path, "path_params": prm["path"], "query_params": prm["query"],
             "header_params": prm["header"], "has_body": bool(op.get("requestBody")),
-            "operation_id": str(op.get("operationId") or "")}
+            "operation_id": str(op.get("operationId") or ""), "envelope": envelope}
+
+
+def _envelope_of(schema, api):
+    """The name of the wrapper object when a request body carries its fields inside one required object property
+    ({"data": {...fields}, "meta": {...}}): exactly one required top-level property that is an object with its own
+    properties. "" otherwise (fields at the top level). api_tool then shows the inner fields as body leaves and a
+    pre-hook wraps them back into that property before sending."""
+    try:
+        props = schema.get("properties") or {}
+        req = set(schema.get("required") or [])
+        objs = [k for k, v in props.items() if k in req and isinstance(v, dict)
+                and (_deref(api, v) or {}).get("properties")]
+        return objs[0] if len(objs) == 1 and len(req) == 1 else ""
+    except Exception:
+        return ""
 
 
 def tool_names(api):
@@ -416,6 +433,10 @@ def api_tool(api, name, baked=None, description="", required=None, retries=0, pr
         drop = [f for f in moved_path + moved_query if f not in spec["fields"]]
         route_pre = (_ROUTE_PRE.replace("__PATH__", repr(moved_path)).replace("__QUERY__", repr(moved_query))
                      .replace("__DROP__", repr(drop)).replace("__NOBODY__", repr(no_body)))
+    if spec.get("envelope"):   # fields shown flat to the model and the engine; sent inside the wrapper object
+        route_pre = (route_pre + ("\n" if route_pre else "") +
+                     "try:\n    _b = config.get('body')\n    if isinstance(_b, dict) and %r not in _b:\n"
+                     "        config['body'] = {%r: _b}\nexcept Exception:\n    pass\n" % (spec["envelope"], spec["envelope"]))
     if pre and route_pre:
         pre = pre + ("" if pre.endswith("\n") else "\n") + route_pre
     else:

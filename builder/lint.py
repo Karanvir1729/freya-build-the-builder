@@ -981,6 +981,9 @@ class _Linter:
                     try:
                         schema = _fl._json_schema(op.get("requestBody"), self.api) or schema
                         schema = dict(schema, properties={k: _fl._deref(self.api, v) for k, v in (schema.get("properties") or {}).items()})
+                        env = _fl._envelope_of(schema, self.api)   # fields wrapped in one object: the tool shows them flat
+                        if env:
+                            schema = _fl._deref(self.api, schema["properties"][env])
                         prm = _fl._params(self.api, op, item)
                         params = dict(prm["query"], **prm["path"])
                     except Exception:
