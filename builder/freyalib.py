@@ -1364,6 +1364,8 @@ def check(wf):
 # A talkative customer on the organisers' simulator can send dozens of cut-off fragments in a row; 'Please go on.' each
 # time invites another long sentence that is cut again, and two calls hit the 80-turn cap with no notes written
 # (extended Brief B EXT-B-02, EXT-B-05, talkative). The second cut-off in a row asks for a short answer instead.
+# (and EXT-A-41, talkative: after 'two one nine' and a cut-off, 'Thank you, and the rest?' was said 20+ times until the call
+# timed out)
 # --- how customers talk (brief-agnostic). Measured on the organisers' simulator with the kit's styles: small talk at a
 # security question was read as a refusal (3 calls closed as declined), "how much can I pay instead?" became a plan
 # request (a transfer), and sympathy was said for a busy day (the judge counts sympathy sentences).
@@ -1384,7 +1386,8 @@ PERSONA_CONDUCT = (
     "unless the rules say such a question counts. When the message contains the answer AND a question, use the answer (call the "
     "tool) and answer the question in the same turn. Only what the rules name counts as a refusal.\n"
     "- When a number or a date arrives in parts, wait for the complete value before calling a tool and combine the parts in "
-    "order. When the customer corrects a value, the last value stated counts: read that one back.\n"
+    "order. If you asked for the rest and their next message holds no part of it, ask the whole question again in full; "
+    "never ask 'and the rest?' twice in a row. When the customer corrects a value, the last value stated counts: read that one back.\n"
     "- A question about how much they can, should or have to pay is not a request for a payment plan: propose the amount "
     "the rules give you.\n"
     "- A tool call that returns an error instead of a result: call it once more with the same values. Never ask a question "
