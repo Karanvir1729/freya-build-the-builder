@@ -1488,5 +1488,25 @@ def test_fin_priority_ranks_the_notes():
     assert ending() == "refused"
     assert ending(fin_priority=["service_error", "hardship", "dispute", "refused"]) == "dispute"
 
+@test
+def test_cant_pay_today_is_a_refusal_whatever_the_stance():
+    """Generated Brief A GEN-P-01 (Freya): 'No, I can't pay today.' came back stance=offer, day_refused=yes; nothing
+    routed and the model asked for today again. day_refused routes to check_offer; with no day, amount or reference of
+    their own the stance decides: accept -> the accept path, too_much -> too_much, anything else -> the refusal."""
+    n = mk().negotiate_node("T", [mk().stance_extraction("s")], mk().offer_guard_transitions() + [fl.always("negotiate")])
+    conds = [c for t in n["transitions"] if t["target_node"] == "check_offer" for c in t["condition"]["conditions"]]
+    assert {"variable": "day_refused", "operator": "equals", "operand": "yes"} in conds, conds
+    for st in ("offer", "refuse", "other"):
+        P, V = start([CARD])
+        ev(P, V, "offer", stance=st, day_refused="yes", offer_kind="none", offer_when="")
+        assert V["attempts_used_p1"] == "1" and "Friday" in V["say_next"] and "today" not in V["say_next"].lower(), (st, V["say_next"])
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="accept", day_refused="yes", offer_kind="none", offer_when="")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+    # an amount with the declined day is still an offer (EXT-B-14)
+    P, V = start([CARD])
+    ev(P, V, "offer", stance="offer", day_refused="yes", offer_kind="none", offer_ref="full", offer_when="")
+    assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+
 if __name__ == "__main__":
     sys.exit(main())

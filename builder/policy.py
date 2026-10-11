@@ -1011,10 +1011,17 @@ def ev_offer(V):
     if cutoff_turn(V, a, d):
         return
     if d is None and a is None and k2 != 'vague' and kind != 'vague' and g(V, 'day_refused') == 'yes' and \
-            g(V, 'stance') == 'refuse' and g(V, 'offer_ref') not in ('floor', 'full'):
-        # 'I can't do Friday.' with no amount and no day of their own: the declined day is not an offer, the no is the
-        # flat refusal it is (it reached the guard only because the extractor saw a day in it)
-        ev_refuse(V)
+            g(V, 'offer_ref') not in ('floor', 'full'):
+        # 'I can't do Friday.' / 'No, I can't pay today.' with no amount and no day of their own: the declined day is not
+        # an offer; the stance decides (generated Brief A GEN-P-01 on Freya: 'No, I can't pay today.' came back stance=offer
+        # with day_refused=yes, routed nowhere, and the model asked for today again)
+        st = g(V, 'stance')
+        if st == 'accept':
+            ev_accept(V)
+        elif st == 'too_much':
+            ev_too_much(V)
+        else:
+            ev_refuse(V)
         return
     if k2 in ('exact', 'vague'):
         kind = k2
@@ -1941,9 +1948,10 @@ class Policy:
     def offer_guard_transitions():
         """offer_kind exact|vague -> check_offer (the guard), stance accept -> accept_offer (the guard on the
         current offer). Put them after the topic transitions and before the stance counter."""
-        return [fl.tr("check_offer", "the customer named a date, an amount or a vague period",
+        return [fl.tr("check_offer", "the customer named a date, an amount or a vague period, or turned the proposed day down",
                       fl.cond("offer_kind", "equals", "exact"), fl.cond("offer_kind", "equals", "vague"),
-                      fl.cond("offer_ref", "equals", "floor"), fl.cond("offer_ref", "equals", "full")),
+                      fl.cond("offer_ref", "equals", "floor"), fl.cond("offer_ref", "equals", "full"),
+                      fl.cond("day_refused", "equals", "yes")),
                 fl.eq("stance", "accept", "accept_offer", "the customer accepted the current offer")]
 
     @staticmethod
