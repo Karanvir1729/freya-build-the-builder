@@ -76,6 +76,7 @@ DEFAULT_TEXTS = {
     "cutoff_day": "Sorry, I did not catch the day. Which day would that be?",
     "cutoff_amount": "Sorry, I did not catch that.",
     "vague_deadline": "The latest date I can record is [deadline].",
+    "vague_week_end": "",   # optional: a line before the week's-end proposal (vague_again='week_end'); the offer question names the day
     "too_much_floor": "The lowest amount I can accept is [floor], the [floor_name].",
     "exhausted": "I understand.",
     "one_by_one": "Let us go through them one by one.",
@@ -462,6 +463,16 @@ def check_one(V, pid, a, d, kind):
             # (an amount with a declined day is an offer, never a refusal: it gets the deadline below)
             refuse(V, pid)
             return
+        if P.get('vague_again') == 'week_end':
+            # the brief: propose the last business day of the current week (the next business day after it when the
+            # call is on that day), the deadline when that day is after it
+            t = today_of(V)
+            wk = lastbd_of_week(t - datetime.timedelta(days=t.weekday()))
+            day = wk if wk is not None and wk > t else bd_after(t)
+            if day <= dl:
+                set_prop(V, pid, amt, day)
+                say(V, join([pre, T('vague_week_end', day=txt_short(day), words=pg(V, pid, 'words')), V['offer_question']]))
+                return
         set_prop(V, pid, amt, dl)
         say(V, join([pre, T('vague_deadline', deadline=txt_short(dl), words=pg(V, pid, 'words')), V['offer_question']]))
         return
@@ -688,6 +699,10 @@ def resolve_when(V, text):
             delta = (wd - today.weekday()) % 7 or 7   # bare / 'this X' = the first X after today; 'next X' = seven days later
             if m.group(1) == 'next':
                 delta += 7
+        elif P.get('weekday_rule') == 'first_from_today':
+            delta = (wd - today.weekday()) % 7       # bare / 'this X' = the first X from today on (today on that weekday)
+            if m.group(1) in ('next', 'coming'):
+                delta = delta or 7                   # 'next X' = the first X after today (7 days later on that weekday)
         elif m.group(1) == 'next':
 
             if P.get('weekday_rule') == 'first_after':
@@ -1619,9 +1634,12 @@ class Policy:
         restructuring request after the promise, adds none). True (default): notes right after the promises.
     weekday_rule: the brief's reading of the weekday words: 'this_week' ('this X' = X of the current calendar week, 'next X' =
         X of the following week), 'first_after' ('this X' and 'next X' both = the first X after today) or 'first_after_plus7'
-        (a bare 'X' or 'this X' = the first X after today, also when said on that weekday; 'next X' = that day + 7 days).
-    vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline) or
-        'refuse' (the brief counts it as a non-answer: one persuasion attempt).
+        (a bare 'X' or 'this X' = the first X after today, also when said on that weekday; 'next X' = that day + 7 days) or
+        'first_from_today' (a bare 'X' or 'this X' = the first X from today on, today itself when said on that weekday;
+        'next X' = the first X after today, also in the same week, 7 days later when said on that weekday).
+    vague_again: a second vague answer after the one ask for the exact day: 'deadline' (propose the deadline), 'week_end'
+        (propose the last business day of the current week, the next business day after it when the call is on that day,
+        the deadline when that day is after it) or 'refuse' (the brief counts it as a non-answer: one persuasion attempt).
     above_full: an amount above the full amount: 'ask' (propose the full amount and ask again) or 'agree' (the brief
         says record the full amount and say so: straight to the read-back with the brief's sentence first).
     promise_reasons: {'full': <reason>, 'partial': <reason>} when the brief's promise ending has a reason that depends
@@ -1656,8 +1674,8 @@ class Policy:
             raise ValueError("notes=True needs note_reasons {state: reason}")
         if closed_day_move not in ("after", "before"):
             raise ValueError("closed_day_move must be 'after' or 'before'")
-        if vague_again not in ("deadline", "refuse"):
-            raise ValueError("vague_again must be 'deadline' or 'refuse'")
+        if vague_again not in ("deadline", "week_end", "refuse"):
+            raise ValueError("vague_again must be 'deadline', 'week_end' or 'refuse'")
         if above_full not in ("ask", "agree"):
             raise ValueError("above_full must be 'ask' or 'agree'")
         pr = dict(promise_reasons or {})
@@ -1714,6 +1732,13 @@ class Policy:
         and the promise reason the core wrote (promise_reason). Use it for the promise ending itself too
         (ending_code(promise_outcome, <default reason>))."""
         ov, rv, po = self.P["outcome_var"], self.P["reason_var"], self.P["promise_outcome"]
+        if isinstance(reason, fl.dated):
+            # a code the brief changes from a date on: the else branch picks the one in force on the call's date
+            src = self.ending_code(outcome, reason.newest(), promise_decides)
+            tail = "    else:\n        vars[%r] = %r\n        vars[%r] = %r\n" % (ov, outcome, rv, reason.newest())
+            body = "".join("        " + l + "\n" for l in reason.code("vars[%r]" % rv).rstrip("\n").split("\n"))
+            assert tail in src
+            return src.replace(tail, "    else:\n        vars[%r] = %r\n" % (ov, outcome) + body)
         return ("try:\n    rec = str(vars.get('recorded_pids') or '').strip()\n"
                 "    if %r and rec and rec.lower() not in ('none', 'null'):\n"
                 "        vars[%r] = %r\n        vars[%r] = str(vars.get('promise_reason') or %r)\n"

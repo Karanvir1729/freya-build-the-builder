@@ -1261,5 +1261,86 @@ def test_opening_no_answer_is_not_an_ask():
     assert V["who1"] == "unclear" and V["opening_no_answer_route"] == "retry", V
 
 
+@test
+def test_first_from_today_weekday_rule():
+    """Kestrel audit R99: '"Next <weekday>" means the first such weekday after the call date, even when it falls in the
+    same week ... If the call is on that weekday, "this <weekday>" means today and "next <weekday>" means seven days
+    later.' No other preset reads it that way."""
+    P = pol.Policy(HOL, texts=TEXTS, weekday_rule="first_from_today")
+    words = ('this friday', 'next friday', 'friday', 'coming friday', 'on friday', 'this wednesday', 'next wednesday')
+    for today, want in (("2026-10-16", ["2026-10-16", "2026-10-23", "2026-10-16", "2026-10-23", "2026-10-16", "2026-10-21", "2026-10-21"]),
+                        ("2026-10-14", ["2026-10-16", "2026-10-16", "2026-10-16", "2026-10-16", "2026-10-16", "2026-10-14", "2026-10-21"])):
+        G = {"vars": {"today_iso": today}}
+        exec(P.core() + "\nout = [resolve_when(vars, w)[0].isoformat() for w in %r]\ntab = weekday_table(today_of(vars))\n" % (words,), G)
+        assert G["out"] == want, (today, G["out"])
+        assert G["tab"].split("\n")[0].endswith("(today); \"next %s\" = %s" % (("Friday", "Friday 23 October 2026") if today == "2026-10-16"
+                                                                             else ("Wednesday", "Wednesday 21 October 2026"))), G["tab"]
+    # the other presets are unchanged
+    P3 = pol.Policy(HOL, texts=TEXTS, weekday_rule="first_after_plus7")
+    G3 = {"vars": {"today_iso": "2026-10-16"}}
+    exec(P3.core() + "\nout = [resolve_when(vars, w)[0].isoformat() for w in ('this friday', 'next friday', 'friday')]\n", G3)
+    assert G3["out"] == ["2026-10-23", "2026-10-30", "2026-10-23"], G3["out"]
+
+
+@test
+def test_vague_again_week_end():
+    """Kestrel audit R98: 'ask once for the exact day; if none is given, propose the last business day of the current
+    week (if the call is on that day, the next business day after it); if that is after the latest date, propose the
+    latest date'. vague_again='week_end'; 'deadline' (A/B) is unchanged."""
+    for today, want in (("2026-10-14", "Friday 16 October"), ("2026-10-16", "Monday 19 October"), ("2026-10-23", "Tuesday 27 October")):
+        P, V = start_on([CARD], today)
+        P = mk(vague_again="week_end")
+        V = {"today_iso": today, "now": today + "T11:00", "test_products": json.dumps([CARD])}
+        run(P.prepare_code(BODY, "statement"), V)
+        ev(P, V, "offer", offer_kind="vague", offer_when="next week")
+        assert V["say_next"] == "Which exact day would that be?", V["say_next"]
+        ev(P, V, "offer", offer_kind="vague", offer_when="I don't know, sometime next week")
+        assert want in V["say_next"] and "latest date" not in V["say_next"], (today, V["say_next"])
+    # past the deadline: the deadline (a product whose deadline is tomorrow, asked on a Wednesday)
+    P = mk(vague_again="week_end")
+    V = {"today_iso": "2026-10-14", "now": "2026-10-14T11:00", "test_products": json.dumps([CARD])}
+    run(P.prepare_code(BODY, "statement"), V)
+    V["deadline_p1"] = "2026-10-15"
+    ev(P, V, "offer", offer_kind="vague", offer_when="next week")
+    ev(P, V, "offer", offer_kind="vague", offer_when="next week")
+    assert V["say_next"].startswith("The latest date I can record is Thursday 15 October."), V["say_next"]
+    # 'deadline' as before
+    P, V = start([CARD])
+    ev(P, V, "offer", offer_kind="vague", offer_when="next week")
+    ev(P, V, "offer", offer_kind="vague", offer_when="next week")
+    assert V["say_next"].startswith("The latest date I can record is"), V["say_next"]
+
+
+@test
+def test_dated_reason_follows_the_call_date():
+    """Kestrel audit R51/R117: a memo changes a close code from a date on ('from Wednesday 14 October HSHP instead of
+    HARD'): the code in force is chosen against the call's date, never fixed at build time."""
+    nodes = {}
+    fl.end_pair("hardship", "no_promise", fl.dated("HARD", {"2026-10-14": "HSHP"}), "Goodbye.", nodes)
+    assert nodes["end_hardship"]["end_call"]["name"] if "end_call" in nodes["end_hardship"] else True
+    code = nodes["fin_hardship"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
+    assert "{{" not in code
+    for d, want in (("2026-10-13", "HARD"), ("2026-10-14", "HSHP"), ("2026-11-02", "HSHP"), ("", "HSHP")):
+        V = {"today_iso": d}
+        exec(code, {"vars": V})
+        assert V["reason"] == want and V["outcome"] == "no_promise", (d, V)
+    assert "no_promise_HSHP" in json.dumps(nodes["end_hardship"]), nodes["end_hardship"]
+    assert fl.dated("A", {"2026-12-01": "C", "2026-11-01": "B"}).all_values() == ["A", "B", "C"]
+    nodes = {}
+    fl.end_pair("refused", "no_promise", "RF", "Bye.", nodes)
+    code = nodes["fin_refused"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
+    V = {}
+    exec(code, {"vars": V})
+    assert V == {"outcome": "no_promise", "reason": "RF"}, V
+    # POLICY.end_pair: a recorded promise still decides; otherwise the code in force on the call's date
+    P = mk()
+    nodes = {}
+    P.end_pair("hardship", "no_promise", fl.dated("HARD", {"2026-10-14": "HSHP"}), "Goodbye.", nodes)
+    code = nodes["fin_hardship"]["pre_actions"][0]["function"]["parameters"]["properties"]["code"]["default"]
+    for V0, want in (({"today_iso": "2026-10-13"}, ("no_promise", "HARD")), ({"today_iso": "2026-10-15"}, ("no_promise", "HSHP")),
+                     ({"today_iso": "2026-10-13", "recorded_pids": "p1", "promise_reason": "PRM"}, ("promise", "PRM"))):
+        exec(code, {"vars": V0})
+        assert (V0["outcome"], V0["reason"]) == want, (V0, want)
+
 if __name__ == "__main__":
     sys.exit(main())

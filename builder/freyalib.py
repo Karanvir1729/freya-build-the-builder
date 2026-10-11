@@ -45,6 +45,7 @@ Design rules baked into the helpers (from the platform docs and the proven gener
 """
 from __future__ import annotations
 
+import datetime
 import json
 import pathlib
 import re
@@ -295,17 +296,51 @@ def conversation_first(opening_node_name, setup_code, route_var, routes, default
     return opening_node_name
 
 
+class dated(dict):
+    """A value the brief changes from a date on ('from Wednesday 14 October the close is coded HSHP instead of HARD'):
+    dated("HARD", {"2026-10-14": "HSHP"}). The value in force is chosen in code against the call's date (today_iso, set
+    by SETUP_CODE from `now`), never fixed at build time: a call dated before the change gets the old value. With no call
+    date the newest value applies. str() is the newest value (terminal names, enum lists); values() lists them all."""
+    def __init__(self, before, changes, date_var="today_iso"):
+        ch = sorted((str(k)[:10], v) for k, v in dict(changes).items())
+        if not ch:
+            raise ValueError("dated: no change dates")
+        for k, _ in ch:
+            datetime.date.fromisoformat(k)
+        super().__init__(before=before, changes=ch, date_var=date_var)
+
+    def newest(self):
+        return self["changes"][-1][1]
+
+    def all_values(self):
+        return [self["before"]] + [v for _, v in self["changes"]]
+
+    def __str__(self):
+        return str(self.newest())
+
+    def code(self, target):
+        """Python lines setting `target` (e.g. "vars['reason']") to the value in force on the call's date."""
+        return ("_dd = str(vars.get(%r) or '')[:10]\n%s = %r if _dd else %r\nfor _dk, _dv in %r:\n    if _dd and _dd >= _dk:\n"
+                "        %s = _dv\n" % (self["date_var"], target, self["before"], self.newest(), [list(c) for c in self["changes"]],
+                                         target))
+
+
 def outcome_code(outcome, reason, outcome_var="outcome", reason_var="reason"):
+    if isinstance(reason, dated):
+        body = reason.code("vars[%r]" % reason_var)
+        return ("try:\n    vars[%r] = %r\n%s\nexcept Exception:\n    vars[%r] = %r\n"
+                % (outcome_var, outcome, "\n".join("    " + l for l in body.rstrip("\n").split("\n")), reason_var, reason.newest()))
     return ("try:\n    vars[%r] = %r\n    vars[%r] = %r\nexcept Exception:\n    pass\n"
             % (outcome_var, outcome, reason_var, reason))
 
 
 def end_pair(key, outcome, reason, farewell, nodes, outcome_var="outcome", reason_var="reason"):
     """Adds fin_<key> (a code node that sets vars outcome/reason) and end_<key> (the end_call terminal named
-    <outcome>_<reason>, or <outcome> when reason is "") to `nodes`. Route every ending to fin_<key>."""
+    <outcome>_<reason>, or <outcome> when reason is "") to `nodes`. Route every ending to fin_<key>. `reason` may be a
+    dated(...) value: fin_<key> picks the one in force on the call's date, the terminal is named after the newest."""
     fin, end = "fin_%s" % key, "end_%s" % key
     nodes[fin] = code_node(fin, outcome_code(outcome, reason, outcome_var, reason_var), [always(end)])
-    nodes[end] = end_node(end, "%s_%s" % (outcome, reason) if reason else outcome, farewell)
+    nodes[end] = end_node(end, "%s_%s" % (outcome, str(reason)) if reason else outcome, farewell)
     return fin, end
 
 
@@ -660,8 +695,17 @@ def weekday_table_first_after_plus7(today):
         a = today + datetime.timedelta(days=k)
         tab.append('"' + WD[a.weekday()] + '" = "this ' + WD[a.weekday()] + '" = ' + txt(a) + '; "next ' + WD[a.weekday()] + '" = ' + txt(a + datetime.timedelta(days=7)))
     return '\n'.join(tab)
+def weekday_table_first_from_today(today):
+    tab = []
+    for k in range(0, 7):
+        a = today + datetime.timedelta(days=k)
+        b = a if k else a + datetime.timedelta(days=7)
+        tab.append('"' + WD[a.weekday()] + '" = "this ' + WD[a.weekday()] + '" = ' + txt(a) + ('' if k else ' (today)') + '; "next ' + WD[a.weekday()] + '" = ' + txt(b))
+    return '\n'.join(tab)
 if WDRULE == 'first_after':
     weekday_table = weekday_table_first_after
+if WDRULE == 'first_from_today':
+    weekday_table = weekday_table_first_from_today
 if WDRULE == 'first_after_plus7':
     weekday_table = weekday_table_first_after_plus7
 def calendar_text(today, deadline, extra_days=10):
@@ -693,6 +737,9 @@ def fmt(x):
 '''
 
 
+WEEKDAY_RULES = ("this_week", "first_after", "first_after_plus7", "first_from_today")
+
+
 def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS, weekday_rule="this_week"):
     """Python source (for the top of a code node) defining, on datetime.date values:
     isbd(d) business day?; next_bd(d) / prev_bd(d) d ITSELF when it is a business day, else the first business day
@@ -704,9 +751,11 @@ def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS, weekday_rule="thi
     next business day); fmt(x) '420.5' / '420' / '420.25'. Also imports datetime, json, re. No '{{' or '}}'.
     `weekday_rule`: "this_week" ("this X" = X of the current week, "next X" = a week later), "first_after"
     (both "this X" and "next X" = the first X after today) or "first_after_plus7" (a bare "X" or "this X" = the first X
-    after today, "next X" = seven days after that), as the brief defines the words."""
-    if weekday_rule not in ("this_week", "first_after", "first_after_plus7"):
-        raise ValueError("weekday_rule must be 'this_week', 'first_after' or 'first_after_plus7', got %r" % weekday_rule)
+    after today, "next X" = seven days after that) or "first_from_today" (a bare "X" or "this X" = the first X from today
+    on, today itself when said on that weekday; "next X" = the first X after today, also within the same week, seven days
+    later when said on that weekday), as the brief defines the words."""
+    if weekday_rule not in WEEKDAY_RULES:
+        raise ValueError("weekday_rule must be one of %s, got %r" % (", ".join(WEEKDAY_RULES), weekday_rule))
     hol = sorted(set(str(h)[:10] for h in holidays or []))
     return _CAL_HELPERS.replace("__HOLIDAYS__", repr(hol)).replace("__BWD__", repr(sorted(set(int(x) for x in business_weekdays)))) \
                        .replace("__WDRULE__", repr(weekday_rule))
