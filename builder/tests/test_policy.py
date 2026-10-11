@@ -1508,5 +1508,37 @@ def test_cant_pay_today_is_a_refusal_whatever_the_stance():
     ev(P, V, "offer", stance="offer", day_refused="yes", offer_kind="none", offer_ref="full", offer_when="")
     assert V["say_next"] == "Which exact day would that be?", V["say_next"]
 
+@test
+def test_compacted_code_behaves_the_same():
+    """Brief A PUB-06 talkative (Freya): code + variables went over the platform's 131072-byte limit and the finalize node
+    failed. code_node compacts every code node; the same event sequence through compacted and original code must leave
+    identical variables."""
+    import copy
+    for multi, notes, prods in ((False, False, [CARD]), (True, True, [CARD, LOAN, CAR])):
+        P = mk(multi, notes)
+        V0 = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps(prods)}
+        prep = P.prepare_code(BODY, "statement")
+        small = fl.compact_code(prep)
+        assert len(small) < len(prep) * 0.8, (len(small), len(prep))
+        A, B = copy.deepcopy(V0), copy.deepcopy(V0)
+        run(prep, A); run(small, B)
+        assert A == B
+        seq = [("offer", dict(stance="refuse", day_refused="yes", offer_kind="none")), ("refuse", dict(stance="refuse")),
+               ("offer", dict(offer_kind="exact", offer_when="Monday the 19th", offer_amount="420")),
+               ("dispute", dict(topic="dispute", customer_said="never had a car loan")), ("accept", dict(stance="accept")),
+               ("finalize", {})]
+        for evn, ext in seq:
+            for X in (A, B):
+                X.update(ext)
+            code = P.event_code(evn)
+            run(code, A); run(fl.compact_code(code), B)
+            assert A == B, (evn, {k: (A.get(k), B.get(k)) for k in set(A) | set(B) if A.get(k) != B.get(k)})
+    # strings are never touched: a comment-like text and indentation inside a multi-line string survive
+    src = 'try:\n    x = """a\n    # not a comment\n        b"""  # a comment\n    y = "#keep"\nexcept Exception:\n    pass\n'
+    out = fl.compact_code(src)
+    G1, G2 = {}, {}
+    exec(src, G1); exec(out, G2)
+    assert G1["x"] == G2["x"] and G2["y"] == "#keep", out
+
 if __name__ == "__main__":
     sys.exit(main())

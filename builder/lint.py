@@ -796,6 +796,13 @@ class _Linter:
                 self.err(f"{where}.parameters.code", "code must be a baked default string")
             else:
                 self.check_python(code["default"], f"{where}.code", "code")
+                nb = len(code["default"].encode())
+                if nb > 80000:
+                    # the platform caps code + the call's variables at 131072 bytes per run (seen on Freya: the finalize
+                    # node of Brief A failed late in a call at 131990 bytes); freyalib.code_node compacts the code
+                    self.warn(f"{where}.code", "code is %d bytes: with the call's variables (40+ KB late in a call) it can pass "
+                                               "the platform's 131072-byte limit for code + data; build it with freyalib.code_node "
+                                               "(compact_code) or split it" % nb)
         if "const" in code:
             self.err(f"{where}.parameters.code", "const does not bake; use default")
         tm = props.get("timeout_ms")

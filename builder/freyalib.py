@@ -223,9 +223,55 @@ def _need_transitions(name, transitions, kind):
         raise ValueError("%s node %r needs at least one transition (end with always(<next>))" % (kind, name))
 
 
+# The platform caps code + variables at 131072 bytes per code_exec ('Code and data for code_exec total 131990 bytes, over
+# the 131072-byte limit': Brief A PUB-06 talkative on Freya, the finalize node failed late in the call, its old route
+# stayed and the wrap-up looped until the call timed out). Every code node is compacted: comments removed, 4-space
+# indentation shrunk to 1 space, strings untouched (tokenize-aware); a source that does not compile is left as it is.
+CODE_SOFT_LIMIT = 80000
+
+
+def compact_code(src):
+    import io, tokenize
+    try:
+        compile(src, "<code>", "exec")
+        toks = list(tokenize.generate_tokens(io.StringIO(src).readline))
+    except Exception:
+        return src
+    lines = src.split("\n")
+    in_string = set()                     # lines that lie inside a multi-line string (never touched)
+    comments = {}
+    for t in toks:
+        if t.type == tokenize.STRING and t.end[0] > t.start[0]:
+            in_string.update(range(t.start[0] + 1, t.end[0] + 1))
+        elif t.type == tokenize.COMMENT:
+            comments[t.start[0]] = t.start[1]
+    out = []
+    for i, line in enumerate(lines, 1):
+        if i in in_string:
+            out.append(line)
+            continue
+        if i in comments:
+            line = line[:comments[i]].rstrip()
+            if not line.strip():
+                continue
+        stripped = line.lstrip(" ")
+        n = len(line) - len(stripped)
+        if not stripped:
+            continue
+        out.append(" " * (n // 4 + (1 if n % 4 else 0)) + stripped)
+    res = "\n".join(out) + ("\n" if src.endswith("\n") else "")
+    try:
+        compile(res, "<code>", "exec")
+    except Exception:
+        return src
+    return res
+
+
 def code_node(name, code, transitions):
-    """A passthrough code node. `transitions` must end with always(<next>). Raises ValueError when empty."""
+    """A passthrough code node. `transitions` must end with always(<next>). Raises ValueError when empty. The code is
+    compacted (compact_code) to stay well under the platform's 128 KB limit for code + variables."""
     _need_transitions(name, transitions, "code")
+    code = compact_code(code)
     return base_node(name, "code", passthrough=True, passthrough_default_transition=transitions[-1]["target_node"],
                      on_enter={"type": "silent"}, disable_inactivity_monitor=True, pre_actions=[{
                          "type": "function",
