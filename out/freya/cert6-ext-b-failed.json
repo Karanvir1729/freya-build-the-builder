@@ -1,0 +1,70 @@
+{
+ "agent_id": "24083493-68b9-4c7d-86d1-914ffa24b18c",
+ "cases": "tests/cases/brief-b-extended.cases.json",
+ "style": null,
+ "passed": 1,
+ "total": 1,
+ "runs": 1,
+ "seconds": 43,
+ "final": [
+  {
+   "id": "EXT-B-12",
+   "family": "Multi-product",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "EXT-B-12",
+   "mock_case": "PUB-11",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "691b92bb-cd52-4458-ac48-6c04c9b62c52",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "add_note",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_61faa67c-b86",
+   "now": "2026-10-14T11:00",
+   "simulation_id": "223a40e2-990f-4428-8a8a-ffc2f87d302f",
+   "slowest_turn_s": 7.0,
+   "ended": "assistant-ended-call"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "EXT-B-12",
+    "mock_case": "PUB-11",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "691b92bb-cd52-4458-ac48-6c04c9b62c52",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "add_note",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_61faa67c-b86",
+    "now": "2026-10-14T11:00",
+    "simulation_id": "223a40e2-990f-4428-8a8a-ffc2f87d302f",
+    "slowest_turn_s": 7.0,
+    "ended": "assistant-ended-call"
+   }
+  ]
+ ]
+}
