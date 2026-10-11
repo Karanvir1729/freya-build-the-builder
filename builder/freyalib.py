@@ -614,6 +614,9 @@ def addbd(d, n):
         if isbd(d):
             c += 1
     return d
+# next_bd(d) / prev_bd(d): d ITSELF when d is a business day, else the nearest one after / before (on or after, on or
+# before: for moving a named day off a weekend or holiday). "The next business day after X" is bd_after(X) = addbd(X, 1),
+# never next_bd(X), which returns X when X is a business day (Kestrel: attempt 1 landed on the call date).
 def next_bd(d):
     guard = 0
     while not isbd(d) and guard < 4000:
@@ -626,6 +629,10 @@ def prev_bd(d):
         d = d - datetime.timedelta(days=1)
         guard += 1
     return d
+def bd_after(d):
+    return addbd(d, 1)
+def bd_before(d):
+    return prev_bd(d - datetime.timedelta(days=1))
 def lastbd_of_week(monday):
     for k in range(6, -1, -1):
         d = monday + datetime.timedelta(days=k)
@@ -688,7 +695,9 @@ def fmt(x):
 
 def CAL_HELPERS(holidays, business_weekdays=BUSINESS_WEEKDAYS, weekday_rule="this_week"):
     """Python source (for the top of a code node) defining, on datetime.date values:
-    isbd(d) business day?; next_bd(d) / prev_bd(d) d itself or the first business day after / before it; txt(d) 'Friday 16 October 2026'; txt_short(d) without the year; addbd(d, n) n business
+    isbd(d) business day?; next_bd(d) / prev_bd(d) d ITSELF when it is a business day, else the first business day
+    after / before it (to move a named day off a closed day); bd_after(d) / bd_before(d) the business day strictly after
+    / before d ('the next business day after the call date' = bd_after(today), never next_bd(today)); txt(d) 'Friday 16 October 2026'; txt_short(d) without the year; addbd(d, n) n business
     days later; next_bd(d) d or the first business day after it; lastbd_of_week(monday) last business day of that
     week or None; weekday_table(today) the '"this Monday" = ...; "next Monday" = ...' table; calendar_text(today,
     deadline, extra_days=10) one tagged line per day (allowed / weekend / bank holiday / after the deadline, with the

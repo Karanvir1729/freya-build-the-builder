@@ -477,7 +477,12 @@ def fit_day(V, p, dd):
     if dd < t:
         dd = t if isbd(t) else next_bd(t)
     if not isbd(dd):
-        dd = next_bd(dd)
+        nb = next_bd(dd)
+        if P['closed_day_move'] == 'before':   # the brief's rule for a closed day, as check_one applies it (Kestrel PUB-13)
+            pb = prev_bd(dd)
+            if pb >= t:
+                nb = pb
+        dd = nb
         tag = 'bd'
     if dd > dl:
         dd = dl

@@ -244,7 +244,7 @@ POLICY = pol.Policy(
 BANDS = SPEC["bands"]
 PREPARE_BODY = fl.products_from_vars() + r'''
 today = datetime.date.fromisoformat(str(vars.get('today_iso')))
-a1 = next_bd(today)                                     # 4.8 attempt 1: the next business day after the call date
+a1 = bd_after(today)                                    # 4.8 attempt 1: the next business day after the call date
 items = []
 for i, p in enumerate(prods):
     if not isinstance(p, dict):

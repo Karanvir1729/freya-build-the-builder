@@ -45,10 +45,10 @@ statement = 'STATEMENT'
 '''
 
 
-def mk(multi=False, notes=False):
+def mk(multi=False, notes=False, **kw):
     return pol.Policy(HOL, texts=TEXTS, multi=multi, notes=notes,
                       note_reasons={"refused": "refused", "hardship": "hardship", "dispute": "dispute",
-                                    "paid": "paid", "service_error": "service_error"} if notes else None)
+                                    "paid": "paid", "service_error": "service_error"} if notes else None, **kw)
 
 
 def run(src, V):
@@ -438,6 +438,19 @@ def note_text_carries_the_customers_reason():               # Brief F PUB-05: th
     # the extraction exists only when the brief keeps notes
     names = lambda pol_: [e["name"] for e in pol_.negotiate_node("t", [], [])["extraction_schema"]]
     assert "customer_said" in names(mk(True, True)) and "customer_said" not in names(mk(False, False))
+
+
+@test
+def one_day_for_all_moves_a_closed_day_by_the_brief():     # Kestrel PUB-13: closed_day_move='before' for several products
+    P, V = start([CARD, LOAN], multi=True, notes=True)
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-26", offer_for="all")   # a holiday (Monday)
+    assert V["agreed_p1"].startswith("420.0|2026-10-27"), V["agreed_p1"]               # default: the next business day
+    P2 = mk(True, True, closed_day_move="before")
+    import json
+    V2 = {"today_iso": TODAY, "now": TODAY + "T11:00", "test_products": json.dumps([CARD, LOAN])}
+    run(P2.prepare_code(BODY, "statement"), V2)
+    ev(P2, V2, "offer", offer_kind="exact", offer_date="2026-10-26", offer_for="all")
+    assert V2["agreed_p1"].startswith("420.0|2026-10-23"), V2["agreed_p1"]             # 'before': Friday 23 October
 
 
 @test
