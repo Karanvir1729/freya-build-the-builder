@@ -1109,6 +1109,25 @@ QUESTION_ENUM_CLAUSE = (" question = asks something back INSTEAD of answering (w
                         "(the answer is processed and the question answered in the same turn); refused is only an explicit refusal or not wanting to talk.")
 
 
+def question_clause(deflections=None):
+    """The question/refused part of an identity refusal-enum description. `deflections`: the questions the brief counts
+    as declining, in its own words (e.g. ["what the call is about"]); they get the enum value `deflection`, which the
+    generator routes to the same decline counter as `refused` (values: none, refused, deflection, question), and
+    `question` keeps only the other questions back. Without deflections: QUESTION_ENUM_CLAUSE (generated Brief B GEN-C-08:
+    'What is this call about? Tell me first.' went to the question-back path with its own counter, so one deflection plus
+    one refusal never reached the brief's 'a second refusal or a second such question closes the call')."""
+    if not deflections:
+        return QUESTION_ENUM_CLAUSE
+    return (" deflection = asks %s INSTEAD of answering (the brief counts that as declining), with NO answer in the message; "
+            "question = asks anything else back instead of answering (why do you need that, which account, who is calling) with "
+            "NO answer in the message; a message that contains the answer and also a question is none (the answer is processed "
+            "and the question answered in the same turn); refused is an explicit refusal or not wanting to talk."
+            % " or ".join(deflections))
+
+
+DEFLECTION_VALUES = ["none", "refused", "deflection", "question"]
+
+
 def reset_pre(names):
     """Tool pre hook: zero the named counters (e.g. question_count_<stage> once an answer reaches the identity tool)."""
     return "try:\n" + "".join("    vars[%r] = 0\n" % n for n in names) + "except Exception:\n    pass\n"

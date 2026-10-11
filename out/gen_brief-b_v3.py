@@ -151,7 +151,7 @@ ID_COMMON = ("Rules for this step:\n"
              "- After every tool result, speak to the customer or call the next tool. Follow what_to_do_next.")
 
 REFUSAL_DESC = ("From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, "
-                "or ask the same thing back again instead of answering. none if they give an answer or say anything else." + fl.QUESTION_ENUM_CLAUSE + fl.REFUSAL_NONE_CLAUSE)
+                "or ask the same thing back again instead of answering. none if they give an answer or say anything else." + fl.question_clause(["what the call is about"]) + fl.REFUSAL_NONE_CLAUSE)
 
 nodes["ask_dob"] = fl.conv(
     "ask_dob",
@@ -162,12 +162,13 @@ nodes["ask_dob"] = fl.conv(
                        description="Check the date of birth. CALL it every time the customer gives a full date of birth.",
                        field_descriptions={"answer": "The date of birth as YYYY-MM-DD."},
                        post=fl.verify_post("What is your date of birth?", HINTS, MAX_WRONG, all_verified_text=ALL_VERIFIED)), transfer_general],
-    extraction=[fl.ext("refusal_dob", ["none", "refused", "question"], REFUSAL_DESC)],
+    extraction=[fl.ext("refusal_dob", fl.DEFLECTION_VALUES, REFUSAL_DESC)],
     transitions=[
         fl.eq("verify_identity_response.data.wrong_answers_left", "0", "fin_failed", "three wrong answers"),
         fl.is_true("verify_identity_response.data.verified", "ask_phone", "date of birth correct"),
         fl.transferred("fin_transferred_human", "transferred"),
         fl.eq("refusal_dob", "refused", "count_decline_dob", "customer refused"),
+        fl.eq("refusal_dob", "deflection", "count_decline_dob", "asks what the call is about instead of answering (rule 15: declining)"),
         fl.eq("refusal_dob", "question", "qb_dob", "asks a question back"),
     ])
 
@@ -179,12 +180,13 @@ nodes["ask_phone"] = fl.conv(
                        description="Check the last four digits of the phone number. CALL it every time the customer gives four digits.",
                        field_descriptions={"answer": "Exactly four digits."},
                        post=fl.verify_post("What are the last four digits of the phone number on file?", HINTS, MAX_WRONG, all_verified_text=ALL_VERIFIED)), transfer_general],
-    extraction=[fl.ext("refusal_phone", ["none", "refused", "question"], REFUSAL_DESC)],
+    extraction=[fl.ext("refusal_phone", fl.DEFLECTION_VALUES, REFUSAL_DESC)],
     transitions=[
         fl.is_true("verify_identity_response.data.all_verified", "load_account", "identity verified"),
         fl.eq("verify_identity_response.data.wrong_answers_left", "0", "fin_failed", "three wrong answers"),
         fl.transferred("fin_transferred_human", "transferred"),
         fl.eq("refusal_phone", "refused", "count_decline_phone", "customer refused"),
+        fl.eq("refusal_phone", "deflection", "count_decline_phone", "asks what the call is about instead of answering (rule 15: declining)"),
         fl.eq("refusal_phone", "question", "qb_phone", "asks a question back"),
     ])
 

@@ -512,6 +512,13 @@ def third_party_reask_is_counted_in_code():                 # generated Brief B 
 
 
 @test
+def deflection_clause_names_the_briefs_question():          # generated Brief B GEN-C-08: rule 15
+    c = fl.question_clause(["what the call is about"])
+    assert "deflection = asks what the call is about INSTEAD" in c and "question = asks anything else back" in c
+    assert fl.question_clause() == fl.QUESTION_ENUM_CLAUSE and fl.DEFLECTION_VALUES == ["none", "refused", "deflection", "question"]
+
+
+@test
 def every_event_survives_empty_vars():
     P = mk(True, True)
     for name, e in pol.EVENT_NODES.items():

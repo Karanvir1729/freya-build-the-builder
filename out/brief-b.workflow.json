@@ -1904,6 +1904,20 @@
      }
     },
     {
+     "target_node": "count_decline_dob",
+     "description": "asks what the call is about instead of answering (rule 15: declining)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "refusal_dob",
+        "operator": "equals",
+        "operand": "deflection"
+       }
+      ]
+     }
+    },
+    {
      "target_node": "qb_dob",
      "description": "asks a question back",
      "condition": {
@@ -2040,9 +2054,10 @@
      "enum_values": [
       "none",
       "refused",
+      "deflection",
       "question"
      ],
-     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask the same thing back again instead of answering. none if they give an answer or say anything else. question = asks something back INSTEAD of answering (why do you need that, which account or what this is about, who is calling) with NO answer in the message; a message that contains the answer and also a question is none (the answer is processed and the question answered in the same turn); refused is only an explicit refusal or not wanting to talk. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
+     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask the same thing back again instead of answering. none if they give an answer or say anything else. deflection = asks what the call is about INSTEAD of answering (the brief counts that as declining), with NO answer in the message; question = asks anything else back instead of answering (why do you need that, which account, who is calling) with NO answer in the message; a message that contains the answer and also a question is none (the answer is processed and the question answered in the same turn); refused is an explicit refusal or not wanting to talk. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
      "min_confidence": 0.5
     }
    ],
@@ -2109,6 +2124,20 @@
         "variable": "refusal_phone",
         "operator": "equals",
         "operand": "refused"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "count_decline_phone",
+     "description": "asks what the call is about instead of answering (rule 15: declining)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "refusal_phone",
+        "operator": "equals",
+        "operand": "deflection"
        }
       ]
      }
@@ -2250,9 +2279,10 @@
      "enum_values": [
       "none",
       "refused",
+      "deflection",
       "question"
      ],
-     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask the same thing back again instead of answering. none if they give an answer or say anything else. question = asks something back INSTEAD of answering (why do you need that, which account or what this is about, who is calling) with NO answer in the message; a message that contains the answer and also a question is none (the answer is processed and the question answered in the same turn); refused is only an explicit refusal or not wanting to talk. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
+     "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask the same thing back again instead of answering. none if they give an answer or say anything else. deflection = asks what the call is about INSTEAD of answering (the brief counts that as declining), with NO answer in the message; question = asks anything else back instead of answering (why do you need that, which account, who is calling) with NO answer in the message; a message that contains the answer and also a question is none (the answer is processed and the question answered in the same turn); refused is an explicit refusal or not wanting to talk. Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
      "min_confidence": 0.5
     }
    ],
