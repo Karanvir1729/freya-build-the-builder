@@ -864,6 +864,14 @@ def test_today_named_in_readback():
 
 
 @test
+def test_claims_need_a_named_product():
+    """EXT-B-12: 'I paid the credit card yesterday and I never had a' (cut off) was settled as a dispute of the
+    personal loan; the extraction only pairs a claim with a product the message names."""
+    d = mk(True).claims_extraction()[0]["description"]
+    assert "NAMES" in d and "never guess" in d, d
+
+
+@test
 def test_once_only_offers_not_repeated():
     """The floor and the hardship offer are said once by code; the state line and the node prompts forbid the
     dialogue model to repeat them on small talk (Freya talkative PUB-05: support offered 3 times; PUB-06: the

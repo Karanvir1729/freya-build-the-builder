@@ -1569,7 +1569,9 @@ class Policy:
                 "add '@' and the customer's OWN WORDS for that product's day when they name one), "
                 "refuse (will not or cannot pay it). Example: '" + o[0] + "=dispute;" + o[min(1, len(o) - 1)] + "=pay@today;" +
                 o[min(2, len(o) - 1)] + "=pay@monday the 26th'. Empty when the message is about all products together "
-                "in one answer or about one product only.")
+                "in one answer or about one product only. A pair only for a product the message NAMES (its type, its "
+                "card digits or its position): words cut off before the product's name ('and I never had a') name no "
+                "product, so leave that claim out, never guess which product it was.")
         return [{"name": "per_product", "type": "string", "description": desc, "min_confidence": conf}]
 
     @staticmethod
