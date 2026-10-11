@@ -21,8 +21,9 @@ import sys
 def entry(x):
     body = x.get("response", x.get("yanit"))
     e = {"status": int(x.get("http", 200)), "body": body}
-    if x.get("gecikmeSaniye"):
-        e["delay_ms"] = int(float(x["gecikmeSaniye"]) * 1000)
+    delay = x.get("delaySeconds", x.get("gecikmeSaniye"))   # the file uses delaySeconds; its description says gecikmeSaniye
+    if delay:
+        e["delay_ms"] = int(float(delay) * 1000)
     return e
 
 
