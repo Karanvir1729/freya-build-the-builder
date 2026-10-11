@@ -9,7 +9,7 @@ case's own call date replaces the session's variables["now"] (the mock enforces 
 --chunk at a time, one simulation per chunk (the workspace runs one simulation at a time). Personas, the
 ledger check and the judge are the kit's: persona_for, http, score_ledger. Costs Freya credits.
 """
-import argparse, hashlib, json, pathlib, sys, time
+import argparse, hashlib, json, pathlib, re, sys, time
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "tools"))
 import freya
@@ -60,12 +60,46 @@ def close_from_args(led):
     return dict(led, outcome=args.get("outcome"), reason=args.get("reason")), args
 
 
+def _retry(fn, tries=12, wait=15):
+    # a gateway error (502/503/504) from Freya while polling is transient: try again
+    for i in range(tries):
+        try:
+            return fn()
+        except RuntimeError as e:
+            if not re.search(r"-> 50[234]", str(e)) or i == tries - 1:
+                raise
+            print("Freya answered %s; retrying in %d s" % (str(e)[:80], wait), flush=True)
+            time.sleep(wait)
+
+
+def run_simulation(agent_id, name, variables):
+    """freya.run_simulation, but a 502/503/504 while it polls no longer loses the run (two runs lost on 11 Oct): the
+    simulation id comes from the error, and polling and the iteration lookup go on with retries."""
+    try:
+        return freya.run_simulation(agent_id, name, variables)
+    except RuntimeError as e:
+        m = re.search(r"/api/v2/simulations/([0-9a-f-]{36}) -> 50[234]", str(e))
+        if not m:
+            raise
+        sim_id = m.group(1)
+        print("Freya answered %s while polling simulation %s; polling again" % (str(e)[:60], sim_id), flush=True)
+    while True:
+        time.sleep(10)
+        s = _retry(lambda: freya.api("GET", f"/api/v2/simulations/{sim_id}"))
+        s = s.get("simulation") or s
+        if s.get("status") in ("completed", "failed", "paused"):
+            break
+    its = _retry(lambda: freya.api("GET", f"/api/v2/simulations/{sim_id}/iterations"))
+    its = its.get("iterations") or its.get("items") or its
+    return sim_id, its[0]["id"], s.get("status")
+
+
 def run_chunk(agent_id, cases, ids, from_args=False):
     sessions = {c["id"]: session(c) for c in cases}
     t0 = time.time()
-    sim_id, it_id, status = freya.run_simulation(agent_id, f"ext {time.strftime('%H:%M:%S')}", {ids[c["id"]]: sessions[c["id"]] for c in cases})
+    sim_id, it_id, status = run_simulation(agent_id, f"ext {time.strftime('%H:%M:%S')}", {ids[c["id"]]: sessions[c["id"]] for c in cases})
     took = time.time() - t0
-    judge = {r["personaId"]: r for r in freya.get_iteration(sim_id, it_id)["runs"]}
+    judge = {r["personaId"]: r for r in _retry(lambda: freya.get_iteration(sim_id, it_id))["runs"]}
     rows = []
     for c in cases:
         led = http("/v1/practice/ledger/" + sessions[c["id"]]["customer_id"])
