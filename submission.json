@@ -7,7 +7,7 @@
     }
   ],
   "repo": "https://github.com/Karanvir1729/freya-build-the-builder",
-  "commit": "96f12e5",
+  "commit": "69bfd9c",
   "run_command": "python3 builder/build.py {case_folder} {mock_url} --slot final6 --resume out/gen_final5.py --no-rules --no-audit --minutes 18",
   "workflow": "submission/final6.workflow.json",
   "trace": "traces/final6.log",
