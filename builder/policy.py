@@ -1173,6 +1173,14 @@ def targets_for_topic(V, kind=''):
     return [tp or cur]
 def ev_settle(V, kind):
     if multi(V):
+        cl = claims(V)
+        ts0 = targets_for_topic(V, kind)
+        if cl and ts0 and all(cl.get(p) == 'refuse' for p in ts0):
+            # the topic says dispute/paid but the customer's own words for that product say they will not pay it ('I am
+            # not paying that loan' came back topic=dispute AND per_product=personal loan=refuse: Kestrel PUB-12 on
+            # Freya noted a dispute and skipped the second attempt): a refusal
+            ev_refuse(V)
+            return
         pre = settle_claims(V)
         if pre:
             if not pay_claimed(V, pre):

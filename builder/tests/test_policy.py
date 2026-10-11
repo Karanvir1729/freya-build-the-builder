@@ -1574,5 +1574,21 @@ def test_review_fixes_names_latest_fstrings_callbacks():
     run(code, V)
     assert V["cb_route"] == "close", V
 
+@test
+def test_topic_contradicted_by_per_product_refuse():
+    """Kestrel PUB-12 (Freya): 'I am not paying that loan.' came back topic=dispute with per_product='personal
+    loan=refuse'; the loan was noted as a dispute. The customer's per-product words win: a refusal (the next rung)."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse", stance="refuse")
+    ev(P, V, "refuse", stance="refuse")
+    assert V["cur_pid"] == "p2" and V["attempts_used_p2"] == "1", (V["cur_pid"], V.get("attempts_used_p2"))
+    ev(P, V, "dispute", topic="dispute", stance="refuse", offer_for="second", per_product="personal loan=refuse")
+    assert V["state_p2"] == "open" and V["attempts_used_p2"] == "2", (V["state_p2"], V.get("attempts_used_p2"), V["say_next"])
+    # a real dispute is still a dispute
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "refuse", stance="refuse"); ev(P, V, "refuse", stance="refuse")
+    ev(P, V, "dispute", topic="dispute", offer_for="second", per_product="personal loan=dispute", customer_said="I never had a personal loan")
+    assert V["state_p2"] == "dispute", V["state_p2"]
+
 if __name__ == "__main__":
     sys.exit(main())
