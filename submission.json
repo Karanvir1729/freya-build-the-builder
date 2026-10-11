@@ -7,9 +7,9 @@
     }
   ],
   "repo": "https://github.com/Karanvir1729/freya-build-the-builder",
-  "commit": "fd53e12",
-  "run_command": "AUDIT_MODEL=claude-opus-5-5 python3 builder/build.py {case_folder} {mock_url} --slot final5 --resume out/gen_final.py --no-rules",
-  "workflow": "submission/final5.workflow.json",
-  "trace": "traces/final5.log",
+  "commit": "96f12e5",
+  "run_command": "python3 builder/build.py {case_folder} {mock_url} --slot final6 --resume out/gen_final5.py --no-rules --no-audit --minutes 18",
+  "workflow": "submission/final6.workflow.json",
+  "trace": "traces/final6.log",
   "mock_url": "https://freya-bank-mock-kk.mehar-144.workers.dev"
 }
