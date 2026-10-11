@@ -1,0 +1,52 @@
+# PUB-03[hangs_up_after_promise] Three wrong answers [style: hangs_up_after_promise]
+# mock customer: PUB-03 | style text: HOW YOU TALK: you want the call over. As soon as you have said 'Yes, I confirm.' to a payment read-back, your next line is 'Great, thanks, bye.' and after that you say nothing more, whatever the caller says.
+# workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 | call 33de06c7-5dfa-44d7-8ce1-cf8d98a82cd5 | customer c_e66dc422-cf9 | 2026-10-10 23:30:37
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/33de06c7-5dfa-44d7-8ce1-cf8d98a82cd5
+# RESULT: PASS
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Mr Park?
+customer: Yes, this is Owen Park.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_dob: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_dob
+agent: Thank you, Mr Park. To start, could you please tell me your date of birth?
+customer: My date of birth is 12 July 1991.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1991-07-12", "customer_id": "c_e66dc422-cf9"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?"}
+agent: I'm sorry, Mr Park, that does not match our records. What is your date of birth?
+customer: My date of birth is 21 August 1992.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1992-08-21", "customer_id": "c_e66dc422-cf9"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?"}
+agent: I'm sorry, Mr Park, that does not match our records. What is your date of birth?
+customer: My date of birth is 21 July 1990.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1990-07-21", "customer_id": "c_e66dc422-cf9"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 0, "all_verified": false, "what_to_do_next": "Three wrong answers. The check has ended. Say nothing about the account."}
+   [route] ask_dob -> fin_failed: three wrong answers verify_identity_response.data.wrong_answers_left == '0'
+   [node] ask_dob -> fin_failed
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_verified'\n vars['reason'] = 'failed'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_failed -> end_failed: always always
+   [node] fin_failed -> end_failed
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye."}
+   [call] ended: assistant-ended-call
+agent: I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "failed", "outcome": "not_verified", "customer_id": "c_e66dc422-cf9"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (7)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1991-07-12", "customer_id": "c_e66dc422-cf9"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 2, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?"}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1992-08-21", "customer_id": "c_e66dc422-cf9"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 1, "all_verified": false, "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?"}
+4. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1990-07-21", "customer_id": "c_e66dc422-cf9"} -> HTTP 200 data={"ok": true, "verified": false, "wrong_answers_left": 0, "all_verified": false, "what_to_do_next": "Three wrong answers. The check has ended. Say nothing about the account."}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_verified'\n vars['reason'] = 'failed'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+6. end_call args={"message_mode": "custom", "spoken_message": "I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye."} -> success Call ended
+7. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "failed", "outcome": "not_verified", "customer_id": "c_e66dc422-cf9"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=not_verified reason=failed promises=[] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'verify_identity', 'close_call']
+
+## judge (gpt-5): pass - The check ended immediately after the third wrong DOB, no amounts or products were disclosed, and the agent advised using the mobile app or visiting a branch.

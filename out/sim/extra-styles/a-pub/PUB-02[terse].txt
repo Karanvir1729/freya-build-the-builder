@@ -1,0 +1,42 @@
+# PUB-02[terse] A relative answers [style: terse]
+# mock customer: PUB-02 | style text: HOW YOU TALK: you answer in one short line, never more than a few words. You say dates, years and digits in words even when nobody asked you to, like 'fourteenth of March nineteen eighty-eight' and 'four four seven one'. Once in the call your sentence stops early, as if you were cut off, and you finish it only when the caller asks.
+# workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 | call de0ccca7-212f-4010-8d3b-06b83cf276e3 | customer c_5e5cab88-6df | 2026-10-10 23:06:31
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: ended by the agent (end_call in the call log after HTTP 502) | transcript from: GET /api/v2/call/de0ccca7-212f-4010-8d3b-06b83cf276e3
+# RESULT: PASS
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Ms Costa?
+customer: No, this is her husband, what's the call about—
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> third_party: someone else answered who1 == 'someone_else'
+   [node] setup -> third_party
+agent: I can only discuss this with Ms Costa personally. When would be a good time to reach her?
+customer: I can pay myself. Maria can be reached tomorrow morning around eleven.
+   [tool] schedule_callback POST https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback body={"date": "2026-10-15", "time": "11:00", "customer_id": "c_5e5cab88-6df"}
+   [tool] schedule_callback -> HTTP 200 data={"ok": true, "what_to_do_next": "Callback booked."}
+   [route] third_party -> fin_callback: callback booked (schedule_callback_response.data.ok == 'true' OR schedule_callback_response.data.ok == 'True')
+   [node] third_party -> fin_callback
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_reached'\n vars['reason'] = 'callback'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_callback -> end_callback: always always
+   [node] fin_callback -> end_callback
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "Thank you, we will call back then. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: Thank you, we will call back then. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "callback", "outcome": "not_reached", "customer_id": "c_5e5cab88-6df"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (5)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. schedule_callback POST https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback body={"date": "2026-10-15", "time": "11:00", "customer_id": "c_5e5cab88-6df"} -> HTTP 200 data={"ok": true, "what_to_do_next": "Callback booked."}
+3. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'not_reached'\n vars['reason'] = 'callback'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+4. end_call args={"message_mode": "custom", "spoken_message": "Thank you, we will call back then. Goodbye."} -> success Call ended
+5. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "callback", "outcome": "not_reached", "customer_id": "c_5e5cab88-6df"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=not_reached reason=callback promises=[] notes=[] callbacks=[{"date": "2026-10-15", "time": "11:00"}] transfers=[] calls=['schedule_callback', 'close_call']
+
+## judge (gpt-5): pass - The agent did not state a reason or mention any product/amount/debt; verify_identity and get_account were not called; and the callback was scheduled for the next business day (2026-10-15) at 11:00.

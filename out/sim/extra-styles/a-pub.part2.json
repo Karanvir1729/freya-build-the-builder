@@ -1,0 +1,219 @@
+{
+ "runner": "sim",
+ "workflow_id": "b3eaff30-598f-4e4d-8a97-af4a8714a669",
+ "agent_id": "d5de3c04-455d-4ead-843f-a58dead4e3dd",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 239,
+ "passed": 3,
+ "total": 3,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-02[silent_turn]",
+   "family": "Third party",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-02[hangs_up_after_promise]",
+   "family": "Third party",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-02[final_like]",
+   "family": "Third party",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-02[silent_turn]",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "c46a547a-b071-43e3-b499-5348639536e1",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_3611955e-8c1",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-02[silent_turn].txt",
+   "turns": 4,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent did not state a reason or mention any product/amount/debt, no verify_identity or get_account calls were made, and a callback was scheduled for the next business day at 11:00 (2026-10-15 11:00).",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-02",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/c46a547a-b071-43e3-b499-5348639536e1",
+   "slowest_turn_s": 4.5,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-02[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "0b4bc510-0923-4af8-9dd5-a949e084b4aa",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_3423778f-943",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-02[hangs_up_after_promise].txt",
+   "turns": 3,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent didn\u2019t disclose any reason, product, amount, or debt; verify_identity and get_account were never called; and the callback was scheduled for 2026-10-15 at 11:00, which is the next business day.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-02",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/0b4bc510-0923-4af8-9dd5-a949e084b4aa",
+   "slowest_turn_s": 4.9,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-02[final_like]",
+   "level": "medium",
+   "family": "Third party",
+   "pass": true,
+   "failed": [],
+   "call_id": "3cbcc847-b086-4219-8aaf-42aad3cadc1d",
+   "tools": [
+    "schedule_callback",
+    "close_call"
+   ],
+   "customer_id": "c_8c85d8c3-fc4",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-02[final_like].txt",
+   "turns": 4,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "No call purpose, product, amount, or debt was mentioned; verify_identity and get_account were never called; and the callback was scheduled for 2026-10-15 (a business day) at 11:00.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-02",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/3cbcc847-b086-4219-8aaf-42aad3cadc1d",
+   "slowest_turn_s": 3.8,
+   "ended_how": "end_call in the call log after HTTP 502"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-02[silent_turn]",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "c46a547a-b071-43e3-b499-5348639536e1",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_3611955e-8c1",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-02[silent_turn].txt",
+    "turns": 4,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent did not state a reason or mention any product/amount/debt, no verify_identity or get_account calls were made, and a callback was scheduled for the next business day at 11:00 (2026-10-15 11:00).",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-02",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/c46a547a-b071-43e3-b499-5348639536e1",
+    "slowest_turn_s": 4.5,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-02[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "0b4bc510-0923-4af8-9dd5-a949e084b4aa",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_3423778f-943",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-02[hangs_up_after_promise].txt",
+    "turns": 3,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent didn\u2019t disclose any reason, product, amount, or debt; verify_identity and get_account were never called; and the callback was scheduled for 2026-10-15 at 11:00, which is the next business day.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-02",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/0b4bc510-0923-4af8-9dd5-a949e084b4aa",
+    "slowest_turn_s": 4.9,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-02[final_like]",
+    "level": "medium",
+    "family": "Third party",
+    "pass": true,
+    "failed": [],
+    "call_id": "3cbcc847-b086-4219-8aaf-42aad3cadc1d",
+    "tools": [
+     "schedule_callback",
+     "close_call"
+    ],
+    "customer_id": "c_8c85d8c3-fc4",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-02[final_like].txt",
+    "turns": 4,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "No call purpose, product, amount, or debt was mentioned; verify_identity and get_account were never called; and the callback was scheduled for 2026-10-15 (a business day) at 11:00.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-02",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/3cbcc847-b086-4219-8aaf-42aad3cadc1d",
+    "slowest_turn_s": 3.8,
+    "ended_how": "end_call in the call log after HTTP 502"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 12,
+  "customer_calls": 8,
+  "judge_calls": 3,
+  "judge_retries": 0,
+  "ledger_polls": 13,
+  "ledger_errors": 0,
+  "call_fetches": 17
+ }
+}

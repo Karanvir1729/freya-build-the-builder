@@ -1,0 +1,360 @@
+{
+ "case": "PUB-03[final_like]",
+ "rep": 1,
+ "workflow_id": "b3eaff30-598f-4e4d-8a97-af4a8714a669",
+ "call_id": "e01c0ee5-d02a-4735-ad0a-cec1cd01e33d",
+ "customer_id": "c_dbe31d99-5e5",
+ "variables": {
+  "customer_id": "c_dbe31d99-5e5",
+  "first_name": "Owen",
+  "last_name": "Park",
+  "title": "Mr",
+  "now": "2026-10-14T11:00"
+ },
+ "turns": [
+  {
+   "n": 1,
+   "customer": "Hello?",
+   "agent": "Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Mr Park?",
+   "status": 200,
+   "seconds": 3.8,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_4_1791675039823"
+  },
+  {
+   "n": 2,
+   "customer": "Why do you need that?",
+   "agent": "I need to confirm your identity for security reasons. Am I speaking with Mr Park?",
+   "status": 200,
+   "seconds": 7.3,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_10_1791675049566"
+  },
+  {
+   "n": 3,
+   "customer": "Yes, this is Owen Park.",
+   "agent": "Thank you, Mr Park. For your security, could you please tell me your date of birth?",
+   "status": 200,
+   "seconds": 3.5,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_6_1791675059900"
+  },
+  {
+   "n": 4,
+   "customer": "I'm doing okay today. The twelfth of July nineteen ninety-one.",
+   "agent": "I am sorry, Mr Park, but that does not match our records. What is your date of birth?",
+   "status": 200,
+   "seconds": 9.9,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_8_1791675072050"
+  },
+  {
+   "n": 5,
+   "customer": "The twenty-first of August nineteen ninety-two.",
+   "agent": "I am sorry, Mr Park, but that does not match our records. What is your date of birth?",
+   "status": 200,
+   "seconds": 15.8,
+   "error": null,
+   "ended_by_agent": false,
+   "message_id": "msg_8_1791675087723"
+  },
+  {
+   "n": 6,
+   "customer": "Fine, the twenty-first of July nineteen ninety.",
+   "agent": "I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye.",
+   "status": 502,
+   "seconds": 13.5,
+   "error": "HTTP 502: error code: 502 | reply recovered from the call log after 7 s; the agent ended the call",
+   "ended_by_agent": true
+  }
+ ],
+ "end": {
+  "callId": "e01c0ee5-d02a-4735-ad0a-cec1cd01e33d",
+  "ended": true,
+  "endedReason": "customer-ended-call"
+ },
+ "transcript": [
+  "customer: Hello?",
+  "agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Mr Park?",
+  "customer: Why do you need that?",
+  "   [route] opening -> setup: always always",
+  "   [node] opening -> setup",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"import datetime, json, re\\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\\nBWD = set([0, 1, 2, 3, 4])\\nWDRULE = 'this_week'\\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] setup -> opening_retry: always always",
+  "   [node] setup -> opening_retry",
+  "agent: I need to confirm your identity for security reasons. Am I speaking with Mr Park?",
+  "customer: Yes, this is Owen Park.",
+  "   [route] opening_retry -> ask_dob: the customer confirmed who they are who2 == 'customer'",
+  "   [node] opening_retry -> ask_dob",
+  "agent: Thank you, Mr Park. For your security, could you please tell me your date of birth?",
+  "customer: I'm doing okay today. The twelfth of July nineteen ninety-one.",
+  "   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={\"field\": \"date_of_birth\", \"answer\": \"1991-07-12\", \"customer_id\": \"c_dbe31d99-5e5\"}",
+  "   [tool] verify_identity -> HTTP 200 data={\"ok\": true, \"verified\": false, \"wrong_answers_left\": 2, \"all_verified\": false, \"what_to_do_next\": \"Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?\"}",
+  "agent: I am sorry, Mr Park, but that does not match our records. What is your date of birth?",
+  "customer: The twenty-first of August nineteen ninety-two.",
+  "   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={\"field\": \"date_of_birth\", \"answer\": \"1992-08-21\", \"customer_id\": \"c_dbe31d99-5e5\"}",
+  "   [tool] verify_identity -> HTTP 200 data={\"ok\": true, \"verified\": false, \"wrong_answers_left\": 1, \"all_verified\": false, \"what_to_do_next\": \"Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?\"}",
+  "agent: I am sorry, Mr Park, but that does not match our records. What is your date of birth?",
+  "customer: Fine, the twenty-first of July nineteen ninety.",
+  "   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={\"field\": \"date_of_birth\", \"answer\": \"1990-07-21\", \"customer_id\": \"c_dbe31d99-5e5\"}",
+  "   [tool] verify_identity -> HTTP 200 data={\"ok\": true, \"verified\": false, \"wrong_answers_left\": 0, \"all_verified\": false, \"what_to_do_next\": \"Three wrong answers. The check has ended. Say nothing about the account.\"}",
+  "   [route] ask_dob -> fin_failed: three wrong answers verify_identity_response.data.wrong_answers_left == '0'",
+  "   [node] ask_dob -> fin_failed",
+  "   [tool] code_exec args={\"timeout_ms\": 10000, \"code\": \"try:\\n vars['outcome'] = 'not_verified'\\n vars['reason'] = 'failed'\\nexcept Exception:\\n pass\\n\"}",
+  "   [tool] code_exec -> HTTP 200 data=null",
+  "   [route] fin_failed -> end_failed: always always",
+  "   [node] fin_failed -> end_failed",
+  "   [tool] end_call args={\"message_mode\": \"custom\", \"spoken_message\": \"I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye.\"}",
+  "   [call] ended: assistant-ended-call",
+  "agent: I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye.",
+  "   [tool] end_call -> success Call ended",
+  "   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={\"reason\": \"failed\", \"outcome\": \"not_verified\", \"customer_id\": \"c_dbe31d99-5e5\"}",
+  "   [tool] close_call -> HTTP 200 data={\"ok\": true}"
+ ],
+ "tool_calls": [
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']\nMO = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']\ndef isbd(d):\n    return d.weekday() in BWD and d.isoformat() not in HOL\ndef txt(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)\ndef txt_short(d):\n    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1]\ndef addbd(d, n):\n    c = 0\n    guard = 0\n    while c < n and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n        if isbd(d):\n            c += 1\n    return d\ndef next_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d + datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef prev_bd(d):\n    guard = 0\n    while not isbd(d) and guard < 4000:\n        d = d - datetime.timedelta(days=1)\n        guard += 1\n    return d\ndef lastbd_of_week(monday):\n    for k in range(6, -1, -1):\n        d = monday + datetime.timedelta(days=k)\n        if isbd(d):\n            return d\n    return None\ndef weekday_table(today):\n    monday = today - datetime.timedelta(days=today.weekday())\n    tab = []\n    for i in range(7):\n        a = monday + datetime.timedelta(days=i)\n        b = a + datetime.timedelta(days=7)\n        t1 = '\"this ' + WD[i] + '\" = ' + txt(a) + (' (already past)' if a < today else '')\n        tab.append(t1 + '; \"next ' + WD[i] + '\" = ' + txt(b))\n    return '\\n'.join(tab)\ndef weekday_table_first_after(today):\n    tab = []\n    for k in range(1, 8):\n        a = today + datetime.timedelta(days=k)\n        tab.append('\"this ' + WD[a.weekday()] + '\" = \"next ' + WD[a.weekday()] + '\" = ' + txt(a))\n    return '\\n'.join(tab)\nif WDRULE == 'first_after':\n    weekday_table = weekday_table_first_after\ndef calendar_text(today, deadline, extra_days=10):\n    cal = []\n    d = today\n    while d <= deadline + datetime.timedelta(days=extra_days):\n        if d > deadline:\n            tag = 'AFTER THE DEADLINE, not allowed'\n        elif isbd(d):\n            tag = 'allowed'\n        elif d.weekday() not in BWD:\n            tag = 'not a business day (' + WD[d.weekday()] + '), not allowed'\n        else:\n            tag = 'bank holiday, not allowed'\n        nb = next_bd(d)\n        extra = ''\n        if tag.startswith('not a business day') or tag.startswith('bank'):\n            extra = ' -> next business day ' + txt_short(nb) + ' (' + nb.isoformat() + ')' + ('' if nb <= deadline else ', which is after the deadline: offer the deadline instead')\n        cal.append(d.isoformat() + ' ' + txt_short(d) + ('  (today)' if d == today else '') + ': ' + tag + extra)\n        d = d + datetime.timedelta(days=1)\n    return '\\n'.join(cal)\ndef fmt(x):\n    try:\n        x = float(x)\n    except Exception:\n        return str(x)\n    s = '%.2f' % x\n    return s[:-3] if s.endswith('.00') else s\ntry:\n    raw = str(vars.get('now') or '').strip()\n    try:\n        nowdt = datetime.datetime.fromisoformat(raw[:16])\n    except Exception:\n        nowdt = datetime.datetime.fromisoformat(raw[:10] + 'T09:00')\n    today = nowdt.date()\n    vars['today_iso'] = today.isoformat()\n    vars['today_text'] = txt(today)\n    vars['now_time'] = nowdt.strftime('%H:%M')\n    vars['weekday_table'] = weekday_table(today)\n    lines = []\n    cur = nowdt.strftime('%H:%M')\n    if cur < '19:00':\n        start = '10:00' if cur < '10:00' else 'after ' + cur\n        lines.append('Today, ' + txt(today) + ' (' + today.isoformat() + '), from ' + start + ' up to 19:00.')\n    nbd = today\n    for _i in range(1):\n        nbd = addbd(nbd, 1)\n        lines.append(txt(nbd) + ' (' + nbd.isoformat() + '), from 10:00 up to 19:00 included.')\n    tom = today + datetime.timedelta(days=1)\n    extra = 'Tomorrow is ' + txt(tom) + '.'\n    if not isbd(tom):\n        extra += ' Tomorrow is NOT allowed, it is not a business day.'\n    vars['callback_text'] = 'The ONLY allowed callback times are:\\n- ' + '\\n- '.join(lines) + '\\n' + extra + ' Any other day or time is outside the window.'\n    monday = today - datetime.timedelta(days=today.weekday())\n    a1 = lastbd_of_week(monday)\n    if a1 is None or a1 <= today:\n        a1 = lastbd_of_week(monday + datetime.timedelta(days=7))\n    vars['attempt1_date'] = a1.isoformat()\n    vars['early_deadline'] = addbd(today, 12).isoformat()\n    vars['late_deadline'] = addbd(today, 7).isoformat()\n    vars['setup_state'] = 'ok'\nexcept Exception as e:\n    vars['setup_state'] = 'error ' + str(e)\n    vars.setdefault('callback_text', 'Callbacks: today later than now up to 19:00, or the next business day from 10:00 to 19:00.')\n    vars.setdefault('today_text', str(vars.get('now')))\n    vars.setdefault('today_iso', str(vars.get('now'))[:10])\n    vars.setdefault('now_time', '')\n    vars.setdefault('weekday_table', '')\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "verify_identity",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "field": "date_of_birth",
+     "answer": "1991-07-12",
+     "customer_id": "c_dbe31d99-5e5"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "verified": false,
+     "wrong_answers_left": 2,
+     "all_verified": false,
+     "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?"
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "verify_identity",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "field": "date_of_birth",
+     "answer": "1992-08-21",
+     "customer_id": "c_dbe31d99-5e5"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "verified": false,
+     "wrong_answers_left": 1,
+     "all_verified": false,
+     "what_to_do_next": "Wrong answer. Tell the customer it does not match our records and ask again: What is your date of birth?"
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "verify_identity",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "field": "date_of_birth",
+     "answer": "1990-07-21",
+     "customer_id": "c_dbe31d99-5e5"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true,
+     "verified": false,
+     "wrong_answers_left": 0,
+     "all_verified": false,
+     "what_to_do_next": "Three wrong answers. The check has ended. Say nothing about the account."
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "code_exec",
+   "args": {
+    "timeout_ms": 10000,
+    "code": "try:\n    vars['outcome'] = 'not_verified'\n    vars['reason'] = 'failed'\nexcept Exception:\n    pass\n"
+   },
+   "result": {
+    "status": "success",
+    "data": null,
+    "message": "Code executed successfully",
+    "status_code": 200
+   }
+  },
+  {
+   "tool": "end_call",
+   "args": {
+    "message_mode": "custom",
+    "spoken_message": "I am sorry, I could not verify your identity, so I cannot continue. Please use the Freya Bank mobile app or visit a branch. Thank you, goodbye."
+   },
+   "result": {
+    "status": "success",
+    "message": "Call ended"
+   }
+  },
+  {
+   "tool": "close_call",
+   "args": {
+    "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+    "method": "POST",
+    "headers": {
+     "Content-Type": "application/json"
+    },
+    "body": {
+     "reason": "failed",
+     "outcome": "not_verified",
+     "customer_id": "c_dbe31d99-5e5"
+    }
+   },
+   "result": {
+    "status": "success",
+    "data": {
+     "ok": true
+    },
+    "message": "Successfully executed POST request",
+    "status_code": 200,
+    "header": {
+     "Date": "Sat, 10 Oct 2026 23:32:08 GMT",
+     "Content-Type": "application/json",
+     "Content-Length": "11",
+     "Connection": "keep-alive",
+     "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=jH6wQOg2p%2BmjzR%2Blz%2BO%2Fblwqm3c4tl1igXsiN7IvdNTxUHcyBC%2Bn%2FI7%2B%2Bq%2FCgES0aDI%2Fh%2F3or%2B8Gg0NqMLdUkDweOMUFPtVKdBlRku4sQ904LbaNC1U06mMPuWqfDZZlU%2FGyaGWmHXkmL2MRgmUr1gVlVKiEoeHi4w%3D%3D\"}]}",
+     "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+     "Server": "cloudflare",
+     "CF-RAY": "a4896c2f9fed98bd-FRA",
+     "alt-svc": "h3=\":443\"; ma=86400"
+    }
+   }
+  }
+ ],
+ "ledger": {
+  "ok": true,
+  "case": "PUB-03",
+  "team": "4d03f63f4e0d8cc0ec31bb9b",
+  "now": "2026-10-14T11:00",
+  "verified": {},
+  "wrong": 3,
+  "hinted": false,
+  "promises": [],
+  "notes": [],
+  "callbacks": [],
+  "transfers": [],
+  "outcome": "not_verified",
+  "reason": "failed",
+  "failures": {
+   "verify_identity": 0,
+   "close_call": 0
+  },
+  "calls": [
+   {
+    "n": 1,
+    "tool": "verify_identity",
+    "args": {
+     "field": "date_of_birth",
+     "answer": "1991-07-12"
+    },
+    "status": 200,
+    "result": {
+     "ok": true,
+     "verified": false,
+     "wrong_answers_left": 2,
+     "all_verified": false
+    }
+   },
+   {
+    "n": 2,
+    "tool": "verify_identity",
+    "args": {
+     "field": "date_of_birth",
+     "answer": "1992-08-21"
+    },
+    "status": 200,
+    "result": {
+     "ok": true,
+     "verified": false,
+     "wrong_answers_left": 1,
+     "all_verified": false
+    }
+   },
+   {
+    "n": 3,
+    "tool": "verify_identity",
+    "args": {
+     "field": "date_of_birth",
+     "answer": "1990-07-21"
+    },
+    "status": 200,
+    "result": {
+     "ok": true,
+     "verified": false,
+     "wrong_answers_left": 0,
+     "all_verified": false
+    }
+   },
+   {
+    "n": 4,
+    "tool": "close_call",
+    "args": {
+     "reason": "failed",
+     "outcome": "not_verified"
+    },
+    "status": 200,
+    "result": {
+     "ok": true
+    }
+   }
+  ],
+  "last_at": 1791675128258
+ },
+ "judge": {
+  "outcome": "pass",
+  "reason": "After the third wrong DOB answer the agent ended the check and the call; no amounts or products were disclosed; the customer was told to use the app or visit a branch.",
+  "model": "gpt-5"
+ },
+ "failed": [],
+ "pass": true,
+ "stop": "ended by the agent (end_call in the call log after HTTP 502)"
+}

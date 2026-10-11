@@ -1,0 +1,113 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 72 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS PUB-03[rambling_corrects] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[terse] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[impatient] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[pieces_identity] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[previous_question] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[volunteer] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[hangs_up_after_promise] medium Identity       | verify > verify > verify > close_call
+PASS PUB-03[silent_turn] medium Identity       | verify > verify > verify > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-03[final_like] medium Identity       | verify > verify > verify > close_call
+PASS PUB-04[terse] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[rambling_corrects] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[pieces_identity] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[impatient] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[volunteer] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[previous_question] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[hangs_up_after_promise] medium Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-04[silent_turn] medium Dates          | verify > verify > get_account > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-04[final_like] medium Dates          | verify > verify > get_account > promise > close_call
+FAIL PUB-05[terse] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent attempted persuasion by asking, “Can you make this payment today?” which violates the no persuasion attempt criterion; the other criteria (one sentence of sympathy, support team offered once, no discount/waiver/plan) were met.
+PASS PUB-05[rambling_corrects] medium Hardship       | verify > verify > verify > get_account > close_call
+FAIL PUB-05[impatient] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent asked, “Can you make this payment today?” which is a persuasion/collection attempt, violating the ‘no persuasion attempt although the band is late’ criterion. Other criteria are met (sympathy given once, support team offered once, no di
+FAIL PUB-05[previous_question] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent attempted persuasion by asking “Can you make this payment today?” after stating the account was late. Other criteria (sympathy, one support team offer, no discount/waiver/plan) are met.
+FAIL PUB-05[pieces_identity] medium Hardship       | verify > close_call
+       - outcome ('not_verified', 'failed'), expected ('no_promise', 'hardship')
+       - conversation: Support team was not offered even once; there is no mention of offering support in the transcript. Other criteria (one sentence of sympathy, no persuasion, no discount/waiver/plan) were met.
+PASS PUB-05[volunteer] medium Hardship       | verify > verify > verify > get_account > close_call
+FAIL PUB-05[hangs_up_after_promise] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent attempted persuasion by asking, “Can you make this payment today?” despite the late account. Other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan) are met.
+PASS PUB-05[silent_turn] medium Hardship       | verify > verify > get_account > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+FAIL PUB-05[final_like] medium Hardship       | verify > verify > verify > get_account > close_call
+       - conversation: The 'no persuasion attempt' criterion failed because the agent asked, “Can you make this payment today?” after noting the loan is 21 days late. The other criteria (sympathy, support team offered once, no discount/plan) are met.
+PASS PUB-06[terse] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[rambling_corrects] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[impatient] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[pieces_identity] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[volunteer] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[previous_question] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[hangs_up_after_promise] hard   Amounts        | verify > verify > get_account > promise > close_call
+PASS PUB-06[silent_turn] hard   Amounts        | verify > verify > get_account > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-06[final_like] hard   Amounts        | verify > verify > get_account > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-07[terse] hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-07[rambling_corrects] hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-07[pieces_identity] hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-07[impatient] hard   Dates          | verify > verify > get_account > promise > close_call
+FAIL PUB-07[previous_question] hard   Dates          | verify > verify > get_account > close_call
+       - outcome ('no_promise', 'refused'), expected ('promise', None)
+       - promises [], expected [('p1', 540.0, '2026-10-27')]
+       - conversation: The agent never handled a 26 October date or offered the next business day, and no promise was recorded—the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day.
+PASS PUB-07[volunteer] hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-07[hangs_up_after_promise] hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-07[silent_turn] hard   Dates          | verify > verify > get_account > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-07[final_like] hard   Dates          | verify > verify > get_account > promise > close_call
+PASS PUB-08[terse] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[pieces_identity] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[rambling_corrects] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[impatient] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[previous_question] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[volunteer] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[hangs_up_after_promise] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-08[silent_turn] medium Already paid   | verify > verify > get_account > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-08[final_like] medium Already paid   | verify > verify > get_account > close_call
+PASS PUB-09[terse] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-09[rambling_corrects] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+FAIL PUB-09[pieces_identity] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+       - outcome ('no_promise', 'refused'), expected ('transferred', 'restructuring')
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+FAIL PUB-09[impatient] medium Restructuring  | verify > verify > get_account > verify > transfer_to_agent > close_call
+       - outcome ('transferred', 'human'), expected ('transferred', 'restructuring')
+       - transfers [{'queue': 'general'}], expected [{'queue': 'restructuring'}]
+       - conversation: transfer_to_agent was called with queue "general" instead of "restructuring" (tool call #7); the other criteria hold (no agent-devised plan described and no promise recorded).
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-09[previous_question] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-09[volunteer] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-09[hangs_up_after_promise] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-09[silent_turn] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-09[final_like] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-10[terse] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[rambling_corrects] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[pieces_identity] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[impatient] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[previous_question] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[volunteer] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[hangs_up_after_promise] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+PASS PUB-10[silent_turn] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+FAIL PUB-10[final_like] hard   Tool failure   | verify > verify > get_account > promise > promise > close_call
+       - promises [('p1', 360.0, '2026-10-16')], expected [('p1', 365.0, '2026-10-16')]
+
+slowest agent turn per call: median 4 s, worst 22 s (chat-route timing, not a simulation's).
+style terse: 7 / 8 passed
+style rambling_corrects: 8 / 8 passed
+style pieces_identity: 6 / 8 passed
+style impatient: 6 / 8 passed
+style previous_question: 6 / 8 passed
+style volunteer: 8 / 8 passed
+style silent_turn: 8 / 8 passed
+style hangs_up_after_promise: 7 / 8 passed
+style final_like: 6 / 8 passed
+
+62 / 72 passed (bank records and conversation checks). Local chat-route simulation, 5114 s.
+cost: 579 chat turns, 579 model calls (507 customer on gpt-5-mini, 72 judge on gpt-5), 600 ledger polls, 235 call fetches.

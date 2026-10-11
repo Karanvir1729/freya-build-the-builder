@@ -1,0 +1,49 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 90 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS PUB-01[terse] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[rambling_corrects] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[pieces_identity] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[impatient] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[previous_question] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[volunteer] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[hangs_up_after_promise] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-01[silent_turn] easy   Happy path     | verify > verify > get_account > promise > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-01[final_like] easy   Happy path     | verify > verify > get_account > promise > close_call
+PASS PUB-02[rambling_corrects] medium Third party    | schedule_callback > close_call
+PASS PUB-02[terse] medium Third party    | schedule_callback > close_call
+PASS PUB-02[pieces_identity] medium Third party    | schedule_callback > close_call
+PASS PUB-02[impatient] medium Third party    | schedule_callback > close_call
+PASS PUB-02[previous_question] medium Third party    | schedule_callback > close_call
+PASS PUB-02[volunteer] medium Third party    | schedule_callback > close_call
+PASS PUB-02[hangs_up_after_promise] medium Third party    | schedule_callback > close_call
+PASS PUB-02[final_like] medium Third party    | schedule_callback > close_call
+FAIL PUB-02[silent_turn] medium Third party    | (no tool calls)
+       - outcome (None, None), expected ('not_reached', 'callback')
+       - callbacks [], expected [{'date': '2026-10-15', 'time': '11:00'}]
+       - the call was not closed with close_call
+       - conversation: No callback was scheduled for the next business day at 11:00; the agent only asked when she could be reached and no scheduling occurred. The other criteria are met.
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+FAIL PUB-03[terse] medium Identity       | verify
+       - outcome (None, None), expected ('not_verified', 'failed')
+       - the call was not closed with close_call
+       - conversation: The customer was not told to use the app or visit a branch, and the call did not reach three wrong answers to confirm the check ends after the third; only one wrong DOB attempt occurred before the snippet ends.
+FAIL PUB-03[pieces_identity] medium Identity       | (no tool calls)
+       - outcome (None, None), expected ('not_verified', 'failed')
+       - the call was not closed with close_call
+       - conversation: no call was started, nothing to judge
+FAIL PUB-03[rambling_corrects] medium Identity       | (no tool calls)
+       - outcome (None, None), expected ('not_verified', 'failed')
+       - the call was not closed with close_call
+       - conversation: no call was started, nothing to judge
+FAIL PUB-03[impatient] medium Identity       | (no tool calls)
+       - outcome (None, None), expected ('not_verified', 'failed')
+       - the call was not closed with close_call
+       - conversation: no call was started, nothing to judge
+FAIL PUB-03[previous_question] medium Identity       | (no tool calls)
+       - outcome (None, None), expected ('not_verified', 'failed')
+       - the call was not closed with close_call
+       - conversation: no call was started, nothing to judge
+FAIL PUB-03[volunteer] medium Identity       | (no tool calls)
+       - outcome (None, None), expected ('not_verified', 'failed')
+       - the call was not closed with close_call
+       - conversation: no call was started, nothing to judge

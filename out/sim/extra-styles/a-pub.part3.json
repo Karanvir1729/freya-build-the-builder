@@ -1,0 +1,4969 @@
+{
+ "runner": "sim",
+ "workflow_id": "b3eaff30-598f-4e4d-8a97-af4a8714a669",
+ "agent_id": "d5de3c04-455d-4ead-843f-a58dead4e3dd",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 5114,
+ "passed": 62,
+ "total": 72,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-03[terse]",
+   "family": "Identity",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[rambling_corrects]",
+   "family": "Identity",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[pieces_identity]",
+   "family": "Identity",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[impatient]",
+   "family": "Identity",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[previous_question]",
+   "family": "Identity",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[volunteer]",
+   "family": "Identity",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[silent_turn]",
+   "family": "Identity",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[hangs_up_after_promise]",
+   "family": "Identity",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-03[final_like]",
+   "family": "Identity",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[terse]",
+   "family": "Dates",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[rambling_corrects]",
+   "family": "Dates",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[pieces_identity]",
+   "family": "Dates",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[impatient]",
+   "family": "Dates",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[previous_question]",
+   "family": "Dates",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[volunteer]",
+   "family": "Dates",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[silent_turn]",
+   "family": "Dates",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[hangs_up_after_promise]",
+   "family": "Dates",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-04[final_like]",
+   "family": "Dates",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-05[terse]",
+   "family": "Hardship",
+   "style": "terse",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[rambling_corrects]",
+   "family": "Hardship",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-05[pieces_identity]",
+   "family": "Hardship",
+   "style": "pieces_identity",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[impatient]",
+   "family": "Hardship",
+   "style": "impatient",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[previous_question]",
+   "family": "Hardship",
+   "style": "previous_question",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[volunteer]",
+   "family": "Hardship",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-05[silent_turn]",
+   "family": "Hardship",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-05[hangs_up_after_promise]",
+   "family": "Hardship",
+   "style": "hangs_up_after_promise",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[final_like]",
+   "family": "Hardship",
+   "style": "final_like",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-06[terse]",
+   "family": "Amounts",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[rambling_corrects]",
+   "family": "Amounts",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[pieces_identity]",
+   "family": "Amounts",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[impatient]",
+   "family": "Amounts",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[previous_question]",
+   "family": "Amounts",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[volunteer]",
+   "family": "Amounts",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[silent_turn]",
+   "family": "Amounts",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[hangs_up_after_promise]",
+   "family": "Amounts",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-06[final_like]",
+   "family": "Amounts",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[terse]",
+   "family": "Dates",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[rambling_corrects]",
+   "family": "Dates",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[pieces_identity]",
+   "family": "Dates",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[impatient]",
+   "family": "Dates",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[previous_question]",
+   "family": "Dates",
+   "style": "previous_question",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-07[volunteer]",
+   "family": "Dates",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[silent_turn]",
+   "family": "Dates",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[hangs_up_after_promise]",
+   "family": "Dates",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-07[final_like]",
+   "family": "Dates",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[terse]",
+   "family": "Already paid",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[rambling_corrects]",
+   "family": "Already paid",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[pieces_identity]",
+   "family": "Already paid",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[impatient]",
+   "family": "Already paid",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[previous_question]",
+   "family": "Already paid",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[volunteer]",
+   "family": "Already paid",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[silent_turn]",
+   "family": "Already paid",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[hangs_up_after_promise]",
+   "family": "Already paid",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-08[final_like]",
+   "family": "Already paid",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[terse]",
+   "family": "Restructuring",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[rambling_corrects]",
+   "family": "Restructuring",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[pieces_identity]",
+   "family": "Restructuring",
+   "style": "pieces_identity",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-09[impatient]",
+   "family": "Restructuring",
+   "style": "impatient",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-09[previous_question]",
+   "family": "Restructuring",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[volunteer]",
+   "family": "Restructuring",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[silent_turn]",
+   "family": "Restructuring",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[hangs_up_after_promise]",
+   "family": "Restructuring",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[final_like]",
+   "family": "Restructuring",
+   "style": "final_like",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[terse]",
+   "family": "Tool failure",
+   "style": "terse",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[rambling_corrects]",
+   "family": "Tool failure",
+   "style": "rambling_corrects",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[pieces_identity]",
+   "family": "Tool failure",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[impatient]",
+   "family": "Tool failure",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[previous_question]",
+   "family": "Tool failure",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[volunteer]",
+   "family": "Tool failure",
+   "style": "volunteer",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[silent_turn]",
+   "family": "Tool failure",
+   "style": "silent_turn",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[hangs_up_after_promise]",
+   "family": "Tool failure",
+   "style": "hangs_up_after_promise",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-10[final_like]",
+   "family": "Tool failure",
+   "style": "final_like",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-03[terse]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "387dd1f9-babc-4620-afec-37c11a3c81af",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_5acc6b92-6e1",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[terse].txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The identity check ended immediately after the third wrong DOB answer with the call closed, no amounts or products were disclosed, and the agent instructed the customer to use the mobile app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-03",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/387dd1f9-babc-4620-afec-37c11a3c81af",
+   "slowest_turn_s": 4.2,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-03[rambling_corrects]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "29896dcd-1493-4b07-8c32-68815b1fb213",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_cb2d41c9-c24",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[rambling_corrects].txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "After the third wrong DOB the check ended and the call was closed; no amounts or products were disclosed; and the agent told the customer to use the mobile app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-03",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/29896dcd-1493-4b07-8c32-68815b1fb213",
+   "slowest_turn_s": 3.4,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-03[pieces_identity]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "b1f7da78-6cde-46b5-bd50-8e8f690c9947",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_79992071-851",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[pieces_identity].txt",
+   "turns": 9,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent ended the check immediately after the third wrong DOB, disclosed no amounts or products, and instructed the customer to use the mobile app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-03",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b1f7da78-6cde-46b5-bd50-8e8f690c9947",
+   "slowest_turn_s": 8.1,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-03[impatient]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "e3f0d6af-c27a-4353-8ab7-50fc114d0a3a",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_06e985e0-9f8",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[impatient].txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent ended the check immediately after the third wrong answer, disclosed no amounts or products, and instructed the customer to use the mobile app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-03",
+   "ended": "customer-ended-call",
+   "transcript_source": "GET /api/v2/call/e3f0d6af-c27a-4353-8ab7-50fc114d0a3a",
+   "slowest_turn_s": 3.4,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_call_from_ledger": true
+  },
+  {
+   "id": "PUB-03[previous_question]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "7ab6afc0-3133-43f1-9da6-1ae18b3ddac2",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_cb7676cd-b1c",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[previous_question].txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "After the third wrong DOB, the agent ended the check and the call; no amounts or products were disclosed; and the customer was told to use the mobile app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-03",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/7ab6afc0-3133-43f1-9da6-1ae18b3ddac2",
+   "slowest_turn_s": 9.6,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-03[volunteer]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "ba18272f-2e9f-4980-8eff-149e143934e2",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_92cbc71c-af8",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[volunteer].txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The identity check ended immediately after the third wrong DOB, no amounts or products were disclosed, and the agent advised using the mobile app or visiting a branch.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-03",
+   "ended": null,
+   "transcript_source": "GET /api/v2/call/ba18272f-2e9f-4980-8eff-149e143934e2",
+   "slowest_turn_s": 2.5,
+   "ended_how": "end_call in the call log after HTTP 502",
+   "close_call_from_ledger": true
+  },
+  {
+   "id": "PUB-03[silent_turn]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "e4dd7f3e-e10e-4cf5-9d3d-9ffc9e16cacb",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_f64961c7-696",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[silent_turn].txt",
+   "turns": 6,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent ended after the third wrong DOB attempt, disclosed no amounts or products, and instructed the customer to use the app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-03",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/e4dd7f3e-e10e-4cf5-9d3d-9ffc9e16cacb",
+   "slowest_turn_s": 3.0,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-03[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "33de06c7-5dfa-44d7-8ce1-cf8d98a82cd5",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_e66dc422-cf9",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[hangs_up_after_promise].txt",
+   "turns": 5,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The check ended immediately after the third wrong DOB, no amounts or products were disclosed, and the agent advised using the mobile app or visiting a branch.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-03",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/33de06c7-5dfa-44d7-8ce1-cf8d98a82cd5",
+   "slowest_turn_s": 11.6,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-03[final_like]",
+   "level": "medium",
+   "family": "Identity",
+   "pass": true,
+   "failed": [],
+   "call_id": "e01c0ee5-d02a-4735-ad0a-cec1cd01e33d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_dbe31d99-5e5",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-03[final_like].txt",
+   "turns": 6,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "pass",
+    "reason": "After the third wrong DOB answer the agent ended the check and the call; no amounts or products were disclosed; the customer was told to use the app or visit a branch.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-03",
+   "ended": "customer-ended-call",
+   "transcript_source": "GET /api/v2/call/e01c0ee5-d02a-4735-ad0a-cec1cd01e33d",
+   "slowest_turn_s": 3.4,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-04[terse]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "11a29ccc-0230-4a00-9fad-571bfc92fa46",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_0a9fed2e-544",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[terse].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The customer\u2019s Nov 6 date was not treated as a refusal; the promise was recorded for 23 October (seen in dialogue and create_promise call); and the agent identified itself as a digital assistant at the start.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/11a29ccc-0230-4a00-9fad-571bfc92fa46",
+   "slowest_turn_s": 5.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[rambling_corrects]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "ec597cbe-5159-4915-b375-3fb8d7cadc35",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_9f563c59-3bb",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[rambling_corrects].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Customer\u2019s own date (5 Nov) was treated as an offer, not a refusal; the promise was recorded for 23 October; and the agent identified itself as a digital assistant at the start.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/ec597cbe-5159-4915-b375-3fb8d7cadc35",
+   "slowest_turn_s": 3.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[pieces_identity]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "528b6906-3034-4065-8cb8-b8bd9e2e61f9",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d09ba725-fc0",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[pieces_identity].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the customer's Nov 6 date was treated as an offer (not a refusal); the promise was recorded for 23 October; and the agent identified itself as a digital assistant at the start.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/528b6906-3034-4065-8cb8-b8bd9e2e61f9",
+   "slowest_turn_s": 5.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[impatient]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "bc0885a8-da7d-480e-89a8-1808db9a6654",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_b326d1e7-c89",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[impatient].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent identifies as a digital assistant; the promise is recorded for 23 October; and the customer\u2019s proposed 6 November date was treated as an offer, not a refusal.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/bc0885a8-da7d-480e-89a8-1808db9a6654",
+   "slowest_turn_s": 5.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[previous_question]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "fdce1814-d127-40ef-88a7-63be25ecab38",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_58e6e005-586",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[previous_question].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Her own date (6 Nov) was treated as a counteroffer, not a refusal, and the promise was recorded for 23 October. The agent also identified itself as a digital assistant at the start.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/fdce1814-d127-40ef-88a7-63be25ecab38",
+   "slowest_turn_s": 2.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[volunteer]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "bf9e231b-a30c-44c0-aa10-77eb491c8c8a",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_542f6531-775",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[volunteer].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent identified as a digital assistant, the customer\u2019s proposed 6 November date was negotiated rather than treated as a refusal, and the promise was recorded for 23 October, the stated late-band deadline.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/bf9e231b-a30c-44c0-aa10-77eb491c8c8a",
+   "slowest_turn_s": 1.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[silent_turn]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "311e8e3d-6d4b-4d4e-8e1c-6bb2c1b75319",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_0017e28e-c62",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[silent_turn].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Customer\u2019s proposed date (6 November) was negotiated, not treated as a refusal; the promise was set for 23 October; and the agent identified itself as a digital assistant at the start of the call.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/311e8e3d-6d4b-4d4e-8e1c-6bb2c1b75319",
+   "slowest_turn_s": 5.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "210f6a9a-3137-41e1-af57-eab5972dbb1d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_614f38c4-010",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[hangs_up_after_promise].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent did not treat the customer\u2019s proposed 6 November as a refusal, set and recorded the promise for the late-band deadline of 23 October, and identified itself as a digital assistant at the start of the call.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/210f6a9a-3137-41e1-af57-eab5972dbb1d",
+   "slowest_turn_s": 4.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-04[final_like]",
+   "level": "medium",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "ac031806-70b2-40af-8c6c-c7d0a73511ac",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_e3f5fc81-9a1",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-04[final_like].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent identified as a digital assistant; customer\u2019s proposed Nov 6 date was treated as a counteroffer (not a refusal); promise recorded for the late-band deadline, 23 October.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-04",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/ac031806-70b2-40af-8c6c-c7d0a73511ac",
+   "slowest_turn_s": 3.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[terse]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d which violates the no persuasion attempt criterion; the other criteria (one sentence of sympathy, support team offered once, no discount/waiver/plan) were met."
+   ],
+   "call_id": "5bd21ed9-acb2-472a-9c7f-6ec67d3196d3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_6ad77c58-458",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[terse].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d which violates the no persuasion attempt criterion; the other criteria (one sentence of sympathy, support team offered once, no discount/waiver/plan) were met.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5bd21ed9-acb2-472a-9c7f-6ec67d3196d3",
+   "slowest_turn_s": 4.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[rambling_corrects]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "5e4dd5ad-16b0-45af-83ba-dad4af351def",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_6e59230f-aac",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[rambling_corrects].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent expressed sympathy once, made no persuasion attempts beyond a single standard ask, offered the support team once, and did not offer any discount, waiver, or plan.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/5e4dd5ad-16b0-45af-83ba-dad4af351def",
+   "slowest_turn_s": 2.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[pieces_identity]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "outcome ('not_verified', 'failed'), expected ('no_promise', 'hardship')",
+    "conversation: Support team was not offered even once; there is no mention of offering support in the transcript. Other criteria (one sentence of sympathy, no persuasion, no discount/waiver/plan) were met."
+   ],
+   "call_id": "e733ee2c-3ec4-4f47-a34f-83921ed361b9",
+   "tools": [
+    "verify_identity",
+    "close_call"
+   ],
+   "customer_id": "c_2f5f6f82-b4f",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[pieces_identity].txt",
+   "turns": 30,
+   "stop": "max turns (30) reached",
+   "judge": {
+    "outcome": "fail",
+    "reason": "Support team was not offered even once; there is no mention of offering support in the transcript. Other criteria (one sentence of sympathy, no persuasion, no discount/waiver/plan) were met.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-05",
+   "ended": "customer-ended-call",
+   "transcript_source": "GET /api/v2/call/e733ee2c-3ec4-4f47-a34f-83921ed361b9",
+   "slowest_turn_s": 2.8,
+   "ended_how": null
+  },
+  {
+   "id": "PUB-05[impatient]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria are met (sympathy given once, support team offered once, no discount/waiver/plan offered)."
+   ],
+   "call_id": "9102c261-c7df-41f3-96d4-57662c6c882d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_d8fb97f1-96d",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[impatient].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria are met (sympathy given once, support team offered once, no discount/waiver/plan offered).",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/9102c261-c7df-41f3-96d4-57662c6c882d",
+   "slowest_turn_s": 6.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[previous_question]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d after stating the account was late. Other criteria (sympathy, one support team offer, no discount/waiver/plan) are met."
+   ],
+   "call_id": "1213d12d-c81e-4f88-86f5-f694e2375e71",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_e161beb4-79c",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[previous_question].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d after stating the account was late. Other criteria (sympathy, one support team offer, no discount/waiver/plan) are met.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/1213d12d-c81e-4f88-86f5-f694e2375e71",
+   "slowest_turn_s": 2.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[volunteer]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "e1c37d6a-cad9-456f-a7b0-7851f803922e",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_0c767182-76d",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[volunteer].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent expresses sympathy once, makes no persuasion attempts, offers the support team once, and does not offer any discount, waiver, or plan.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/e1c37d6a-cad9-456f-a7b0-7851f803922e",
+   "slowest_turn_s": 2.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[silent_turn]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "257fe498-5d38-4729-bcd0-cddc60777c0f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_7d7ac976-b19",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[silent_turn].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent expressed sympathy (\u201cI am sorry to hear that\u201d), made no persuasion attempt after hardship (only repeated the payment question once for clarity), offered the support team once, and did not offer any discount, waiver, or plan.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/257fe498-5d38-4729-bcd0-cddc60777c0f",
+   "slowest_turn_s": 4.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d despite the late account. Other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan) are met."
+   ],
+   "call_id": "90a74cd3-f0ea-4fdd-85cc-3f751bbfe379",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_cc8231a3-3b4",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[hangs_up_after_promise].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d despite the late account. Other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan) are met.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/90a74cd3-f0ea-4fdd-85cc-3f751bbfe379",
+   "slowest_turn_s": 3.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[final_like]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The 'no persuasion attempt' criterion failed because the agent asked, \u201cCan you make this payment today?\u201d after noting the loan is 21 days late. The other criteria (sympathy, support team offered once, no discount/plan) are met."
+   ],
+   "call_id": "6d4b46ab-33ca-4828-89de-b2e54d4c1c98",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_2d8c12b0-c93",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-05[final_like].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The 'no persuasion attempt' criterion failed because the agent asked, \u201cCan you make this payment today?\u201d after noting the loan is 21 days late. The other criteria (sympathy, support team offered once, no discount/plan) are met.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/6d4b46ab-33ca-4828-89de-b2e54d4c1c98",
+   "slowest_turn_s": 2.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[terse]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "7ff6d5db-c567-4b81-a437-f9c6fa46d034",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_30cd7a20-ec7",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[terse].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent never asked how much she can pay; the minimum payment was offered once with the note that the rest stays overdue; and the promise was confirmed and recorded for 637.50 on Friday 16 October.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/7ff6d5db-c567-4b81-a437-f9c6fa46d034",
+   "slowest_turn_s": 9.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[rambling_corrects]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "1349b6b6-8e4b-4491-9ca0-b9c8b482e0c2",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_9479eb66-42e",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[rambling_corrects].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent never asked how much the customer could pay; the minimum payment was offered once with the note that the rest stays overdue; and a promise was confirmed and recorded for 637.50 on Friday 16 October.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/1349b6b6-8e4b-4491-9ca0-b9c8b482e0c2",
+   "slowest_turn_s": 4.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[pieces_identity]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "17ff2a7d-d4bc-4804-86bc-343609f24952",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_28bd92f0-f6d",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[pieces_identity].txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent never asked how much she can pay; the minimum was offered once with the note that the rest stays overdue; and the promise was confirmed and recorded for 637.50 on Friday 16 October (2026-10-16).",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/17ff2a7d-d4bc-4804-86bc-343609f24952",
+   "slowest_turn_s": 10.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[impatient]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "7d5fca0c-292c-435f-880d-1ddb88b4f67b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_8d16624b-aad",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[impatient].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are satisfied: the agent never asked how much she could pay, the minimum payment was offered once with the note that the rest stays overdue, and a promise for 637.50 on Friday 16 October was confirmed and recorded.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/7d5fca0c-292c-435f-880d-1ddb88b4f67b",
+   "slowest_turn_s": 6.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[previous_question]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "c3bd6057-9c20-469b-b227-d526c4b7299f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_5f0f2aa3-91c",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[previous_question].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent never asked how much she could pay; the minimum payment was offered once with the note that the rest stays overdue; and a promise for 637.50 on Friday 16 October was confirmed and recorded.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c3bd6057-9c20-469b-b227-d526c4b7299f",
+   "slowest_turn_s": 7.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[volunteer]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "8397c16f-17b7-4a76-8350-952ac72f08eb",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_41784031-2cb",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[volunteer].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent never asked how much she can pay; minimum payment was offered once with the note that the rest stays overdue; and the promise was confirmed and recorded for 637.50 on Friday 16 October (2026-10-16).",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8397c16f-17b7-4a76-8350-952ac72f08eb",
+   "slowest_turn_s": 9.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[silent_turn]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "0f54994c-0bb3-4f18-bcf4-577eb53a3590",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_5f3b9590-292",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[silent_turn].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent never asked how much she could pay, offered the minimum payment once with the note that the rest stays overdue, and recorded a promise for 637.50 on Friday 16 October.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/0f54994c-0bb3-4f18-bcf4-577eb53a3590",
+   "slowest_turn_s": 22.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[hangs_up_after_promise]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "58882c40-4707-4d85-8f67-f146f1eabe2c",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_9120065e-bbb",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[hangs_up_after_promise].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent never asked how much she could pay, offered the minimum once with the note that the rest stays overdue, and secured a promise for 637.50 on Friday 16 October (recorded as 2026-10-16).",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/58882c40-4707-4d85-8f67-f146f1eabe2c",
+   "slowest_turn_s": 6.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-06[final_like]",
+   "level": "hard",
+   "family": "Amounts",
+   "pass": true,
+   "failed": [],
+   "call_id": "c6f75f94-6097-4b26-b48a-5c7cd7ff1f1b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_0287487d-e35",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-06[final_like].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent never asked how much she can pay; the minimum payment was offered once with the note that the rest stays overdue; and a promise was confirmed and recorded for 637.50 on Friday 16 October.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-06",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/c6f75f94-6097-4b26-b48a-5c7cd7ff1f1b",
+   "slowest_turn_s": 19.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[terse]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "88ddc93e-5e22-46b7-aae6-8e54f8aee9b3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_725a59c4-27a",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[terse].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent asked once for the exact day, rejected 26 October and offered the next business day (Tuesday 27 October), and the promise was recorded for Tuesday 27 October as shown by the create_promise call.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/88ddc93e-5e22-46b7-aae6-8e54f8aee9b3",
+   "slowest_turn_s": 12.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[rambling_corrects]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "16327291-418f-4df2-8140-55df3e9ea4bd",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d67b2725-5bd",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[rambling_corrects].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked once for the exact day, rejected 26 October and offered the next business day (Tuesday 27 Oct). The promise was recorded for Tuesday 27 October, meeting the early-band deadline.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/16327291-418f-4df2-8140-55df3e9ea4bd",
+   "slowest_turn_s": 14.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[pieces_identity]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "ce8ef81a-f201-4618-9f5b-84806af8dc9d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_87424191-70d",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[pieces_identity].txt",
+   "turns": 12,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked once for the exact day, rejected 26 Oct and offered Tue 27 Oct; the promise was recorded for Tue 27 Oct (next business day), satisfying the early-band requirement.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/ce8ef81a-f201-4618-9f5b-84806af8dc9d",
+   "slowest_turn_s": 2.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[impatient]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "992a433f-7e72-4464-b2cc-b35711b476dd",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_da8750aa-c01",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[impatient].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: the agent asked once for the exact day, declined 26 October and offered Tuesday 27 October, and the promise was recorded for Tuesday 27 October (create_promise with 2026-10-27), which is within the early-band window.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/992a433f-7e72-4464-b2cc-b35711b476dd",
+   "slowest_turn_s": 4.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[previous_question]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'refused'), expected ('promise', None)",
+    "promises [], expected [('p1', 540.0, '2026-10-27')]",
+    "conversation: The agent never handled a 26 October date or offered the next business day, and no promise was recorded\u2014the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day."
+   ],
+   "call_id": "cd6db795-0ac2-4ea6-b4d2-428eefb72de1",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_de218dd1-24b",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[previous_question].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent never handled a 26 October date or offered the next business day, and no promise was recorded\u2014the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/cd6db795-0ac2-4ea6-b4d2-428eefb72de1",
+   "slowest_turn_s": 7.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[volunteer]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "c5a87974-5559-410e-a72a-23e269b9f4eb",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_10960507-39b",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[volunteer].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked once for the exact day, rejected 26 Oct and offered the next business day (Tue 27 Oct), and the promise was recorded for Tuesday 27 October (create_promise date 2026-10-27), which is within the early-band deadline.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c5a87974-5559-410e-a72a-23e269b9f4eb",
+   "slowest_turn_s": 3.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[silent_turn]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "4358ecd2-8e73-4ccd-9b6b-1392c407ce4b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_482180d5-394",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[silent_turn].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent asked once for the exact day, rejected 26 Oct and offered the next business day (Tue 27 Oct), and the promise was recorded for 2026-10-27 as shown by create_promise, implying it met the early-band deadline.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/4358ecd2-8e73-4ccd-9b6b-1392c407ce4b",
+   "slowest_turn_s": 4.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[hangs_up_after_promise]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "70fa69fa-1462-4bfe-b55e-10fba656ef48",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_22a6f282-8c7",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[hangs_up_after_promise].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked once for the exact day, rejected 26 Oct and proposed the next business day (Tue 27 Oct), and the promise was recorded for Tuesday 27 Oct (per create_promise), which is within the early-band window.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/70fa69fa-1462-4bfe-b55e-10fba656ef48",
+   "slowest_turn_s": 2.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-07[final_like]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "4280897c-73f0-46d1-9136-c3625f6ddbae",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_23db489c-162",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-07[final_like].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent asked for the exact day once, rejected 26 October and offered the next business day (Tuesday 27 October), and the promise was recorded for Tuesday 27 October per the create_promise call, satisfying the early-band requirement.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/4280897c-73f0-46d1-9136-c3625f6ddbae",
+   "slowest_turn_s": 4.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[terse]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "f31a02e3-121a-4ab7-b260-8d07e5e7ccd2",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_deb17d30-c68",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[terse].txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent explicitly said payments can take one business day to appear, and no promise was recorded (the call was closed as paid with no promise-related tool calls).",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f31a02e3-121a-4ab7-b260-8d07e5e7ccd2",
+   "slowest_turn_s": 3.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[rambling_corrects]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "918ee16b-11c6-491b-8a1f-e3e95677e0b5",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_fb890feb-f60",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[rambling_corrects].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said \u201cPayments can take one business day to appear,\u201d and stated they would not take a promise; no promise was recorded (no promise logging tool call, call closed as paid).",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/918ee16b-11c6-491b-8a1f-e3e95677e0b5",
+   "slowest_turn_s": 12.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[pieces_identity]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "1f1434a7-a5f6-4aa8-8026-7c04d4661bc0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_b819d748-c8c",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[pieces_identity].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said \u201cPayments can take one business day to appear,\u201d and no promise was recorded (no promise-related tool call; call closed with outcome 'paid').",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/1f1434a7-a5f6-4aa8-8026-7c04d4661bc0",
+   "slowest_turn_s": 4.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[impatient]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "494142a9-c07a-4feb-93b8-298718009fac",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_7ceb714c-0c7",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[impatient].txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent explicitly said payments can take one business day to appear, and no promise was recorded (no promise-related tool calls; call closed with outcome 'paid').",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/494142a9-c07a-4feb-93b8-298718009fac",
+   "slowest_turn_s": 5.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[previous_question]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "3ee94d83-ac59-473f-b4da-01d0c3cdc29d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_5f49fce8-382",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[previous_question].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said payments can take one business day to appear and stated they would not take a promise. No promise-related tool calls were made; call closed as paid.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/3ee94d83-ac59-473f-b4da-01d0c3cdc29d",
+   "slowest_turn_s": 7.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[volunteer]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "cb31e758-7a61-4ff4-80a6-e807025109c5",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_75adc965-591",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[volunteer].txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said payments can take one business day to appear, and no promise was recorded (call closed as paid without any promise-related tool calls).",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/cb31e758-7a61-4ff4-80a6-e807025109c5",
+   "slowest_turn_s": 3.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[silent_turn]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "1421b9e7-e54c-4733-83ba-247612b7a418",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_f2f1e7d2-10a",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[silent_turn].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said payments can take one business day to appear, and no promise was taken or recorded (outcome marked as paid with no promise tool call).",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/1421b9e7-e54c-4733-83ba-247612b7a418",
+   "slowest_turn_s": 10.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "341521f8-534d-4544-a822-981dac7896d4",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_c53e1907-d94",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[hangs_up_after_promise].txt",
+   "turns": 5,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent explicitly said payments can take one business day to appear, and no promise was recorded (no promise-related tool calls; agent said they would not take a promise).",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/341521f8-534d-4544-a822-981dac7896d4",
+   "slowest_turn_s": 4.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-08[final_like]",
+   "level": "medium",
+   "family": "Already paid",
+   "pass": true,
+   "failed": [],
+   "call_id": "8e368bad-9a0f-4e22-9f3b-0b0b8869eee0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_f04c5bd9-a25",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-08[final_like].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent stated payments can take one business day to appear and explicitly said they would not take a promise; tool calls show outcome 'paid' with no promise recorded.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-08",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8e368bad-9a0f-4e22-9f3b-0b0b8869eee0",
+   "slowest_turn_s": 7.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[terse]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "e05fffce-8571-4e8f-b781-b1c7dcd86fe6",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_4d3badf6-bfd",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[terse].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe a plan; and no promise to pay was recorded in tools or dialogue.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/e05fffce-8571-4e8f-b781-b1c7dcd86fe6",
+   "slowest_turn_s": 4.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[rambling_corrects]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "44b4c523-d747-4288-92a4-e0c9b874e293",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_23fea496-d5c",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[rambling_corrects].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose its own plan and no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/44b4c523-d747-4288-92a4-e0c9b874e293",
+   "slowest_turn_s": 7.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[pieces_identity]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": false,
+   "failed": [
+    "outcome ('no_promise', 'refused'), expected ('transferred', 'restructuring')"
+   ],
+   "call_id": "e318c187-a332-43c3-a6cf-8ab4a3575526",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_ba28cfbf-83b",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[pieces_identity].txt",
+   "turns": 15,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring' (tool call #6); the agent did not describe a new plan and explicitly said it couldn\u2019t set one up; and the call ended with outcome 'no_promise' and the agent stated no promise was recorded.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/e318c187-a332-43c3-a6cf-8ab4a3575526",
+   "slowest_turn_s": 3.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[impatient]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": false,
+   "failed": [
+    "outcome ('transferred', 'human'), expected ('transferred', 'restructuring')",
+    "transfers [{'queue': 'general'}], expected [{'queue': 'restructuring'}]",
+    "conversation: transfer_to_agent was called with queue \"general\" instead of \"restructuring\" (tool call #7); the other criteria hold (no agent-devised plan described and no promise recorded)."
+   ],
+   "call_id": "3ac871e0-9325-4d37-b582-5451e382b365",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "verify_identity",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_d4b50f05-092",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[impatient].txt",
+   "turns": 11,
+   "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+   "judge": {
+    "outcome": "fail",
+    "reason": "transfer_to_agent was called with queue \"general\" instead of \"restructuring\" (tool call #7); the other criteria hold (no agent-devised plan described and no promise recorded).",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/3ac871e0-9325-4d37-b582-5451e382b365",
+   "slowest_turn_s": 5.8,
+   "ended_how": "end_call in the call log after HTTP 502"
+  },
+  {
+   "id": "PUB-09[previous_question]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "011b8376-ebec-453a-8b21-657b20fe81d8",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_7846d4ad-434",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[previous_question].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any plan; and no promise was recorded in the transcript or tool calls.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/011b8376-ebec-453a-8b21-657b20fe81d8",
+   "slowest_turn_s": 4.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[volunteer]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "f81e7129-d0a7-4aaa-b10a-b442646e5718",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_896eda61-d9c",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[volunteer].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any payment plan; and no promise-to-pay was recorded in the transcript or tool calls.",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f81e7129-d0a7-4aaa-b10a-b442646e5718",
+   "slowest_turn_s": 6.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[silent_turn]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "dd41cc41-d1ab-4f68-ab9e-d63eb7e4e105",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_9af4b205-ecb",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[silent_turn].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose its own plan; and no promise to pay was recorded.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/dd41cc41-d1ab-4f68-ab9e-d63eb7e4e105",
+   "slowest_turn_s": 1.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "205ae7af-d58d-4ea6-bb12-3da6680e3324",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_f4517028-c39",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[hangs_up_after_promise].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any payment plan; and no promise was recorded in the transcript or tool calls.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/205ae7af-d58d-4ea6-bb12-3da6680e3324",
+   "slowest_turn_s": 2.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[final_like]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "ac3cec0b-7bd6-470b-869c-5ec998e72c2f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_8691a956-22e",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-09[final_like].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring' (tool call 7); the agent did not propose its own plan and only offered the minimum due today, and no promise-to-pay was recorded in the tool calls.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/ac3cec0b-7bd6-470b-869c-5ec998e72c2f",
+   "slowest_turn_s": 5.5,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[terse]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "8e147ba9-c68e-4c6f-8791-19bd3412de4d",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_a3f65bfa-812",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[terse].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one promise was successfully created after the retry (first failed, second succeeded), and the agent only said 'recorded' after the successful creation, not before.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8e147ba9-c68e-4c6f-8791-19bd3412de4d",
+   "slowest_turn_s": 2.8,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[rambling_corrects]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "74905bc7-26f7-40aa-9200-eead01220b71",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_675e2135-ad4",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[rambling_corrects].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one promise was successfully created after the retry (first create failed, second succeeded), and the agent only said 'recorded' after the successful create; they did not use 'recorded' earlier.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/74905bc7-26f7-40aa-9200-eead01220b71",
+   "slowest_turn_s": 3.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[pieces_identity]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "09f312cc-0b89-40f0-9baf-a78079ce1096",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_3462663a-0cc",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[pieces_identity].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one successful create_promise after the initial failure (one promise recorded), and the agent did not say 'recorded' until after the successful API call.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/09f312cc-0b89-40f0-9baf-a78079ce1096",
+   "slowest_turn_s": 2.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[impatient]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "3cbc2015-46e2-40c6-91bf-f3d35942bcf9",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_7104fa5e-19d",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[impatient].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one promise was successfully created after the retry (first attempt failed, second succeeded), and the agent only said \u201crecorded\u201d after the successful create_promise call, not before.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/3cbc2015-46e2-40c6-91bf-f3d35942bcf9",
+   "slowest_turn_s": 2.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[previous_question]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "e01572ab-330b-46a3-ad0f-ed17e10e3dc5",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_9b34b26c-cb2",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[previous_question].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one successful create_promise occurred after the retry (promise_id pr1), and the agent only said \u201cYour promise is recorded\u201d after that success; they did not say \u201crecorded\u201d before a successful call.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/e01572ab-330b-46a3-ad0f-ed17e10e3dc5",
+   "slowest_turn_s": 2.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[volunteer]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "72ee2ef3-00ea-4d98-a210-11c1a558dd57",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_8abc8b9b-bcb",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[volunteer].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one successful create_promise call occurred after the retry, and the agent used 'recorded' only after that success (earlier line said 'record' not 'recorded').",
+    "model": "gpt-5"
+   },
+   "style": "volunteer",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/72ee2ef3-00ea-4d98-a210-11c1a558dd57",
+   "slowest_turn_s": 4.4,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[silent_turn]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "b311b549-4a87-40f5-966c-002e6ab7451b",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_d8a949a0-fe2",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[silent_turn].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Exactly one promise was created after the retry (first failed, second succeeded), and the agent only used 'recorded' after the successful creation, not before.",
+    "model": "gpt-5"
+   },
+   "style": "silent_turn",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/b311b549-4a87-40f5-966c-002e6ab7451b",
+   "slowest_turn_s": 3.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[hangs_up_after_promise]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": true,
+   "failed": [],
+   "call_id": "b7787cad-687f-4f83-9399-9d51d185dbd0",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_c5c9d80e-66f",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[hangs_up_after_promise].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only one successful create_promise occurred after a failed attempt, so exactly one promise exists, and the agent only said 'recorded' after the successful promise creation, not before.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/b7787cad-687f-4f83-9399-9d51d185dbd0",
+   "slowest_turn_s": 4.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-10[final_like]",
+   "level": "hard",
+   "family": "Tool failure",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 360.0, '2026-10-16')], expected [('p1', 365.0, '2026-10-16')]"
+   ],
+   "call_id": "62e4e5bf-17f0-46e9-933e-758950441bac",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_cd2ce119-eec",
+   "transcript": "out/sim/extra-styles/a-pub/PUB-10[final_like].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Only the second create_promise call succeeded, so there is exactly one promise after the retry, and the agent only said \u201cYour promise is recorded\u201d after that success (not before).",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-10",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/62e4e5bf-17f0-46e9-933e-758950441bac",
+   "slowest_turn_s": 5.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-03[terse]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "387dd1f9-babc-4620-afec-37c11a3c81af",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_5acc6b92-6e1",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[terse].txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The identity check ended immediately after the third wrong DOB answer with the call closed, no amounts or products were disclosed, and the agent instructed the customer to use the mobile app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-03",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/387dd1f9-babc-4620-afec-37c11a3c81af",
+    "slowest_turn_s": 4.2,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-03[rambling_corrects]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "29896dcd-1493-4b07-8c32-68815b1fb213",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_cb2d41c9-c24",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[rambling_corrects].txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "After the third wrong DOB the check ended and the call was closed; no amounts or products were disclosed; and the agent told the customer to use the mobile app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-03",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/29896dcd-1493-4b07-8c32-68815b1fb213",
+    "slowest_turn_s": 3.4,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-03[pieces_identity]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "b1f7da78-6cde-46b5-bd50-8e8f690c9947",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_79992071-851",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[pieces_identity].txt",
+    "turns": 9,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent ended the check immediately after the third wrong DOB, disclosed no amounts or products, and instructed the customer to use the mobile app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-03",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b1f7da78-6cde-46b5-bd50-8e8f690c9947",
+    "slowest_turn_s": 8.1,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-03[impatient]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "e3f0d6af-c27a-4353-8ab7-50fc114d0a3a",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_06e985e0-9f8",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[impatient].txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent ended the check immediately after the third wrong answer, disclosed no amounts or products, and instructed the customer to use the mobile app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-03",
+    "ended": "customer-ended-call",
+    "transcript_source": "GET /api/v2/call/e3f0d6af-c27a-4353-8ab7-50fc114d0a3a",
+    "slowest_turn_s": 3.4,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_call_from_ledger": true
+   },
+   {
+    "id": "PUB-03[previous_question]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "7ab6afc0-3133-43f1-9da6-1ae18b3ddac2",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_cb7676cd-b1c",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[previous_question].txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "After the third wrong DOB, the agent ended the check and the call; no amounts or products were disclosed; and the customer was told to use the mobile app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-03",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/7ab6afc0-3133-43f1-9da6-1ae18b3ddac2",
+    "slowest_turn_s": 9.6,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-03[volunteer]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "ba18272f-2e9f-4980-8eff-149e143934e2",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_92cbc71c-af8",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[volunteer].txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The identity check ended immediately after the third wrong DOB, no amounts or products were disclosed, and the agent advised using the mobile app or visiting a branch.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-03",
+    "ended": null,
+    "transcript_source": "GET /api/v2/call/ba18272f-2e9f-4980-8eff-149e143934e2",
+    "slowest_turn_s": 2.5,
+    "ended_how": "end_call in the call log after HTTP 502",
+    "close_call_from_ledger": true
+   },
+   {
+    "id": "PUB-03[silent_turn]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "e4dd7f3e-e10e-4cf5-9d3d-9ffc9e16cacb",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_f64961c7-696",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[silent_turn].txt",
+    "turns": 6,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent ended after the third wrong DOB attempt, disclosed no amounts or products, and instructed the customer to use the app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-03",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/e4dd7f3e-e10e-4cf5-9d3d-9ffc9e16cacb",
+    "slowest_turn_s": 3.0,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-03[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "33de06c7-5dfa-44d7-8ce1-cf8d98a82cd5",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_e66dc422-cf9",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[hangs_up_after_promise].txt",
+    "turns": 5,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The check ended immediately after the third wrong DOB, no amounts or products were disclosed, and the agent advised using the mobile app or visiting a branch.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-03",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/33de06c7-5dfa-44d7-8ce1-cf8d98a82cd5",
+    "slowest_turn_s": 11.6,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-03[final_like]",
+    "level": "medium",
+    "family": "Identity",
+    "pass": true,
+    "failed": [],
+    "call_id": "e01c0ee5-d02a-4735-ad0a-cec1cd01e33d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_dbe31d99-5e5",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-03[final_like].txt",
+    "turns": 6,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "pass",
+     "reason": "After the third wrong DOB answer the agent ended the check and the call; no amounts or products were disclosed; the customer was told to use the app or visit a branch.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-03",
+    "ended": "customer-ended-call",
+    "transcript_source": "GET /api/v2/call/e01c0ee5-d02a-4735-ad0a-cec1cd01e33d",
+    "slowest_turn_s": 3.4,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-04[terse]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "11a29ccc-0230-4a00-9fad-571bfc92fa46",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_0a9fed2e-544",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[terse].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The customer\u2019s Nov 6 date was not treated as a refusal; the promise was recorded for 23 October (seen in dialogue and create_promise call); and the agent identified itself as a digital assistant at the start.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/11a29ccc-0230-4a00-9fad-571bfc92fa46",
+    "slowest_turn_s": 5.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[rambling_corrects]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "ec597cbe-5159-4915-b375-3fb8d7cadc35",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_9f563c59-3bb",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[rambling_corrects].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Customer\u2019s own date (5 Nov) was treated as an offer, not a refusal; the promise was recorded for 23 October; and the agent identified itself as a digital assistant at the start.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/ec597cbe-5159-4915-b375-3fb8d7cadc35",
+    "slowest_turn_s": 3.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[pieces_identity]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "528b6906-3034-4065-8cb8-b8bd9e2e61f9",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d09ba725-fc0",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[pieces_identity].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the customer's Nov 6 date was treated as an offer (not a refusal); the promise was recorded for 23 October; and the agent identified itself as a digital assistant at the start.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/528b6906-3034-4065-8cb8-b8bd9e2e61f9",
+    "slowest_turn_s": 5.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[impatient]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "bc0885a8-da7d-480e-89a8-1808db9a6654",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_b326d1e7-c89",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[impatient].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent identifies as a digital assistant; the promise is recorded for 23 October; and the customer\u2019s proposed 6 November date was treated as an offer, not a refusal.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/bc0885a8-da7d-480e-89a8-1808db9a6654",
+    "slowest_turn_s": 5.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[previous_question]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "fdce1814-d127-40ef-88a7-63be25ecab38",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_58e6e005-586",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[previous_question].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Her own date (6 Nov) was treated as a counteroffer, not a refusal, and the promise was recorded for 23 October. The agent also identified itself as a digital assistant at the start.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/fdce1814-d127-40ef-88a7-63be25ecab38",
+    "slowest_turn_s": 2.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[volunteer]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "bf9e231b-a30c-44c0-aa10-77eb491c8c8a",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_542f6531-775",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[volunteer].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent identified as a digital assistant, the customer\u2019s proposed 6 November date was negotiated rather than treated as a refusal, and the promise was recorded for 23 October, the stated late-band deadline.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/bf9e231b-a30c-44c0-aa10-77eb491c8c8a",
+    "slowest_turn_s": 1.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[silent_turn]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "311e8e3d-6d4b-4d4e-8e1c-6bb2c1b75319",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_0017e28e-c62",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[silent_turn].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Customer\u2019s proposed date (6 November) was negotiated, not treated as a refusal; the promise was set for 23 October; and the agent identified itself as a digital assistant at the start of the call.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/311e8e3d-6d4b-4d4e-8e1c-6bb2c1b75319",
+    "slowest_turn_s": 5.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "210f6a9a-3137-41e1-af57-eab5972dbb1d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_614f38c4-010",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[hangs_up_after_promise].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent did not treat the customer\u2019s proposed 6 November as a refusal, set and recorded the promise for the late-band deadline of 23 October, and identified itself as a digital assistant at the start of the call.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/210f6a9a-3137-41e1-af57-eab5972dbb1d",
+    "slowest_turn_s": 4.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-04[final_like]",
+    "level": "medium",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "ac031806-70b2-40af-8c6c-c7d0a73511ac",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_e3f5fc81-9a1",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-04[final_like].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent identified as a digital assistant; customer\u2019s proposed Nov 6 date was treated as a counteroffer (not a refusal); promise recorded for the late-band deadline, 23 October.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-04",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/ac031806-70b2-40af-8c6c-c7d0a73511ac",
+    "slowest_turn_s": 3.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[terse]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d which violates the no persuasion attempt criterion; the other criteria (one sentence of sympathy, support team offered once, no discount/waiver/plan) were met."
+    ],
+    "call_id": "5bd21ed9-acb2-472a-9c7f-6ec67d3196d3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_6ad77c58-458",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[terse].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d which violates the no persuasion attempt criterion; the other criteria (one sentence of sympathy, support team offered once, no discount/waiver/plan) were met.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5bd21ed9-acb2-472a-9c7f-6ec67d3196d3",
+    "slowest_turn_s": 4.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[rambling_corrects]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "5e4dd5ad-16b0-45af-83ba-dad4af351def",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_6e59230f-aac",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[rambling_corrects].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent expressed sympathy once, made no persuasion attempts beyond a single standard ask, offered the support team once, and did not offer any discount, waiver, or plan.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/5e4dd5ad-16b0-45af-83ba-dad4af351def",
+    "slowest_turn_s": 2.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[pieces_identity]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "outcome ('not_verified', 'failed'), expected ('no_promise', 'hardship')",
+     "conversation: Support team was not offered even once; there is no mention of offering support in the transcript. Other criteria (one sentence of sympathy, no persuasion, no discount/waiver/plan) were met."
+    ],
+    "call_id": "e733ee2c-3ec4-4f47-a34f-83921ed361b9",
+    "tools": [
+     "verify_identity",
+     "close_call"
+    ],
+    "customer_id": "c_2f5f6f82-b4f",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[pieces_identity].txt",
+    "turns": 30,
+    "stop": "max turns (30) reached",
+    "judge": {
+     "outcome": "fail",
+     "reason": "Support team was not offered even once; there is no mention of offering support in the transcript. Other criteria (one sentence of sympathy, no persuasion, no discount/waiver/plan) were met.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-05",
+    "ended": "customer-ended-call",
+    "transcript_source": "GET /api/v2/call/e733ee2c-3ec4-4f47-a34f-83921ed361b9",
+    "slowest_turn_s": 2.8,
+    "ended_how": null
+   },
+   {
+    "id": "PUB-05[impatient]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria are met (sympathy given once, support team offered once, no discount/waiver/plan offered)."
+    ],
+    "call_id": "9102c261-c7df-41f3-96d4-57662c6c882d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_d8fb97f1-96d",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[impatient].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria are met (sympathy given once, support team offered once, no discount/waiver/plan offered).",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/9102c261-c7df-41f3-96d4-57662c6c882d",
+    "slowest_turn_s": 6.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[previous_question]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d after stating the account was late. Other criteria (sympathy, one support team offer, no discount/waiver/plan) are met."
+    ],
+    "call_id": "1213d12d-c81e-4f88-86f5-f694e2375e71",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_e161beb4-79c",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[previous_question].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d after stating the account was late. Other criteria (sympathy, one support team offer, no discount/waiver/plan) are met.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/1213d12d-c81e-4f88-86f5-f694e2375e71",
+    "slowest_turn_s": 2.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[volunteer]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "e1c37d6a-cad9-456f-a7b0-7851f803922e",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_0c767182-76d",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[volunteer].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent expresses sympathy once, makes no persuasion attempts, offers the support team once, and does not offer any discount, waiver, or plan.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/e1c37d6a-cad9-456f-a7b0-7851f803922e",
+    "slowest_turn_s": 2.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[silent_turn]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "257fe498-5d38-4729-bcd0-cddc60777c0f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_7d7ac976-b19",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[silent_turn].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent expressed sympathy (\u201cI am sorry to hear that\u201d), made no persuasion attempt after hardship (only repeated the payment question once for clarity), offered the support team once, and did not offer any discount, waiver, or plan.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/257fe498-5d38-4729-bcd0-cddc60777c0f",
+    "slowest_turn_s": 4.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d despite the late account. Other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan) are met."
+    ],
+    "call_id": "90a74cd3-f0ea-4fdd-85cc-3f751bbfe379",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_cc8231a3-3b4",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[hangs_up_after_promise].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent attempted persuasion by asking, \u201cCan you make this payment today?\u201d despite the late account. Other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan) are met.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/90a74cd3-f0ea-4fdd-85cc-3f751bbfe379",
+    "slowest_turn_s": 3.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[final_like]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The 'no persuasion attempt' criterion failed because the agent asked, \u201cCan you make this payment today?\u201d after noting the loan is 21 days late. The other criteria (sympathy, support team offered once, no discount/plan) are met."
+    ],
+    "call_id": "6d4b46ab-33ca-4828-89de-b2e54d4c1c98",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_2d8c12b0-c93",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-05[final_like].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The 'no persuasion attempt' criterion failed because the agent asked, \u201cCan you make this payment today?\u201d after noting the loan is 21 days late. The other criteria (sympathy, support team offered once, no discount/plan) are met.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/6d4b46ab-33ca-4828-89de-b2e54d4c1c98",
+    "slowest_turn_s": 2.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[terse]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "7ff6d5db-c567-4b81-a437-f9c6fa46d034",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_30cd7a20-ec7",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[terse].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent never asked how much she can pay; the minimum payment was offered once with the note that the rest stays overdue; and the promise was confirmed and recorded for 637.50 on Friday 16 October.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/7ff6d5db-c567-4b81-a437-f9c6fa46d034",
+    "slowest_turn_s": 9.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[rambling_corrects]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "1349b6b6-8e4b-4491-9ca0-b9c8b482e0c2",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_9479eb66-42e",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[rambling_corrects].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent never asked how much the customer could pay; the minimum payment was offered once with the note that the rest stays overdue; and a promise was confirmed and recorded for 637.50 on Friday 16 October.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/1349b6b6-8e4b-4491-9ca0-b9c8b482e0c2",
+    "slowest_turn_s": 4.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[pieces_identity]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "17ff2a7d-d4bc-4804-86bc-343609f24952",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_28bd92f0-f6d",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[pieces_identity].txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent never asked how much she can pay; the minimum was offered once with the note that the rest stays overdue; and the promise was confirmed and recorded for 637.50 on Friday 16 October (2026-10-16).",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/17ff2a7d-d4bc-4804-86bc-343609f24952",
+    "slowest_turn_s": 10.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[impatient]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "7d5fca0c-292c-435f-880d-1ddb88b4f67b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_8d16624b-aad",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[impatient].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are satisfied: the agent never asked how much she could pay, the minimum payment was offered once with the note that the rest stays overdue, and a promise for 637.50 on Friday 16 October was confirmed and recorded.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/7d5fca0c-292c-435f-880d-1ddb88b4f67b",
+    "slowest_turn_s": 6.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[previous_question]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "c3bd6057-9c20-469b-b227-d526c4b7299f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_5f0f2aa3-91c",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[previous_question].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent never asked how much she could pay; the minimum payment was offered once with the note that the rest stays overdue; and a promise for 637.50 on Friday 16 October was confirmed and recorded.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c3bd6057-9c20-469b-b227-d526c4b7299f",
+    "slowest_turn_s": 7.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[volunteer]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "8397c16f-17b7-4a76-8350-952ac72f08eb",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_41784031-2cb",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[volunteer].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent never asked how much she can pay; minimum payment was offered once with the note that the rest stays overdue; and the promise was confirmed and recorded for 637.50 on Friday 16 October (2026-10-16).",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8397c16f-17b7-4a76-8350-952ac72f08eb",
+    "slowest_turn_s": 9.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[silent_turn]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "0f54994c-0bb3-4f18-bcf4-577eb53a3590",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_5f3b9590-292",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[silent_turn].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent never asked how much she could pay, offered the minimum payment once with the note that the rest stays overdue, and recorded a promise for 637.50 on Friday 16 October.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/0f54994c-0bb3-4f18-bcf4-577eb53a3590",
+    "slowest_turn_s": 22.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[hangs_up_after_promise]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "58882c40-4707-4d85-8f67-f146f1eabe2c",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_9120065e-bbb",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[hangs_up_after_promise].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent never asked how much she could pay, offered the minimum once with the note that the rest stays overdue, and secured a promise for 637.50 on Friday 16 October (recorded as 2026-10-16).",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/58882c40-4707-4d85-8f67-f146f1eabe2c",
+    "slowest_turn_s": 6.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-06[final_like]",
+    "level": "hard",
+    "family": "Amounts",
+    "pass": true,
+    "failed": [],
+    "call_id": "c6f75f94-6097-4b26-b48a-5c7cd7ff1f1b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_0287487d-e35",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-06[final_like].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent never asked how much she can pay; the minimum payment was offered once with the note that the rest stays overdue; and a promise was confirmed and recorded for 637.50 on Friday 16 October.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-06",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/c6f75f94-6097-4b26-b48a-5c7cd7ff1f1b",
+    "slowest_turn_s": 19.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[terse]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "88ddc93e-5e22-46b7-aae6-8e54f8aee9b3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_725a59c4-27a",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[terse].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent asked once for the exact day, rejected 26 October and offered the next business day (Tuesday 27 October), and the promise was recorded for Tuesday 27 October as shown by the create_promise call.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/88ddc93e-5e22-46b7-aae6-8e54f8aee9b3",
+    "slowest_turn_s": 12.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[rambling_corrects]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "16327291-418f-4df2-8140-55df3e9ea4bd",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d67b2725-5bd",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[rambling_corrects].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked once for the exact day, rejected 26 October and offered the next business day (Tuesday 27 Oct). The promise was recorded for Tuesday 27 October, meeting the early-band deadline.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/16327291-418f-4df2-8140-55df3e9ea4bd",
+    "slowest_turn_s": 14.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[pieces_identity]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "ce8ef81a-f201-4618-9f5b-84806af8dc9d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_87424191-70d",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[pieces_identity].txt",
+    "turns": 12,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked once for the exact day, rejected 26 Oct and offered Tue 27 Oct; the promise was recorded for Tue 27 Oct (next business day), satisfying the early-band requirement.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/ce8ef81a-f201-4618-9f5b-84806af8dc9d",
+    "slowest_turn_s": 2.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[impatient]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "992a433f-7e72-4464-b2cc-b35711b476dd",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_da8750aa-c01",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[impatient].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: the agent asked once for the exact day, declined 26 October and offered Tuesday 27 October, and the promise was recorded for Tuesday 27 October (create_promise with 2026-10-27), which is within the early-band window.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/992a433f-7e72-4464-b2cc-b35711b476dd",
+    "slowest_turn_s": 4.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[previous_question]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'refused'), expected ('promise', None)",
+     "promises [], expected [('p1', 540.0, '2026-10-27')]",
+     "conversation: The agent never handled a 26 October date or offered the next business day, and no promise was recorded\u2014the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day."
+    ],
+    "call_id": "cd6db795-0ac2-4ea6-b4d2-428eefb72de1",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_de218dd1-24b",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[previous_question].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent never handled a 26 October date or offered the next business day, and no promise was recorded\u2014the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/cd6db795-0ac2-4ea6-b4d2-428eefb72de1",
+    "slowest_turn_s": 7.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[volunteer]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "c5a87974-5559-410e-a72a-23e269b9f4eb",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_10960507-39b",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[volunteer].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked once for the exact day, rejected 26 Oct and offered the next business day (Tue 27 Oct), and the promise was recorded for Tuesday 27 October (create_promise date 2026-10-27), which is within the early-band deadline.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c5a87974-5559-410e-a72a-23e269b9f4eb",
+    "slowest_turn_s": 3.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[silent_turn]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "4358ecd2-8e73-4ccd-9b6b-1392c407ce4b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_482180d5-394",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[silent_turn].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent asked once for the exact day, rejected 26 Oct and offered the next business day (Tue 27 Oct), and the promise was recorded for 2026-10-27 as shown by create_promise, implying it met the early-band deadline.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/4358ecd2-8e73-4ccd-9b6b-1392c407ce4b",
+    "slowest_turn_s": 4.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[hangs_up_after_promise]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "70fa69fa-1462-4bfe-b55e-10fba656ef48",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_22a6f282-8c7",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[hangs_up_after_promise].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked once for the exact day, rejected 26 Oct and proposed the next business day (Tue 27 Oct), and the promise was recorded for Tuesday 27 Oct (per create_promise), which is within the early-band window.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/70fa69fa-1462-4bfe-b55e-10fba656ef48",
+    "slowest_turn_s": 2.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-07[final_like]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "4280897c-73f0-46d1-9136-c3625f6ddbae",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_23db489c-162",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-07[final_like].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent asked for the exact day once, rejected 26 October and offered the next business day (Tuesday 27 October), and the promise was recorded for Tuesday 27 October per the create_promise call, satisfying the early-band requirement.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/4280897c-73f0-46d1-9136-c3625f6ddbae",
+    "slowest_turn_s": 4.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[terse]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "f31a02e3-121a-4ab7-b260-8d07e5e7ccd2",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_deb17d30-c68",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[terse].txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent explicitly said payments can take one business day to appear, and no promise was recorded (the call was closed as paid with no promise-related tool calls).",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f31a02e3-121a-4ab7-b260-8d07e5e7ccd2",
+    "slowest_turn_s": 3.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[rambling_corrects]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "918ee16b-11c6-491b-8a1f-e3e95677e0b5",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_fb890feb-f60",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[rambling_corrects].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said \u201cPayments can take one business day to appear,\u201d and stated they would not take a promise; no promise was recorded (no promise logging tool call, call closed as paid).",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/918ee16b-11c6-491b-8a1f-e3e95677e0b5",
+    "slowest_turn_s": 12.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[pieces_identity]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "1f1434a7-a5f6-4aa8-8026-7c04d4661bc0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_b819d748-c8c",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[pieces_identity].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said \u201cPayments can take one business day to appear,\u201d and no promise was recorded (no promise-related tool call; call closed with outcome 'paid').",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/1f1434a7-a5f6-4aa8-8026-7c04d4661bc0",
+    "slowest_turn_s": 4.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[impatient]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "494142a9-c07a-4feb-93b8-298718009fac",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_7ceb714c-0c7",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[impatient].txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent explicitly said payments can take one business day to appear, and no promise was recorded (no promise-related tool calls; call closed with outcome 'paid').",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/494142a9-c07a-4feb-93b8-298718009fac",
+    "slowest_turn_s": 5.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[previous_question]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "3ee94d83-ac59-473f-b4da-01d0c3cdc29d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_5f49fce8-382",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[previous_question].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said payments can take one business day to appear and stated they would not take a promise. No promise-related tool calls were made; call closed as paid.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/3ee94d83-ac59-473f-b4da-01d0c3cdc29d",
+    "slowest_turn_s": 7.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[volunteer]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "cb31e758-7a61-4ff4-80a6-e807025109c5",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_75adc965-591",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[volunteer].txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said payments can take one business day to appear, and no promise was recorded (call closed as paid without any promise-related tool calls).",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/cb31e758-7a61-4ff4-80a6-e807025109c5",
+    "slowest_turn_s": 3.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[silent_turn]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "1421b9e7-e54c-4733-83ba-247612b7a418",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_f2f1e7d2-10a",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[silent_turn].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said payments can take one business day to appear, and no promise was taken or recorded (outcome marked as paid with no promise tool call).",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/1421b9e7-e54c-4733-83ba-247612b7a418",
+    "slowest_turn_s": 10.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "341521f8-534d-4544-a822-981dac7896d4",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_c53e1907-d94",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[hangs_up_after_promise].txt",
+    "turns": 5,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent explicitly said payments can take one business day to appear, and no promise was recorded (no promise-related tool calls; agent said they would not take a promise).",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/341521f8-534d-4544-a822-981dac7896d4",
+    "slowest_turn_s": 4.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-08[final_like]",
+    "level": "medium",
+    "family": "Already paid",
+    "pass": true,
+    "failed": [],
+    "call_id": "8e368bad-9a0f-4e22-9f3b-0b0b8869eee0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_f04c5bd9-a25",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-08[final_like].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent stated payments can take one business day to appear and explicitly said they would not take a promise; tool calls show outcome 'paid' with no promise recorded.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-08",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8e368bad-9a0f-4e22-9f3b-0b0b8869eee0",
+    "slowest_turn_s": 7.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[terse]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "e05fffce-8571-4e8f-b781-b1c7dcd86fe6",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_4d3badf6-bfd",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[terse].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe a plan; and no promise to pay was recorded in tools or dialogue.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/e05fffce-8571-4e8f-b781-b1c7dcd86fe6",
+    "slowest_turn_s": 4.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[rambling_corrects]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "44b4c523-d747-4288-92a4-e0c9b874e293",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_23fea496-d5c",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[rambling_corrects].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose its own plan and no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/44b4c523-d747-4288-92a4-e0c9b874e293",
+    "slowest_turn_s": 7.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[pieces_identity]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": false,
+    "failed": [
+     "outcome ('no_promise', 'refused'), expected ('transferred', 'restructuring')"
+    ],
+    "call_id": "e318c187-a332-43c3-a6cf-8ab4a3575526",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_ba28cfbf-83b",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[pieces_identity].txt",
+    "turns": 15,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring' (tool call #6); the agent did not describe a new plan and explicitly said it couldn\u2019t set one up; and the call ended with outcome 'no_promise' and the agent stated no promise was recorded.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/e318c187-a332-43c3-a6cf-8ab4a3575526",
+    "slowest_turn_s": 3.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[impatient]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": false,
+    "failed": [
+     "outcome ('transferred', 'human'), expected ('transferred', 'restructuring')",
+     "transfers [{'queue': 'general'}], expected [{'queue': 'restructuring'}]",
+     "conversation: transfer_to_agent was called with queue \"general\" instead of \"restructuring\" (tool call #7); the other criteria hold (no agent-devised plan described and no promise recorded)."
+    ],
+    "call_id": "3ac871e0-9325-4d37-b582-5451e382b365",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "verify_identity",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_d4b50f05-092",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[impatient].txt",
+    "turns": 11,
+    "stop": "ended by the agent (end_call in the call log after HTTP 502)",
+    "judge": {
+     "outcome": "fail",
+     "reason": "transfer_to_agent was called with queue \"general\" instead of \"restructuring\" (tool call #7); the other criteria hold (no agent-devised plan described and no promise recorded).",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/3ac871e0-9325-4d37-b582-5451e382b365",
+    "slowest_turn_s": 5.8,
+    "ended_how": "end_call in the call log after HTTP 502"
+   },
+   {
+    "id": "PUB-09[previous_question]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "011b8376-ebec-453a-8b21-657b20fe81d8",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_7846d4ad-434",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[previous_question].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any plan; and no promise was recorded in the transcript or tool calls.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/011b8376-ebec-453a-8b21-657b20fe81d8",
+    "slowest_turn_s": 4.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[volunteer]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "f81e7129-d0a7-4aaa-b10a-b442646e5718",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_896eda61-d9c",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[volunteer].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any payment plan; and no promise-to-pay was recorded in the transcript or tool calls.",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f81e7129-d0a7-4aaa-b10a-b442646e5718",
+    "slowest_turn_s": 6.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[silent_turn]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "dd41cc41-d1ab-4f68-ab9e-d63eb7e4e105",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_9af4b205-ecb",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[silent_turn].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose its own plan; and no promise to pay was recorded.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/dd41cc41-d1ab-4f68-ab9e-d63eb7e4e105",
+    "slowest_turn_s": 1.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "205ae7af-d58d-4ea6-bb12-3da6680e3324",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_f4517028-c39",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[hangs_up_after_promise].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any payment plan; and no promise was recorded in the transcript or tool calls.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/205ae7af-d58d-4ea6-bb12-3da6680e3324",
+    "slowest_turn_s": 2.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[final_like]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "ac3cec0b-7bd6-470b-869c-5ec998e72c2f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_8691a956-22e",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-09[final_like].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring' (tool call 7); the agent did not propose its own plan and only offered the minimum due today, and no promise-to-pay was recorded in the tool calls.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/ac3cec0b-7bd6-470b-869c-5ec998e72c2f",
+    "slowest_turn_s": 5.5,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[terse]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "8e147ba9-c68e-4c6f-8791-19bd3412de4d",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_a3f65bfa-812",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[terse].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one promise was successfully created after the retry (first failed, second succeeded), and the agent only said 'recorded' after the successful creation, not before.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8e147ba9-c68e-4c6f-8791-19bd3412de4d",
+    "slowest_turn_s": 2.8,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[rambling_corrects]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "74905bc7-26f7-40aa-9200-eead01220b71",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_675e2135-ad4",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[rambling_corrects].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one promise was successfully created after the retry (first create failed, second succeeded), and the agent only said 'recorded' after the successful create; they did not use 'recorded' earlier.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/74905bc7-26f7-40aa-9200-eead01220b71",
+    "slowest_turn_s": 3.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[pieces_identity]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "09f312cc-0b89-40f0-9baf-a78079ce1096",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_3462663a-0cc",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[pieces_identity].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one successful create_promise after the initial failure (one promise recorded), and the agent did not say 'recorded' until after the successful API call.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/09f312cc-0b89-40f0-9baf-a78079ce1096",
+    "slowest_turn_s": 2.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[impatient]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "3cbc2015-46e2-40c6-91bf-f3d35942bcf9",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_7104fa5e-19d",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[impatient].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one promise was successfully created after the retry (first attempt failed, second succeeded), and the agent only said \u201crecorded\u201d after the successful create_promise call, not before.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/3cbc2015-46e2-40c6-91bf-f3d35942bcf9",
+    "slowest_turn_s": 2.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[previous_question]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "e01572ab-330b-46a3-ad0f-ed17e10e3dc5",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_9b34b26c-cb2",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[previous_question].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one successful create_promise occurred after the retry (promise_id pr1), and the agent only said \u201cYour promise is recorded\u201d after that success; they did not say \u201crecorded\u201d before a successful call.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/e01572ab-330b-46a3-ad0f-ed17e10e3dc5",
+    "slowest_turn_s": 2.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[volunteer]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "72ee2ef3-00ea-4d98-a210-11c1a558dd57",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_8abc8b9b-bcb",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[volunteer].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one successful create_promise call occurred after the retry, and the agent used 'recorded' only after that success (earlier line said 'record' not 'recorded').",
+     "model": "gpt-5"
+    },
+    "style": "volunteer",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/72ee2ef3-00ea-4d98-a210-11c1a558dd57",
+    "slowest_turn_s": 4.4,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[silent_turn]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "b311b549-4a87-40f5-966c-002e6ab7451b",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_d8a949a0-fe2",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[silent_turn].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Exactly one promise was created after the retry (first failed, second succeeded), and the agent only used 'recorded' after the successful creation, not before.",
+     "model": "gpt-5"
+    },
+    "style": "silent_turn",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/b311b549-4a87-40f5-966c-002e6ab7451b",
+    "slowest_turn_s": 3.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[hangs_up_after_promise]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": true,
+    "failed": [],
+    "call_id": "b7787cad-687f-4f83-9399-9d51d185dbd0",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_c5c9d80e-66f",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[hangs_up_after_promise].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only one successful create_promise occurred after a failed attempt, so exactly one promise exists, and the agent only said 'recorded' after the successful promise creation, not before.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/b7787cad-687f-4f83-9399-9d51d185dbd0",
+    "slowest_turn_s": 4.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-10[final_like]",
+    "level": "hard",
+    "family": "Tool failure",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 360.0, '2026-10-16')], expected [('p1', 365.0, '2026-10-16')]"
+    ],
+    "call_id": "62e4e5bf-17f0-46e9-933e-758950441bac",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_cd2ce119-eec",
+    "transcript": "out/sim/extra-styles/a-pub/PUB-10[final_like].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Only the second create_promise call succeeded, so there is exactly one promise after the retry, and the agent only said \u201cYour promise is recorded\u201d after that success (not before).",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-10",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/62e4e5bf-17f0-46e9-933e-758950441bac",
+    "slowest_turn_s": 5.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 579,
+  "customer_calls": 507,
+  "judge_calls": 72,
+  "judge_retries": 0,
+  "ledger_polls": 600,
+  "ledger_errors": 0,
+  "call_fetches": 235
+ }
+}

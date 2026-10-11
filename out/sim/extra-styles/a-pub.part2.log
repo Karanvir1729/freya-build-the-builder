@@ -1,0 +1,13 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 3 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS PUB-02[hangs_up_after_promise] medium Third party    | schedule_callback > close_call
+PASS PUB-02[silent_turn] medium Third party    | schedule_callback > close_call
+       ! the chat route branched this call from an older message (isBranch): a chat-route artefact, not the agent
+PASS PUB-02[final_like] medium Third party    | schedule_callback > close_call
+
+slowest agent turn per call: median 4 s, worst 5 s (chat-route timing, not a simulation's).
+style silent_turn: 1 / 1 passed
+style hangs_up_after_promise: 1 / 1 passed
+style final_like: 1 / 1 passed
+
+3 / 3 passed (bank records and conversation checks). Local chat-route simulation, 239 s.
+cost: 12 chat turns, 11 model calls (8 customer on gpt-5-mini, 3 judge on gpt-5), 13 ledger polls, 17 call fetches.

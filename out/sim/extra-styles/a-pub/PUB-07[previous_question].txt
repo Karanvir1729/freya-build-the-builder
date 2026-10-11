@@ -1,0 +1,79 @@
+# PUB-07[previous_question] A vague period, then a holiday [style: previous_question]
+# mock customer: PUB-07 | style text: HOW YOU TALK: once in the call, you answer the question the caller asked BEFORE the current one again, as if you had not heard the new question, like repeating your date of birth when asked for something else. When the caller asks again, you answer the current question correctly.
+# workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 | call cd6db795-0ac2-4ea6-b4d2-428eefb72de1 | customer c_de218dd1-24b | 2026-10-11 00:13:30
+# customer model gpt-5-mini | judge model gpt-5 (openai) | stop: close_call in the ledger | transcript from: GET /api/v2/call/cd6db795-0ac2-4ea6-b4d2-428eefb72de1
+# RESULT: FAIL | outcome ('no_promise', 'refused'), expected ('promise', None) | promises [], expected [('p1', 540.0, '2026-10-27')] | conversation: The agent never handled a 26 October date or offered the next business day, and no promise was recorded—the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day.
+
+customer: Hello?
+agent: Hello, this is Freya Bank's digital assistant. Please note that we record this call. Am I speaking with Mr Ortiz?
+customer: Yes, this is Samuel Ortiz.
+   [route] opening -> setup: always always
+   [node] opening -> setup
+   [tool] code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] setup -> ask_dob: the customer confirmed who they are who1 == 'customer'
+   [node] setup -> ask_dob
+agent: To start, could you please tell me your date of birth, Mr Ortiz?
+customer: 5 December 1975.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1975-12-05", "customer_id": "c_de218dd1-24b"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Ask the next security question."}
+   [route] ask_dob -> ask_phone: date of birth correct (verify_identity_response.data.verified == 'true' OR verify_identity_response.data.verified == 'True')
+   [node] ask_dob -> ask_phone
+agent: Thank you. Could you please provide the last four digits of the phone number on file, Mr Ortiz?
+customer: 5 December 1975.
+agent: Could you please provide the last four digits of the phone number on file, Mr Ortiz?
+customer: Seven zero nine three.
+   [tool] verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "7093", "customer_id": "c_de218dd1-24b"}
+   [tool] verify_identity -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+   [route] ask_phone -> load_account: identity verified (verify_identity_response.data.all_verified == 'true' OR verify_identity_response.data.all_verified == 'True')
+   [node] ask_phone -> load_account
+   [tool] api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_de218dd1-24b"}
+   [tool] api_call -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 540, "days_late": 5, "instalment_amount": 180}]}
+   [route] load_account -> prepare: always always
+   [node] load_account -> prepare
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] prepare -> negotiate: always always
+   [node] prepare -> negotiate
+agent: Thank you, Mr Ortiz. I am calling from the collections team about a late payment on your personal loan. The past-due amount is 540, and it is 5 days late. Can you make this payment today?
+customer: No, I cannot pay today.
+   [route] negotiate -> count_refusal: a flat refusal or a non-answer stance == 'refuse'
+   [node] negotiate -> count_refusal
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_refusal -> negotiate: always always
+   [node] count_refusal -> negotiate
+agent: Can you pay 540 on Friday 16 October?
+customer: No, I cannot pay on Friday 16 October.
+   [route] negotiate -> count_refusal: a flat refusal or a non-answer stance == 'refuse'
+   [node] negotiate -> count_refusal
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr...
+   [tool] code_exec -> HTTP 200 data=null
+   [route] count_refusal -> fin_refused: the call ends route == 'fin'
+   [node] count_refusal -> fin_refused
+   [tool] code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'no_promise'\n vars['reason'] = 'refused'\nexcept Exception:\n pass\n"}
+   [tool] code_exec -> HTTP 200 data=null
+   [route] fin_refused -> end_refused: always always
+   [node] fin_refused -> end_refused
+   [tool] end_call args={"message_mode": "custom", "spoken_message": "I understand. I have not recorded a promise today. Thank you for your time, Mr Ortiz. Goodbye."}
+   [call] ended: assistant-ended-call
+agent: I understand. I have not recorded a promise today. Thank you for your time, Mr Ortiz. Goodbye.
+   [tool] end_call -> success Call ended
+   [tool] close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "refused", "outcome": "no_promise", "customer_id": "c_de218dd1-24b"}
+   [tool] close_call -> HTTP 200 data={"ok": true}
+
+## tool calls (10)
+1. code_exec args={"timeout_ms": 10000, "code": "import datetime, json, re\nHOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\nBWD = set([0, 1, 2, 3, 4])\nWDRULE = 'this_week'\nWD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat... -> HTTP 200 data=null
+2. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "date_of_birth", "answer": "1975-12-05", "customer_id": "c_de218dd1-24b"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false, "what_to_do_next": "Correct. Ask the next security question."}
+3. verify_identity POST https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity body={"field": "phone_last4", "answer": "7093", "customer_id": "c_de218dd1-24b"} -> HTTP 200 data={"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true, "what_to_do_next": "Both answers are correct. Identity verified."}
+4. api_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/get_account body={"customer_id": "c_de218dd1-24b"} -> HTTP 200 data={"ok": true, "products": [{"product_id": "p1", "type": "personal_loan", "past_due": 540, "days_late": 5, "instalment_amount": 180}]}
+5. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+6. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+7. code_exec args={"timeout_ms": 10000, "code": "try:\n import datetime, json, re\n HOL = set(['2026-10-26', '2026-11-11', '2026-11-26', '2026-12-25', '2027-01-01'])\n BWD = set([0, 1, 2, 3, 4])\n WDRULE = 'this_week'\n WD = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr... -> HTTP 200 data=null
+8. code_exec args={"timeout_ms": 10000, "code": "try:\n vars['outcome'] = 'no_promise'\n vars['reason'] = 'refused'\nexcept Exception:\n pass\n"} -> HTTP 200 data=null
+9. end_call args={"message_mode": "custom", "spoken_message": "I understand. I have not recorded a promise today. Thank you for your time, Mr Ortiz. Goodbye."} -> success Call ended
+10. close_call POST https://freya-bank-mock.freyavoice.workers.dev/v1/close_call body={"reason": "refused", "outcome": "no_promise", "customer_id": "c_de218dd1-24b"} -> HTTP 200 data={"ok": true}
+
+## ledger: outcome=no_promise reason=refused promises=[] notes=[] callbacks=[] transfers=[] calls=['verify_identity', 'verify_identity', 'get_account', 'close_call']
+
+## judge (gpt-5): fail - The agent never handled a 26 October date or offered the next business day, and no promise was recorded—the call ended with 'no_promise.' Therefore, there is no promise for Tuesday 27 October nor evidence of asking once for the exact day.
