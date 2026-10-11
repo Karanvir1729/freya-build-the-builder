@@ -1,0 +1,68 @@
+{
+ "model": "claude-fable-5-1",
+ "sample_models": {
+  "A": "claude-fable-5-1",
+  "B": "claude-fable-5-1",
+  "C": "claude-fable-5-1"
+ },
+ "seconds": 315.814031124115,
+ "cost_usd": 7.950875,
+ "calls": 10,
+ "self_check": {
+  "missing_numbers": {},
+  "missing_tokens": []
+ },
+ "samples": {
+  "A": 109,
+  "B": 107,
+  "C": 116
+ },
+ "stages": {
+  "extract": {
+   "seconds": 160.17307019233704,
+   "cost_usd": 5.632257500000001,
+   "calls": 6
+  },
+  "merge": {
+   "seconds": 69.08489298820496,
+   "cost_usd": 0.9701825000000001,
+   "calls": 1
+  },
+  "decide": {
+   "seconds": 0.0,
+   "cost_usd": 0.4842575,
+   "calls": 1
+  },
+  "verify": {
+   "seconds": 0.0,
+   "cost_usd": 0.8641775,
+   "calls": 2
+  },
+  "verify+decide": {
+   "seconds": 86.54366493225098
+  }
+ },
+ "briefs": [
+  "/private/tmp/claude-501/-Users-karanvirkhanna-freya-build-the-builder/f2419810-3d98-44b7-9cce-ce8a0e139238/scratchpad/reh-d/kestrel.md"
+ ],
+ "api": "tools/openapi.json",
+ "spec": "kestrel.spec.json",
+ "conflicts": "kestrel.rules.conflicts.md",
+ "n_conflicts": 15,
+ "call_date_range": {
+  "earliest": "2026-10-14",
+  "latest": "2026-12-31",
+  "basis": "memo effective from first call Wednesday 14 October 2026; example now 2026-10-14T11:00; closure days listed for the remainder of 2026"
+ },
+ "n_rules": 122,
+ "n_in_force": 112,
+ "n_low": 15,
+ "n_low_in_force": 14,
+ "verification": {
+  "mismatch": 2,
+  "ok": 30
+ },
+ "decision_blocks": 12,
+ "spec_errors": 0,
+ "spec_warnings": 0
+}

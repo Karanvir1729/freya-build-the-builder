@@ -60,7 +60,20 @@ WRITE_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 # a shell command writes a file it names when it redirects into it, edits it in place, copies or moves onto it, removes
 # it, or is a script that names it and writes (python open(..., 'w') / write_text / .write). Naming a file is not
 # writing it: 'python3 builder/tests/test_policy.py 2>&1 | tail' reads only.
-PY_WRITE = re.compile(r"open\([^)]*['\"][wa]b?['\"]|write_text\(|write_bytes\(|\.write\(|os\.replace\(|shutil\.(copy|move)")
+def _py_writes(cmd, p):
+    """A python snippet that writes this path: open('<path>', 'w'), Path('<path>').write_text(...), os.replace/shutil onto
+    it, or a variable holding the path that is opened for writing (p = 'builder/policy.py'; open(p, 'w'))."""
+    q = r"['\"]" + p + r"['\"]"
+    mode = r"\s*,\s*['\"](?:w|a|r\+)b?['\"]"
+    if re.search(r"open\(\s*" + q + mode, cmd) or re.search(r"Path\(\s*" + q + r"\s*\)\s*\.\s*write_(?:text|bytes)\(", cmd) or \
+            re.search(r"(?:os\.replace|os\.rename|shutil\.(?:copy\w*|move))\([^)]*,\s*" + q, cmd):
+        return True
+    for m in re.finditer(r"\b(\w+)\s*=\s*(?:pathlib\.)?(?:Path\()?" + q, cmd):
+        v = re.escape(m.group(1))
+        if re.search(r"open\(\s*" + v + mode, cmd) or re.search(r"\b" + v + r"\s*\.\s*write_(?:text|bytes)\(", cmd) or \
+                re.search(r"Path\(\s*" + v + r"\s*\)\s*\.\s*write_(?:text|bytes)\(", cmd):
+            return True
+    return False
 
 
 def _writes(cmd, path):
@@ -68,13 +81,13 @@ def _writes(cmd, path):
     end = r"(?=$|[\s;|&)'\"])"
     pats = [r">>?\s*['\"]?" + p + end,                                  # cat > path, echo x >> path
             r"\btee\s+(?:-a\s+)?['\"]?" + p + end,
-            r"\b(?:sed|perl)\s+(?:-\w+\s+)*-i\b.*" + p + end,           # sed -i ... path
+            r"\b(?:sed|perl)\s+(?:-\w+\s+)*-i\b[^;&|\n]*" + p + end,  # sed -i ... path (same simple command)
             r"\b(?:cp|mv|install)\s+(?:-\w+\s+)*\S+\s+['\"]?" + p + end,  # cp src path (path is the target)
             r"\b(?:rm|unlink|truncate)\s+(?:-\w+\s+)*['\"]?" + p + end,
-            r"\bgit\s+(?:checkout|restore)\b.*" + p + end]
+            r"\bgit\s+(?:checkout|restore)\b[^;&|\n]*" + p + end]
     if any(re.search(x, cmd) for x in pats):
         return True
-    return bool(re.search(p, cmd)) and bool(PY_WRITE.search(cmd)) and bool(re.search(r"\bpython3?\b", cmd))
+    return _py_writes(cmd, p)
 
 
 def agent_touched(tool_uses, paths, root=ROOT):

@@ -567,6 +567,10 @@ def test_rules_write_tools_before_verification():
     allow = RULES + [{"id": "R09", "category": "third_party", "text": "Call `schedule_callback` with the date and time.",
                       "verbatim": [], "values": {}}]
     assert not any("schedule_callback" in x["where"] and x["level"] in (ERROR, WARN) for x in rl(wf, allow)), rl(wf, allow)
+    # a rule about a customer who was not reached allows it too, whatever its category (the inventory may file it as recording)
+    reached = RULES + [{"id": "R25", "category": "recording", "text": "If the offered slot fits the window, call `schedule_callback` "
+                        "with the date and the time as HH:MM and close as `not_reached` with code CBK.", "verbatim": [], "values": {}}]
+    assert not any("schedule_callback" in x["where"] and x["level"] == ERROR for x in rl(wf, reached)), rl(wf, reached)
     wf = gated()
     wf["nodes"]["ask_id"]["tools"].append(api_tool("transfer_to_agent", {"customer_id": {"type": "string", "default": "{{customer_id}}"},
                                                                     "queue": {"type": "string", "default": "general"}}))

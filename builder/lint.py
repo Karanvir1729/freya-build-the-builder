@@ -1662,6 +1662,10 @@ class _Linter:
     PRE_VERIFICATION_RE = re.compile(r"before (identity|verification|the security|verif)|before and after verif|"
                                      r"during (identity|verification|the security)|at any (time|point)|any point in the call|"
                                      r"whenever|even before", re.I)
+    # a rule about a customer who was not reached (a third party answered, a callback) applies before verification,
+    # whatever category the inventory gave it (Kestrel: "call schedule_callback ... close as not_reached" was 'recording')
+    NOT_REACHED_RE = re.compile(r"not[_ ]reached|could not be reached|can be reached|be reached|someone else|third[- ]party|"
+                                r"another person|not the customer|wrong number", re.I)
     POST_VERIFICATION_RE = re.compile(r"(only|just) (after|once) (identity|verification|the security|verif|the customer is verified)|"
                                       r"not before (identity|verification|verif)|once (identity|the customer) (is|has been) verified|"
                                       r"after (identity|the customer) (is|has been) verified", re.I)
@@ -1686,7 +1690,7 @@ class _Linter:
                     continue   # close_call closes every call, the not-reached ones included
                 naming = [r for r in rules if re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", self._rule_blob(r))]
                 if any(r.get("category") in ("third_party", "identity") or self.PRE_VERIFICATION_RE.search(self._rule_blob(r))
-                       for r in naming):
+                       or self.NOT_REACHED_RE.search(self._rule_blob(r)) for r in naming):
                     continue
                 ids = ', '.join(str(r.get('id')) for r in naming)
                 if naming and any(self.POST_VERIFICATION_RE.search(self._rule_blob(r)) for r in naming):

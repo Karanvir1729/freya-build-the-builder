@@ -100,13 +100,17 @@ def test_agent_touched():
     assert bg.agent_touched([], paths, d) == set()
     reads = ["python3 builder/tests/test_policy.py 2>&1 | tail -3", "grep -n x builder/policy.py > /tmp/out.txt",
              "cp builder/policy.py /tmp/copy.py", "sed -n 1,40p builder/policy.py", "python3 -c \"import json; print(open('builder/lint.py').read()[:10])\""]
+    reads.append("python3 - <<'EOF'\np='out/gen_x.py'; s=open(p).read()\nopen(p,'w').write(s)\nEOF\npython3 builder/lint.py out/x.json --api a")
+    reads.append("sed -i '' 's/a/b/' out/gen_x.py && python3 out/gen_x.py && python3 builder/lint.py out/x.json")
     for c in reads:                                                     # naming a file is not writing it
         assert bg.agent_touched([("Bash", {"command": c})], paths, d) == set(), c
     writes = {"cat > builder/lint.py <<'EOF'\nX = 3\nEOF": "builder/lint.py", "echo y >> tools/score.py": "tools/score.py",
               "cp out/new.py builder/policy.py": "builder/policy.py", "rm -f builder/newmod.py": "builder/newmod.py",
               "printf 'x' | tee builder/lint.py": "builder/lint.py",
               "python3 - <<'EOF'\np='builder/policy.py'; s=open(p).read()\nopen(p,'w').write(s)\nEOF": "builder/policy.py",
-              "python3 - <<'EOF'\nimport pathlib\npathlib.Path('builder/lint.py').write_text('x')\nEOF": "builder/lint.py"}
+              "python3 - <<'EOF'\nimport pathlib\npathlib.Path('builder/lint.py').write_text('x')\nEOF": "builder/lint.py",
+              "python3 -c \"open('tools/score.py', 'a').write('#')\"": "tools/score.py",
+              "python3 - <<'EOF'\nimport pathlib\nf = pathlib.Path('builder/policy.py')\nf.write_text(f.read_text())\nEOF": "builder/policy.py"}
     for c, want in writes.items():
         assert bg.agent_touched([("Bash", {"command": c})], paths, d) == {want}, (c, bg.agent_touched([("Bash", {"command": c})], paths, d))
     shutil.rmtree(d)

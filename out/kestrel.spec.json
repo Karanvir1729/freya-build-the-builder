@@ -1,0 +1,401 @@
+{
+ "schema": "rules-v2/spec-1",
+ "call_date_range": {
+  "earliest": "2026-10-14",
+  "latest": "2026-12-31",
+  "basis": "memo effective from first call Wednesday 14 October 2026; example now 2026-10-14T11:00; closure days listed for the remainder of 2026"
+ },
+ "spec": {
+  "max_wrong_answers": 2,
+  "calendar": {
+   "business_weekdays": [
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri"
+   ],
+   "holidays": [
+    {
+     "date": "2026-10-30",
+     "name": "Founders' Day"
+    },
+    {
+     "date": "2026-11-20",
+     "name": "core systems migration"
+    },
+    {
+     "date": "2026-12-24",
+     "name": "Christmas Eve"
+    },
+    {
+     "date": "2026-12-25",
+     "name": "Christmas Day"
+    },
+    {
+     "date": "2026-12-28",
+     "name": "Boxing Day (substitute)"
+    },
+    {
+     "date": "2026-12-31",
+     "name": "New Year's Eve"
+    }
+   ]
+  },
+  "callback": {
+   "open": "09:00",
+   "close": "18:00",
+   "same_day": true,
+   "later_than_now": true,
+   "days_ahead_business": 2,
+   "text": "times as HH:MM"
+  },
+  "bands": [
+   {
+    "name": "F",
+    "min_days": 1,
+    "max_days": 10,
+    "deadline_rule": {
+     "type": "calendar_days_after",
+     "n": 21,
+     "adjust": "previous_business_day"
+    },
+    "attempts": 1,
+    "text": "fresh arrears"
+   },
+   {
+    "name": "S",
+    "min_days": 11,
+    "max_days": 45,
+    "deadline_rule": {
+     "type": "business_days_after",
+     "n": 5,
+     "adjust": "none"
+    },
+    "attempts": 2,
+    "text": "standing arrears"
+   },
+   {
+    "name": "over 45",
+    "min_days": 46,
+    "max_days": null,
+    "same_as": "S",
+    "text": "treat as Band S"
+   }
+  ],
+  "floors": [
+   {
+    "product_types": [
+     "credit_card"
+    ],
+    "rule": {
+     "type": "multiple",
+     "factor": 2,
+     "field": "minimum_payment",
+     "cap_to_full": true
+    }
+   },
+   {
+    "product_types": [
+     "personal_loan",
+     "car_loan"
+    ],
+    "rule": {
+     "type": "field",
+     "field": "instalment_amount"
+    }
+   }
+  ],
+  "attempt_ladder": [
+   {
+    "attempt": 1,
+    "bands": [
+     "F",
+     "S"
+    ],
+    "amount": "in_play",
+    "date_rule": "the next business day after the call date",
+    "text": ""
+   },
+   {
+    "attempt": 2,
+    "bands": [
+     "S"
+    ],
+    "amount": "floor",
+    "date_rule": "the latest date",
+    "text": ""
+   }
+  ],
+  "identity": [
+   {
+    "order": 1,
+    "field": "phone_last4",
+    "retry_rule": "a wrong answer may be asked again within the two-wrong-answer limit"
+   },
+   {
+    "order": 2,
+    "field": "date_of_birth",
+    "hint_values": [
+     "day_month_swapped"
+    ],
+    "retry_rule": "a wrong answer may be asked again within the limit; a day_month_swapped retry does not count"
+   }
+  ],
+  "outcomes": [
+   {
+    "outcome": "not_reached",
+    "reason": "UNC",
+    "when": "still unclear who answered after the second ask; could not establish who answered"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "CBK",
+    "when": "third party answered; callback booked"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "NCB",
+    "when": "third party answered; no callback inside the window"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "WN",
+    "when": "number does not belong to the customer"
+   },
+   {
+    "outcome": "not_reached",
+    "reason": "DEC",
+    "when": "customer deceased"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "IDF",
+    "when": "identity check failed (second wrong answer)"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "IDD",
+    "when": "customer declined the identity check or asked again what it is about instead of answering; would not talk, before identity confirmed; customer declined the identity check, or would not talk before it was complete"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "RF",
+    "when": "persuasion attempts used up, or customer refuses to continue, nothing else applies; would not talk, after identity confirmed; identity confirmed; persuasion attempts used up, or the customer refuses to continue; most serious note is refused"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "TSP",
+    "when": "hardship, customer accepted transfer to `support`; hardship transfer to customer care accepted; call transferred to customer care, hardship (queue support)"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "SVC",
+    "when": "create_promise failed three times (single product); a bank service failed repeatedly after identity was confirmed (get_account, create_promise); most serious note is service_error"
+   },
+   {
+    "outcome": "paid",
+    "reason": "AP",
+    "when": "customer states the overdue amount is already paid; no promise taken; customer states the overdue amount is already paid; no promise taken; every product noted paid"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "DSP",
+    "when": "customer disputes the arrears; most serious note is dispute"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "TRS",
+    "when": "transferred to queue `restructuring`; call transferred to the restructuring team (queue restructuring)"
+   },
+   {
+    "outcome": "transferred",
+    "reason": "TRH",
+    "when": "human requested; transferred to queue `general`; call transferred to a human agent at the customer's request (queue general)"
+   },
+   {
+    "outcome": "promise",
+    "reason": "PRM",
+    "when": "at least one promise recorded and no transfer afterwards; at least one promise recorded on this call, and no transfer afterwards; at least one promise recorded and no transfer followed, regardless of notes"
+   },
+   {
+    "outcome": "no_promise",
+    "reason": "HSHP",
+    "when": "hardship disclosed; customer declined the customer care transfer; most serious note is hardship"
+   },
+   {
+    "outcome": "not_verified",
+    "reason": "SVC",
+    "when": "a bank service failed repeatedly during the identity check"
+   }
+  ],
+  "note_reasons": [
+   {
+    "reason": "refused",
+    "when": "attempts used up, or the customer refuses the product",
+    "text_must_contain": "the number of attempts made and the last offer (amount and date)"
+   },
+   {
+    "reason": "hardship",
+    "when": "hardship disclosed, customer declined the transfer",
+    "text_must_contain": "the circumstance in the customer's words"
+   },
+   {
+    "reason": "service_error",
+    "when": "create_promise failed on every try",
+    "text_must_contain": "the words \"create_promise\" and the number of tries"
+   },
+   {
+    "reason": "paid",
+    "when": "the customer says the product is already paid",
+    "text_must_contain": "the channel and the day the customer says they paid"
+   },
+   {
+    "reason": "dispute",
+    "when": "the customer disputes the product",
+    "text_must_contain": "what is disputed"
+   }
+  ],
+  "verbatim": [
+   {
+    "text": "This is the digital assistant of Kestrel Bank. Please note that this call is recorded.",
+    "when": "R13: The first thing said on every call, word for word, is the recorded-call opening sentence."
+   },
+   {
+    "text": "Am I speaking with {first_name} {last_name}?",
+    "when": "R14: After the opening the assistant asks \"Am I speaking with {first_name} {last_name}?\" using the full name because the title field is unreliable."
+   },
+   {
+    "text": "I am Kestrel Bank's digital assistant.",
+    "when": "R19: If anyone asks whether they are talking to a robot or an AI, answer \"I am Kestrel Bank's digital assistant.\" and carry on."
+   },
+   {
+    "text": "Please accept my condolences.",
+    "when": "R28: If told the customer has died, say \"Please accept my condolences.\", ask nothing else, and close with code DEC."
+   },
+   {
+    "text": "Are you able to clear the overdue amount today?",
+    "when": "R40: The first ask is word for word \"Are you able to clear the overdue amount today?\" (several products: \"Are you able to clear all of these today?\"); always ask for"
+   },
+   {
+    "text": "Are you able to clear all of these today?",
+    "when": "R40: The first ask is word for word \"Are you able to clear the overdue amount today?\" (several products: \"Are you able to clear all of these today?\"); always ask for"
+   },
+   {
+    "text": "I am sorry to hear that.",
+    "when": "R49: On illness, bereavement, job loss or the like: say the sorry sentence, make no persuasion attempt at all, and offer once a transfer to customer care (`support` "
+   },
+   {
+    "text": "Shall I record that?",
+    "when": "R54: Read back the product, the amount and the date, then ask \"Shall I record that?\"; call `create_promise` only after a clear yes."
+   },
+   {
+    "text": "We will email you a confirmation of this arrangement.",
+    "when": "R59: After a successful recording say word for word \"We will email you a confirmation of this arrangement.\" — once per call, after the last promise, not once per pro"
+   },
+   {
+    "text": "Payments made today show on our side on the next business day.",
+    "when": "R60: On \"I already paid\": say the verbatim sentence, take no promise, `add_note` reason `paid` (text: channel and day they say they paid), and close `paid` with code"
+   },
+   {
+    "text": "I don't have that information.",
+    "when": "R65: To a question that cannot be answered from the tools, say \"I don't have that information.\""
+   }
+  ],
+  "forbidden_words_before_verification": [
+   "arrears",
+   "overdue",
+   "late",
+   "collections",
+   "debt",
+   "payment",
+   "instalment",
+   "the name of any product"
+  ]
+ },
+ "sources": {
+  "verbatim": [
+   "R13",
+   "R14",
+   "R19",
+   "R28",
+   "R40",
+   "R49",
+   "R54",
+   "R59",
+   "R60",
+   "R65"
+  ],
+  "outcomes": [
+   "R17",
+   "R25",
+   "R26",
+   "R27",
+   "R28",
+   "R35",
+   "R36",
+   "R48",
+   "R49",
+   "R50",
+   "R58",
+   "R60",
+   "R61",
+   "R62",
+   "R63",
+   "R64",
+   "R76",
+   "R77",
+   "R111",
+   "R112",
+   "R122"
+  ],
+  "forbidden_words_before_verification": [
+   "R21"
+  ],
+  "identity": [
+   "R30"
+  ],
+  "max_wrong_answers": [
+   "R32"
+  ],
+  "note_reasons": [
+   "R48",
+   "R51",
+   "R58",
+   "R60",
+   "R61",
+   "R74",
+   "R102",
+   "R120"
+  ],
+  "calendar": [
+   "R83",
+   "R109"
+  ],
+  "bands": [
+   "R104",
+   "R105"
+  ],
+  "attempt_ladder": [
+   "R106"
+  ],
+  "floors": [
+   "R108"
+  ],
+  "callback": [
+   "R113"
+  ]
+ },
+ "notes": [
+  "R01: field enum: date_of_birth, phone_last4; phone_last4 = four digits; unreadable date rejected, not counted",
+  "R03: reason enum: refused, hardship, dispute, paid, service_error",
+  "R05: queue enum: restructuring, general, support",
+  "R78: outcome enum: promise, paid, transferred, no_promise, not_verified, not_reached; nothing accepted after close_call",
+  "R09: variables: customer_id, first_name, last_name, title (Mr|Ms), now as YYYY-MM-DDTHH:MM"
+ ],
+ "merge_conflicts": [
+  "bands[F].text: \"fresh arrears, unchanged\" (R104) -> \"fresh arrears\" (R105)",
+  "bands[S].text: \"standing arrears; latest date brought forward from 7th to 5th business day\" (R104) -> \"standing arrears\" (R105)",
+  "bands[over 45].text: \"not in the digital campaign; if returned, treat as Band S\" (R104) -> \"treat as Band S\" (R105)"
+ ]
+}
