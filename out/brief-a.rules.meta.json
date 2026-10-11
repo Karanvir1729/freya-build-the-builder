@@ -5,41 +5,36 @@
   "B": "claude-opus-5-5",
   "C": "claude-opus-5-5"
  },
- "seconds": 77.93197751045227,
- "cost_usd": 0.9614872,
- "calls": 9,
+ "seconds": 76.312175989151,
+ "cost_usd": 1.4895518,
+ "calls": 8,
  "self_check": {
   "missing_numbers": {},
   "missing_tokens": []
  },
  "samples": {
   "A": 58,
-  "B": 56,
-  "C": 59
+  "B": 59,
+  "C": 60
  },
  "stages": {
   "extract": {
-   "seconds": 38.026636838912964,
-   "cost_usd": 0.5900322,
+   "seconds": 36.602041482925415,
+   "cost_usd": 1.1503953,
    "calls": 6
   },
   "merge": {
-   "seconds": 19.245793342590332,
-   "cost_usd": 0.2109725,
-   "calls": 1
-  },
-  "decide": {
-   "seconds": 0.0,
-   "cost_usd": 0.0494139,
+   "seconds": 18.68771529197693,
+   "cost_usd": 0.2175587,
    "calls": 1
   },
   "verify": {
    "seconds": 0.0,
-   "cost_usd": 0.1110686,
+   "cost_usd": 0.1215978,
    "calls": 1
   },
   "verify+decide": {
-   "seconds": 20.646599292755127
+   "seconds": 21.01495122909546
   }
  },
  "briefs": [
@@ -48,20 +43,20 @@
  "api": "tools/openapi.json",
  "spec": "brief-a.spec.json",
  "conflicts": "brief-a.rules.conflicts.md",
- "n_conflicts": 1,
+ "n_conflicts": 3,
  "call_date_range": {
-  "earliest": "2026-10-14",
-  "latest": "2027-01-01",
-  "basis": "example `now` 2026-10-14T11:00; bank holiday list runs to 2027-01-01"
+  "earliest": "",
+  "latest": "",
+  "basis": ""
  },
- "n_rules": 60,
- "n_in_force": 60,
+ "n_rules": 61,
+ "n_in_force": 61,
  "n_low": 2,
  "n_low_in_force": 2,
  "verification": {
   "ok": 21
  },
- "decision_blocks": 1,
+ "decision_blocks": 0,
  "spec_errors": 0,
  "spec_warnings": 0
 }
