@@ -66,7 +66,7 @@ def _retry(fn, tries=12, wait=15):
         try:
             return fn()
         except RuntimeError as e:
-            if not re.search(r"-> 50[234]", str(e)) or i == tries - 1:
+            if not re.search(r"-> 5\d\d", str(e)) or i == tries - 1:
                 raise
             print("Freya answered %s; retrying in %d s" % (str(e)[:80], wait), flush=True)
             time.sleep(wait)
@@ -79,12 +79,12 @@ def run_simulation(agent_id, name, variables):
         try:                           # temporarily unavailable', 503) is retried for up to 20 minutes
             return freya.run_simulation(agent_id, name, variables)
         except RuntimeError as e:
-            m = re.search(r"/api/v2/simulations/([0-9a-f-]{36}) -> 50[234]", str(e))
+            m = re.search(r"/api/v2/simulations/([0-9a-f-]{36}) -> 5\d\d", str(e))
             if m:
                 sim_id = m.group(1)
                 print("Freya answered %s while polling simulation %s; polling again" % (str(e)[:60], sim_id), flush=True)
                 break
-            if not re.search(r"POST /api/v2/simulations -> 50[234]", str(e)) or attempt == 39:
+            if not re.search(r"POST /api/v2/simulations -> 5\d\d", str(e)) or attempt == 39:
                 raise
             print("Freya answered %s when starting; retrying in 30 s" % str(e)[:80], flush=True)
             time.sleep(30)
