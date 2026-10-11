@@ -2221,6 +2221,48 @@
    "node_type": "conversation",
    "transitions": [
     {
+     "target_node": "fin_deceased",
+     "description": "the person now says they are not the customer (deceased)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "who_now",
+        "operator": "equals",
+        "operand": "deceased"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "fin_wrong_number",
+     "description": "the person now says they are not the customer (wrong_number)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "who_now",
+        "operator": "equals",
+        "operand": "wrong_number"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "third_party",
+     "description": "the person now says they are not the customer (someone_else)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "who_now",
+        "operator": "equals",
+        "operand": "someone_else"
+       }
+      ]
+     }
+    },
+    {
      "target_node": "fin_failed",
      "description": "three wrong answers",
      "condition": {
@@ -2422,6 +2464,18 @@
      ],
      "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask what the call is about INSTEAD of answering (R15: asking what the call is about instead of answering counts as declining). none if they give an answer or say anything else. question = asks something else back INSTEAD of answering (why do you need that, who is calling, is this a robot, is this a scam) with NO answer in the message; a message that contains the answer and also a question is none (the answer is processed and the question answered in the same turn). Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
      "min_confidence": 0.5
+    },
+    {
+     "name": "who_now",
+     "type": "string",
+     "enum_values": [
+      "same",
+      "deceased",
+      "wrong_number",
+      "someone_else"
+     ],
+     "description": "From the person's LATEST message only: whether they now say they are NOT the person this call is for. same = anything else: an answer to the question (also a wrong one), a question, a refusal, small talk, a cut-off line, or the person themselves. The other values are the opening's cases, described there as: Who answered, judged ONLY from the person's latest message. customer = they confirm they are {{title}} {{last_name}}: 'yes', 'that's me', 'speaking', or they say the customer's own name ({{first_name}} / {{last_name}}). someone_else = another person answered (a relative, partner, colleague), or says the customer is not here / not available, or offers to take a message. wrong_number = says this number does not belong to that person / they do not know them. deceased = says the customer has died / passed away. refuses = says they do not want to talk / not interested. unclear = anything else: 'hello', 'go ahead', 'who is this?', 'what is this about?', a question, silence. no_answer = the message answers nothing and asks nothing: only small talk (the day, the traffic, work, family) and/or a sentence cut off mid-way (it stops on 'an', 'the', 'my', 'with', 'because'), with no yes or no, no name, no greeting and no question in it. no_answer comes before the catch-all 'anything else' of unclear; every example named under unclear stays unclear, and so do a greeting ('hello'), 'go ahead', any question and silence. A message with small talk AND an answer gets the answer's value. Here only deceased, wrong_number, someone_else count, for a person who says they are not that person; never 'same' for a message that says so.",
+     "min_confidence": 0.5
     }
    ],
    "on_enter_first_entry_only": false
@@ -2430,6 +2484,48 @@
    "name": "ask_phone",
    "node_type": "conversation",
    "transitions": [
+    {
+     "target_node": "fin_deceased",
+     "description": "the person now says they are not the customer (deceased)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "who_now",
+        "operator": "equals",
+        "operand": "deceased"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "fin_wrong_number",
+     "description": "the person now says they are not the customer (wrong_number)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "who_now",
+        "operator": "equals",
+        "operand": "wrong_number"
+       }
+      ]
+     }
+    },
+    {
+     "target_node": "third_party",
+     "description": "the person now says they are not the customer (someone_else)",
+     "condition": {
+      "logic": "or",
+      "conditions": [
+       {
+        "variable": "who_now",
+        "operator": "equals",
+        "operand": "someone_else"
+       }
+      ]
+     }
+    },
     {
      "target_node": "load_account",
      "description": "identity verified",
@@ -2631,6 +2727,18 @@
       "question"
      ],
      "description": "From the customer's LATEST message only: refused if they refuse to answer the security question, say they do not want to talk, or ask what the call is about INSTEAD of answering (R15: asking what the call is about instead of answering counts as declining). none if they give an answer or say anything else. question = asks something else back INSTEAD of answering (why do you need that, who is calling, is this a robot, is this a scam) with NO answer in the message; a message that contains the answer and also a question is none (the answer is processed and the question answered in the same turn). Small talk, an unrelated sentence, a cut-off or empty message, a partial answer, or a question back that the rules do not count is none, never refused: only what the rules name counts.",
+     "min_confidence": 0.5
+    },
+    {
+     "name": "who_now",
+     "type": "string",
+     "enum_values": [
+      "same",
+      "deceased",
+      "wrong_number",
+      "someone_else"
+     ],
+     "description": "From the person's LATEST message only: whether they now say they are NOT the person this call is for. same = anything else: an answer to the question (also a wrong one), a question, a refusal, small talk, a cut-off line, or the person themselves. The other values are the opening's cases, described there as: Who answered, judged ONLY from the person's latest message. customer = they confirm they are {{title}} {{last_name}}: 'yes', 'that's me', 'speaking', or they say the customer's own name ({{first_name}} / {{last_name}}). someone_else = another person answered (a relative, partner, colleague), or says the customer is not here / not available, or offers to take a message. wrong_number = says this number does not belong to that person / they do not know them. deceased = says the customer has died / passed away. refuses = says they do not want to talk / not interested. unclear = anything else: 'hello', 'go ahead', 'who is this?', 'what is this about?', a question, silence. no_answer = the message answers nothing and asks nothing: only small talk (the day, the traffic, work, family) and/or a sentence cut off mid-way (it stops on 'an', 'the', 'my', 'with', 'because'), with no yes or no, no name, no greeting and no question in it. no_answer comes before the catch-all 'anything else' of unclear; every example named under unclear stays unclear, and so do a greeting ('hello'), 'go ahead', any question and silence. A message with small talk AND an answer gets the answer's value. Here only deceased, wrong_number, someone_else count, for a person who says they are not that person; never 'same' for a message that says so.",
      "min_confidence": 0.5
     }
    ],

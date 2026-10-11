@@ -1406,5 +1406,28 @@ def test_accept_with_a_declined_day_and_the_latest_day():
     ev(P, V, "accept", stance="accept")
     assert V["state_p1"] == "agreed" and "today" in V["readback_line"], V["readback_line"]
 
+@test
+def test_reroute_not_customer_at_the_security_questions():
+    """EXT-A-04 (in_words, Freya): the sister answered 'I am Maria' at the opening, then at the date of birth 'I am not
+    Maria Costa, I am her sister': no route, 70+ refusals. The identity nodes get the opening's own not-the-customer
+    routes (values and targets read from setup)."""
+    nodes = _opening_nodes()
+    nodes["ask_dob"]["extraction_schema"] = [fl.ext("refusal_dob", ["none", "refused"], "r")]
+    nodes["ask_dob"]["transitions"] = [fl.eq("refusal_dob", "refused", "fin_declined", "r")]
+    fl.reroute_not_customer(nodes, ["ask_dob"])
+    ent = [e for e in nodes["ask_dob"]["extraction_schema"] if e["name"] == "who_now"][0]
+    assert ent["enum_values"] == ["same", "deceased", "wrong_number", "someone_else"], ent["enum_values"]
+    assert "customer = yes" in ent["description"], ent["description"]
+    got = {t["condition"]["conditions"][0]["operand"]: t["target_node"] for t in nodes["ask_dob"]["transitions"][:3]}
+    assert got == {"deceased": "fin_deceased", "wrong_number": "fin_wrong_number", "someone_else": "third_party"}, got
+    assert nodes["ask_dob"]["transitions"][3]["target_node"] == "fin_declined"
+    fl.reroute_not_customer(nodes, ["ask_dob"])     # idempotent
+    assert len(nodes["ask_dob"]["transitions"]) == 4 and len(nodes["ask_dob"]["extraction_schema"]) == 2
+    try:
+        fl.reroute_not_customer(nodes, ["ask_dob"], values=["third_party_x"])
+        raise AssertionError("an unknown value must raise")
+    except ValueError:
+        pass
+
 if __name__ == "__main__":
     sys.exit(main())

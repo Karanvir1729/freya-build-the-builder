@@ -1010,6 +1010,55 @@ def opening_no_answer(nodes, ask_line, opening="opening", setup="setup", retry="
     return nodes
 
 
+# a person who only says at the security questions that they are NOT the customer (a relative who first answered to the
+# customer's name): the identity nodes had no route for it, and the model refused ('I can only speak with Ms Costa.')
+# 70+ times while the sister kept giving a callback time (extended Brief A EXT-A-04, in_words style, on Freya)
+REROUTE_SKIP = ("customer", "refuses", "refused", "declined", "declines", "unclear", "no_answer", "other", "none")
+REROUTE_DESC = ("From the person's LATEST message only: whether they now say they are NOT the person this call is for. "
+                "same = anything else: an answer to the question (also a wrong one), a question, a refusal, small talk, a "
+                "cut-off line, or the person themselves. The other values are the opening's cases, described there as: ")
+
+
+def reroute_not_customer(nodes, ask_nodes, setup="setup", var1="who1", values=None, var="who_now", opening=None):
+    """Gives every identity-question node in `ask_nodes` (a person who answered to the customer's name at the opening)
+    the opening's 'not the customer' cases: extraction `var` (same + those values, described with the opening's own
+    description of `var1`) and one route per value to the target the opening's setup routes it to (e.g. someone_else ->
+    the third-party node, wrong_number / deceased -> their endings). `values` default: every value setup routes on
+    except the one that leads to ask_nodes[0] and REROUTE_SKIP; pass the brief's own names when they differ. The routes
+    go first. Returns nodes."""
+    trs = (nodes.get(setup) or {}).get("transitions") or []
+    m = {}
+    for t in trs:
+        for c in (t.get("condition") or {}).get("conditions") or []:
+            if c.get("variable") == var1 and c.get("operator") == "equals":
+                m.setdefault(str(c.get("operand")), t["target_node"])
+    if not m:
+        raise ValueError("reroute_not_customer: %r has no routes on %r" % (setup, var1))
+    vals = list(values) if values else [v for v, t in m.items() if t != ask_nodes[0] and v not in REROUTE_SKIP]
+    missing = [v for v in vals if v not in m]
+    if missing or not vals:
+        raise ValueError("reroute_not_customer: no setup route for %r (routes: %s)" % (missing or vals, sorted(m)))
+    desc1 = ""
+    for k, n in nodes.items():
+        if opening in (None, k):
+            for e in n.get("extraction_schema") or []:
+                if e.get("name") == var1 and not desc1:
+                    desc1 = str(e.get("description") or "")
+    entry = ext(var, ["same"] + vals, REROUTE_DESC + desc1 + " Here only " + ", ".join(vals) + " count, for a person who "
+                "says they are not that person; never 'same' for a message that says so.")
+    for n in ask_nodes:
+        node = nodes.get(n)
+        if not isinstance(node, dict) or node.get("node_type") != "conversation":
+            raise ValueError("reroute_not_customer: %r must be a conversation node already in nodes" % n)
+        sch = node.setdefault("extraction_schema", [])
+        if not any(e.get("name") == var for e in sch):
+            sch.append(dict(entry))
+        have = {t.get("target_node") + "|" + json.dumps(t.get("condition"), sort_keys=True) for t in node.get("transitions") or []}
+        new = [eq(var, v, m[v], "the person now says they are not the customer (%s)" % v) for v in vals]
+        node["transitions"] = [t for t in new if t["target_node"] + "|" + json.dumps(t["condition"], sort_keys=True) not in have] \
+            + list(node.get("transitions") or [])
+    return nodes
+
 TP_OFFER_DESC = ("Whether the person who answered, in their LATEST message, offers to pay, to settle it, to take care of it "
                  "or to act for the customer ('I can pay it myself', 'I'll sort it out for her', 'can I help with it?'). "
                  "yes = such an offer, also when the message asks a question or names a time as well; no = anything else.")

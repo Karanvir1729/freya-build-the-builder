@@ -205,6 +205,8 @@ nodes["ask_phone"] = fl.conv(
         fl.eq("refusal_phone", "question", "qb_phone", "asks a question back"),
     ])
 
+fl.reroute_not_customer(nodes, ["ask_dob", "ask_phone"])   # a person who says only now that they are not the customer: the opening's routes
+
 for stage in ["dob", "phone"]:
     nodes[f"qb_{stage}"] = fl.question_back_node(stage, f"ask_{stage}", "fin_declined")   # a question back: answer, ask again; twice in a row = deflection
     code = fl.counter_code("decline_count", 2, "decline_route", reset={"refusal_dob": "none", "refusal_phone": "none"})
