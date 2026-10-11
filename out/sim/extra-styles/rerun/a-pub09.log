@@ -1,0 +1,10 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 2 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS PUB-09[impatient] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+PASS PUB-09[pieces_identity] medium Restructuring  | verify > verify > get_account > transfer_to_agent > close_call
+
+slowest agent turn per call: median 9 s, worst 9 s (chat-route timing, not a simulation's).
+style pieces_identity: 1 / 1 passed
+style impatient: 1 / 1 passed
+
+2 / 2 passed (bank records and conversation checks). Local chat-route simulation, 101 s.
+cost: 14 chat turns, 14 model calls (12 customer on gpt-5-mini, 2 judge on gpt-5), 14 ledger polls, 4 call fetches.

@@ -1,0 +1,167 @@
+{
+ "runner": "sim",
+ "workflow_id": "b3eaff30-598f-4e4d-8a97-af4a8714a669",
+ "agent_id": "d5de3c04-455d-4ead-843f-a58dead4e3dd",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 101,
+ "passed": 2,
+ "total": 2,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-09[pieces_identity]",
+   "family": "Restructuring",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-09[impatient]",
+   "family": "Restructuring",
+   "style": "impatient",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-09[pieces_identity]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "486e77ed-ed68-461f-b62b-b40925dae4d6",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_f2b6c20a-f5f",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-09[pieces_identity].txt",
+   "turns": 8,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any payment plan; and no promise-to-pay was recorded in the tool calls.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/486e77ed-ed68-461f-b62b-b40925dae4d6",
+   "slowest_turn_s": 3.6,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-09[impatient]",
+   "level": "medium",
+   "family": "Restructuring",
+   "pass": true,
+   "failed": [],
+   "call_id": "f067dc15-5e15-43b4-85c4-83b0200ef035",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "transfer_to_agent",
+    "close_call"
+   ],
+   "customer_id": "c_5c529d0a-6b5",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-09[impatient].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "The agent called transfer_to_agent with queue 'restructuring', did not describe any repayment plan itself, and no promise was recorded in the transcript or tool calls.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-09",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f067dc15-5e15-43b4-85c4-83b0200ef035",
+   "slowest_turn_s": 9.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-09[pieces_identity]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "486e77ed-ed68-461f-b62b-b40925dae4d6",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_f2b6c20a-f5f",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-09[pieces_identity].txt",
+    "turns": 8,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "transfer_to_agent was called with queue 'restructuring'; the agent did not propose or describe any payment plan; and no promise-to-pay was recorded in the tool calls.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/486e77ed-ed68-461f-b62b-b40925dae4d6",
+    "slowest_turn_s": 3.6,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-09[impatient]",
+    "level": "medium",
+    "family": "Restructuring",
+    "pass": true,
+    "failed": [],
+    "call_id": "f067dc15-5e15-43b4-85c4-83b0200ef035",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "transfer_to_agent",
+     "close_call"
+    ],
+    "customer_id": "c_5c529d0a-6b5",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-09[impatient].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "The agent called transfer_to_agent with queue 'restructuring', did not describe any repayment plan itself, and no promise was recorded in the transcript or tool calls.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-09",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f067dc15-5e15-43b4-85c4-83b0200ef035",
+    "slowest_turn_s": 9.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 14,
+  "customer_calls": 12,
+  "judge_calls": 2,
+  "judge_retries": 0,
+  "ledger_polls": 14,
+  "ledger_errors": 0,
+  "call_fetches": 4
+ }
+}

@@ -1,0 +1,8 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 1 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+PASS PUB-07[previous_question] hard   Dates          | verify > verify > get_account > promise > close_call
+
+slowest agent turn per call: median 8 s, worst 8 s (chat-route timing, not a simulation's).
+style previous_question: 1 / 1 passed
+
+1 / 1 passed (bank records and conversation checks). Local chat-route simulation, 129 s.
+cost: 10 chat turns, 10 model calls (9 customer on gpt-5-mini, 1 judge on gpt-5), 10 ledger polls, 2 call fetches.

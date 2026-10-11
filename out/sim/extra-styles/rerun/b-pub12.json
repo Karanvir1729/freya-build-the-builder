@@ -1,0 +1,263 @@
+{
+ "runner": "sim",
+ "workflow_id": "6e8d8427-cbe5-407f-916c-de2fa5e3107f",
+ "agent_id": "01be3409-fdf0-4700-ab84-189fb4e29d11",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 386,
+ "passed": 1,
+ "total": 3,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-12[rambling_corrects]",
+   "family": "Multi-product",
+   "style": "rambling_corrects",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-12[pieces_identity]",
+   "family": "Multi-product",
+   "style": "pieces_identity",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-12[previous_question]",
+   "family": "Multi-product",
+   "style": "previous_question",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-12[rambling_corrects]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "promises [('p1', 510.0, '2026-10-14')], expected [('p1', 510.0, '2026-10-15')]"
+   ],
+   "call_id": "12069ed5-ffd7-41a6-8f89-b44bbcdfbdfa",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_dad565fe-e50",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-12[rambling_corrects].txt",
+   "turns": 11,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria hold: DOB asked once, phone last-4 re-asked once; exactly one promise on the credit card; one refused note each for the personal loan and car loan; two attempts on the late personal loan and one on the early car loan.",
+    "model": "gpt-5"
+   },
+   "style": "rambling_corrects",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/12069ed5-ffd7-41a6-8f89-b44bbcdfbdfa",
+   "slowest_turn_s": 7.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[pieces_identity]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": true,
+   "failed": [],
+   "call_id": "c7ffb981-b925-4cb7-b8f6-a1c912873ae6",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_4c1b2f09-a92",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-12[pieces_identity].txt",
+   "turns": 15,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Phone last-four question was asked twice (once repeated), DOB only once; exactly one promise was created for the credit card; one 'refused' note was added for each of the personal loan (p2) and car loan (p3); two payment attempts were made on the personal loan and one on the car loan.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c7ffb981-b925-4cb7-b8f6-a1c912873ae6",
+   "slowest_turn_s": 4.3,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-12[previous_question]",
+   "level": "hard",
+   "family": "Multi-product",
+   "pass": false,
+   "failed": [
+    "conversation: The agent made two attempts on the car loan (asked for payment twice: \u201cNext, your car loan...\u201d and again \u201cYes, I am here... Can you pay 140...\u201d); the criterion requires only one. All other criteria are met."
+   ],
+   "call_id": "07a07add-0eaf-44f1-a8a4-456cc105605e",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "add_note",
+    "add_note",
+    "close_call"
+   ],
+   "customer_id": "c_ff3293dc-95b",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-12[previous_question].txt",
+   "turns": 15,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent made two attempts on the car loan (asked for payment twice: \u201cNext, your car loan...\u201d and again \u201cYes, I am here... Can you pay 140...\u201d); the criterion requires only one. All other criteria are met.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-12",
+   "ended": "assistant-ended-call",
+   "chat_branched": true,
+   "transcript_source": "GET /api/v2/call/07a07add-0eaf-44f1-a8a4-456cc105605e",
+   "slowest_turn_s": 11.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-12[rambling_corrects]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "promises [('p1', 510.0, '2026-10-14')], expected [('p1', 510.0, '2026-10-15')]"
+    ],
+    "call_id": "12069ed5-ffd7-41a6-8f89-b44bbcdfbdfa",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_dad565fe-e50",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-12[rambling_corrects].txt",
+    "turns": 11,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria hold: DOB asked once, phone last-4 re-asked once; exactly one promise on the credit card; one refused note each for the personal loan and car loan; two attempts on the late personal loan and one on the early car loan.",
+     "model": "gpt-5"
+    },
+    "style": "rambling_corrects",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/12069ed5-ffd7-41a6-8f89-b44bbcdfbdfa",
+    "slowest_turn_s": 7.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[pieces_identity]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": true,
+    "failed": [],
+    "call_id": "c7ffb981-b925-4cb7-b8f6-a1c912873ae6",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_4c1b2f09-a92",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-12[pieces_identity].txt",
+    "turns": 15,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Phone last-four question was asked twice (once repeated), DOB only once; exactly one promise was created for the credit card; one 'refused' note was added for each of the personal loan (p2) and car loan (p3); two payment attempts were made on the personal loan and one on the car loan.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c7ffb981-b925-4cb7-b8f6-a1c912873ae6",
+    "slowest_turn_s": 4.3,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-12[previous_question]",
+    "level": "hard",
+    "family": "Multi-product",
+    "pass": false,
+    "failed": [
+     "conversation: The agent made two attempts on the car loan (asked for payment twice: \u201cNext, your car loan...\u201d and again \u201cYes, I am here... Can you pay 140...\u201d); the criterion requires only one. All other criteria are met."
+    ],
+    "call_id": "07a07add-0eaf-44f1-a8a4-456cc105605e",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "add_note",
+     "add_note",
+     "close_call"
+    ],
+    "customer_id": "c_ff3293dc-95b",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-12[previous_question].txt",
+    "turns": 15,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent made two attempts on the car loan (asked for payment twice: \u201cNext, your car loan...\u201d and again \u201cYes, I am here... Can you pay 140...\u201d); the criterion requires only one. All other criteria are met.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-12",
+    "ended": "assistant-ended-call",
+    "chat_branched": true,
+    "transcript_source": "GET /api/v2/call/07a07add-0eaf-44f1-a8a4-456cc105605e",
+    "slowest_turn_s": 11.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 41,
+  "customer_calls": 38,
+  "judge_calls": 3,
+  "judge_retries": 0,
+  "ledger_polls": 41,
+  "ledger_errors": 0,
+  "call_fetches": 11
+ }
+}

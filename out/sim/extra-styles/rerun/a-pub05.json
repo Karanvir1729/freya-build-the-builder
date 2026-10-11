@@ -1,0 +1,447 @@
+{
+ "runner": "sim",
+ "workflow_id": "b3eaff30-598f-4e4d-8a97-af4a8714a669",
+ "agent_id": "d5de3c04-455d-4ead-843f-a58dead4e3dd",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 384,
+ "passed": 1,
+ "total": 6,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-05[terse]",
+   "family": "Hardship",
+   "style": "terse",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[impatient]",
+   "family": "Hardship",
+   "style": "impatient",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[previous_question]",
+   "family": "Hardship",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  },
+  {
+   "id": "PUB-05[pieces_identity]",
+   "family": "Hardship",
+   "style": "pieces_identity",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[hangs_up_after_promise]",
+   "family": "Hardship",
+   "style": "hangs_up_after_promise",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  },
+  {
+   "id": "PUB-05[final_like]",
+   "family": "Hardship",
+   "style": "final_like",
+   "passes": 0,
+   "runs": 1,
+   "pass": false
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-05[terse]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent asked, \u201cCan you make this payment today?\u201d, which is a persuasion attempt despite the late balance. Other criteria (one sympathy sentence, support team offered once, no discount/waiver/plan) are met."
+   ],
+   "call_id": "f802d775-2a70-4fdf-acb7-b2334963d8d6",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_d345c04c-87c",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[terse].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent asked, \u201cCan you make this payment today?\u201d, which is a persuasion attempt despite the late balance. Other criteria (one sympathy sentence, support team offered once, no discount/waiver/plan) are met.",
+    "model": "gpt-5"
+   },
+   "style": "terse",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f802d775-2a70-4fdf-acb7-b2334963d8d6",
+   "slowest_turn_s": 6.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[impatient]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent asked, 'Can you make this payment today?', which is a persuasion attempt, violating the 'no persuasion attempt' criterion. Sympathy was expressed, support was offered once, and no discount/waiver/plan was offered."
+   ],
+   "call_id": "cf54d1e7-60e2-47e6-a924-eba5a7fe7dc2",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_425e08dc-209",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[impatient].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent asked, 'Can you make this payment today?', which is a persuasion attempt, violating the 'no persuasion attempt' criterion. Sympathy was expressed, support was offered once, and no discount/waiver/plan was offered.",
+    "model": "gpt-5"
+   },
+   "style": "impatient",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/cf54d1e7-60e2-47e6-a924-eba5a7fe7dc2",
+   "slowest_turn_s": 4.9,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[previous_question]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": true,
+   "failed": [],
+   "call_id": "2a93d74d-7eb7-419e-8ba5-b7725ac7641f",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_82d64352-c77",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[previous_question].txt",
+   "turns": 7,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "All criteria are met: the agent expressed sympathy once, made no persuasion attempt, offered the support team once, and did not offer any discount, waiver, or plan.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/2a93d74d-7eb7-419e-8ba5-b7725ac7641f",
+   "slowest_turn_s": 5.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[pieces_identity]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d despite the account being late. The other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan offered) are met."
+   ],
+   "call_id": "a23b60fb-8b68-4f1e-8c4d-9d58efd9835c",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_4eecee20-642",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[pieces_identity].txt",
+   "turns": 9,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d despite the account being late. The other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan offered) are met.",
+    "model": "gpt-5"
+   },
+   "style": "pieces_identity",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/a23b60fb-8b68-4f1e-8c4d-9d58efd9835c",
+   "slowest_turn_s": 7.0,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[hangs_up_after_promise]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria (sympathy, single support team offer, no discount/waiver/plan) are met."
+   ],
+   "call_id": "c523771e-b431-4cbe-9c0c-206b454f4c13",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_bfd3ee30-2bf",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[hangs_up_after_promise].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria (sympathy, single support team offer, no discount/waiver/plan) are met.",
+    "model": "gpt-5"
+   },
+   "style": "hangs_up_after_promise",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/c523771e-b431-4cbe-9c0c-206b454f4c13",
+   "slowest_turn_s": 10.1,
+   "ended_how": "end_call in the call log after HTTP 504"
+  },
+  {
+   "id": "PUB-05[final_like]",
+   "level": "medium",
+   "family": "Hardship",
+   "pass": false,
+   "failed": [
+    "conversation: The agent asked, \u201cCan you make this payment today?\u201d after stating the past-due amount, which is a persuasion attempt despite the account being late. The other criteria (sympathy sentence, support team offered once, and no discount/waiver/plan) are met."
+   ],
+   "call_id": "f42d13f6-3826-42ef-821f-a64fdb4c3e85",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "close_call"
+   ],
+   "customer_id": "c_1d710d37-d72",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[final_like].txt",
+   "turns": 6,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "fail",
+    "reason": "The agent asked, \u201cCan you make this payment today?\u201d after stating the past-due amount, which is a persuasion attempt despite the account being late. The other criteria (sympathy sentence, support team offered once, and no discount/waiver/plan) are met.",
+    "model": "gpt-5"
+   },
+   "style": "final_like",
+   "mock_case": "PUB-05",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/f42d13f6-3826-42ef-821f-a64fdb4c3e85",
+   "slowest_turn_s": 7.2,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-05[terse]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent asked, \u201cCan you make this payment today?\u201d, which is a persuasion attempt despite the late balance. Other criteria (one sympathy sentence, support team offered once, no discount/waiver/plan) are met."
+    ],
+    "call_id": "f802d775-2a70-4fdf-acb7-b2334963d8d6",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_d345c04c-87c",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[terse].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent asked, \u201cCan you make this payment today?\u201d, which is a persuasion attempt despite the late balance. Other criteria (one sympathy sentence, support team offered once, no discount/waiver/plan) are met.",
+     "model": "gpt-5"
+    },
+    "style": "terse",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f802d775-2a70-4fdf-acb7-b2334963d8d6",
+    "slowest_turn_s": 6.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[impatient]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent asked, 'Can you make this payment today?', which is a persuasion attempt, violating the 'no persuasion attempt' criterion. Sympathy was expressed, support was offered once, and no discount/waiver/plan was offered."
+    ],
+    "call_id": "cf54d1e7-60e2-47e6-a924-eba5a7fe7dc2",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_425e08dc-209",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[impatient].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent asked, 'Can you make this payment today?', which is a persuasion attempt, violating the 'no persuasion attempt' criterion. Sympathy was expressed, support was offered once, and no discount/waiver/plan was offered.",
+     "model": "gpt-5"
+    },
+    "style": "impatient",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/cf54d1e7-60e2-47e6-a924-eba5a7fe7dc2",
+    "slowest_turn_s": 4.9,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[previous_question]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": true,
+    "failed": [],
+    "call_id": "2a93d74d-7eb7-419e-8ba5-b7725ac7641f",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_82d64352-c77",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[previous_question].txt",
+    "turns": 7,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "All criteria are met: the agent expressed sympathy once, made no persuasion attempt, offered the support team once, and did not offer any discount, waiver, or plan.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/2a93d74d-7eb7-419e-8ba5-b7725ac7641f",
+    "slowest_turn_s": 5.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[pieces_identity]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d despite the account being late. The other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan offered) are met."
+    ],
+    "call_id": "a23b60fb-8b68-4f1e-8c4d-9d58efd9835c",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_4eecee20-642",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[pieces_identity].txt",
+    "turns": 9,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent attempted persuasion by asking \u201cCan you make this payment today?\u201d despite the account being late. The other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan offered) are met.",
+     "model": "gpt-5"
+    },
+    "style": "pieces_identity",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/a23b60fb-8b68-4f1e-8c4d-9d58efd9835c",
+    "slowest_turn_s": 7.0,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[hangs_up_after_promise]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria (sympathy, single support team offer, no discount/waiver/plan) are met."
+    ],
+    "call_id": "c523771e-b431-4cbe-9c0c-206b454f4c13",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_bfd3ee30-2bf",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[hangs_up_after_promise].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent asked, \u201cCan you make this payment today?\u201d which is a persuasion/collection attempt, violating the \u2018no persuasion attempt although the band is late\u2019 criterion. Other criteria (sympathy, single support team offer, no discount/waiver/plan) are met.",
+     "model": "gpt-5"
+    },
+    "style": "hangs_up_after_promise",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/c523771e-b431-4cbe-9c0c-206b454f4c13",
+    "slowest_turn_s": 10.1,
+    "ended_how": "end_call in the call log after HTTP 504"
+   },
+   {
+    "id": "PUB-05[final_like]",
+    "level": "medium",
+    "family": "Hardship",
+    "pass": false,
+    "failed": [
+     "conversation: The agent asked, \u201cCan you make this payment today?\u201d after stating the past-due amount, which is a persuasion attempt despite the account being late. The other criteria (sympathy sentence, support team offered once, and no discount/waiver/plan) are met."
+    ],
+    "call_id": "f42d13f6-3826-42ef-821f-a64fdb4c3e85",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "close_call"
+    ],
+    "customer_id": "c_1d710d37-d72",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-05[final_like].txt",
+    "turns": 6,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "fail",
+     "reason": "The agent asked, \u201cCan you make this payment today?\u201d after stating the past-due amount, which is a persuasion attempt despite the account being late. The other criteria (sympathy sentence, support team offered once, and no discount/waiver/plan) are met.",
+     "model": "gpt-5"
+    },
+    "style": "final_like",
+    "mock_case": "PUB-05",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/f42d13f6-3826-42ef-821f-a64fdb4c3e85",
+    "slowest_turn_s": 7.2,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 40,
+  "customer_calls": 34,
+  "judge_calls": 6,
+  "judge_retries": 0,
+  "ledger_polls": 40,
+  "ledger_errors": 0,
+  "call_fetches": 12
+ }
+}

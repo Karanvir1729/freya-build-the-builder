@@ -1,0 +1,23 @@
+sim | workflow b3eaff30-598f-4e4d-8a97-af4a8714a669 (slot brief-a-v3-x) | 6 case(s) x 1 rep(s) | concurrency 2 | customer gpt-5-mini, judge gpt-5 (openai)
+FAIL PUB-05[terse] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent asked, “Can you make this payment today?”, which is a persuasion attempt despite the late balance. Other criteria (one sympathy sentence, support team offered once, no discount/waiver/plan) are met.
+FAIL PUB-05[impatient] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent asked, 'Can you make this payment today?', which is a persuasion attempt, violating the 'no persuasion attempt' criterion. Sympathy was expressed, support was offered once, and no discount/waiver/plan was offered.
+PASS PUB-05[previous_question] medium Hardship       | verify > verify > get_account > close_call
+FAIL PUB-05[pieces_identity] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent attempted persuasion by asking “Can you make this payment today?” despite the account being late. The other criteria (one sympathy sentence, support team offered once, and no discount/waiver/plan offered) are met.
+FAIL PUB-05[hangs_up_after_promise] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent asked, “Can you make this payment today?” which is a persuasion/collection attempt, violating the ‘no persuasion attempt although the band is late’ criterion. Other criteria (sympathy, single support team offer, no discount/waiver/plan)
+FAIL PUB-05[final_like] medium Hardship       | verify > verify > get_account > close_call
+       - conversation: The agent asked, “Can you make this payment today?” after stating the past-due amount, which is a persuasion attempt despite the account being late. The other criteria (sympathy sentence, support team offered once, and no discount/waiver/plan) ar
+
+slowest agent turn per call: median 7 s, worst 10 s (chat-route timing, not a simulation's).
+style terse: 0 / 1 passed
+style impatient: 0 / 1 passed
+style previous_question: 1 / 1 passed
+style pieces_identity: 0 / 1 passed
+style hangs_up_after_promise: 0 / 1 passed
+style final_like: 0 / 1 passed
+
+1 / 6 passed (bank records and conversation checks). Local chat-route simulation, 384 s.
+cost: 40 chat turns, 40 model calls (34 customer on gpt-5-mini, 6 judge on gpt-5), 40 ledger polls, 12 call fetches.

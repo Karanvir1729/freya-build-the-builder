@@ -713,6 +713,27 @@ def claims_first(V):
         return False
     advance(V, pre)
     return True
+def other_settled(V):
+    # one product at a time: a turn whose offer names ANOTHER product that is already settled (agreed, recorded, paid,
+    # disputed, refused) is never applied to the product under discussion. A customer who repeated 'I'll pay the credit
+    # card tomorrow and I will not pay the personal loan' while the loan was asked had the CARD's day agreed for the
+    # LOAN (offer_for 'first', stance refuse; Brief B PUB-12, previous_question style). The turn's refusal or 'too much'
+    # counts for the current product; anything else gets the current question again.
+    if not multi(V) or g(V, 'stage') == 'all':
+        return False
+    tp = offer_target(V)
+    cur = g(V, 'cur_pid')
+    if not tp or not cur or tp == cur or state(V, tp) == 'open':
+        return False
+    V['offer_verdict'] = 'other_product'
+    st = g(V, 'stance')
+    if st == 'refuse':
+        ev_refuse(V)
+    elif st == 'too_much':
+        too_much(V, cur)
+    else:
+        say(V, g(V, 'offer_question'), 'negotiate')
+    return True
 def ev_offer(V):
     if claims_first(V):
         return
@@ -725,6 +746,8 @@ def ev_offer(V):
         kind = k2
     if kind == 'vague':
         d = None
+    if other_settled(V):
+        return
     if not (multi(V) and g(V, 'stage') == 'all'):
         pid = g(V, 'cur_pid')
         a = ref_amount(V, pid, a)

@@ -808,5 +808,23 @@ def test_identity_parts_across_turns():
     assert not any(msg in f["message"] for f in lint(node("Ask. CALL verify_identity. " + s)))
 
 
+@test
+def test_offer_for_settled_other_product():
+    """One product at a time, an offer naming ANOTHER, already agreed product is not applied to the current one (Brief B
+    PUB-12, previous_question: the card's 'tomorrow' was agreed for the loan). Its refusal counts for the current product;
+    without a refusal the current question is asked again; an offer for the current product still goes through."""
+    P, V = start([CARD, LOAN, CAR], multi=True, notes=True)
+    ev(P, V, "offer", offer_kind="exact", offer_date="2026-10-15", offer_for="first")
+    assert V["state_p1"] == "agreed" and V["cur_pid"] == "p2", V["say_next"]
+    card = V["agreed_p1"]
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_for="first", stance="refuse")
+    assert V["state_p2"] == "open" and V["agreed_p2"] == "" and V["agreed_p1"] == card, (V["state_p2"], V["agreed_p2"])
+    assert V["say_next"] == "For your personal loan, can you pay 700 on Friday 23 October?", V["say_next"]
+    ev(P, V, "offer", offer_kind="exact", offer_when="tomorrow", offer_for="first", stance="offer")
+    assert V["state_p2"] == "open" and V["say_next"] == "For your personal loan, can you pay 700 on Friday 23 October?", V["say_next"]
+    ev(P, V, "offer", offer_kind="exact", offer_when="friday", offer_for="second", stance="offer")
+    assert V["state_p2"] == "agreed" and V["cur_pid"] == "p3", (V["state_p2"], V["cur_pid"])
+
+
 if __name__ == "__main__":
     sys.exit(main())

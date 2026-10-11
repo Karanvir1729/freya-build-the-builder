@@ -1,0 +1,99 @@
+{
+ "runner": "sim",
+ "workflow_id": "b3eaff30-598f-4e4d-8a97-af4a8714a669",
+ "agent_id": "d5de3c04-455d-4ead-843f-a58dead4e3dd",
+ "simulation_id": null,
+ "iteration_id": null,
+ "seconds": 129,
+ "passed": 1,
+ "total": 1,
+ "runs": 1,
+ "final": [
+  {
+   "id": "PUB-07[previous_question]",
+   "family": "Dates",
+   "style": "previous_question",
+   "passes": 1,
+   "runs": 1,
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "id": "PUB-07[previous_question]",
+   "level": "hard",
+   "family": "Dates",
+   "pass": true,
+   "failed": [],
+   "call_id": "8dde618a-9f00-4544-acf6-fe1c1bf238a3",
+   "tools": [
+    "verify_identity",
+    "verify_identity",
+    "get_account",
+    "create_promise",
+    "close_call"
+   ],
+   "customer_id": "c_ebe9db0c-9ee",
+   "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-07[previous_question].txt",
+   "turns": 10,
+   "stop": "close_call in the ledger",
+   "judge": {
+    "outcome": "pass",
+    "reason": "Agent asked once for the exact day, rejected 26 October and proposed the next business day (Tuesday 27 October), and the promise was recorded for Tuesday 27 October, which the system accepted as within the allowed (early-band) deadline.",
+    "model": "gpt-5"
+   },
+   "style": "previous_question",
+   "mock_case": "PUB-07",
+   "ended": "assistant-ended-call",
+   "transcript_source": "GET /api/v2/call/8dde618a-9f00-4544-acf6-fe1c1bf238a3",
+   "slowest_turn_s": 7.7,
+   "ended_how": "end_call in the call log after HTTP 504"
+  }
+ ],
+ "all_rows": [
+  [
+   {
+    "id": "PUB-07[previous_question]",
+    "level": "hard",
+    "family": "Dates",
+    "pass": true,
+    "failed": [],
+    "call_id": "8dde618a-9f00-4544-acf6-fe1c1bf238a3",
+    "tools": [
+     "verify_identity",
+     "verify_identity",
+     "get_account",
+     "create_promise",
+     "close_call"
+    ],
+    "customer_id": "c_ebe9db0c-9ee",
+    "transcript": "out/sim/extra-styles/rerun/transcripts/PUB-07[previous_question].txt",
+    "turns": 10,
+    "stop": "close_call in the ledger",
+    "judge": {
+     "outcome": "pass",
+     "reason": "Agent asked once for the exact day, rejected 26 October and proposed the next business day (Tuesday 27 October), and the promise was recorded for Tuesday 27 October, which the system accepted as within the allowed (early-band) deadline.",
+     "model": "gpt-5"
+    },
+    "style": "previous_question",
+    "mock_case": "PUB-07",
+    "ended": "assistant-ended-call",
+    "transcript_source": "GET /api/v2/call/8dde618a-9f00-4544-acf6-fe1c1bf238a3",
+    "slowest_turn_s": 7.7,
+    "ended_how": "end_call in the call log after HTTP 504"
+   }
+  ]
+ ],
+ "customer_model": "gpt-5-mini",
+ "judge_model": "gpt-5",
+ "provider": "openai",
+ "counts": {
+  "chat_turns": 10,
+  "customer_calls": 9,
+  "judge_calls": 1,
+  "judge_retries": 0,
+  "ledger_polls": 10,
+  "ledger_errors": 0,
+  "call_fetches": 2
+ }
+}
