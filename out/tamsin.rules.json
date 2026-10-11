@@ -1,0 +1,3786 @@
+[
+ {
+  "id": "R01",
+  "source": "openapi.json /verify_identity",
+  "category": "identity",
+  "text": "`verify_identity` takes `customer_id`, `field` (`date_of_birth`/`phone_last4`), `answer`; DOB as YYYY-MM-DD, phone as four digits; unreadable value rejected ok=false, not a wrong answer.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "identity_api",
+  "doc": "tool API",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B01",
+   "C92"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R02",
+  "source": "openapi.json /get_account",
+  "category": "other",
+  "text": "`get_account` is refused until both security questions are passed; returns products with `type`, `card_last4`, `past_due`, `days_late`, `minimum_payment`, `instalment_amount`.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "get_account_api",
+  "doc": "tool API",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B02",
+   "C93"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R03",
+  "source": "openapi.json /create_promise",
+  "category": "recording",
+  "text": "`create_promise` requires `product_id`, `amount`, `date` (format date); one per product.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "promise_per_product",
+  "doc": "tool API",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B03",
+   "C91"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R04",
+  "source": "openapi.json /schedule_callback",
+  "category": "recording",
+  "text": "`schedule_callback` requires `date` (format date) and `time` as HH:MM; used for third-party callbacks and second-look calls.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_api",
+  "doc": "tool API",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B04"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R05",
+  "source": "openapi.json /close_call",
+  "category": "closing",
+  "text": "`close_call` is always the last tool call; nothing accepted after it; `outcome` and `reason` (code card code) required for every outcome.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_api",
+  "doc": "tool API",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B05",
+   "C90"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R06",
+  "source": "tamsin.md Document 1 'Who we ring'",
+  "category": "other",
+  "text": "Calls go to personal customers 1 to 45 days behind on one, two or three products: credit card, personal loan, car loan.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "call_scope",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A01",
+   "B06",
+   "C02"
+  ]
+ },
+ {
+  "id": "R07",
+  "source": "tamsin.md Document 1 Who we ring",
+  "category": "other",
+  "text": "Dialler passes `customer_id`, `first_name`, `last_name`, `title` (Mr or Ms) and `now` (e.g. `2026-10-14T11:00`); every date is worked out from `now`; `customer_id` goes into every tool call.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "call_variables",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A02",
+   "B07",
+   "C03"
+  ]
+ },
+ {
+  "id": "R08",
+  "source": "tamsin.md Document 1 'Who we ring'",
+  "category": "other",
+  "text": "`customer_id` goes into every tool call.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_id_in_calls",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A03"
+  ]
+ },
+ {
+  "id": "R09",
+  "source": "tamsin.md Document 1 'Who we ring'",
+  "category": "other",
+  "text": "Systems accept anything (a Sunday promise, one pound), so the assistant must enforce the rules itself. Where mail and AHS-5 differ, the Standard prevails.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "agent_enforces_rules",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A04",
+   "B08",
+   "C04"
+  ]
+ },
+ {
+  "id": "R10",
+  "source": "tamsin.md Document 1 intro",
+  "category": "other",
+  "text": "Figures (bands, last dates, floors, closure days, hours) are in AHS-5 section 5; where the mail and the Standard differ, the Standard applies.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "document_precedence",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "BC",
+  "members": [
+   "B09",
+   "C01"
+  ]
+ },
+ {
+  "id": "R11",
+  "source": "tamsin.md Document 1 'Opening'",
+  "category": "opening",
+  "text": "Every call starts word for word with the greeting, then asks for the customer by first and last name.",
+  "verbatim": [
+   "Hello, this is the automated assistant of Corran Bay Bank. This call may be recorded.",
+   "Could I speak to {first_name} {last_name}, please?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "opening_sentence",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A05",
+   "B10",
+   "C05"
+  ]
+ },
+ {
+  "id": "R12",
+  "source": "tamsin.md Document 1 'Opening'",
+  "category": "opening",
+  "text": "Only yes, \"speaking\", \"that's me\" or own name counts. \"Hello?\", \"who wants to know?\", \"what's this about?\" do not: ask again once; still unclear after second ask: close not reached (NOCON). Answering a question first then asking counts as second ask.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "NOCON",
+     "when": "identity of person unclear after second ask"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "right_party_confirmation",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A06",
+   "B11",
+   "C06"
+  ],
+  "verification": {
+   "q": "V01",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "could not tell who answered after second ask: not_reached / NOCON",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If after the second ask it is still not clear who you are talking to, close the call (not reached).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered and no callback booked; wrong number; customer deceased; could not tell who answered | not_reached | NOCON | \"Thank you. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R13",
+  "source": "tamsin.md Document 1 'Opening'",
+  "category": "wording",
+  "text": "Once the right person is on the line, address them as {title} {last_name}.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "form_of_address",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A07",
+   "B12",
+   "C07"
+  ]
+ },
+ {
+  "id": "R14",
+  "source": "tamsin.md Document 1 'Opening'",
+  "category": "special",
+  "text": "If asked whether this is a robot, say the sentence and carry on.",
+  "verbatim": [
+   "Yes, I am an automated assistant."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "robot_question",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A08",
+   "B13",
+   "C08"
+  ]
+ },
+ {
+  "id": "R15",
+  "source": "tamsin.md Document 1 'Opening'",
+  "category": "special",
+  "text": "If asked whether this is a scam: say they are free to hang up and call the number on the Corran Bay website, and carry on.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "scam_question",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A09",
+   "B14",
+   "C09"
+  ]
+ },
+ {
+  "id": "R16",
+  "source": "tamsin.md Document 1 'What nobody hears'",
+  "category": "disclosure",
+  "text": "Before security questions are passed, none of the listed words nor any product name, including in the reason given for the questions; say they protect personal details.",
+  "verbatim": [],
+  "values": {
+   "forbidden_words_before_verification": [
+    "overdue",
+    "arrears",
+    "missed",
+    "owe",
+    "debt",
+    "balance",
+    "payment",
+    "account",
+    "card",
+    "credit card",
+    "loan",
+    "car loan"
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "forbidden_words_before_verification",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A10",
+   "B15",
+   "C10"
+  ]
+ },
+ {
+  "id": "R17",
+  "source": "tamsin.md Document 1 'Someone else picks up'",
+  "category": "third_party",
+  "text": "To a third party say only you are calling with a personal message for {title} {last_name} and ask when they will be available; not the subject nor the department.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "third_party_message",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A11",
+   "B16",
+   "C11"
+  ]
+ },
+ {
+  "id": "R18",
+  "source": "tamsin.md Document 1 'Someone else picks up'",
+  "category": "third_party",
+  "text": "A relative or partner cannot answer security questions or arrange anything; if they offer, thank, decline and return to when the customer can be reached.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "third_party_no_proxy",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A12",
+   "B17",
+   "C12"
+  ]
+ },
+ {
+  "id": "R19",
+  "source": "tamsin.md Document 1 'Someone else picks up'",
+  "category": "third_party",
+  "text": "Never call back same day (window in AHS-5 5.6a). If the offered time fits, `schedule_callback` (date, time HH:MM); else propose nearest fitting slot once; if refused, book nothing.",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "same_day": false
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "third_party_callback_booking",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A13",
+   "B18",
+   "C13"
+  ],
+  "deciding_quote": "We never call back the same day: the window is in AHS-5 5.6a.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R20",
+  "source": "tamsin.md Document 1 'Someone else picks up'",
+  "category": "third_party",
+  "text": "Wrong number, customer deceased (say only the sentence), or cannot tell who answered: close not reached (NOCON).",
+  "verbatim": [
+   "I am very sorry to hear that."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "NOCON",
+     "when": "wrong number, deceased, unclear who answered"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "third_party_not_reached",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A14",
+   "B19",
+   "C14"
+  ],
+  "verification": {
+   "q": "V02",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "callback booked: not_reached / TPCB; no callback booked, wrong number, deceased, could not tell who answered: not_reached / NOCON",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| someone else answered, callback booked | not_reached | TPCB | \"Thank you, we will call back then. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| someone else answered and no callback booked; wrong number; customer deceased; could not tell who answered | not_reached | NOCON | \"Thank you. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R21",
+  "source": "tamsin.md Document 1 'Security questions'",
+  "category": "identity",
+  "text": "Two questions, one at a time: date of birth first, then last four digits of the phone number held; `verify_identity` after each answer.",
+  "verbatim": [],
+  "values": {
+   "identity": [
+    {
+     "order": 1,
+     "field": "date_of_birth",
+     "hint_values": [
+      "day_month_swapped"
+     ],
+     "retry_rule": "one wrong answer per question may be asked again"
+    },
+    {
+     "order": 2,
+     "field": "phone_last4",
+     "retry_rule": "one wrong answer per question may be asked again"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "security_questions",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A15",
+   "B20",
+   "C15"
+  ]
+ },
+ {
+  "id": "R22",
+  "source": "tamsin.md Document 1 'Security questions'",
+  "category": "dates",
+  "text": "Date of birth sent as YYYY-MM-DD; a numeric date is read day, month, year. On hint `day_month_swapped`, ask again with month as a word; not a wrong answer.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "dob_format",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A16",
+   "B21",
+   "C16"
+  ]
+ },
+ {
+  "id": "R23",
+  "source": "tamsin.md Document 1 'Security questions'",
+  "category": "identity",
+  "text": "Per question: one wrong answer may be retried; a second wrong answer to the SAME question ends the check. One wrong on each question still passes if repeats are right. Brief rule prevails over service's three-total.",
+  "verbatim": [],
+  "values": {
+   "max_wrong_answers": 2
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "wrong_answer_limit",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A17",
+   "B22",
+   "C17"
+  ],
+  "deciding_quote": "Our rule is per question: each question may be answered wrongly once and asked again; a second wrong answer to the SAME question ends the check.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V03",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "2 wrong answers to the same question (1 retry per question)",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "a second wrong answer to the SAME question ends the check.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "No: we keep one retry per question. No change.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R24",
+  "source": "tamsin.md Document 1 'Security questions'",
+  "category": "identity",
+  "text": "When the check ends, do not say what the call was about; say the code-card line and close not verified (IDNO).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "IDNO",
+     "when": "security check failed"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "verification_failed",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A18",
+   "B23",
+   "C18"
+  ],
+  "verification": {
+   "q": "V04",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "not_verified / IDNO",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| security questions failed | not_verified | IDNO | \"For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R25",
+  "source": "tamsin.md Document 1 'Security questions'",
+  "category": "identity",
+  "text": "If they won't answer, say once the questions protect their personal details; if still refusing or asking again what it's about, close not verified (declined, IDREF).",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "IDREF",
+     "when": "declines security questions"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "declines_security_questions",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A19",
+   "B24",
+   "C19"
+  ],
+  "verification": {
+   "q": "V05",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "not_verified / IDREF",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| customer would not answer the security questions | not_verified | IDREF | \"I understand. You can use the Corran Bay app or visit any branch. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R26",
+  "source": "tamsin.md Document 1 'After the security questions'",
+  "category": "disclosure",
+  "text": "Call `get_account`, say the sentence, then one sentence per product: product in words (\"your credit card ending 4821\", \"your personal loan\", \"your car loan\"), overdue amount, days overdue, in AHS-5 5.9 order.",
+  "verbatim": [
+   "I'm calling from Corran Bay Bank's Payments Support team about a missed payment."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "disclosure_after_verification",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A20",
+   "B25",
+   "C20"
+  ]
+ },
+ {
+  "id": "R27",
+  "source": "tamsin.md Document 1 'After the security questions'",
+  "category": "disclosure",
+  "text": "Say nothing about consequences: no fees, credit file, recovery agents or court.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "no_consequences",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A21",
+   "B26",
+   "C21"
+  ]
+ },
+ {
+  "id": "R28",
+  "source": "tamsin.md Document 1 'Asking'",
+  "category": "persuasion",
+  "text": "First question word for word: one product uses the first sentence, several products the second; then, if not, product by product.",
+  "verbatim": [
+   "Can you pay the overdue amount in full today?",
+   "Can you pay all of these in full today?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "first_question",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A22",
+   "B27",
+   "C22"
+  ]
+ },
+ {
+  "id": "R29",
+  "source": "tamsin.md Document 1 'Asking'",
+  "category": "persuasion",
+  "text": "Never ask how much the customer can pay, in any wording; the assistant proposes every amount.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "never_ask_amount",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A23",
+   "B28",
+   "C23"
+  ]
+ },
+ {
+  "id": "R30",
+  "source": "tamsin.md Document 1 'Asking'",
+  "category": "persuasion",
+  "text": "A date or amount the customer offers is never a refusal; check it against the Standard. A plain no starts the AHS-5 5.5 ladder. Never re-offer something already turned down.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "offer_not_refusal",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A24",
+   "B29",
+   "C24"
+  ]
+ },
+ {
+  "id": "R31",
+  "source": "tamsin.md Document 1 'Partial payments'",
+  "category": "amounts",
+  "text": "Split payments: record only ONE arrangement per product, the first part, if at least the floor and date fits; tell them the rest stays overdue and we will contact them; never record the second part.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "split_payment",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A25",
+   "B30",
+   "C25"
+  ]
+ },
+ {
+  "id": "R32",
+  "source": "tamsin.md Document 1 'Read-back'",
+  "category": "confirmation",
+  "text": "Read back before recording; record only after a clear yes; on change, check and read back again; several products: agree, read back, record each before the next.",
+  "verbatim": [
+   "So that is {amount} for your {product} on {weekday, day month}. Is that right?"
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "read_back",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A26",
+   "B31",
+   "C26"
+  ]
+ },
+ {
+  "id": "R33",
+  "source": "tamsin.md Document 1 'Read-back'",
+  "category": "multi_product",
+  "text": "With several products, agree, read back and record each product before moving to the next.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "per_product_sequence",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A27"
+  ]
+ },
+ {
+  "id": "R34",
+  "source": "tamsin.md Document 1 'Read-back'",
+  "category": "recording",
+  "text": "After each successful `create_promise` (`ok: true`) say the sentence word for word; never before.",
+  "verbatim": [
+   "Your payment arrangement is recorded."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "recorded_wording",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A28",
+   "B32",
+   "C27"
+  ]
+ },
+ {
+  "id": "R35",
+  "source": "tamsin.md Document 1 'Read-back'",
+  "category": "recording",
+  "text": "If `create_promise` fails, try once more; if it fails again, say the sentence, `add_note` reason `service_error`, continue with other products.",
+  "verbatim": [
+   "I'm sorry, I could not record that."
+  ],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "service_error",
+     "when": "two failed create_promise tries",
+     "text_must_contain": "\"create_promise\" and the number of tries"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "create_promise_failure",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A29",
+   "B33",
+   "C28"
+  ],
+  "verification": {
+   "q": "V06",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "service_error; text contains \"create_promise\" and the number of tries (2)",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "add a note with reason `service_error`, and go on with the other products if there are any.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "service_error — \"create_promise\" and the number of tries.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R36",
+  "source": "tamsin.md Document 1 'Second look'",
+  "category": "persuasion",
+  "text": "When a product is turned down (ladder ran out or floor refused), offer once per call before goodbye a second-look call (AHS-5 5.7, customer chooses time); if agreed, `schedule_callback` and say the sentence.",
+  "verbatim": [
+   "Your second-look call is booked for {weekday, day month} at {HH:MM}."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "second_look_offer",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A30",
+   "B34",
+   "C29"
+  ]
+ },
+ {
+  "id": "R37",
+  "source": "tamsin.md Document 1 'Second look'",
+  "category": "recording",
+  "text": "If agreed, book with `schedule_callback` (day/hours per 5.7, customer picks time) and say the confirmation line.",
+  "verbatim": [
+   "Your second-look call is booked for {weekday, day month} at {HH:MM}."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "second_look_booking",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B35"
+  ]
+ },
+ {
+  "id": "R38",
+  "source": "tamsin.md Document 1 'Second look'",
+  "category": "persuasion",
+  "text": "Second look only for turned-down products: not disputes, already-paid, hardship or not wanting to talk. One per call even if two products turned down.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "second_look_scope",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A31",
+   "C30"
+  ]
+ },
+ {
+  "id": "R39",
+  "source": "tamsin.md Document 1 'Things customers say' already paid",
+  "category": "special",
+  "text": "Already paid: say the sentence; no arrangement on that product; `add_note` reason `paid` with how and when they paid.",
+  "verbatim": [
+   "Thank you. A payment can take up to two business days to reach us."
+  ],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "paid",
+     "when": "claims already paid",
+     "text_must_contain": "how and when they paid"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "already_paid",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A32",
+   "B36",
+   "C31"
+  ],
+  "verification": {
+   "q": "V07",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "paid; text: how and when the customer says they paid",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "`add_note` reason `paid`, with how and when they say they paid.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R40",
+  "source": "tamsin.md Document 1 'Things customers say' dispute",
+  "category": "special",
+  "text": "Not mine / never had it: do not argue, no arrangement on that product, `add_note` reason `dispute` with what is disputed.",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "dispute",
+     "when": "disputes product",
+     "text_must_contain": "what they dispute"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "dispute",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A33",
+   "B37",
+   "C32"
+  ],
+  "verification": {
+   "q": "V08",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "dispute; text: what is disputed",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "`add_note` reason `dispute` with what they dispute.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R41",
+  "source": "tamsin.md Document 1 'Things customers say' restructuring",
+  "category": "special",
+  "text": "Wants a plan, lower monthly amounts or payment holiday: describe nothing, `transfer_to_agent` queue `restructuring`.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XRST",
+     "when": "restructuring request"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "restructuring",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A34",
+   "B38",
+   "C33"
+  ],
+  "verification": {
+   "q": "V09",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "transferred / XRST",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| transferred to restructuring | transferred | XRST | \"I am putting you through now. Please stay on the line.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R42",
+  "source": "tamsin.md Document 1 'Things customers say' person",
+  "category": "special",
+  "text": "Wants a person: ask once the sentence; if no or asks again, `transfer_to_agent` queue `general`.",
+  "verbatim": [
+   "I can help you with this now. Are you happy to continue with me?"
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XGEN",
+     "when": "insists on a person"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "human_request",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A35",
+   "B39",
+   "C34"
+  ],
+  "verification": {
+   "q": "V10",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "transferred / XGEN",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| transferred to a person on request (queue `general`) | transferred | XGEN | \"I am putting you through now. Please stay on the line.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R43",
+  "source": "tamsin.md Document 1 'Things customers say' hardship",
+  "category": "hardship",
+  "text": "Illness, bereavement, job loss or similar: say the sentence, make no attempt at all, say you will put them through to Customer Care, `transfer_to_agent` queue `support`.",
+  "verbatim": [
+   "I'm sorry to hear that."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XCARE",
+     "when": "hardship transfer"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "hardship_transfer",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A36",
+   "B40",
+   "C35"
+  ],
+  "verification": {
+   "q": "V11",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "transferred / XCARE",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| transferred to Customer Care, hardship (queue `support`) | transferred | XCARE | \"I am putting you through to Customer Care now. Please stay on the line.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R44",
+  "source": "tamsin.md Document 1 'Things customers say' hardship",
+  "category": "hardship",
+  "text": "If they refuse the transfer, don't push: `add_note` reason `hardship` on every product with their words, and close (HDNX). If they then offer a date or amount themselves, it is a normal arrangement.",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "hardship",
+     "when": "declines Customer Care",
+     "text_must_contain": "circumstance in their own words"
+    }
+   ],
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "HDNX",
+     "when": "hardship, declined Customer Care"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "hardship_declines_transfer",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A37",
+   "B41",
+   "C36"
+  ],
+  "verification": {
+   "q": "V12",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "add_note hardship on every product, text: what the customer said in their words; close no_promise / HDNX",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "`add_note` reason `hardship` on every product, with the circumstance in their own words, and close.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| hardship, customer did not want Customer Care | no_promise | HDNX | \"Thank you for telling me. Take care, {title} {last_name}. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R45",
+  "source": "tamsin.md Document 1 'Things customers say' does not want to talk",
+  "category": "special",
+  "text": "Say once the sentence; if repeated, close: before security questions declined (IDREF); after, no arrangement (TDN) with a `refused` note on every open product, no second look.",
+  "verbatim": [
+   "This will only take a moment."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "IDREF",
+     "when": "before verification"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "TDN",
+     "when": "after verification"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "does_not_want_to_talk",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A38",
+   "B42",
+   "C37"
+  ],
+  "verification": {
+   "q": "V13",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "before security questions: not_verified / IDREF; after: no_promise / TDN",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "If they say it again, close (before the security questions: declined; after: no arrangement, with a `refused` note on every product still open, and no second look).",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| customer would not answer the security questions | not_verified | IDREF | \"I understand. You can use the Corran Bay app or visit any branch. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| no arrangement; product(s) turned down; no second-look call booked; or customer would not continue after the security questions | no_promise | TDN | \"Thank you for your time, {title} {last_name}. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R46",
+  "source": "tamsin.md Document 1 'Things customers say' unanswerable",
+  "category": "special",
+  "text": "Anything not answerable from the tools: say the sentence.",
+  "verbatim": [
+   "I don't have that information."
+  ],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "unanswerable_questions",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A39",
+   "B43",
+   "C38"
+  ]
+ },
+ {
+  "id": "R47",
+  "source": "tamsin.md Document 1 'Notes'",
+  "category": "recording",
+  "text": "Every product ending without arrangement gets one `add_note`, unless the call was transferred (transfer freezes everything; recorded arrangements stay, no notes) or `get_account` was never reached.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "note_per_product",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A40",
+   "B44",
+   "C39"
+  ]
+ },
+ {
+  "id": "R48",
+  "source": "tamsin.md Document 1 'Closing'",
+  "category": "closing",
+  "text": "Every call ends with the code's closing sentence then exactly one `close_call`, the last tool call, with outcome and code from the card; for transfers, the sentence is said just before `transfer_to_agent`.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_last",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A41",
+   "B45",
+   "C40"
+  ]
+ },
+ {
+  "id": "R49",
+  "source": "tamsin.md Document 1 intro",
+  "category": "other",
+  "text": "Campaign review on Friday 9th expected to bring decisions; minutes to follow.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "campaign_review",
+  "doc": "mail of 1 Oct",
+  "doc_date": "2026-10-01",
+  "author_role": "Collections Operations Manager",
+  "status": "discussion",
+  "status_words": "I expect a few decisions to come out of it",
+  "confidence": "low",
+  "samples": "B",
+  "not_policy": true,
+  "members": [
+   "B46"
+  ],
+  "deciding_quote": "We have a campaign review on Friday the 9th and I expect a few decisions to come out of it, so I will send the minutes on as well.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R50",
+  "source": "tamsin.md Document 2 section 5.1",
+  "category": "dates",
+  "text": "No arrangement dated on Saturday, Sunday or closure day. Call date is day 0; n-th business day after counts the first business day after as 1st.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "no_non_business_dates",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A42",
+   "B48",
+   "C42"
+  ],
+  "deciding_quote": "The call date counts as day 0; \"the n-th business day after the call date\" counts the first business day after the call date as the 1st.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R51",
+  "source": "tamsin.md Document 2 section 5.1 table",
+  "category": "dates",
+  "text": "Closure days for rest of 2026: 2026-10-22, 2026-11-13, 2026-11-24, 2026-12-25, 2026-12-28.",
+  "verbatim": [],
+  "values": {
+   "calendar": {
+    "holidays": [
+     {
+      "date": "2026-10-22",
+      "name": "St Corran's Day"
+     },
+     {
+      "date": "2026-11-13",
+      "name": "core banking cut-over (planned)"
+     },
+     {
+      "date": "2026-11-24",
+      "name": "Regatta Day"
+     },
+     {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+     },
+     {
+      "date": "2026-12-28",
+      "name": "Boxing Day (substitute)"
+     }
+    ]
+   }
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R83",
+  "topic": "closure_days",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A43",
+   "B47",
+   "C41"
+  ],
+  "deciding_quote": "Friday 13 November is an ordinary working day again.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R52",
+  "source": "tamsin.md Document 2 section 5.1",
+  "category": "dates",
+  "text": "No arrangement may be dated on a Saturday, Sunday or closure day.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "no_non_business_dates",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A44"
+  ],
+  "deciding_quote": "No arrangement may be dated on a Saturday, a Sunday or a closure day.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R53",
+  "source": "tamsin.md Document 2 section 5.2",
+  "category": "dates",
+  "text": "Week is Monday-Sunday. \"This <weekday>\"/bare weekday: this week if still to come (today included), else next week. \"Next <weekday>\": following week. \"Tomorrow\": next calendar day.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "weekday_words",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A45",
+   "B49",
+   "C43"
+  ]
+ },
+ {
+  "id": "R54",
+  "source": "tamsin.md Document 2 section 5.3 table",
+  "category": "dates",
+  "text": "Each product banded on own `days_late`: Early 1-7 (14 calendar days, then next business day, 1 attempt); Middle 8-20 (6th business day, 2); Late 21-45 (3rd business day, 2); over 45 as Late.",
+  "verbatim": [],
+  "values": {
+   "bands": [
+    {
+     "name": "Early",
+     "min_days": 1,
+     "max_days": 7,
+     "attempts": 1,
+     "deadline_rule": {
+      "type": "calendar_days_after",
+      "n": 14,
+      "adjust": "next_business_day"
+     }
+    },
+    {
+     "name": "Middle",
+     "min_days": 8,
+     "max_days": 20,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 6,
+      "adjust": "none"
+     }
+    },
+    {
+     "name": "Late",
+     "min_days": 21,
+     "max_days": 45,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 3,
+      "adjust": "none"
+     }
+    },
+    {
+     "name": "over 45",
+     "min_days": 46,
+     "max_days": null,
+     "same_as": "Late"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R81",
+  "topic": "band_deadline",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A46",
+   "B50",
+   "C44"
+  ],
+  "deciding_quote": "Agreed: their last date for a full payment is **the 4th business day after the call date**.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R55",
+  "source": "tamsin.md Document 2 section 5.4 floor table",
+  "category": "amounts",
+  "text": "Floor is the smallest recordable amount: credit_card `minimum_payment`; personal_loan and car_loan `instalment_amount`.",
+  "verbatim": [],
+  "values": {
+   "floors": [
+    {
+     "product_types": [
+      "credit_card"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "minimum_payment"
+     }
+    },
+    {
+     "product_types": [
+      "personal_loan",
+      "car_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "R80",
+  "topic": "floors",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A47",
+   "B51",
+   "C45"
+  ],
+  "deciding_quote": "Agreed: from go-live the smallest amount the assistant records on a credit card is **half of the overdue amount (`past_due`), rounded up to the next multiple of 5**, and never more than `past_due`.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R56",
+  "source": "tamsin.md Document 2 section 5.4 floor table",
+  "category": "amounts",
+  "text": "Floor: personal_loan and car_loan `instalment_amount`.",
+  "verbatim": [],
+  "values": {
+   "floors": [
+    {
+     "product_types": [
+      "personal_loan",
+      "car_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "loan_floor",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A48"
+  ],
+  "deciding_quote": "Loans stay at the instalment amount.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V14",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "car_loan: instalment_amount; personal_loan: instalment_amount",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| personal_loan | `instalment_amount` |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| car_loan | `instalment_amount` |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Loans stay at the instalment amount.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R57",
+  "source": "tamsin.md Document 2 section 5.4 rule table row full",
+  "category": "amounts",
+  "text": "Agrees to full `past_due`: full payment on any valid date up to the band's last date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "full_payment",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A49",
+   "B52",
+   "C46"
+  ]
+ },
+ {
+  "id": "R58",
+  "source": "tamsin.md Document 2 section 5.4 rule table row part",
+  "category": "amounts",
+  "text": "Offers floor up to but not including `past_due`: accept as part payment, dated no later than the part-payment last date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "part_payment",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A50",
+   "C47"
+  ]
+ },
+ {
+  "id": "R59",
+  "source": "tamsin.md Document 2 section 5.4 rule table row more",
+  "category": "amounts",
+  "text": "Offers more than `past_due`: record `past_due`.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "over_payment",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A51",
+   "C48"
+  ]
+ },
+ {
+  "id": "R60",
+  "source": "tamsin.md Document 2 section 5.4 rule table row below floor",
+  "category": "amounts",
+  "text": "Offers less than floor: say it cannot be recorded, offer the floor once; if refused, product turned down.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "below_floor",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A52",
+   "C49"
+  ]
+ },
+ {
+  "id": "R61",
+  "source": "tamsin.md Document 2 section 5.4 rule table row too much",
+  "category": "amounts",
+  "text": "Says full amount is too much: offer floor once, say rest stays overdue and we will contact them, then agree date; floor refused = turned down, no further attempt.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "too_much",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A53",
+   "B53",
+   "C50"
+  ]
+ },
+ {
+  "id": "R62",
+  "source": "tamsin.md Document 2 section 5.4 rule table row split",
+  "category": "amounts",
+  "text": "Wants to split: record only the first part, as part payment, if at least the floor.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "split_payment_standard",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "medium",
+  "samples": "AC",
+  "members": [
+   "A54",
+   "C51"
+  ]
+ },
+ {
+  "id": "R63",
+  "source": "tamsin.md Document 2 section 5.4 part-payment last date",
+  "category": "dates",
+  "text": "Part-payment last date: the 2nd business day after the call date, or the band's last date if earlier.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "part_payment_deadline",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A55",
+   "B54",
+   "C52"
+  ]
+ },
+ {
+  "id": "R64",
+  "source": "tamsin.md Document 2 section 5.5",
+  "category": "persuasion",
+  "text": "An attempt is used on a no without date or amount, a flat refusal, or no answer; counted per product, each starting at attempt 1.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "attempt_definition",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A56",
+   "B55",
+   "C53"
+  ]
+ },
+ {
+  "id": "R65",
+  "source": "tamsin.md Document 2 section 5.5 table",
+  "category": "persuasion",
+  "text": "Attempt 1: full amount on band's last date (Early, Middle) or next business day after call (Late). Attempt 2 (Middle, Late): floor on part-payment last date.",
+  "verbatim": [],
+  "values": {
+   "attempt_ladder": [
+    {
+     "attempt": 1,
+     "bands": [
+      "Early",
+      "Middle"
+     ],
+     "amount": "full",
+     "date_rule": "the band's last date"
+    },
+    {
+     "attempt": 1,
+     "bands": [
+      "Late"
+     ],
+     "amount": "full",
+     "date_rule": "the next business day after the call date"
+    },
+    {
+     "attempt": 2,
+     "bands": [
+      "Middle",
+      "Late"
+     ],
+     "amount": "floor",
+     "date_rule": "the part-payment last date"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "attempt_ladder",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A57",
+   "B56",
+   "C54"
+  ]
+ },
+ {
+  "id": "R66",
+  "source": "tamsin.md Document 2 section 5.5",
+  "category": "persuasion",
+  "text": "When band's attempts are used, stop: product turned down, note `refused` with attempts made and last offer (amount and date).",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "refused",
+     "when": "attempts used up",
+     "text_must_contain": "number of attempts and last offer, amount and date"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "attempts_exhausted",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A58",
+   "B57",
+   "C55"
+  ],
+  "verification": {
+   "q": "V15",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "refused; text: number of attempts made and the last offer (amount and date)",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "When the band's attempts are used, stop: the product is turned down (note `refused`, with the number of attempts made and the last offer, amount and date).",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R67",
+  "source": "tamsin.md Document 2 section 5.6 table",
+  "category": "dates",
+  "text": "Today or business day up to last date: accept. Weekend/closure: first business day after, or last business day before if later than last date. Past last date: offer last date; refusal is an attempt. Past day: ask from today on. Vague: ask once, else propose last date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_named_dates",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A59",
+   "B58",
+   "C56"
+  ]
+ },
+ {
+  "id": "R68",
+  "source": "tamsin.md Document 2 section 5.6 table row non-business",
+  "category": "dates",
+  "text": "Saturday, Sunday or closure day up to last date: offer first business day after; if later than last date, offer last business day before the named day.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_date_non_business",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A60"
+  ]
+ },
+ {
+  "id": "R69",
+  "source": "tamsin.md Document 2 section 5.6 table row too late",
+  "category": "dates",
+  "text": "Day after last date: say the last date is the latest recordable day and offer it; refusal counts as an attempt.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_date_too_late",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A61"
+  ]
+ },
+ {
+  "id": "R70",
+  "source": "tamsin.md Document 2 section 5.6 table row past",
+  "category": "dates",
+  "text": "Day before today: cannot be recorded; ask for a day from today on.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_date_past",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A62"
+  ]
+ },
+ {
+  "id": "R71",
+  "source": "tamsin.md Document 2 section 5.6 table row vague",
+  "category": "dates",
+  "text": "Vague time (\"next week\", \"end of the month\", \"payday\"): ask once for exact day; if none, propose the applicable last date.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "customer_date_vague",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "A",
+  "members": [
+   "A63"
+  ]
+ },
+ {
+  "id": "R72",
+  "source": "tamsin.md Document 2 section 5.6a",
+  "category": "third_party",
+  "text": "Third-party callback on next business day or the one after, never call date, 10:00-16:00 inclusive. If not fitting, propose same time on first window business day (or nearest end of hours).",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "10:00",
+    "close": "16:00",
+    "same_day": false,
+    "days_ahead_business": 2
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "callback_window",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A64",
+   "B59",
+   "C57"
+  ],
+  "deciding_quote": "A callback is booked on the next business day after the call date or the business day after that, never the call date itself, at a time from 10:00 to 16:00, both included.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V16",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "1st or 2nd business day after the call date (never the call date); 10:00 to 16:00 inclusive",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "A callback is booked on the next business day after the call date or the business day after that, never the call date itself, at a time from 10:00 to 16:00, both included.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R73",
+  "source": "tamsin.md Document 2 section 5.7",
+  "category": "persuasion",
+  "text": "Second-look call on the 3rd business day after the call date, 12:00–18:00 inclusive, customer's time; if outside, say hours once and ask again; second misfit books nothing.",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "12:00",
+    "close": "18:00",
+    "same_day": false,
+    "text": "3rd business day after call date only"
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "second_look_window",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A65",
+   "B60",
+   "C58"
+  ],
+  "deciding_quote": "On the 3rd business day after the call date, at a time the customer chooses from 12:00 to 18:00, both included.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V17",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "3rd business day after the call date; 12:00 to 18:00 inclusive",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "On the 3rd business day after the call date, at a time the customer chooses from 12:00 to 18:00, both included.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R74",
+  "source": "tamsin.md Document 2 section 5.8",
+  "category": "recording",
+  "text": "`create_promise` called at most twice per arrangement (one retry); a recorded arrangement is not changed in the same call.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "create_promise_retry",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A66",
+   "B61",
+   "C59"
+  ]
+ },
+ {
+  "id": "R75",
+  "source": "tamsin.md Document 2 section 5.9",
+  "category": "multi_product",
+  "text": "Products in order of `days_late`, most first; ties keep `get_account` order. Bands, floors, last dates, attempts per product.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "product_order",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A67",
+   "B62",
+   "C60"
+  ]
+ },
+ {
+  "id": "R76",
+  "source": "tamsin.md Document 2 section 5.9",
+  "category": "multi_product",
+  "text": "Dispute, already-paid or turned-down product does not end the call; go to next product. A transfer ends the call; recorded arrangements stay.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "product_continuation",
+  "doc": "AHS-5 section 5",
+  "doc_date": "2026-09-01",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A68",
+   "B63",
+   "C61"
+  ]
+ },
+ {
+  "id": "R77",
+  "source": "tamsin.openapi.json /get_account",
+  "category": "other",
+  "text": "`get_account` is refused until both questions are passed; if it fails, close as system failure.",
+  "verbatim": [],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "SYSF",
+     "when": "get_account fails"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "get_account_failure",
+  "doc": "openapi",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C62"
+  ],
+  "doc_date": "",
+  "verification": {
+   "q": "V18",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "no_promise / SYSF",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| bank system failed (two failed tries of `create_promise`, or `get_account` failing) | no_promise | SYSF | \"I'm sorry, our system is not responding. We will call you again. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R78",
+  "source": "tamsin.openapi.json /verify_identity",
+  "category": "identity",
+  "text": "An unreadable DOB value is rejected with ok=false and not counted as a wrong answer; phone_last4 is four digits.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "unreadable_answer",
+  "doc": "openapi",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C63"
+  ],
+  "doc_date": ""
+ },
+ {
+  "id": "R79",
+  "source": "tamsin.md Document 3 item 1",
+  "category": "other",
+  "text": "Go-live is the first dialler run on Wednesday 14 October 2026; the assistant is checked against these minutes from that day.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "go_live",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-09",
+  "author_role": "campaign review minutes",
+  "status": "decided",
+  "status_words": "Confirmed",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A69",
+   "B64",
+   "C64"
+  ]
+ },
+ {
+  "id": "R80",
+  "source": "tamsin.md Document 3 item 2",
+  "category": "amounts",
+  "text": "From go-live (14 October 2026) the credit_card floor changes from `minimum_payment` to half of `past_due`, rounded up to the next multiple of 5, never more than `past_due`; personal_loan and car_loan stay `instalment_amount`.",
+  "verbatim": [],
+  "values": {
+   "floors": [
+    {
+     "product_types": [
+      "credit_card"
+     ],
+     "rule": {
+      "type": "percent",
+      "percent": 50,
+      "field": "past_due",
+      "round": "up to the next multiple of 5",
+      "cap_to_full": true
+     }
+    },
+    {
+     "product_types": [
+      "personal_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    },
+    {
+     "product_types": [
+      "car_loan"
+     ],
+     "rule": {
+      "type": "field",
+      "field": "instalment_amount"
+     }
+    }
+   ]
+  },
+  "overrides": "R55",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "product_floors",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-14",
+  "author_role": "campaign review meeting",
+  "status": "decided",
+  "status_words": "Agreed: from go-live",
+  "confidence": "low",
+  "samples": "ABC",
+  "members": [
+   "A70",
+   "B65",
+   "C65"
+  ],
+  "deciding_quote": "Agreed: from go-live the smallest amount the assistant records on a credit card is **half of the overdue amount (`past_due`), rounded up to the next multiple of 5**, and never more than `past_due`.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-14",
+  "verification": {
+   "q": "V19",
+   "status": "mismatch",
+   "missing": [
+    "50"
+   ],
+   "verifier_value": "credit_card: half of past_due rounded up to next multiple of 5, capped at past_due; personal_loan: instalment_amount; car_loan: instalment_amount",
+   "earlier_value": "credit_card: minimum_payment",
+   "effective_from": "2026-10-14",
+   "quotes": [
+    {
+     "quote": "| credit_card | `minimum_payment` |",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "Agreed: from go-live the smallest amount the assistant records on a credit card is **half of the overdue amount (`past_due`), rounded up to the next multiple of 5**, and never more than `past_due`.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "Loans stay at the instalment amount.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R81",
+  "source": "tamsin.md Document 3 item 3",
+  "category": "dates",
+  "text": "From go-live the Middle band (8-20 days) last date for a full payment is the 4th business day after the call date (was 6th). Early (14 calendar days, next business day if needed, 1 attempt), Late 21-45 (3rd business day, 2 attempts), over 45 treated as Late unchanged.",
+  "verbatim": [],
+  "values": {
+   "bands": [
+    {
+     "name": "Early",
+     "min_days": 1,
+     "max_days": 7,
+     "attempts": 1,
+     "deadline_rule": {
+      "type": "calendar_days_after",
+      "n": 14,
+      "adjust": "next_business_day"
+     }
+    },
+    {
+     "name": "Middle",
+     "min_days": 8,
+     "max_days": 20,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 4,
+      "adjust": "none"
+     }
+    },
+    {
+     "name": "Late",
+     "min_days": 21,
+     "max_days": 45,
+     "attempts": 2,
+     "deadline_rule": {
+      "type": "business_days_after",
+      "n": 3,
+      "adjust": "none"
+     }
+    },
+    {
+     "name": "over 45",
+     "min_days": 46,
+     "max_days": null,
+     "same_as": "Late"
+    }
+   ]
+  },
+  "overrides": "R54",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "band_deadline",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-14",
+  "author_role": "campaign review meeting",
+  "status": "decided",
+  "status_words": "Agreed",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A71",
+   "B66",
+   "C66"
+  ],
+  "deciding_quote": "Agreed: their last date for a full payment is **the 4th business day after the call date**.",
+  "deciding_quote_found": true,
+  "effective_from": "2026-10-14",
+  "verification": {
+   "q": "V20",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Early 1-7: 14 calendar days after call date (or next business day), 1 attempt; Middle 8-20: 4th business day after call date, 2 attempts; Late 21-45: 3rd business day after call date, 2 attempts; over 45: treated as Late",
+   "earlier_value": "Middle: 6th business day after the call date",
+   "effective_from": "2026-10-14",
+   "quotes": [
+    {
+     "quote": "| Early | 1 to 7 | the calendar day 14 days after the call date; if that is not a business day, the first business day after it | 1 |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| Middle | 8 to 20 | the 6th business day after the call date | 2 |",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "Agreed: their last date for a full payment is **the 4th business day after the call date**.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| Late | 21 to 45 | the 3rd business day after the call date | 2 |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| over 45 | treated as Late | | |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R82",
+  "source": "tamsin.md Document 3 item 3",
+  "category": "dates",
+  "text": "Widening the Early band to 10 days was discussed; no change for now, numbers in November.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "bands",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-09",
+  "author_role": "campaign review minutes",
+  "status": "discussion",
+  "status_words": "was discussed; no change for now",
+  "confidence": "high",
+  "samples": "ABC",
+  "not_policy": true,
+  "members": [
+   "A72",
+   "B67",
+   "C67"
+  ],
+  "deciding_quote": "The question of widening the Early band to 10 days was discussed; no change for now, Fenella to bring numbers in November.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R83",
+  "source": "tamsin.md Document 3 item 4",
+  "category": "dates",
+  "text": "Cut-over closure day moves to Friday 6 November 2026; Friday 13 November is an ordinary working day. Closure days now: 2026-10-22, 2026-11-06, 2026-11-24, 2026-12-25, 2026-12-28; business days Mon–Fri.",
+  "verbatim": [],
+  "values": {
+   "calendar": {
+    "business_weekdays": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri"
+    ],
+    "holidays": [
+     {
+      "date": "2026-10-22",
+      "name": "St Corran's Day"
+     },
+     {
+      "date": "2026-11-06",
+      "name": "core banking cut-over"
+     },
+     {
+      "date": "2026-11-24",
+      "name": "Regatta Day"
+     },
+     {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+     },
+     {
+      "date": "2026-12-28",
+      "name": "Boxing Day (substitute)"
+     }
+    ]
+   }
+  },
+  "overrides": "R51",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "closure_days",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-09",
+  "author_role": "campaign review minutes",
+  "status": "decided",
+  "status_words": "brought forward by the vendor",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A73",
+   "B68",
+   "C68"
+  ],
+  "deciding_quote": "Core banking cut-over has been brought forward by the vendor to **Friday 6 November 2026**.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V21",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "Business days Monday-Friday; closure days 2026-10-22, 2026-11-06, 2026-11-24, 2026-12-25, 2026-12-28",
+   "earlier_value": "cut-over closure 2026-11-13",
+   "effective_from": "2026-10-14",
+   "quotes": [
+    {
+     "quote": "A business day is Monday to Friday, excluding the bank's closure days.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| 2026-11-13 | Friday | core banking cut-over (planned) |",
+     "in_force": false,
+     "found": true
+    },
+    {
+     "quote": "Core banking cut-over has been brought forward by the vendor to **Friday 6 November 2026**.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| 2026-10-22 | Thursday | St Corran's Day |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| 2026-11-24 | Tuesday | Regatta Day |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| 2026-12-25 | Friday | Christmas Day |",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "| 2026-12-28 | Monday | Boxing Day (substitute) |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R84",
+  "source": "tamsin.md Document 3 item 5",
+  "category": "third_party",
+  "text": "Second-look rules unchanged; 12:00–18:00 hours stay.",
+  "verbatim": [],
+  "values": {
+   "callback": {
+    "open": "12:00",
+    "close": "18:00"
+   }
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "second_look_window",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-09",
+  "author_role": "campaign review minutes",
+  "status": "decided",
+  "status_words": "No change to the rules",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A74",
+   "B69",
+   "C69"
+  ],
+  "deciding_quote": "No change to the rules; the 12:00–18:00 hours stay.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V22",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "3rd business day after the call date; 12:00 to 18:00 inclusive",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "No change to the rules; the 12:00–18:00 hours stay.",
+     "in_force": true,
+     "found": true
+    },
+    {
+     "quote": "On the 3rd business day after the call date, at a time the customer chooses from 12:00 to 18:00, both included.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R85",
+  "source": "tamsin.md Document 3 item 6",
+  "category": "identity",
+  "text": "Moving to the service's three-in-total rule was rejected; keep one retry per question (second wrong answer to the same question ends the check).",
+  "verbatim": [],
+  "values": {
+   "max_wrong_answers": 2
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "wrong_answer_limit",
+  "doc": "minutes of 9 Oct",
+  "doc_date": "2026-10-09",
+  "author_role": "campaign review minutes",
+  "status": "rejected",
+  "status_words": "No: we keep one retry per question",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A75",
+   "B70",
+   "C70"
+  ],
+  "deciding_quote": "No: we keep one retry per question.",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R86",
+  "source": "tamsin.md Document 4 intro",
+  "category": "closing",
+  "text": "Every `close_call` has one outcome (`promise`,`paid`,`transferred`,`no_promise`,`not_verified`,`not_reached`) and one reason code from the card; the closing sentence is said word for word before `close_call` (for a transfer, before `transfer_to_agent`).",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_codes",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A76",
+   "B71",
+   "C71"
+  ],
+  "deciding_quote": "The closing sentence is said, word for word, before `close_call` (for a transfer, before `transfer_to_agent`).",
+  "deciding_quote_found": true
+ },
+ {
+  "id": "R87",
+  "source": "tamsin.md Document 4 intro",
+  "category": "closing",
+  "text": "The closing sentence for the code is said word for word before `close_call`; for a transfer, before `transfer_to_agent`.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "closing_sentence",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "B",
+  "members": [
+   "B72"
+  ]
+ },
+ {
+  "id": "R88",
+  "source": "tamsin.md Document 4 table",
+  "category": "closing",
+  "text": "Outcome/reason/closing sentence table: each situation maps to the outcome, code and exact closing sentence listed.",
+  "verbatim": [
+   "Thank you, {title} {last_name}. Your arrangement is in place. Goodbye.",
+   "Thank you, {title} {last_name}. The rest of the overdue amount is still due and we will be in touch about it. Goodbye.",
+   "Thank you for letting us know. Goodbye.",
+   "I am putting you through now. Please stay on the line.",
+   "I am putting you through to Customer Care now. Please stay on the line.",
+   "Thank you for your time, {title} {last_name}. Goodbye.",
+   "Thank you for your time, {title} {last_name}. Speak to you then. Goodbye.",
+   "Thank you for telling me. Take care, {title} {last_name}. Goodbye.",
+   "We will look into this and write to you. Goodbye.",
+   "I'm sorry, our system is not responding. We will call you again. Goodbye.",
+   "For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.",
+   "I understand. You can use the Corran Bay app or visit any branch. Goodbye.",
+   "Thank you, we will call back then. Goodbye.",
+   "Thank you. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "promise",
+     "reason": "FULLPTP",
+     "when": "at least one arrangement recorded, no transfer after it, every arrangement for the full overdue amount"
+    },
+    {
+     "outcome": "promise",
+     "reason": "PARTPTP",
+     "when": "at least one arrangement recorded, no transfer after it, at least one for less than overdue amount"
+    },
+    {
+     "outcome": "paid",
+     "reason": "CLMPD",
+     "when": "every product claimed as already paid, nothing recorded"
+    },
+    {
+     "outcome": "transferred",
+     "reason": "XRST",
+     "when": "transferred to restructuring"
+    },
+    {
+     "outcome": "transferred",
+     "reason": "XGEN",
+     "when": "transferred to a person on request (queue general)"
+    },
+    {
+     "outcome": "transferred",
+     "reason": "XCARE",
+     "when": "transferred to Customer Care, hardship (queue support)"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "TDN",
+     "when": "no arrangement; turned down; no second-look booked; or would not continue after security questions"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "TDN2L",
+     "when": "no arrangement; turned down; second-look call booked"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "HDNX",
+     "when": "hardship, customer did not want Customer Care"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "DSPT",
+     "when": "customer disputes"
+    },
+    {
+     "outcome": "no_promise",
+     "reason": "SYSF",
+     "when": "two failed create_promise tries, or get_account failing"
+    },
+    {
+     "outcome": "not_verified",
+     "reason": "IDNO",
+     "when": "security questions failed"
+    },
+    {
+     "outcome": "not_verified",
+     "reason": "IDREF",
+     "when": "customer would not answer the security questions"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "TPCB",
+     "when": "someone else answered, callback booked"
+    },
+    {
+     "outcome": "not_reached",
+     "reason": "NOCON",
+     "when": "someone else answered, no callback; wrong number; deceased; could not tell who answered"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_call_codes",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A77",
+   "B73",
+   "C72"
+  ],
+  "deciding_quote": "Every `close_call` has one `outcome` from the dialler's list (`promise`, `paid`, `transferred`, `no_promise`, `not_verified`, `not_reached`) and one `reason` code from this card.",
+  "deciding_quote_found": true,
+  "verification": {
+   "q": "V23",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "all arrangements full: promise/FULLPTP; any part: promise/PARTPTP; all claimed paid: paid/CLMPD; restructuring: transferred/XRST; person: transferred/XGEN; hardship Customer Care: transferred/XCARE; turned down no second look or would not continue after security: no_promise/TDN; turned down with second look: no_promise/TDN2L; hardship declined transfer: no_promise/HDNX; dispute: no_promise/DSPT; system failure: no_promise/SYSF; security failed: not_verified/IDNO; would not answer security: not_verified/IDREF; third party callback booked: not_reached/TPCB; no callback/wrong number/deceased/unclear: not_reached/NOCON",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "Every `close_call` has one `outcome` from the dialler's list (`promise`, `paid`, `transferred`, `no_promise`, `not_verified`, `not_reached`) and one `reason` code from this card.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R89",
+  "source": "tamsin.md Document 4 table row FULLPTP",
+  "category": "closing",
+  "text": "At least one arrangement recorded, no transfer after, all for full overdue amount: close `promise`/`FULLPTP` with the sentence.",
+  "verbatim": [
+   "Thank you, {title} {last_name}. Your arrangement is in place. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "promise",
+     "reason": "FULLPTP",
+     "when": "all arrangements full amount"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_fullptp",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C73"
+  ],
+  "verification": {
+   "q": "V24",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "promise / FULLPTP",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| at least one arrangement recorded, no transfer after it, every arrangement for the full overdue amount | promise | FULLPTP | \"Thank you, {title} {last_name}. Your arrangement is in place. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R90",
+  "source": "tamsin.md Document 4 table row PARTPTP",
+  "category": "closing",
+  "text": "At least one arrangement recorded, no transfer after, at least one for less than overdue amount: close `promise`/`PARTPTP`.",
+  "verbatim": [
+   "Thank you, {title} {last_name}. The rest of the overdue amount is still due and we will be in touch about it. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "promise",
+     "reason": "PARTPTP",
+     "when": "at least one part arrangement"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_partptp",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C74"
+  ],
+  "verification": {
+   "q": "V25",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "promise / PARTPTP",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| at least one arrangement recorded, no transfer after it, at least one arrangement for less than the overdue amount | promise | PARTPTP | \"Thank you, {title} {last_name}. The rest of the overdue amount is still due and we will be in touch about it. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R91",
+  "source": "tamsin.md Document 4 table row CLMPD",
+  "category": "closing",
+  "text": "Every product claimed already paid, nothing recorded: close `paid`/`CLMPD`.",
+  "verbatim": [
+   "Thank you for letting us know. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "paid",
+     "reason": "CLMPD",
+     "when": "every product claimed paid"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_clmpd",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C75"
+  ],
+  "verification": {
+   "q": "V26",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "paid / CLMPD",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| every product claimed as already paid, nothing recorded | paid | CLMPD | \"Thank you for letting us know. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R92",
+  "source": "tamsin.md Document 4 table row XRST",
+  "category": "closing",
+  "text": "Transferred to restructuring: `transferred`/`XRST`, sentence said before `transfer_to_agent`.",
+  "verbatim": [
+   "I am putting you through now. Please stay on the line."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XRST",
+     "when": "restructuring"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_xrst",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C76"
+  ],
+  "verification": {
+   "q": "V27",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "transferred / XRST",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| transferred to restructuring | transferred | XRST | \"I am putting you through now. Please stay on the line.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R93",
+  "source": "tamsin.md Document 4 table row XGEN",
+  "category": "closing",
+  "text": "Transferred to a person on request (queue `general`): `transferred`/`XGEN`.",
+  "verbatim": [
+   "I am putting you through now. Please stay on the line."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XGEN",
+     "when": "general queue"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_xgen",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C77"
+  ],
+  "verification": {
+   "q": "V28",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "transferred / XGEN",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| transferred to a person on request (queue `general`) | transferred | XGEN | \"I am putting you through now. Please stay on the line.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R94",
+  "source": "tamsin.md Document 4 table row XCARE",
+  "category": "closing",
+  "text": "Transferred to Customer Care for hardship (queue `support`): `transferred`/`XCARE`.",
+  "verbatim": [
+   "I am putting you through to Customer Care now. Please stay on the line."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "transferred",
+     "reason": "XCARE",
+     "when": "support queue"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_xcare",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C78"
+  ],
+  "verification": {
+   "q": "V29",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "transferred / XCARE",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| transferred to Customer Care, hardship (queue `support`) | transferred | XCARE | \"I am putting you through to Customer Care now. Please stay on the line.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R95",
+  "source": "tamsin.md Document 4 table row TDN",
+  "category": "closing",
+  "text": "No arrangement, product(s) turned down, no second-look booked, or customer would not continue after security questions: `no_promise`/`TDN`.",
+  "verbatim": [
+   "Thank you for your time, {title} {last_name}. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "TDN",
+     "when": "turned down, no second look"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_tdn",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C79"
+  ],
+  "verification": {
+   "q": "V30",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "no_promise / TDN",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| no arrangement; product(s) turned down; no second-look call booked; or customer would not continue after the security questions | no_promise | TDN | \"Thank you for your time, {title} {last_name}. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R96",
+  "source": "tamsin.md Document 4 table row TDN2L",
+  "category": "closing",
+  "text": "No arrangement, turned down, second-look call booked: `no_promise`/`TDN2L`.",
+  "verbatim": [
+   "Thank you for your time, {title} {last_name}. Speak to you then. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "TDN2L",
+     "when": "second look booked"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_tdn2l",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C80"
+  ],
+  "verification": {
+   "q": "V31",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome no_promise, reason TDN2L",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| no arrangement; product(s) turned down; second-look call booked | no_promise | TDN2L | \"Thank you for your time, {title} {last_name}. Speak to you then. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R97",
+  "source": "tamsin.md Document 4 table row HDNX",
+  "category": "closing",
+  "text": "Hardship, customer did not want Customer Care: `no_promise`/`HDNX`.",
+  "verbatim": [
+   "Thank you for telling me. Take care, {title} {last_name}. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "HDNX",
+     "when": "hardship, declined transfer"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_hdnx",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C81"
+  ],
+  "verification": {
+   "q": "V32",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome no_promise, reason HDNX",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| hardship, customer did not want Customer Care | no_promise | HDNX | \"Thank you for telling me. Take care, {title} {last_name}. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R98",
+  "source": "tamsin.md Document 4 table row DSPT",
+  "category": "closing",
+  "text": "Customer disputes: `no_promise`/`DSPT`.",
+  "verbatim": [
+   "We will look into this and write to you. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "DSPT",
+     "when": "dispute"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_dspt",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C82"
+  ],
+  "verification": {
+   "q": "V33",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome no_promise, reason DSPT",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| customer disputes | no_promise | DSPT | \"We will look into this and write to you. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R99",
+  "source": "tamsin.md Document 4 table row SYSF",
+  "category": "closing",
+  "text": "Bank system failed (two failed `create_promise` tries, or `get_account` failing): `no_promise`/`SYSF`.",
+  "verbatim": [
+   "I'm sorry, our system is not responding. We will call you again. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "no_promise",
+     "reason": "SYSF",
+     "when": "system failure"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_sysf",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C83"
+  ],
+  "verification": {
+   "q": "V34",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome no_promise, reason SYSF",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| bank system failed (two failed tries of `create_promise`, or `get_account` failing) | no_promise | SYSF | \"I'm sorry, our system is not responding. We will call you again. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R100",
+  "source": "tamsin.md Document 4 table row IDNO",
+  "category": "closing",
+  "text": "Security questions failed: `not_verified`/`IDNO`.",
+  "verbatim": [
+   "For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "IDNO",
+     "when": "failed check"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_idno",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C84"
+  ],
+  "verification": {
+   "q": "V35",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome not_verified, reason IDNO",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| security questions failed | not_verified | IDNO | \"For your security I cannot continue on this call. You can use the Corran Bay app or visit any branch. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R101",
+  "source": "tamsin.md Document 4 table row IDREF",
+  "category": "closing",
+  "text": "Customer would not answer the security questions: `not_verified`/`IDREF`.",
+  "verbatim": [
+   "I understand. You can use the Corran Bay app or visit any branch. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_verified",
+     "reason": "IDREF",
+     "when": "declined questions"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_idref",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C85"
+  ],
+  "verification": {
+   "q": "V36",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome not_verified, reason IDREF",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| customer would not answer the security questions | not_verified | IDREF | \"I understand. You can use the Corran Bay app or visit any branch. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R102",
+  "source": "tamsin.md Document 4 table row TPCB",
+  "category": "closing",
+  "text": "Someone else answered, callback booked: `not_reached`/`TPCB`.",
+  "verbatim": [
+   "Thank you, we will call back then. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "TPCB",
+     "when": "third-party callback booked"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_tpcb",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C86"
+  ],
+  "verification": {
+   "q": "V37",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome not_reached, reason TPCB",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| someone else answered, callback booked | not_reached | TPCB | \"Thank you, we will call back then. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R103",
+  "source": "tamsin.md Document 4 table row NOCON",
+  "category": "closing",
+  "text": "Someone else answered and no callback; wrong number; customer deceased; could not tell who answered: `not_reached`/`NOCON`.",
+  "verbatim": [
+   "Thank you. Goodbye."
+  ],
+  "values": {
+   "outcomes": [
+    {
+     "outcome": "not_reached",
+     "reason": "NOCON",
+     "when": "not reached"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "close_nocon",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "low",
+  "samples": "C",
+  "members": [
+   "C87"
+  ],
+  "verification": {
+   "q": "V38",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "outcome not_reached, reason NOCON",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "| someone else answered and no callback booked; wrong number; customer deceased; could not tell who answered | not_reached | NOCON | \"Thank you. Goodbye.\" |",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R104",
+  "source": "tamsin.md Document 4 several products note",
+  "category": "multi_product",
+  "text": "Several products, nothing recorded, no transfer: all claimed paid → CLMPD; otherwise most serious decides in order SYSF, HDNX, DSPT, TDN2L, TDN; paid next to turned-down is TDN or TDN2L.",
+  "verbatim": [],
+  "values": {
+   "text": "precedence: SYSF > HDNX > DSPT > TDN2L > TDN"
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "multi_product_close_precedence",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A78",
+   "B74",
+   "C88"
+  ]
+ },
+ {
+  "id": "R105",
+  "source": "tamsin.md Document 4 notes",
+  "category": "recording",
+  "text": "`add_note` reason is one of `refused`,`hardship`,`dispute`,`paid`,`service_error`; text must contain the listed content per reason.",
+  "verbatim": [],
+  "values": {
+   "note_reasons": [
+    {
+     "reason": "refused",
+     "when": "product turned down",
+     "text_must_contain": "number of attempts made and last offer (amount and date)"
+    },
+    {
+     "reason": "hardship",
+     "when": "hardship, no transfer",
+     "text_must_contain": "what the customer said, in their words"
+    },
+    {
+     "reason": "dispute",
+     "when": "customer disputes",
+     "text_must_contain": "what is disputed"
+    },
+    {
+     "reason": "paid",
+     "when": "claims already paid",
+     "text_must_contain": "how and when the customer says they paid"
+    },
+    {
+     "reason": "service_error",
+     "when": "create_promise failed twice",
+     "text_must_contain": "\"create_promise\" and the number of tries"
+    }
+   ]
+  },
+  "overrides": "",
+  "in_force": true,
+  "superseded_by": "",
+  "topic": "note_reasons",
+  "doc": "code card v2",
+  "doc_date": "2026-09-28",
+  "status": "decided",
+  "confidence": "high",
+  "samples": "ABC",
+  "members": [
+   "A79",
+   "B75",
+   "C89"
+  ],
+  "verification": {
+   "q": "V39",
+   "status": "ok",
+   "missing": [],
+   "verifier_value": "refused: number of attempts made and last offer (amount and date); hardship: what the customer said, in their words; dispute: what is disputed; paid: how and when the customer says they paid; service_error: \"create_promise\" and the number of tries",
+   "earlier_value": "",
+   "effective_from": "",
+   "quotes": [
+    {
+     "quote": "`reason` is one of `refused`, `hardship`, `dispute`, `paid`, `service_error`. The `text` must contain: refused — the number of attempts made and the last offer (amount and date); hardship — what the customer said, in their words; dispute — what is disputed; paid — how and when the customer says they paid; service_error — \"create_promise\" and the number of tries.",
+     "in_force": true,
+     "found": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "R106",
+  "source": "tamsin.md Document 3 item 7",
+  "category": "other",
+  "text": "AOB: Christmas lunch on Friday 11 December; Treasury dashboard moving to the new BI tool in January. Decides nothing for the calls; no rule for the assistant.",
+  "verbatim": [],
+  "values": {},
+  "overrides": "",
+  "in_force": false,
+  "superseded_by": "",
+  "topic": "aob_non_policy",
+  "doc": "campaign review minutes",
+  "doc_date": "2026-10-09",
+  "author_role": "minute taker (Treasury Ops)",
+  "status": "distractor",
+  "status_words": "AOB",
+  "confidence": "medium",
+  "origin": "gap-fill",
+  "not_policy": true,
+  "deciding_quote": "The Christmas lunch is on Friday 11 December.",
+  "deciding_quote_found": true
+ }
+]
