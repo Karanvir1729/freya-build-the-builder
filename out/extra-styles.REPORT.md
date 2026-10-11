@@ -68,7 +68,7 @@ No failure was "expected by the brief" (no style produced a legitimate hang-up w
 | hangs_up_after_promise | 3 / 3 | 3 / 3 |
 | final_like | 3 / 3 | 3 / 3 |
 
-Totals: Brief A **76/90 → 81/90**, Brief B **23/27 → 24/27** (one rerun of the failures). Every failure that remains is J or S
+Totals: Brief A **80/90 → 85/90**, Brief B **23/27 → 24/27** (one rerun of the failures). Every failure that remains is J or S
 (or a platform-spoiled rerun); no ledger failure caused by the agent remains in the rerun round.
 
 ## Every failure, read from the transcript
